@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>浅析CSRF漏洞 | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>浅析CSRF漏洞</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-08-06T06:50:29.327Z" id="date"> 2023-08-06</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-08-06T06:55:06.346Z" id="updated"> 2023-08-06</time></div></span><br><span>文章总字数: <div class="control">5.5k</div></span><br><span>预计阅读时间: <div class="control">20 分钟</div></span></div></div><hr><div id="post-content"><h2 id="1、CSRF漏洞介绍"><a href="#1、CSRF漏洞介绍" class="headerlink" title="1、CSRF漏洞介绍"></a>1、CSRF漏洞介绍</h2>
+<p>CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click attack 或者 session riding，通常缩写为 CSRF 或者 XSRF .它是一种常见的 Web攻击方式。是一种劫持用户在当前已登录的Web应用程序上执行非本意操作一种攻击.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">说的直白一点就是:别人盗用(劫持)你的身份去做坏事.<br><br>（1）别人--&gt;这里指的是攻击者<br>（2）你----&gt;A站(web服务器)上注册的合法用户(客户端)<br>（3）做坏事---&gt;去请求合法站点A(比如web服务器)存在CSRF攻击的URL,实现类似发送恶意邮件/转账/创建账户/修改密码等&quot;你不希望执行&quot;操作.<br></code></pre></td></tr></table></figure>
+<h3 id="1-1-危害"><a href="#1-1-危害" class="headerlink" title="1-1-危害"></a>1.1 危害</h3>
+<p>以用户的名义发邮件/发消息</p>
+<p>转换/购买商品等;</p>
+<p>修改密码;</p>
+<p>删除文章等</p>
+<h2 id="2、CSRF漏洞的原理"><a href="#2、CSRF漏洞的原理" class="headerlink" title="2、CSRF漏洞的原理"></a>2、CSRF漏洞的原理</h2>
+<h3 id="2-1-CSRF漏洞产生的原因"><a href="#2-1-CSRF漏洞产生的原因" class="headerlink" title="2-1-CSRF漏洞产生的原因"></a>2.1 CSRF漏洞产生的原因</h3>
+<p>(1)http协议使用session在服务端保存用户的个人信息,客户端浏览器用cookie标识用户身份;</p>
+<p>(2)cookie的认证只能确保是某个用户发送的请求,但是不能保证这个请求是否是&quot;用户自愿的行为&quot;.</p>
+<p>(3)这时,用户登录了某个web站点,同时点击了包含CSRF恶意代码的URL,就会触发CSRF</p>
+<h3 id="2-2-漏洞利用的条件"><a href="#2-2-漏洞利用的条件" class="headerlink" title="2-2-漏洞利用的条件"></a>2.2 漏洞利用的条件</h3>
+<p>(1)用户必须登录A网站,生成了cookie</p>
+<p>(2)登录的同时访问了恶意URL(包含CSRF恶意代码的URL).</p>
+<p class='item-img' data-src='image-20230618201202133.png'><img src="image-20230618201202133.png" alt="image-20230618201202133"></p>
+<h3 id="2-3-CSRF和XSS的不同"><a href="#2-3-CSRF和XSS的不同" class="headerlink" title="2-3-CSRF和XSS的不同"></a>2.3 CSRF和XSS的不同</h3>
+<p><strong>(1)XSS主要用户获取用户的cookie信息,达到控制客户端的目的</strong></p>
+<p>XSS----&gt;把你的腰牌(用户身份象征也就是cookie)偷到手,黑客自己去搞破坏.</p>
+<p>CSRF主要是劫持用户身份,让客户端做一些不愿意做的事.</p>
+<p>CSRF----&gt;拿刀劫持你,&quot;借助你的身份&quot;来帮黑客做事.</p>
+<p><strong>(2)危害上来说,XSS更大;</strong></p>
+<p><strong>(3)从应用难度上来说</strong></p>
+<p>CSRF需要满足登录某网站的状态,同时访问了恶意的URL,应用条件比较苛刻.</p>
+<p>XSS只要一次点击或者存储到服务器即可.</p>
+<h2 id="3、CSRF之GET型代码分析"><a href="#3、CSRF之GET型代码分析" class="headerlink" title="3、CSRF之GET型代码分析"></a>3、CSRF之GET型代码分析</h2>
+<p>GET型CSRF代码举例</p>
+<p class='item-img' data-src='image-20230618201506020.png'><img src="image-20230618201506020.png" alt="image-20230618201506020"></p>
+<p class='item-img' data-src='image-20230618201653804.png'><img src="image-20230618201653804.png" alt="image-20230618201653804"></p>
+<p>问题：</p>
+<p>（1）但是URL直接写用户名和密码的方式太过于明显,我们可以通过访问页面的方式进行伪装;</p>
+<p>（2）或者通过XSS页面,直接把这个恶意URL链接发给客户端,在客户登录页面的同时访问这个恶意URL,也可以创建用户;</p>
+<p>（3）通过伪造页面诱导客户点击</p>
+<p class='item-img' data-src='image-20230618201755484.png'><img src="image-20230618201755484.png" alt="image-20230618201755484"></p>
+<p class='item-img' data-src='image-20230618201804285.png'><img src="image-20230618201804285.png" alt="image-20230618201804285"></p>
+<h2 id="4、CSRF之POST型代码分析"><a href="#4、CSRF之POST型代码分析" class="headerlink" title="4、CSRF之POST型代码分析"></a>4、CSRF之POST型代码分析</h2>
+<p>（1）有人说,GET方式容易出现CSRF攻击,那用post是不是就可以万无一失呢?<br>
+（2）当然不是,因为post只是提交的方式改变了,如果原始页面还是存在CSRF漏洞,我们自己创建一个POST页面来模拟用户提交数据,还是可以进行利用的</p>
+<p>（3）post_csrf.php用来模拟存在csrf漏洞的web页面,代码如下：</p>
+<p class='item-img' data-src='image-20230618202028634.png'><img src="image-20230618202028634.png" alt="image-20230618202028634"></p>
+<p>（4）页面显示如下：</p>
+<p class='item-img' data-src='image-20230618202055930.png'><img src="image-20230618202055930.png" alt="image-20230618202055930"></p>
+<p>post型需要黑客自己来构造表单提交的参数<br>
+为了不易发现,提交表单的数据都直接隐藏hidden;<br>
+post.html代码如下:<img src="image-20230618202121176.png" alt="image-20230618202121176"></p>
+<p class='item-img' data-src='image-20230618202246962.png'><img src="image-20230618202246962.png" alt="image-20230618202246962"></p>
+<p class='item-img' data-src='image-20230618202255053.png'><img src="image-20230618202255053.png" alt="image-20230618202255053"></p>
+<h2 id="5、DVWA中CSRF利用实战"><a href="#5、DVWA中CSRF利用实战" class="headerlink" title="5、DVWA中CSRF利用实战"></a>5、DVWA中CSRF利用实战</h2>
+<h3 id="5-1-挖掘CSRF的方法"><a href="#5-1-挖掘CSRF的方法" class="headerlink" title="5-1-挖掘CSRF的方法"></a>5.1 挖掘CSRF的方法:</h3>
+<p>(1)使用burp抓包后修改Referer字段再重新提交,如果能请求就存在CSRF漏洞.</p>
+<p>(2)其他CSRF工具,比如</p>
+<p>CSRFTester就是通过抓取提交参数;</p>
+<p>修改表单信息,重新提交;-----&gt;伪造客户端请求</p>
+<p>重新提交成功就存在CSRF漏洞.</p>
+<p>DVWA中low级别CSRF:没有对输入做过滤,而且也没有原密码认证</p>
+<h2 id="6、csrf案例"><a href="#6、csrf案例" class="headerlink" title="6、csrf案例"></a>6、csrf案例</h2>
+<h3 id="6-1-Gmail"><a href="#6-1-Gmail" class="headerlink" title="6-1-Gmail"></a>6.1 Gmail</h3>
+<p><strong>小明的悲惨遭遇</strong><br>
+这一天，小明同学百无聊赖地刷着<code>Gmail</code>邮件。大部分都是没营养的通知、验证码、聊天记录之类。但有一封邮件引起了小明的注意：</p>
+<p><strong>甩卖比特币，一个只要998！！</strong></p>
+<p>聪明的小明当然知道这种肯定是骗子，但还是抱着好奇的态度点了进去（请勿模仿）。果然，这只是一个什么都没有的空白页面，小明失望的关闭了页面。一切似乎什么都没有发生……</p>
+<p>在这平静的外表之下，黑客的攻击已然得手。小明的<code>Gmail</code>中，被偷偷设置了一个过滤规则，这个规则使得所有的邮件都会被自动转发到<code>hacker@hackermail.com</code>。小明还在继续刷着邮件，殊不知他的邮件正在一封封地，如脱缰的野马一般地，持续不断地向着黑客的邮箱转发而去。</p>
+<p>不久之后的一天，小明发现自己的域名已经被转让了。懵懂的小明以为是域名到期自己忘了续费，直到有一天，对方开出了<code> $650</code> 的赎回价码，小明才开始觉得不太对劲。</p>
+<p>小明仔细查了下域名的转让，对方是拥有自己的验证码的，而域名的验证码只存在于自己的邮箱里面。小明回想起那天奇怪的链接，打开后重新查看了“空白页”的源码：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">&quot;POST&quot;</span> <span class="hljs-attr">action</span>=<span class="hljs-string">&quot;https://mail.google.com/mail/h/ewt1jmuj4ddv/?v=prf&quot;</span> <span class="hljs-attr">enctype</span>=<span class="hljs-string">&quot;multipart/form-data&quot;</span>&gt;</span> <br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;hidden&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;cf2_emc&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;true&quot;</span>/&gt;</span> <br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;hidden&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;cf2_email&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;hacker@hakermail.com&quot;</span>/&gt;</span> <br>    .....<br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;hidden&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;irf&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;on&quot;</span>/&gt;</span> <br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;hidden&quot;</span> <span class="hljs-attr">name</span>=<span class="hljs-string">&quot;nvp_bu_cftb&quot;</span> <span class="hljs-attr">value</span>=<span class="hljs-string">&quot;Create Filter&quot;</span>/&gt;</span> <br><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span> <br><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript"> </span><br><span class="language-javascript">    <span class="hljs-variable language_">document</span>.<span class="hljs-property">forms</span>[<span class="hljs-number">0</span>].<span class="hljs-title function_">submit</span>();</span><br><span class="language-javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<p>这个页面只要打开，就会向Gmail发送一个post请求。请求中，执行了“Create Filter”命令，将所有的邮件，转发到“hacker@hackermail.com”。</p>
+<p>小明由于刚刚就登陆了Gmail，所以这个请求发送时，携带着小明的登录凭证（Cookie），Gmail的后台接收到请求，验证了确实有小明的登录凭证，于是成功给小明配置了过滤器。</p>
+<p>黑客可以查看小明的所有邮件，包括邮件里的域名验证码等隐私信息。拿到验证码之后，黑客就可以要求域名服务商把域名重置给自己。</p>
+<p>小明很快打开Gmail，找到了那条过滤器，将其删除。然而，已经泄露的邮件，已经被转让的域名，再也无法挽回了……</p>
+<p>以上就是小明的悲惨遭遇。而“点开一个黑客的链接，所有邮件都被窃取”这种事情并不是杜撰的，此事件原型是2007年Gmail的<a target="_blank" rel="noopener" href="https://link.segmentfault.com/?enc=6wNtw%2BHHPTxbvfKq9QtMEw%3D%3D.HtoL%2BapPs7EP4HCtIW9ZhGEUNP%2B4xV4xu%2FU%2F21ea6wp76oV%2FDif%2FLiYnqw1iB2X7aWNxKJb16ssAAxe333laxQ%3D%3D">CSRF漏洞</a></p>
+<h2 id="7、CSRF漏洞防御"><a href="#7、CSRF漏洞防御" class="headerlink" title="7、CSRF漏洞防御"></a>7、CSRF漏洞防御</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">修改密码时,需要原密码;<br><br>对客户来讲,不要点击来历不明的链接或图片;养成定时退出的好习惯;安装安全防护软件等<br><br>验证 Referer/Content-Type<br><br>对于用户修改删除等操作最好都使用POST操作<br><br>避免全站通用的Cookie，严格设置Cookie的域<br></code></pre></td></tr></table></figure>
+<p>CSRF通常从第三方网站发起，被攻击的网站无法防止攻击发生，只能通过增强自己网站针对CSRF的防护能力来提升安全性。</p>
+<p>上文中讲了CSRF的两个特点：</p>
+<ul>
+<li>CSRF（通常）发生在第三方域名。</li>
+<li>CSRF攻击者不能获取到Cookie等信息，只是使用。</li>
+</ul>
+<p>针对这两点，我们可以专门制定防护策略，如下：</p>
+<ul>
+<li>阻止不明外域的访问
+<ul>
+<li>同源检测</li>
+<li>Samesite Cookie</li>
+</ul>
+</li>
+<li>提交时要求附加本域才能获取的信息
+<ul>
+<li>CSRF Token</li>
+<li>双重Cookie验证</li>
+</ul>
+</li>
+</ul>
+<p>以下我们对各种防护方法做详细说明。</p>
+<h3 id="7-1-同源检测"><a href="#7-1-同源检测" class="headerlink" title="7-1-同源检测"></a>7.1 同源检测</h3>
+<p>既然CSRF大多来自第三方网站，那么我们就直接禁止外域（或者不受信任的域名）对我们发起请求。</p>
+<p>那么问题来了，我们如何判断请求是否来自外域呢？</p>
+<p>在HTTP协议中，每一个异步请求都会携带两个Header，用于标记来源域名：</p>
+<ul>
+<li>Origin Header</li>
+<li>Referer Header</li>
+</ul>
+<p>这两个Header在浏览器发起请求时，大多数情况会自动带上，并且不能由前端自定义内容。 服务器可以通过解析这两个Header中的域名，确定请求的来源域。</p>
+<h4 id="使用Origin-Header确定来源域名"><a href="#使用Origin-Header确定来源域名" class="headerlink" title="使用Origin-Header确定来源域名"></a>使用Origin Header确定来源域名</h4>
+<p>在部分与CSRF有关的请求中，请求的Header中会携带Origin字段。字段内包含请求的域名（不包含path及query）。</p>
+<p>如果Origin存在，那么直接使用Origin中的字段确认来源域名就可以。</p>
+<p>但是Origin在以下两种情况下并不存在：</p>
+<ul>
+<li>IE11同源策略： IE 11 不会在跨站CORS请求上添加Origin标头，Referer头将仍然是唯一的标识。最根本原因是因为IE 11对同源的定义和其他浏览器有不同，有两个主要的区别，可以参考<a target="_blank" rel="noopener" href="https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy#IE_Exceptions">MDN Same-origin_policy#IE_Exceptions</a></li>
+<li>302重定向： 在302重定向之后Origin不包含在重定向的请求中，因为Origin可能会被认为是其他来源的敏感信息。对于302重定向的情况来说都是定向到新的服务器上的URL，因此浏览器不想将Origin泄漏到新的服务器上。</li>
+</ul>
+<h4 id="使用Referer-Header确定来源域名"><a href="#使用Referer-Header确定来源域名" class="headerlink" title="使用Referer-Header确定来源域名"></a>使用Referer Header确定来源域名</h4>
+<p>根据HTTP协议，在HTTP头中有一个字段叫Referer，记录了该HTTP请求的来源地址。 对于Ajax请求，图片和script等资源请求，Referer为发起请求的页面地址。对于页面跳转，Referer为打开页面历史记录的前一个页面地址。因此我们使用Referer中链接的Origin部分可以得知请求的来源域名。</p>
+<p>这种方法并非万无一失，Referer的值是由浏览器提供的，虽然HTTP协议上有明确的要求，但是每个浏览器对于Referer的具体实现可能有差别，并不能保证浏览器自身没有安全漏洞。使用验证 Referer 值的方法，就是把安全性都依赖于第三方（即浏览器）来保障，从理论上来讲，这样并不是很安全。在部分情况下，攻击者可以隐藏，甚至修改自己请求的Referer。</p>
+<h3 id="7-2-Token防御"><a href="#7-2-Token防御" class="headerlink" title="7-2-Token防御"></a>7.2 Token防御</h3>
+<p>CSRF漏洞实质：服务器无法准确判断当前请求是否是合法用户的自定义操作<br>
+漏洞修补逻辑分析:如果服务器在用户登录之后给予用户一个唯一合法令牌，每一次操作过程中，服务器都会验证令牌是否正确，如果正确那么执行操作，不正确不执行操作。<br>
+一般情况下，给予的令牌写入表单隐藏域的value中，随着表单内容进行提交<br>
+Token防御代码分析</p>
+<p class='item-img' data-src='image-20230618211328913.png'><img src="image-20230618211328913.png" alt="image-20230618211328913"></p>
+<p>代码的意思是hello加上当前时间进行md5编码，当然hello可以改为其它复杂的字符串，这样不容易被破解出来，每一秒的值都会发生变化，如<br class='item-img' data-src='image-20230618211344186.png'><img src="image-20230618211344186.png" alt="image-20230618211344186"></p>
+<p>实例使用Token进行CSRF防御</p>
+<p>1.登陆验证成功之后，在会话SESSION[“user_token”]中保存Token</p>
+<p>2.在后台操作中，增删改表单中添加隐藏域hidden，设置value为Token</p>
+<p>3.提交之后验证Token是否正确</p>
+<p>附上代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>    <span class="hljs-title function_ invoke__">session_start</span>();<br>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">token_generate</span>(<span class="hljs-params"></span>)</span><br><span class="hljs-function">    </span>&#123;<br>        <span class="hljs-variable">$salt</span> = <span class="hljs-string">&quot;hello&quot;</span>.<span class="hljs-title function_ invoke__">date</span>(<span class="hljs-string">&quot;h:i:s&quot;</span>);<br>        <span class="hljs-variable">$token</span> = <span class="hljs-title function_ invoke__">md5</span>(<span class="hljs-variable">$salt</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable">$token</span>;<br>    &#125;<br>    <span class="hljs-variable">$token</span> = <span class="hljs-title function_ invoke__">token_generate</span>();<br>    <span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">&quot;user_token&quot;</span>] = <span class="hljs-variable">$token</span>;<br><span class="hljs-meta">?&gt;</span><br>&lt;html&gt;<br>    &lt;head&gt;<br>        &lt;meta charset=<span class="hljs-string">&quot;utf-8&quot;</span>&gt;<br>        &lt;title&gt;CSRF_TOKEN&lt;/title&gt;<br>    &lt;/head&gt;<br>    &lt;body&gt;<br>    &lt;h1&gt;CSRF_TOKEN&lt;/h1&gt;<br>        &lt;form action=<span class="hljs-string">&quot;check.php&quot;</span> method=<span class="hljs-string">&quot;post&quot;</span>&gt;<br>            &lt;input type=<span class="hljs-string">&quot;text&quot;</span> value=<span class="hljs-string">&quot;111&quot;</span>&gt;<br>            &lt;input type=<span class="hljs-string">&quot;hidden&quot;</span> name=<span class="hljs-string">&quot;user_token&quot;</span> value=<span class="hljs-string">&quot;&lt;?php echo <span class="hljs-subst">$token</span>;?&gt;&quot;</span>&gt;<br>            &lt;input type=<span class="hljs-string">&quot;submit&quot;</span> name=<span class="hljs-string">&quot;submit&quot;</span> value=<span class="hljs-string">&quot;提交&quot;</span>&gt;<br>        &lt;/form&gt;<br>    &lt;/body&gt;<br>&lt;/html&gt;<br></code></pre></td></tr></table></figure>
+<p>再附上check.php验证脚本代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>    <span class="hljs-title function_ invoke__">session_start</span>();<br>    <span class="hljs-variable">$user_token</span> = <span class="hljs-variable">$_POST</span>[<span class="hljs-string">&quot;user_token&quot;</span>];<br>    <span class="hljs-keyword">if</span>(<span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">&quot;user_token&quot;</span>] == <span class="hljs-variable">$user_token</span>)<br>    &#123;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">&quot;user_token&quot;</span>];<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;&lt;br&gt;&quot;</span>;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;<span class="hljs-subst">$user_token</span>&quot;</span>;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;&lt;br&gt;&quot;</span>;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;successful&quot;</span>;<br>    &#125;<br>    <span class="hljs-keyword">else</span><br>    &#123;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;fail&quot;</span>;<br>    &#125;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>为何token可以有效地防御：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">token 是被开发者发送给后端的，攻击者如果无法获取到token 是无法通过后端服务器的校验的<br><br>但是cookie 不同，只要在同一个浏览器，浏览器就会自动将cookie 放入请求头中，如果用cookie 做登录验证，在同一个浏览器并且一登陆的情况下后端服务器将自动识别cookie 对请求进行放行例如：<br><br>小明登录了csdn, 此时小明突然想到了一件事情，登录了另一个网站，而这个网站被不知名的人埋入了一些请求，这些请求是当其他人进入该网站，则请求csdn 友好的帮助访问者发布一篇文章，<br><br>假如csdn 使用的是cookie做登录判断，小明访问该网站时触发了该请求，浏览器会自动将cookie 放入请求头中传给后端，后端服务器判断cookie 是已登录则放行了该网站的操作，小明在不知情的情况下被发布的一篇文章，这里只是一个例子，但是如果这里的请求变为自动将小明的钱包余额转账给那位不知名的人，就比较危险了<br><br>而如果使用token,token 并不会自动被浏览器放入请求头，当其他攻击者像服务器发送请求时，是不会携带token 的，后端服务器没有获取到token 则不会对请求进行放行，保证了用户数据的安全性<br></code></pre></td></tr></table></figure>
+<p>Referer防御CSRF原理：HTTP Referer是header的一部分，当浏览器向web服务器发送请求的时候，一般会带上Referer，告诉服务器我是从哪个页面链接过来的，服务器基于此可以获得一些信息用于处理<br>
+当用户点击被构造好的CSRF利用页面，那么在执行用户对应操作时，提交的HTTP请求中就有对应的Referer值，此时服务端判断Referer值是否与服务器的域名信息有关，如果不关则不执行操作<br>
+Refer防御代码编写<br>
+在PHP中使用$_SERVER[‘HTTP_REFERER’]获取页面提交请求中的Referer值<br>
+这里需要用到一个strpos函数，用法参考<a target="_blank" rel="noopener" href="http://https//www.w3school.com.cn/php/func_string_strpos.asp">https://www.w3school.com.cn/php/func_string_strpos.asp</a><br>
+附上防御代码：</p>
+<p class='item-img' data-src='image-20230618211536552.png'><img src="image-20230618211536552.png" alt="image-20230618211536552"></p>
+<p>strpos函数里面的意思也就是在获取的Referer值里面是否包含xx.com这个域名，如果包含了说明是正确的，没包含就可能是恶意的</p>
+<h3 id="7-4-验证码防御CSRF"><a href="#7-4-验证码防御CSRF" class="headerlink" title="7-4-验证码防御CSRF"></a>7.4 验证码防御CSRF</h3>
+<p>验证码防御被认为是对抗CSRF最简单而且有效的防御方法，CSRF在用户不知情的情况下完成对应操作，而验证码强制用户与应用程序交互，才能最终完成操作，可以被认为是二次验证，但是出于对用户体验考虑，不可能每一次操作都加入验证码。所以验证码只是一种辅助手段，不能作为防御CSRF的主要解决方案</p>
+<p><strong>理论上讲，在提交表单或者GET请求的地方，凡是没有用户进行二次验证或没有csrftoken(其他网站可能不叫csrftoken)的地方大概率存在csrf漏洞。</strong></p>
+<h3 id="7-5-双重Cookie验证"><a href="#7-5-双重Cookie验证" class="headerlink" title="7-5-双重Cookie验证"></a>7.5 双重Cookie验证</h3>
+<p>在会话中存储CSRF Token比较繁琐，而且不能在通用的拦截上统一处理所有的接口。</p>
+<p>那么另一种防御措施是使用双重提交Cookie。利用CSRF攻击不能获取到用户Cookie的特点，我们可以要求Ajax和表单请求携带一个Cookie中的值。</p>
+<p>双重Cookie采用以下流程：</p>
+<ul>
+<li>在用户访问网站页面时，向请求域名注入一个Cookie，内容为随机字符串（例如<code>csrfcookie=v8g9e4ksfhw</code>）。</li>
+<li>在前端向后端发起请求时，取出Cookie，并添加到URL的参数中（接上例<code>POST https://www.a.com/comment?csrfcookie=v8g9e4ksfhw</code>）。</li>
+<li>后端接口验证Cookie中的字段与URL参数中的字段是否一致，不一致则拒绝。</li>
+</ul>
+<p>此方法相对于CSRF Token就简单了许多。可以直接通过前后端拦截的的方法自动化实现。后端校验也更加方便，只需进行请求中字段的对比，而不需要再进行查询和存储Token。</p>
+<p>当然，此方法并没有大规模应用，其在大型网站上的安全性还是没有CSRF Token高，原因我们举例进行说明。</p>
+<p>由于任何跨域都会导致前端无法获取Cookie中的字段（包括子域名之间），于是发生了如下情况：</p>
+<ul>
+<li>如果用户访问的网站为<code>www.a.com</code>，而后端的api域名为<code>api.a.com</code>。那么在<code>www.a.com</code>下，前端拿不到<code>api.a.com</code>的Cookie，也就无法完成双重Cookie认证。</li>
+<li>于是这个认证Cookie必须被种在<code>a.com</code>下，这样每个子域都可以访问。</li>
+<li>任何一个子域都可以修改<code>a.com</code>下的Cookie。</li>
+<li>某个子域名存在漏洞被XSS攻击（例如<code>upload.a.com</code>）。虽然这个子域下并没有什么值得窃取的信息。但攻击者修改了<code>a.com</code>下的Cookie。</li>
+<li>攻击者可以直接使用自己配置的Cookie，对XSS中招的用户再向<code>www.a.com</code>下，发起CSRF攻击。</li>
+</ul>
+<h4 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h4>
+<p><strong>用双重Cookie防御CSRF的优点：</strong></p>
+<ul>
+<li>无需使用Session，适用面更广，易于实施。</li>
+<li>Token储存于客户端中，不会给服务器带来压力。</li>
+<li>相对于Token，实施成本更低，可以在前后端统一拦截校验，而不需要一个个接口和页面添加。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>Cookie中增加了额外的字段。</li>
+<li>如果有其他漏洞（例如XSS），攻击者可以注入Cookie，那么该防御方式失效。</li>
+<li>难以做到子域名的隔离。</li>
+<li>为了确保Cookie传输安全，采用这种防御方式的最好确保用整站HTTPS的方式，如果还没切HTTPS的使用这种方式也会有风险。</li>
+</ul>
+<h3 id="7-6-Samesite-Cookie属性"><a href="#7-6-Samesite-Cookie属性" class="headerlink" title="7-6-Samesite-Cookie属性"></a>7.6 Samesite Cookie属性</h3>
+<p>防止CSRF攻击的办法已经有上面的预防措施。为了从源头上解决这个问题，Google起草了一份草案来改进HTTP协议，那就是为Set-Cookie响应头新增Samesite属性，它用来标明这个 Cookie是个“同站 Cookie”，同站Cookie只能作为第一方Cookie，不能作为第三方Cookie，Samesite 有两个属性值，分别是 Strict 和 Lax，下面分别讲解：</p>
+<h4 id="Samesite-Strict"><a href="#Samesite-Strict" class="headerlink" title="Samesite-Strict"></a>Samesite=Strict</h4>
+<p>这种称为严格模式，表明这个 Cookie 在任何情况下都不可能作为第三方 Cookie，绝无例外。比如说 <a target="_blank" rel="noopener" href="http://b.com">b.com</a> 设置了如下 Cookie：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs html">Set-Cookie: foo=1; Samesite=Strict<br>Set-Cookie: bar=2; Samesite=Lax<br>Set-Cookie: baz=3<br></code></pre></td></tr></table></figure>
+<p>我们在 <a target="_blank" rel="noopener" href="http://a.com">a.com</a> 下发起对 <a target="_blank" rel="noopener" href="http://b.com">b.com</a> 的任意请求，foo 这个 Cookie 都不会被包含在 Cookie 请求头中，但 bar 会。举个实际的例子就是，假如淘宝网站用来识别用户登录与否的 Cookie 被设置成了 Samesite=Strict，那么用户从百度搜索页面甚至天猫页面的链接点击进入淘宝后，淘宝都不会是登录状态，因为淘宝的服务器不会接受到那个 Cookie，其它网站发起的对淘宝的任意请求都不会带上那个 Cookie。</p>
+<h4 id="Samesite-Lax"><a href="#Samesite-Lax" class="headerlink" title="Samesite-Lax"></a>Samesite=Lax</h4>
+<p>这种称为宽松模式，比 Strict 放宽了点限制：假如这个请求是这种请求（改变了当前页面或者打开了新页面）且同时是个GET请求，则这个Cookie可以作为第三方Cookie。比如说 b.com设置了如下Cookie：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs html">Set-Cookie: foo=1; Samesite=Strict<br>Set-Cookie: bar=2; Samesite=Lax<br>Set-Cookie: baz=3<br></code></pre></td></tr></table></figure>
+<p>当用户从 <a target="_blank" rel="noopener" href="http://a.com">a.com</a> 点击链接进入 <a target="_blank" rel="noopener" href="http://b.com">b.com</a> 时，foo 这个 Cookie 不会被包含在 Cookie 请求头中，但 bar 和 baz 会，也就是说用户在不同网站之间通过链接跳转是不受影响了。但假如这个请求是从 <a target="_blank" rel="noopener" href="http://a.com">a.com</a> 发起的对 <a target="_blank" rel="noopener" href="http://b.com">b.com</a> 的异步请求，或者页面跳转是通过表单的 post 提交触发的，则bar也不会发送。</p>
+<p>生成Token放到Cookie中并且设置Cookie的Samesite，Java代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">addTokenCookieAndHeader</span><span class="hljs-params">(HttpServletRequest httpRequest, HttpServletResponse httpResponse)</span> &#123;<br>       <span class="hljs-comment">//生成token</span><br>       <span class="hljs-type">String</span> <span class="hljs-variable">sToken</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.generateToken();<br>       <span class="hljs-comment">//手动添加Cookie实现支持“Samesite=strict”</span><br>       <span class="hljs-comment">//Cookie添加双重验证</span><br>       <span class="hljs-type">String</span> <span class="hljs-variable">CookieSpec</span> <span class="hljs-operator">=</span> String.format(<span class="hljs-string">&quot;%s=%s; Path=%s; HttpOnly; Samesite=Strict&quot;</span>, <span class="hljs-built_in">this</span>.determineCookieName(httpRequest), sToken, httpRequest.getRequestURI());<br>       httpResponse.addHeader(<span class="hljs-string">&quot;Set-Cookie&quot;</span>, CookieSpec);<br>       httpResponse.setHeader(CSRF_TOKEN_NAME, token);<br>   &#125;<br></code></pre></td></tr></table></figure>
+<p>代码源自<a target="_blank" rel="noopener" href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Implementation_example">OWASP Cross-Site_Request_Forgery #Implementation example</a></p>
+<h4 id="如何使用SamesiteCookie"><a href="#如何使用SamesiteCookie" class="headerlink" title="如何使用SamesiteCookie"></a>如何使用SamesiteCookie</h4>
+<p>如果SamesiteCookie被设置为Strict，浏览器在任何跨域请求中都不会携带Cookie，新标签重新打开也不携带，所以说CSRF攻击基本没有机会。</p>
+<p>但是跳转子域名或者是新标签重新打开刚登陆的网站，之前的Cookie都不会存在。尤其是有登录的网站，那么我们新打开一个标签进入，或者跳转到子域名的网站，都需要重新登录。对于用户来讲，可能体验不会很好。</p>
+<p>如果SamesiteCookie被设置为Lax，那么其他网站通过页面跳转过来的时候可以使用Cookie，可以保障外域连接打开页面时用户的登录状态。但相应的，其安全性也比较低。</p>
+<p>另外一个问题是Samesite的兼容性不是很好，现阶段除了从新版Chrome和Firefox支持以外，Safari以及iOS Safari都还不支持，现阶段看来暂时还不能普及。</p>
+<p>而且，SamesiteCookie目前有一个致命的缺陷：不支持子域。例如，种在topic.a.com下的Cookie，并不能使用a.com下种植的SamesiteCookie。这就导致了当我们网站有多个子域名时，不能使用SamesiteCookie在主域名存储用户登录信息。每个子域名都需要用户重新登录一次。</p>
+<p>总之，SamesiteCookie是一个可能替代同源验证的方案，但目前还并不成熟，其应用场景有待观望。</p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/08/06/%E6%B5%85%E6%9E%90sql%E6%B3%A8%E5%85%A5/">← 下一篇 浅析sql注入</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/08/06/%E6%B5%85%E8%B0%88CST%E6%94%BB%E5%87%BB/">浅谈CST攻击 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81CSRF%E6%BC%8F%E6%B4%9E%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">1、CSRF漏洞介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%8D%B1%E5%AE%B3"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 危害</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81CSRF%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">2、CSRF漏洞的原理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-CSRF%E6%BC%8F%E6%B4%9E%E4%BA%A7%E7%94%9F%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 CSRF漏洞产生的原因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E7%9A%84%E6%9D%A1%E4%BB%B6"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 漏洞利用的条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-CSRF%E5%92%8CXSS%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 CSRF和XSS的不同</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81CSRF%E4%B9%8BGET%E5%9E%8B%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">3.</span> <span class="toc-text">3、CSRF之GET型代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%E3%80%81CSRF%E4%B9%8BPOST%E5%9E%8B%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-number">4.</span> <span class="toc-text">4、CSRF之POST型代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5%E3%80%81DVWA%E4%B8%ADCSRF%E5%88%A9%E7%94%A8%E5%AE%9E%E6%88%98"><span class="toc-number">5.</span> <span class="toc-text">5、DVWA中CSRF利用实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E6%8C%96%E6%8E%98CSRF%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 挖掘CSRF的方法:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6%E3%80%81csrf%E6%A1%88%E4%BE%8B"><span class="toc-number">6.</span> <span class="toc-text">6、csrf案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-Gmail"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 Gmail</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7%E3%80%81CSRF%E6%BC%8F%E6%B4%9E%E9%98%B2%E5%BE%A1"><span class="toc-number">7.</span> <span class="toc-text">7、CSRF漏洞防御</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E5%90%8C%E6%BA%90%E6%A3%80%E6%B5%8B"><span class="toc-number">7.1.</span> <span class="toc-text">7.1 同源检测</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8Origin-Header%E7%A1%AE%E5%AE%9A%E6%9D%A5%E6%BA%90%E5%9F%9F%E5%90%8D"><span class="toc-number">7.1.1.</span> <span class="toc-text">使用Origin Header确定来源域名</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8Referer-Header%E7%A1%AE%E5%AE%9A%E6%9D%A5%E6%BA%90%E5%9F%9F%E5%90%8D"><span class="toc-number">7.1.2.</span> <span class="toc-text">使用Referer Header确定来源域名</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-Token%E9%98%B2%E5%BE%A1"><span class="toc-number">7.2.</span> <span class="toc-text">7.2 Token防御</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-%E9%AA%8C%E8%AF%81%E7%A0%81%E9%98%B2%E5%BE%A1CSRF"><span class="toc-number">7.3.</span> <span class="toc-text">7.4 验证码防御CSRF</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-%E5%8F%8C%E9%87%8DCookie%E9%AA%8C%E8%AF%81"><span class="toc-number">7.4.</span> <span class="toc-text">7.5 双重Cookie验证</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9A"><span class="toc-number">7.4.1.</span> <span class="toc-text">总结：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-6-Samesite-Cookie%E5%B1%9E%E6%80%A7"><span class="toc-number">7.5.</span> <span class="toc-text">7.6 Samesite Cookie属性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Samesite-Strict"><span class="toc-number">7.5.1.</span> <span class="toc-text">Samesite&#x3D;Strict</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Samesite-Lax"><span class="toc-number">7.5.2.</span> <span class="toc-text">Samesite&#x3D;Lax</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8SamesiteCookie"><span class="toc-number">7.5.3.</span> <span class="toc-text">如何使用SamesiteCookie</span></a></li></ol></li></ol></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>

