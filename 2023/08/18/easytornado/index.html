@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>攻防世界-easytornado | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>攻防世界-easytornado</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-08-18T08:30:59.199Z" id="date"> 2023-08-18</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-08-18T09:22:14.958Z" id="updated"> 2023-08-18</time></div></span><br><span>文章总字数: <div class="control">851</div></span><br><span>预计阅读时间: <div class="control">3 分钟</div></span></div></div><hr><div id="post-content"><h2 id="题目描述："><a href="#题目描述：" class="headerlink" title="题目描述："></a>题目描述：</h2>
+<p>Tornado 框架</p>
+<h2 id="题目解题："><a href="#题目解题：" class="headerlink" title="题目解题："></a>题目解题：</h2>
+<p class='item-img' data-src='image-20230818163614625.png'><img src="image-20230818163614625.png" alt="image-20230818163614625"></p>
+<p>进入题目看到如上，一个个点击看看</p>
+<p class='item-img' data-src='image-20230818163635642.png'><img src="image-20230818163635642.png" alt="image-20230818163635642"></p>
+<p class='item-img' data-src='image-20230818163648731.png'><img src="image-20230818163648731.png" alt="image-20230818163648731"></p>
+<p class='item-img' data-src='image-20230818163659536.png'><img src="image-20230818163659536.png" alt="image-20230818163659536"></p>
+<p>既然是hint，那这里就是提示了这里的含义应该是，将filename经过md5加密，再加上cookie最后在加密</p>
+<p>也就分析到这里了，后面没啥头绪，只是确定的是这估计是个ssti注入漏洞，看了wp发现</p>
+<p>我们要访问/fllllllllllllag文件，url中也要以GET方式提交了2个参数：filename=/fllllllllllllag&amp;filehash=</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">62499926a4a274c1614cf899bf7816b0<br></code></pre></td></tr></table></figure>
+<p>直接访问是会报错的：<br>
+<code>http://111.200.241.244:53713/file?filename=/fllllllllllllag</code></p>
+<p class='item-img' data-src='image-20230818170116756.png'><img src="image-20230818170116756.png" alt="image-20230818170116756"></p>
+<p>但细细观察发现msg参数的内容与前端页面内容一致，那么可以猜测这时就是注入点，那我们尝试一下即可</p>
+<p class='item-img' data-src='image-20230818170327782.png'><img src="image-20230818170327782.png" alt="image-20230818170327782"></p>
+<p>但这里缺报错了，有点蒙，那估计就和框架有关了，在看wp发现，还是结合提示，这里我们首先已经得知要访问的文件名，那么此时就要想法获得cooki_secret。</p>
+<h3 id="查看tornado的官方文档"><a href="#查看tornado的官方文档" class="headerlink" title="查看tornado的官方文档"></a>查看tornado的官方文档</h3>
+<p>cookie_secret在tornado框架中的tornado.web.RequestHandler和tornado.web.Application类中有使用到：<br>
+<strong>tornado.web.RequestHandler（HTTP请求处理程序的基类）</strong></p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs py">RequestHandler.get_secure_cookie( name , value=<span class="hljs-literal">None</span> , max_age_days=<span class="hljs-number">31</span> , min_version=<span class="hljs-literal">None</span> )<br></code></pre></td></tr></table></figure>
+<p>如果验证通过，则返回给定的签名cookie，否则返回 None。</p>
+<pre><code>RequestHandler.settings
+</code></pre>
+<p>RequestHandler类的设置参数，它的别名self.application.settings。</p>
+<p>tornado.web.Application（组成 Web 应用程序的请求处理程序的集合）<br>
+tornado.web.Application.settings：<br>
+  传递给构造函数的其他关键字参数保存在settings字典中，并且通常在文档中称为“应用程序设置”。设置用于自定义 Tornado 的各个方面（尽管在某些情况下，通过覆盖 的子类中的方法可以实现更丰富的自定义RequestHandler）。一些应用程序还喜欢使用settings字典作为一种方式，使处理程序可以使用特定于应用程序的设置，而无需使用全局变量。<br>
+  其中就包含了cookie_secret: 由RequestHandler.get_secure_cookie函数和set_secure_cookie函数用于对 cookie 进行签名。</p>
+<p>所以可以访问到cookie_secret的函数有：RequestHandler.get_secure_cookie、RequestHandler.settings、self.application.settings、<br>
+访问</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">http://61.147.171.105:60053/error?msg=&#123;&#123;RequestHandler.get_secure_cookie&#125;&#125;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230818170653569.png'><img src="image-20230818170653569.png" alt="image-20230818170653569"></p>
+<p>突然发现不能直接用类名调用函数去访问到它settings，必须要用实例化的对象调用函数去访问，而handler就是处理当前这个页面的HTTP请求的RequestHandler对象</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">（另：在Tornado的前端页面模板中，Tornado提供了一些对象别名来快速访问对象，Handler对象指向的处理当前这个页面的RequestHandler对象。执行?msg=&#123;&#123;datetime&#125;&#125; 还可以访问到datetime模块）<br></code></pre></td></tr></table></figure>
+<h3 id="得到cookie-secret的值"><a href="#得到cookie-secret的值" class="headerlink" title="得到cookie-secret的值"></a>得到cookie_secret的值</h3>
+<p>所以我们直接访问handler.get_secure_cookie、handler.settings、handler.application.settings、</p>
+<pre><code>http://61.147.171.105:60053/error?msg=&#123;&#123;handler.get_secure_cookie&#125;&#125;
+</code></pre>
+<p>get_secure_cookie函数还是被过滤了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">http://61.147.171.105:60053/error?msg=&#123;&#123;handler.settings&#125;&#125;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230818170944826.png'><img src="image-20230818170944826.png" alt="image-20230818170944826"></p>
+<p>成功找到</p>
+<h3 id="计算md5值"><a href="#计算md5值" class="headerlink" title="计算md5值"></a>计算md5值</h3>
+<p>之后我们继续计算哈希值：md5(cookie_secret+md5(/fllllllllllllag))<br>
+  注意filename=/fllllllllllllag&amp;filehash=md5(cookie_secret+md5(filename))中filename=/fllllllllllllag不是fllllllllllllag，少了个“/”得到的MD5值会会不一样的，前面的/flag.txt、/welcome.txt、/hints.txt文件MD5值也是32位的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">MD5在线加密 地址：http://www.jsons.cn/md5/s/<br></code></pre></td></tr></table></figure>
+<p>/fllllllllllllag经过32位小写MD5值加密：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">3bf9f6cf685a6dd8defadabfb41a03a1<br></code></pre></td></tr></table></figure>
+<p>之后cookie_secret的值加上/fllllllllllllag经过32位小写MD5值：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">faaa34dd-fbe3-4b1b-9e2e-8071918f97453bf9f6cf685a6dd8defadabfb41a03a1<br></code></pre></td></tr></table></figure>
+<p>再经过一次32小写MD5值加密：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">8b82faf703302b0590f91499236c86fa<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230818171402829.png'><img src="image-20230818171402829.png" alt="image-20230818171402829"></p>
+<p>得到flag</p>
+<h2 id="参考文章："><a href="#参考文章：" class="headerlink" title="参考文章："></a>参考文章：</h2>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43168364/article/details/111871465?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169234912916800225580030%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169234912916800225580030&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-6-111871465-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Ceasytornado&amp;spm=1018.2226.3001.4187">wp参考一</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/Onlyone_1314/article/details/121875087?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169234912916800225580030%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169234912916800225580030&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-121875087-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Ceasytornado&amp;spm=1018.2226.3001.4187">wp参考二</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/08/18/shrine/">← 下一篇 攻防世界-shrine</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/08/17/simple_js/">攻防世界-simple_js 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">题目描述：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A7%A3%E9%A2%98%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">题目解题：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8Btornado%E7%9A%84%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="toc-number">2.1.</span> <span class="toc-text">查看tornado的官方文档</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BE%97%E5%88%B0cookie-secret%E7%9A%84%E5%80%BC"><span class="toc-number">2.2.</span> <span class="toc-text">得到cookie_secret的值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97md5%E5%80%BC"><span class="toc-number">2.3.</span> <span class="toc-text">计算md5值</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">参考文章：</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>

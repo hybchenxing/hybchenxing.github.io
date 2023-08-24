@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>攻防世界-bug | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>攻防世界-bug</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-08-23T08:43:50.404Z" id="date"> 2023-08-23</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-08-23T09:36:44.274Z" id="updated"> 2023-08-23</time></div></span><br><span>文章总字数: <div class="control">649</div></span><br><span>预计阅读时间: <div class="control">2 分钟</div></span></div></div><hr><div id="post-content"><h2 id="题目描述："><a href="#题目描述：" class="headerlink" title="题目描述："></a>题目描述：</h2>
+<p>无</p>
+<h2 id="题目解题："><a href="#题目解题：" class="headerlink" title="题目解题："></a>题目解题：</h2>
+<p class='item-img' data-src='image-20230823165539260.png'><img src="image-20230823165539260.png" alt="image-20230823165539260"></p>
+<p>打开题目依旧是登录页面，先测试弱口令，没反应，随后扫目录的同时看看是否为sql，但很明显也不是，于是随便注册了一个用户，用来抓包看看是否存在逻辑漏洞</p>
+<p class='item-img' data-src='image-20230823165702887.png'><img src="image-20230823165702887.png" alt="image-20230823165702887"></p>
+<h3 id="cookie解密更改"><a href="#cookie解密更改" class="headerlink" title="cookie解密更改"></a>cookie解密更改</h3>
+<p>这里一看uid之类的，就感觉是逻辑漏洞了，不过我还是借鉴了wp，随后他说这个cookie中的user像是md5加密，于是乎我解密一番看看</p>
+<p>试了很多网站都解密不成功，看来只能靠猜，这里幸运的话猜到是有&quot;UID:用户名&quot;加密而成</p>
+<p class='item-img' data-src='image-20230823171319274.png'><img src="image-20230823171319274.png" alt="image-20230823171319274"></p>
+<p>幸运的话在这里对&quot;1:admin&quot;进行加密修改cookie就可以直接看到admin用户的信息，随后就可以重置密码，不过这条路不太好走，换一条简单的</p>
+<h3 id="重置密码的越权"><a href="#重置密码的越权" class="headerlink" title="重置密码的越权"></a>重置密码的越权</h3>
+<p class='item-img' data-src='image-20230823171507959.png'><img src="image-20230823171507959.png" alt="image-20230823171507959"></p>
+<p>我们将我们注册过的用户输入进去进行密码重置看能否实现越权，在这里尝试的原因在于，别处的功能点均不存在越权漏洞。</p>
+<p>修改密码后bp抓包</p>
+<p class='item-img' data-src='image-20230823171637063.png'><img src="image-20230823171637063.png" alt="image-20230823171637063"></p>
+<p class='item-img' data-src='image-20230823171731888.png'><img src="image-20230823171731888.png" alt="image-20230823171731888"></p>
+<p>在这里修改为admin，admin看看</p>
+<p class='item-img' data-src='image-20230823171801843.png'><img src="image-20230823171801843.png" alt="image-20230823171801843"></p>
+<p>发现成功了，那我们登录一下看看</p>
+<p class='item-img' data-src='image-20230823171910493.png'><img src="image-20230823171910493.png" alt="image-20230823171910493"></p>
+<p>登录进去后，发现点击manage显示ip错误，无权访问，那估计就是修改xff或者ssrf了，那我们抓包看看</p>
+<p class='item-img' data-src='image-20230823172107825.png'><img src="image-20230823172107825.png" alt="image-20230823172107825"></p>
+<p>发现有效果，看一下源码</p>
+<p class='item-img' data-src='image-20230823172123621.png'><img src="image-20230823172123621.png" alt="image-20230823172123621"></p>
+<p>发现module的值为文件管理，如果是佬的话凭直觉认为是文件上传，所以他们会将do赋值为upload，果然还真成功了</p>
+<p>wp是这样说的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">成功绕过IP检测后，能看见侧着的笑脸和Where Is The Flag?的字样。在源码中隐藏了另一个信息index.php?module=filemanage&amp;do=???.文件类型的action通常都是upload，故访问index.php?module=filemanage&amp;do=upload页面，在新页面中能进行文件上传。<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230823172613359.png'><img src="image-20230823172613359.png" alt="image-20230823172613359"></p>
+<p>随便上传一个php文件测试</p>
+<p class='item-img' data-src='image-20230823172727386.png'><img src="image-20230823172727386.png" alt="image-20230823172727386"></p>
+<p>发现有过滤，那我们先更改后缀看看，这里用00截断看看</p>
+<p class='item-img' data-src='image-20230823172825597.png'><img src="image-20230823172825597.png" alt="image-20230823172825597"></p>
+<p>发现成功，然后又说我们的文件类型不对，于是我改为上述图片的，发现依旧不行，那可能就是文件内容也有过滤，这里就看了wp的</p>
+<p>将文件内容修改为<code>&lt;script language='php'&gt;&lt;/script&gt;</code>，绕过&lt;?的限制</p>
+<p class='item-img' data-src='image-20230823173518236.png'><img src="image-20230823173518236.png" alt="image-20230823173518236"></p>
+<p>以为成功了，结果非得将文件类型修改为png才可以</p>
+<p>怎么说，做了一次下来，有点实战的味道</p>
+<h2 id="参考文章："><a href="#参考文章：" class="headerlink" title="参考文章："></a>参考文章：</h2>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43085611/article/details/111828440?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169278075816800222859900%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169278075816800222859900&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-111828440-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Cbug&amp;spm=1018.2226.3001.4187">wp参考一</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_44418229/article/details/126133865?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169278075816800222859900%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169278075816800222859900&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-126133865-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Cbug&amp;spm=1018.2226.3001.4187">wp参考二</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/l1028386804/article/details/84206143">一句话木马大全</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/08/23/web%E6%8A%80%E5%B7%A7%E6%80%BB%E7%BB%93/">← 下一篇 一句话木马大全</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/08/23/wife_wife/">攻防世界-wife_wife 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">题目描述：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A7%A3%E9%A2%98%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">题目解题：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#cookie%E8%A7%A3%E5%AF%86%E6%9B%B4%E6%94%B9"><span class="toc-number">2.1.</span> <span class="toc-text">cookie解密更改</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E7%BD%AE%E5%AF%86%E7%A0%81%E7%9A%84%E8%B6%8A%E6%9D%83"><span class="toc-number">2.2.</span> <span class="toc-text">重置密码的越权</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">参考文章：</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>

