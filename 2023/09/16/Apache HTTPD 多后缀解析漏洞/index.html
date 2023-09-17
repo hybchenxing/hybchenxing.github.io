@@ -1,0 +1,73 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Apache HTTPD 多后缀解析漏洞 | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>Apache HTTPD 多后缀解析漏洞</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-09-16T11:21:45.541Z" id="date"> 2023-09-16</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-09-16T11:36:52.130Z" id="updated"> 2023-09-16</time></div></span><br><span>文章总字数: <div class="control">707</div></span><br><span>预计阅读时间: <div class="control">3 分钟</div></span></div></div><hr><div id="post-content"><h2 id="0x01-漏洞描述"><a href="#0x01-漏洞描述" class="headerlink" title="0x01-漏洞描述"></a>0x01 漏洞描述</h2>
+<p>Apache HTTPD 支持一个文件拥有多个后缀，并为不同后缀执行不同的指令。比如，如下配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">AddType text/html .html<br>AddLanguage zh-CN .cn<br></code></pre></td></tr></table></figure>
+<p>其给<code>.html</code>后缀增加了media-type，值为<code>text/html</code>；给<code>.cn</code>后缀增加了语言，值为<code>zh-CN</code>。此时，如果用户请求文件<code>index.cn.html</code>，他将返回一个中文的html页面。</p>
+<p>以上就是Apache多后缀的特性。如果运维人员给<code>.php</code>后缀增加了处理器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">AddHandler application/x-httpd-php .php<br></code></pre></td></tr></table></figure>
+<p>那么，在有多个后缀的情况下，只要一个文件含有<code>.php</code>后缀的文件即将被识别成PHP文件，没必要是最后一个后缀。利用这个特性，将会造成一个可以绕过上传白名单的解析漏洞。</p>
+<h2 id="0x02-影响版本"><a href="#0x02-影响版本" class="headerlink" title="0x02-影响版本"></a>0x02 影响版本</h2>
+<p>与Apache版本无关，与服务器配置有关</p>
+<ul>
+<li>AddHandler application/x-httpd-php .php</li>
+</ul>
+<h2 id="0x03-漏洞分析"><a href="#0x03-漏洞分析" class="headerlink" title="0x03-漏洞分析"></a>0x03 漏洞分析</h2>
+<p>index.php中是一个白名单检查文件后缀的上传组件，上传完成后并未重命名。</p>
+<p>index.php源码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><br><span class="hljs-keyword">if</span> (!<span class="hljs-keyword">empty</span>(<span class="hljs-variable">$_FILES</span>)):<br><br><span class="hljs-variable">$ext</span> = <span class="hljs-title function_ invoke__">pathinfo</span>(<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">&#x27;file_upload&#x27;</span>][<span class="hljs-string">&#x27;name&#x27;</span>], PATHINFO_EXTENSION);<span class="hljs-comment">//这种取文件名的方式,杜绝了换行符</span><br><span class="hljs-keyword">if</span> (!<span class="hljs-title function_ invoke__">in_array</span>(<span class="hljs-variable">$ext</span>, [<span class="hljs-string">&#x27;gif&#x27;</span>, <span class="hljs-string">&#x27;png&#x27;</span>, <span class="hljs-string">&#x27;jpg&#x27;</span>, <span class="hljs-string">&#x27;jpeg&#x27;</span>])) &#123; <span class="hljs-comment">//白名单</span><br>    <span class="hljs-keyword">die</span>(<span class="hljs-string">&#x27;Unsupported filetype uploaded.&#x27;</span>);<br>&#125;<br><br><span class="hljs-variable">$new_name</span> = <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">&#x27;/uploadfiles/&#x27;</span> . <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">&#x27;file_upload&#x27;</span>][<span class="hljs-string">&#x27;name&#x27;</span>];<span class="hljs-comment">//设置路径</span><br><span class="hljs-keyword">if</span>(!<span class="hljs-title function_ invoke__">move_uploaded_file</span>(<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">&#x27;file_upload&#x27;</span>][<span class="hljs-string">&#x27;tmp_name&#x27;</span>], <span class="hljs-variable">$new_name</span>))&#123;<span class="hljs-comment">//上传文件</span><br>    <span class="hljs-keyword">die</span>(<span class="hljs-string">&#x27;Error uploading file - check destination is writeable.&#x27;</span>);<br>&#125;<br><br><span class="hljs-keyword">die</span>(<span class="hljs-string">&#x27;File uploaded successfully: &#x27;</span> . <span class="hljs-variable">$new_name</span>);<br><br><span class="hljs-keyword">else</span>:<br><span class="hljs-meta">?&gt;</span><br>&lt;form method=<span class="hljs-string">&quot;post&quot;</span> enctype=<span class="hljs-string">&quot;multipart/form-data&quot;</span>&gt;<br>    File: &lt;input type=<span class="hljs-string">&quot;file&quot;</span> name=<span class="hljs-string">&quot;file_upload&quot;</span>&gt;<br>    &lt;input type=<span class="hljs-string">&quot;submit&quot;</span>&gt;<br>&lt;/form&gt;<br><span class="hljs-meta">&lt;?php</span><br></code></pre></td></tr></table></figure>
+<p>以gif、png、jpg、jpeg为后缀的文件均可上传成功，将文件保存到/uploadfiles/目录下，上传完成后并未重命名。</p>
+<p>查看配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># cat conf/docker-php.conf</span><br><br>AddHandler application/x-httpd-php .php<br><br>DirectoryIndex disabled<br>DirectoryIndex index.php index.html                       <br><br>&lt;Directory /var/www/&gt;<br>    Options -Indexes<br>    AllowOverride All<br></code></pre></td></tr></table></figure>
+<p>配置文件中存在AddHandler application/x-httpd-php .php，文件名只要有.php的后缀就会被当成php文件执行。</p>
+<h2 id="0x04-漏洞复现"><a href="#0x04-漏洞复现" class="headerlink" title="0x04-漏洞复现"></a>0x04 漏洞复现</h2>
+<p>docker启动好之后，访问ip:80</p>
+<p>![image-20230916193303999](Apache HTTPD 多后缀解析漏洞/image-20230916193303999.png)</p>
+<p>直接访问<code>http://your-ip/uploadfiles/apache.php.jpeg</code>即可发现，phpinfo被执行了，该文件被解析为php脚本。</p>
+<p>![image-20230916193325731](Apache HTTPD 多后缀解析漏洞/image-20230916193325731.png)</p>
+<p>我们接下来正常操作一下，正常上传php文件，Unsupported filetype uploaded</p>
+<p>![image-20230916193419902](Apache HTTPD 多后缀解析漏洞/image-20230916193419902.png)</p>
+<p>那在后面加上白名单允许的后缀看看</p>
+<p>![image-20230916193524359](Apache HTTPD 多后缀解析漏洞/image-20230916193524359.png)</p>
+<p>成功上传，访问试试</p>
+<p>![image-20230916193542496](Apache HTTPD 多后缀解析漏洞/image-20230916193542496.png)</p>
+<h2 id="0x05-修复建议"><a href="#0x05-修复建议" class="headerlink" title="0x05-修复建议"></a>0x05 修复建议</h2>
+<ol>
+<li>将<code>AddHandler application/x-httpd-php .php</code>的配置文件删除。</li>
+</ol>
+<h2 id="0x06-参考文章"><a href="#0x06-参考文章" class="headerlink" title="0x06-参考文章"></a>0x06 参考文章</h2>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/0dot7/p/17211417.html">【漏洞复现】Apache HTTPD 多后缀解析漏洞 _</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/09/17/%E5%8F%8D%E5%BC%B9shell%E7%9A%84%E6%96%B9%E6%B3%95%E6%80%BB%E7%BB%93/">← 下一篇 反弹shell的方法总结</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/09/16/Apache%20HTTP%20Server%202.4.50%20%E4%B8%AD%E7%9A%84%E8%B7%AF%E5%BE%84%E9%81%8D%E5%8E%86%E5%92%8C%E6%96%87%E4%BB%B6%E6%B3%84%E9%9C%B2%E6%BC%8F%E6%B4%9E%20(CVE-2021-42013)/">Apache HTTP Server 2.4.50 中的路径遍历和文件泄露漏洞 (CVE-2021-42013) 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">0x01 漏洞描述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E5%BD%B1%E5%93%8D%E7%89%88%E6%9C%AC"><span class="toc-number">2.</span> <span class="toc-text">0x02 影响版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-number">3.</span> <span class="toc-text">0x03 漏洞分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="toc-number">4.</span> <span class="toc-text">0x04 漏洞复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">5.</span> <span class="toc-text">0x05 修复建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x06-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">6.</span> <span class="toc-text">0x06 参考文章</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>

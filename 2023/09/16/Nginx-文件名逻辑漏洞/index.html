@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Nginx-文件名逻辑漏洞CVE-2013-4547 | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>Nginx-文件名逻辑漏洞CVE-2013-4547</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-09-16T06:19:13.095Z" id="date"> 2023-09-16</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-09-16T06:23:59.356Z" id="updated"> 2023-09-16</time></div></span><br><span>文章总字数: <div class="control">659</div></span><br><span>预计阅读时间: <div class="control">2 分钟</div></span></div></div><hr><div id="post-content"><h2 id="0x01-漏洞描述："><a href="#0x01-漏洞描述：" class="headerlink" title="0x01-漏洞描述："></a>0x01 漏洞描述：</h2>
+<p>这个漏洞其实和代码执行没有太大的关系,主要原因是错误地解析了请求的URL,错误地获取到用户请求的文件名，导致出现权限绕过、代码执行的连带影响。</p>
+<p>影响版本：Nginx 0.8.41 ~ 1.4.3 / 1.5.0 ~ 1.5.7</p>
+<h2 id="0x02-漏洞原理："><a href="#0x02-漏洞原理：" class="headerlink" title="0x02-漏洞原理："></a>0x02 漏洞原理：</h2>
+<p>举个例子,比如,nginx匹配到.php结尾的请求,就发送给fastcgi进行解析,常见的写法如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">location ~ \.php$ &#123;<br>    include        fastcgi_params;<br><br>    fastcgi_pass   127.0.0.1:9000;<br>    fastcgi_index  index.php;<br>    fastcgi_param  SCRIPT_FILENAME  /var/www/html$fastcgi_script_name;<br>    fastcgi_param  DOCUMENT_ROOT /var/www/html;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>正常情况下(关闭了pathinfo的情况下),只有.php后缀的文件才会被发送给fastcgi解析。</p>
+<p>而存在CVE-2013-4547的情况下,我们请求<code>1.gif[0x20][0x00].php</code>，这个URI可以匹配上正则.php$,可以进入这个Location块；但进入后,Nginx却错误地认为请求的文件是1.gif[0x20],就设置其为SCRIPT_FILENAME的值发送给fastcgi。</p>
+<p>Fastcgi根据SCRIPT_FILENAME的值进行解析,最后造成了解析漏洞。</p>
+<p>所以,我们只需要上传一个空格结尾的文件,即可使PHP解析之。</p>
+<p>再举个例子,比如很多网站限制了允许访问后台的IP:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">location /admin/ &#123;<br>    allow 127.0.0.1;<br>    deny all;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>我们可以请求如下URI:/test[0x20]/…/admin/index.php,这个URI不会匹配上location后面的/admin/,也就绕过了其中的IP验证;但最后请求的是/test[0x20]/…/admin/index.php文件,也就是/admin/index.php,成功访问到后台。(这个前提是需要有一个目录test:这是Linux系统的特点,如果有一个不存在的目录,则即使跳转到上一层,也会爆文件不存在的错误,Windows下没有这个限制)</p>
+<h2 id="0x03-复现过程"><a href="#0x03-复现过程" class="headerlink" title="0x03-复现过程"></a>0x03 复现过程</h2>
+<p>在Windows弄了个环境，后来发现要文件名的后面存在空格，而Windows是不允许存在此类文件的，因此这里复现，使用Vulhub的docker进行复现。</p>
+<p>访问<code>http://your-ip:8080/</code> 上传文件</p>
+<p><strong>看一下后端过滤</strong></p>
+<p class='item-img' data-src='Nginx-%E6%96%87%E4%BB%B6%E5%90%8D%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%5Cimage-20230723095853568.png'><img src="Nginx-%E6%96%87%E4%BB%B6%E5%90%8D%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%5Cimage-20230723095853568.png" alt="image-20230723095853568"></p>
+<p>简单明了的黑名单</p>
+<p>访问<code>http://your-ip:8080/</code> 上传文件，在jpg后面加个空格，是的上传的文件名叫做1.jpg[空格]</p>
+<p class='item-img' data-src='Nginx-%E6%96%87%E4%BB%B6%E5%90%8D%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%5Cimage-20230723102047000.png'><img src="Nginx-%E6%96%87%E4%BB%B6%E5%90%8D%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%5Cimage-20230723102047000.png" alt="image-20230723102047000"></p>
+<p>访问<code>http://your-ip:8080/uploadfiles/1.jpg .php</code>, 并抓包，修改为<code>1.jpg...php</code>, 在Hex选修卡中将jpg后面的两个点<code>2e</code>改成<code>20</code>,<code>00</code><br>
+点击Go,如下。</p>
+<p class='item-img' data-src='Nginx-%E6%96%87%E4%BB%B6%E5%90%8D%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%5Cimage-20230723102928841.png'><img src="Nginx-%E6%96%87%E4%BB%B6%E5%90%8D%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%5Cimage-20230723102928841.png" alt="image-20230723102928841"></p>
+<p>注意，[0x20]是空格，[0x00]是<code>\0</code>，这两个字符都不需要编码。</p>
+<p>Note:该漏洞不受<code>cgi.fix_pathinfo</code>影响，当其为0时，依旧解析，在Windows上有所限制。</p>
+<h2 id="0x04-修复建议"><a href="#0x04-修复建议" class="headerlink" title="0x04-修复建议"></a>0x04 修复建议</h2>
+<p>1）设置security.limit_extensions = .php</p>
+<p>2）或升级Nginx</p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/09/16/Tomcat%20%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/">← 下一篇 Tomcat 远程代码执行CVE-2019-0232</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/09/16/Drupal%20XSS%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2019-6341%EF%BC%89/"> 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E6%BC%8F%E6%B4%9E%E6%8F%8F%E8%BF%B0%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">0x01 漏洞描述：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E6%BC%8F%E6%B4%9E%E5%8E%9F%E7%90%86%EF%BC%9A"><span class="toc-number">2.</span> <span class="toc-text">0x02 漏洞原理：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">0x03 复现过程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-number">4.</span> <span class="toc-text">0x04 修复建议</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
