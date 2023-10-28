@@ -1,0 +1,157 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>初识HSQL | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>初识HSQL</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-10-03T07:27:13.002Z" id="date"> 2023-10-03</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-10-03T14:12:16.943Z" id="updated"> 2023-10-03</time></div></span><br><span>文章总字数: <div class="control">2.3k</div></span><br><span>预计阅读时间: <div class="control">8 分钟</div></span></div></div><hr><div id="post-content"><h1>0x01 前言</h1>
+<p>本文主要是在一次做攻防世界中的题时，所遇到的不懂的点，故此学习一番记录一下。这里并不会讲太深，emmm，因为我感觉不必太深只是懂了各种增删改查的语句我认为即可。话不都说开始卷！</p>
+<h1>0x02 Hsql</h1>
+<h2 id="2-1-HSQLDB-介绍"><a href="#2-1-HSQLDB-介绍" class="headerlink" title="2-1-HSQLDB-介绍"></a>2.1 HSQLDB 介绍</h2>
+<p>HyperSQL 数据库 (HSQLDB) 是一种现代关系数据库管理器，它紧密符合 SQL:2011 标准和 JDBC 4 规范。它支持所有核心功能和 RDBMS。HSQLDB 用于开发、测试和部署数据库应用程序。</p>
+<p>HSQLDB 的主要和独特功能是标准合规性。它可以在用户的应用程序进程内、应用程序服务器内或作为单独的服务器进程提供数据库访问。</p>
+<h2 id="2-2-HSQLDB-特点"><a href="#2-2-HSQLDB-特点" class="headerlink" title="2-2-HSQLDB-特点"></a>2.2 HSQLDB 特点</h2>
+<ul>
+<li>HSQLDB 使用内存结构对数据库服务器进行快速操作。它根据用户的灵活性使用磁盘持久性，并具有可靠的崩溃恢复。</li>
+<li>HSQLDB 也适用于商业智能、ETL 和其他处理大型数据集的应用程序。</li>
+<li>HSQLDB 具有广泛的企业部署选项，例如 XA 事务、连接池数据源和远程身份验证。</li>
+<li>HSQLDB 是用 Java 编程语言编写的，并在 Java 虚拟机 (JVM) 中运行。它支持用于数据库访问的 JDBC 接口。</li>
+</ul>
+<h2 id="2-3-HSQLDB-组成部分"><a href="#2-3-HSQLDB-组成部分" class="headerlink" title="2-3-HSQLDB-组成部分"></a>2.3 HSQLDB 组成部分</h2>
+<p>HSQLDB jar 包中有三个不同的组件。</p>
+<ul>
+<li>HyperSQL RDBMS 引擎 (HSQLDB)</li>
+<li>HyperSQL JDBC 驱动程序</li>
+<li>数据库管理器（GUI 数据库访问工具，具有 Swing 和 AWT 版本）</li>
+</ul>
+<p>HyperSQL RDBMS 和 JDBC 驱动程序提供核心功能。数据库管理器是通用数据库访问工具，可与任何具有 JDBC 驱动程序的数据库引擎一起使用。</p>
+<p>另一个名为 sqltool.jar 的 jar 包含 Sql Tool，它是一个命令行数据库访问工具。这是一个通用命令。Line 数据库访问工具，也可以与其他数据库引擎一起使用。</p>
+<h1>0x03 HSQLDB 安装</h1>
+<p>HSQLDB 是一个用纯 Java 实现的关系数据库管理系统。您可以使用 JDBC 轻松地将此数据库嵌入到您的应用程序中。或者您可以单独使用这些操作。</p>
+<h2 id="3-1-先决条件"><a href="#3-1-先决条件" class="headerlink" title="3-1-先决条件"></a>3.1 先决条件</h2>
+<p>遵循 HSQLDB 的必备软件安装。</p>
+<h2 id="3-2-验证-Java-安装"><a href="#3-2-验证-Java-安装" class="headerlink" title="3-2-验证-Java-安装"></a>3.2 验证 Java 安装</h2>
+<p>由于HSQLDB是纯Java实现的关系型数据库管理系统，所以在安装HSQLDB之前必须先安装JDK（Java Development Kit）软件。如果您的系统中已经安装了 JDK，请尝试以下命令来验证 Java 版本。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">java –version<br></code></pre></td></tr></table></figure>
+<p>如果您的系统中成功安装了 JDK，您将获得以下输出。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">java version &quot;1.8.0_91&quot;<br>Java(TM) SE Runtime Environment (build 1.8.0_91-b14)<br>Java HotSpot(TM) 64-Bit Server VM (build 25.91-b14, mixed mode)<br></code></pre></td></tr></table></figure>
+<p>如果您的系统中没有安装 JDK，请访问以下链接以<a target="_blank" rel="noopener" href="http://www.tutorialspoint.com/java/java_environment_setup.htm">安装 JDK。</a></p>
+<h2 id="3-3-HSQLDB-安装"><a href="#3-3-HSQLDB-安装" class="headerlink" title="3-3-HSQLDB-安装"></a>3.3 HSQLDB 安装</h2>
+<p>以下是安装 HSQLDB 的步骤。</p>
+<p><strong>步骤 1 – 下载 HSQLDB 包</strong></p>
+<p>从以下链接<a target="_blank" rel="noopener" href="https://sourceforge.net/projects/hsqldb/files/%E4%B8%8B%E8%BD%BD%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC%E7%9A%84">https://sourceforge.net/projects/hsqldb/files/下载最新版本的</a> HSQLDB 数据库</p>
+<p class='item-img' data-src='image-20231003154619448.png'><img src="image-20231003154619448.png" alt="image-20231003154619448"></p>
+<h2 id="3-4-准备驱动"><a href="#3-4-准备驱动" class="headerlink" title="3-4-准备驱动"></a>3.4 准备驱动</h2>
+<p><strong>步骤 2 – 解压缩 HSQLDB zip 文件</strong></p>
+<p>解压缩 zip 文件并将其放入C:\目录（任意目录均可）</p>
+<p class='item-img' data-src='image-20231003154711930.png'><img src="image-20231003154711930.png" alt="image-20231003154711930"></p>
+<p>这里也是废了我很长时间，试验下来似乎只有2.3.4版本的稳定，其他版本的不知道如何启动，而且也没有近几年关于此hsqldb的介绍文章了。难受</p>
+<p><strong>步骤 3 – 创建默认数据库</strong></p>
+<p><strong>1、 在d盘下建立一个目录hsqldb文件夹（这个是任意建立的），在文件夹中创建lib文件夹，将hsqldb-2.3.4解压后的lib目录下的hsqldb.jar拷贝到里面，然后在hsqldb文件夹中创建一个data的文件夹。</strong></p>
+<h2 id="3-5-启动服务"><a href="#3-5-启动服务" class="headerlink" title="3-5-启动服务"></a>3.5 启动服务</h2>
+<p><strong>2、 创建数据库</strong></p>
+<p>进入命令提示符，进入data文件夹，输入下面的命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">java -cp ../lib/hsqldb.jar org.hsqldb.Server -database test<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231003204111662.png'><img src="image-20231003204111662.png" alt="image-20231003204111662"></p>
+<p>成功开启</p>
+<p><strong>3、 在data文件夹中就会出现两个文件：test.log和 test.properties，也就是创建了一个名称为test的数据库，如下图所示。</strong></p>
+<p class='item-img' data-src='image-20231003204845293.png'><img src="image-20231003204845293.png" alt="image-20231003204845293"></p>
+<p>这里一直到启动数据库那里都存在问题，我不清楚该数据库的别名是啥了。。。解决的话看后面（跳过这里）</p>
+<p><strong>4、 然后在hsqldb的文件夹中创建一个mydb文件夹，在文件夹中创建三个文件：runManager.bat，runManagerSwing.bat和runServer2.bat</strong></p>
+<p><strong>runManager.bat对应的内容为：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">cd ..\data<br>@java -classpath ..\lib\hsqldb.jar org.hsqldb.util.DatabaseManager<br></code></pre></td></tr></table></figure>
+<p><strong>runManagerSwing.bat对应的内容为：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">cd ..\data<br>@java -classpath ..\lib\hsqldb.jar org.hsqldb.util.DatabaseManagerSwing<br></code></pre></td></tr></table></figure>
+<p><strong>runServer2.bat对应的内容为：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">cd ..\data<br>@java -classpath ../lib/hsqldb.jar org.hsqldb.server.Server -port 9001 -database.0 file:../data/mydb -dbname.0 mydb<br></code></pre></td></tr></table></figure>
+<p><strong>5、 运行hsqldb</strong></p>
+<p>双击runServer2.bat文件，此时回弹出命令行窗口，如下图，表示已启动 HSQLDB 数据库。</p>
+<p class='item-img' data-src='image-20231003205055488.png'><img src="image-20231003205055488.png" alt="image-20231003205055488"></p>
+<p>这里弹一下就没了，我截不住图。。。。</p>
+<p>此时，产生了三个文件，如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">test.lck ——标识数据库锁状态。<br><br>test.log ——运行数据库产生的log信息，它将记录每一个运行和用户操作环节。<br><br>test.properties——数据库的配置信息，包括分配的内存大小等，可更具需要修改。<br></code></pre></td></tr></table></figure>
+<h2 id="3-6-运行模式"><a href="#3-6-运行模式" class="headerlink" title="3-6-运行模式"></a>3.6  运行模式</h2>
+<p>数据库引擎分4种工作模式：内存In-Memory、独立Standalone、服务器Server、韦伯服务器WebServer，启动方式参数大同小异，本文以第三种为例；</p>
+<p class='item-img' data-src='image-20231003205513565.png'><img src="image-20231003205513565.png" alt="image-20231003205513565"></p>
+<p><strong>4. 管理HSQL</strong></p>
+<p>启动HSQL管理工具，打开命令行窗口，执行下列命令：</p>
+<p><code>java -cp hsqldb.jar org.hsqldb.util.DatabaseManager</code></p>
+<p>出现connect窗口：</p>
+<p>不过这里直接双击运行runManager.bat即可</p>
+<p class='item-img' data-src='image-20231003205208331.png'><img src="image-20231003205208331.png" alt="image-20231003205208331"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Recent：将会列出最近的数据库配置<br><br>Setting Name: 设置名称，这里不需要填写<br><br>Type：选择服务器模式（HSQL Database Engine Server）<br><br>Driver：驱动名称，不需要修改<br><br>URL：JDBC连接，无需修改<br><br>User：用户名,根据需要设置<br><br>Password：密码，根据需要设置<br></code></pre></td></tr></table></figure>
+<p><strong>在命令行模式下启动HSQL服务器模式：</strong></p>
+<p><code>java -cp ../lib/hsqldb.jar org.hsqldb.Server -database.0 db -dbname.0 db</code></p>
+<p>​		命令中的org.hsqldb.Server -database.0与-dbname.0为固定值，db 为数据库别名，如果该库存在，则打开该库，不存在，则新建并打开。</p>
+<p><code>java -cp ../lib/hsqldb.jar org.hsqldb.util.DatabaseManager</code></p>
+<p>上述命令会启动服务</p>
+<p>选择引擎Type：HSQL Database Engine Server模式，修改URL：jdbc:hsqldb:hsql://localhost/<strong>db</strong>，<strong>db</strong>为步骤三中指定的数据库别名，用户名SA，密码为空，登录。</p>
+<h2 id="3-7-执行SQL"><a href="#3-7-执行SQL" class="headerlink" title="3-7-执行SQL"></a>3.7 执行SQL</h2>
+<p>登录成功后，工作台如图所示，界面简单的像是Demo！左侧为数据库的所有表树图，右上侧为SQL编辑区：</p>
+<p class='item-img' data-src='image-20231003210651265.png'><img src="image-20231003210651265.png" alt="image-20231003210651265"></p>
+<p>输入SQL语句，点击右侧Execute执行</p>
+<p class='item-img' data-src='image-20231003211028872.png'><img src="image-20231003211028872.png" alt="image-20231003211028872"></p>
+<p>在这里大小写均可，不过还是推荐大写</p>
+<p>获得HSQL语法帮助，点击菜单Command ——&gt; CREATE TABLE ：</p>
+<p class='item-img' data-src='image-20231003211106759.png'><img src="image-20231003211106759.png" alt="image-20231003211106759"></p>
+<p>HSQL SELECT语法：</p>
+<p class='item-img' data-src='image-20231003211138952.png'><img src="image-20231003211138952.png" alt="image-20231003211138952"></p>
+<p>HSQL环境变量：</p>
+<p class='item-img' data-src='image-20231003211229718.png'><img src="image-20231003211229718.png" alt="image-20231003211229718"></p>
+<h2 id="3-7-关闭HSQL"><a href="#3-7-关闭HSQL" class="headerlink" title="3-7-关闭HSQL"></a>3.7 关闭HSQL</h2>
+<p>在SQL编辑区输入shutdown命令，单击Execute执行：</p>
+<p class='item-img' data-src='image-20231003211558430.png'><img src="image-20231003211558430.png" alt="image-20231003211558430"></p>
+<p>服务器响应如下：</p>
+<p class='item-img' data-src='image-20231003211632394.png'><img src="image-20231003211632394.png" alt="image-20231003211632394"></p>
+<h1>0x04 进一步熟悉</h1>
+<p>回顾之前做的ctf题目，其中一个sql语句是这样写的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> List&lt;User&gt; <span class="hljs-title function_">loginCheck</span><span class="hljs-params">(String name, String password)</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-built_in">this</span>.getHibernateTemplate().find(<span class="hljs-string">&quot;from User where name =&#x27;&quot;</span> + name + <span class="hljs-string">&quot;&#x27; and password = &#x27;&quot;</span> + password + <span class="hljs-string">&quot;&#x27;&quot;</span>);<br>    &#125;<br></code></pre></td></tr></table></figure>
+<p>而佬是这样绕过的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">from User <span class="hljs-type">where</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span><span class="hljs-string">&#x27;admin&#x27;</span> or <span class="hljs-string">&#x27;1&#x27;</span>&gt;<span class="hljs-string">&#x27;0&#x27;</span> or name like <span class="hljs-string">&#x27;admin&#x27;</span> <span class="hljs-type">and</span> <span class="hljs-variable">password</span> <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;&quot; + password + &quot;&#x27;</span><br></code></pre></td></tr></table></figure>
+<p>这样的话他是这样传参的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">用户名：<br>admin&#x27; or &#x27;1&#x27;&gt;&#x27;0&#x27; or name like &#x27;admin<br></code></pre></td></tr></table></figure>
+<p>这里呢，前面的第一个单引号是为了闭合where name='中的单引号</p>
+<p>后面的用or隔开，接着是’1’ &gt; ‘0’，很明显恒为true，接着在or隔开name like 'admin，这里的单引号用来闭合<code>name ='&quot; + name + &quot;'</code>中的最后的单引号。由于1&gt;0为true，那么这整条语句就为true，也就不需要关心密码是多少了。</p>
+<p>至于为何要1&gt;0而不用1=1，是因为题目过滤了等于号</p>
+<p>至于为什么是要用两个or，是因为，mysql里and优先级比or高<br>
+那么两个or的作用是保证永真，简单举个例，一个or:admin’ or ‘1’&gt;‘0’ and password=1 表示为false or true and false，先执行true and false，<br>
+为false再有false or false那就是false，而两个false or true or true and false是true，因此根据这个逻辑，可以进行盲注</p>
+<p>但不理解的是他们是如何知道数据库一定含有admin的用户的。。。可能是猜测一般root用户都是admin吧。。。</p>
+<h1>0x04 总结</h1>
+<p>总之这个HSQL与mysql很类似，HSQL数据库有如下两个特点：</p>
+<p>一是“纯而精”，它是一款由HSQL Development Group开发的纯Java数据库，遵循BSD-style许可协议，支持SQL99，SQL2003大部分语法标准；</p>
+<p>二是“小而轻”，更为重要的是，该数据库体积贼小，数据库引擎、JDBC驱动与管理工具三合一加起来才600多Kb，JBoss、Kettle3.0及以上、DataX 等大多数工具或中间件默认都支持HSQL。</p>
+<h1>参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35101027/article/details/86714500">hsqldb的安装使用</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.vue5.com/hsqldb/hsqldb.html">HSQLDB教程</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.modb.pro/db/518495">HSQL 数据库入门</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/10/05/wtf.sh-150/">← 下一篇 wtf.sh-150</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/10/03/Zhuanxv/">Zhuanxv 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">0x02 Hsql</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-HSQLDB-%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 HSQLDB 介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-HSQLDB-%E7%89%B9%E7%82%B9"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 HSQLDB 特点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-HSQLDB-%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 HSQLDB 组成部分</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">0x03 HSQLDB 安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%85%88%E5%86%B3%E6%9D%A1%E4%BB%B6"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 先决条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E9%AA%8C%E8%AF%81-Java-%E5%AE%89%E8%A3%85"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 验证 Java 安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-HSQLDB-%E5%AE%89%E8%A3%85"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 HSQLDB 安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E5%87%86%E5%A4%87%E9%A9%B1%E5%8A%A8"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 准备驱动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-5-%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.5.</span> <span class="toc-text">3.5 启动服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-6-%E8%BF%90%E8%A1%8C%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.6.</span> <span class="toc-text">3.6  运行模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-7-%E6%89%A7%E8%A1%8CSQL"><span class="toc-number">3.7.</span> <span class="toc-text">3.7 执行SQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-7-%E5%85%B3%E9%97%ADHSQL"><span class="toc-number">3.8.</span> <span class="toc-text">3.7 关闭HSQL</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">0x04 进一步熟悉</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">0x04 总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">6.</span> <span class="toc-text">参考文章</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>

