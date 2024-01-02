@@ -1,0 +1,348 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>渗透测试流程&amp;外网打点 | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"Enter here","blurHolder":"Search","noResult":"Data \"$0\" not found"},"code":{"codeInfo":"$0 - $1 lines","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="Search" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>渗透测试流程&amp;外网打点</h1><div id="post-info"><span>First Post: <div class="control"><time datetime="2023-12-31T08:25:52.551Z" id="date"> 2023-12-31</time></div></span><br><span>Last Update: <div class="control"><time datetime="2024-01-02T09:41:24.571Z" id="updated"> 2024-01-02</time></div></span><br><span>Word Count: <div class="control">6.1k</div></span><br><span>Read Time: <div class="control">22 min</div></span></div></div><hr><div id="post-content"><h1>0x01 前言</h1>
+<p>终于抽出时间来学习了，看了看st3pby师傅给的资料，对于渗透测试流程不熟悉的我，感觉需要学的挺多的，估计又是一场恶战，话不多说直接开卷！！</p>
+<h1>0x02 渗透测试基本流程</h1>
+<p>这里先学习一下大致测试的框架流程：</p>
+<p>大致可分为三个阶段：信息搜集、漏洞发现、漏洞利用。但放到实战中，这三个方面又可以有很多的细节优化，进一步深入明确测试流程，这里主要通过9个阶段来学习一下整个测试流程。</p>
+<p>渗透测试一般就是典型的<strong>黑盒测试</strong>，就是模拟黑客的入侵；还有一种叫<strong>白盒渗透</strong>，是在了解了一些内部的情况之后再挖掘漏洞。一般性黑盒测试的东西多一点。</p>
+<h2 id="2-1-确定目标"><a href="#2-1-确定目标" class="headerlink" title="2-1-确定目标"></a>2.1 确定目标</h2>
+<h3 id="范围的确定"><a href="#范围的确定" class="headerlink" title="范围的确定"></a>范围的确定</h3>
+<p>测试的范围：我们要知道当前测试的范围是IP、域名、内网和外网、整个网站还是网站的某个功能模块？</p>
+<p>一般来说可能测试的是一个公司或企业的内部网络，针对的大部分是服务器。或者是一个网站或网站群，或者是一些软件应用或者APP，这类的话一般都是获取应用的后台服务器的权限。</p>
+<h3 id="规则的确定"><a href="#规则的确定" class="headerlink" title="规则的确定"></a>规则的确定</h3>
+<p>我们需要知道我们可以测试到什么程度：是发现漏洞即可，还是要进一步利用漏洞；是否有时间限制、是否可以修改上传、能否提权等等等等，也就是确定问我们可以做什么不可以做什么。这里填充一下文章给的：</p>
+<ul>
+<li>目标系统介绍、重点保护对象及特性。</li>
+<li>是否允许数据破坏？</li>
+<li>是否允许阻断业务正常运行？</li>
+<li>测试之前是否应当知会相关部门接口人？</li>
+<li>接入方式？外网和内网？</li>
+<li>测试是发现问题就算成功，还是尽可能的发现多的问题？</li>
+<li>渗透过程是否需要考虑社会工程？</li>
+</ul>
+<h3 id="需求的确定"><a href="#需求的确定" class="headerlink" title="需求的确定"></a>需求的确定</h3>
+<p>我们需要明确让我们测试的需求具体是什么：web应用的漏洞(新上线程序)？业务逻辑漏洞（针对业务的）？人员权限管理漏洞（针对人员、权限）？根据需求和自己技术能力来确定能不能做、能做多少，点到为止。</p>
+<h2 id="2-2-分析风险，获得授权"><a href="#2-2-分析风险，获得授权" class="headerlink" title="2-2-分析风险，获得授权"></a>2.2 分析风险，获得授权</h2>
+<p>这里的知识就不懂了，没了解过。。。直接cv加自己的浅薄理解了</p>
+<p>分析渗透测试过程中可能产生的风险，如大量测试数据的处理、影响正常业务开展、服务器发生异常的应急、数据备份和恢复、测试人力物力成本…</p>
+<p>由测试方书写实施方案初稿并提交给客户（or本公司内部领导）进行审核。在审核完成后，从客户（or本公司内部领导）获取对测试方进行书面委托授权书，授权测试方进行渗透测试。（不授权不测试~~~）</p>
+<h2 id="2-3-信息搜集"><a href="#2-3-信息搜集" class="headerlink" title="2-3-信息搜集"></a>2.3 信息搜集</h2>
+<p>这里一块可以说是奠定了一次渗透测试是否会成功的基础，虽然之前有所总结，但现在也几乎忘了，因此这一块得重点温习一下（令起一部分）。</p>
+<p>首先明确一下信息搜集阶段的目的：尽可能多的获取到目标web应用的各种信息。</p>
+<p>信息包括：脚本语言类型、服务器类型、目录结构、是否使用开源软件且使用的哪种开源软件、数据库类型、页面所含的超链接、部署应用用到的框架、中间件类型、用到了哪些网络服务（SSH、FTP）、使用的哪种CMS等等还有很多。</p>
+<p>而其中搜集利用到的方式为：主动扫描；开放搜索；利用搜索引擎获取后台、未授权页面、敏感url等等</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">基础信息：IP，网段，域名，端口，旁站、C段<br>系统信息：操作系统版本--》在之后的提权中才能“对症下药”<br>应用信息：各端口的应用，例如web应用，邮件应用等<br>版本信息：所有探测到的版本<br>服务信息：服务器类型、版本、中间件、数据库、脚本类型、软件类型（微信，Chrome）、用到的网络服务<br>人员信息：域名注册人员信息，web应用中网站发帖人的id，管理员姓名等<br>防护信息：试着看能否探测到防护设备<br></code></pre></td></tr></table></figure>
+<p>这种信息一般可以先通过部分功能强大的小插件先获取</p>
+<p class='item-img' data-src='image-20240101172201533.png'><img src="image-20240101172201533.png" alt="image-20240101172201533"></p>
+<h2 id="2-4-漏洞探测（手动-自动）"><a href="#2-4-漏洞探测（手动-自动）" class="headerlink" title="2-4-漏洞探测（手动-自动）"></a>2.4 漏洞探测（手动&amp;自动）</h2>
+<p>到了这一阶段就需要利用2.3搜集到的各类信息，尝试找到相应的漏洞进行探测。</p>
+<h3 id="探测方法"><a href="#探测方法" class="headerlink" title="探测方法"></a>探测方法</h3>
+<ul>
+<li>各类漏扫工具：AWVS、AppScan等等；</li>
+<li>结合漏洞去开源漏洞库（exploit-db）等地方去尝试寻找是否是已经公开过的漏洞。</li>
+<li>网络漫游找寻漏洞验证POC</li>
+<li>平常也需要多关注一些关于网络安全的新闻，掌握漏洞实时消息，说不定日后就不会用到的</li>
+</ul>
+<p>简单列举一下常见的软件漏洞：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">XAMPP提权漏洞<br>WordPress大量漏洞<br>PhpStudy漏洞<br>phpMyAdmin漏洞<br>IIS低版本解析漏洞<br>Nginx/Apache解析漏洞<br>SSH后门漏洞<br>FTP/RDP等网络服务弱口令漏洞<br>Rlogin后门漏洞<br></code></pre></td></tr></table></figure>
+<h3 id="探测内容"><a href="#探测内容" class="headerlink" title="探测内容"></a>探测内容</h3>
+<ul>
+<li>系统漏洞：找寻对方系统是否没有打入相关补丁，幸运地话可能会发现对方操作系统并未及时打补丁，后果就是直接拿下！</li>
+<li>Webserver漏洞：Webserver配置问题–也就是中间件漏洞（这一块爆的漏洞还是很多的）</li>
+<li>Web应用漏洞：Web应用开发问题、还有就是Web开启了其他端口的服务，但却没设置授权访问，或者可以弱口令打入。</li>
+<li>各种端口服务：这里主要是针对端口服务的开启，比如21–FTP、8080–这里可能有Apache-tomcat、struct2等等，常被用于代理www服务、7001端口–一般为weblogic服务、22–Linux-SSH远程连接服务、3389–Windows远程桌面连接等等。</li>
+<li>通信安全：看看传输过程中的敏感数据是明文的、比如token在cookie的传输、jwt加密所用的key、各类加密盐等等。</li>
+</ul>
+<h2 id="2-5-漏洞验证"><a href="#2-5-漏洞验证" class="headerlink" title="2-5-漏洞验证"></a>2.5 漏洞验证</h2>
+<p>将上一步发现的有可能可以成功利用的漏洞都验证一遍。结合实际情况，搭建模拟环境进行测试，成功后再在目标中实现，验证发面包括一下内容：</p>
+<ul>
+<li>自动化验证：结合自动化扫描工具提供的结果</li>
+<li>手工验证：根据公开资源进行验证</li>
+<li>试验验证：自己搭建模拟环境进行验证</li>
+<li>登录猜解：有时可以尝试猜解一下登陆口的账号密码等信息，可关注前端js接口。</li>
+<li>业务漏洞验证：如发现业务漏洞，要进行验证</li>
+<li>公开资源的利用exploit-db/wooyun/渗透代码网站通用、缺省口令厂商的漏洞警告等</li>
+</ul>
+<h2 id="2-6-信息分析"><a href="#2-6-信息分析" class="headerlink" title="2-6-信息分析"></a>2.6 信息分析</h2>
+<p>这一步是为下一步实施具体渗透做准备。</p>
+<ul>
+<li>精准攻击：准备好上一步探测到的漏洞exp（漏洞利用），用来对某个模块进行精准攻击</li>
+<li>绕过防御机制：是否有防火墙等设备，如何绕过</li>
+<li>定制攻击路径：最佳工具路径，根据薄弱点入口，搞清楚内网权限位置，确定最终目标</li>
+<li>绕过检测机制：是否有检测机制，流量监控，杀毒软件，恶意代码检测等（免杀）</li>
+<li>攻击代码：经过试验得来的代码，包括不限于xss代码，sql注入语句等</li>
+</ul>
+<h2 id="2-7-利用漏洞获取数据"><a href="#2-7-利用漏洞获取数据" class="headerlink" title="2-7-利用漏洞获取数据"></a>2.7 利用漏洞获取数据</h2>
+<ul>
+<li>实施攻击：根据前几步的结果，进行攻击</li>
+<li>获取内部信息：基础设施（网络连接，vpn，路由，拓扑等）</li>
+<li>进一步渗透：内网入侵，敏感目标</li>
+<li>持续性存在：一般对客户做渗透不需要。rookit，后门，添加管理账号，驻扎手法等</li>
+<li>清理痕迹：清理相关日志（访问，操作），上传文件等</li>
+</ul>
+<h2 id="2-8-信息整理"><a href="#2-8-信息整理" class="headerlink" title="2-8-信息整理"></a>2.8 信息整理</h2>
+<ul>
+<li>整理渗透工具：整理渗透过程中用到的代码，poc，exp等</li>
+<li>整理收集信息：整理渗透过程中收集到的一切信息</li>
+<li>整理漏洞信息：整理渗透过程中遇到的各种漏洞，各种脆弱位置信息</li>
+<li>目的：为了最后形成报告，形成测试结果使用。</li>
+</ul>
+<h2 id="2-9-形成报告"><a href="#2-9-形成报告" class="headerlink" title="2-9-形成报告"></a>2.9 形成报告</h2>
+<ul>
+<li>按需整理：按照之前第一步跟客户确定好的范围，需求来整理资料，并将资料形成报告</li>
+<li>补充介绍：要对漏洞成因，验证过程和带来危害进行分析</li>
+<li>修补建议：要对所有产生的问题提出合理高效安全的解决办法</li>
+</ul>
+<h1>0x03 信息搜集</h1>
+<p>这里就单独着重学习一下信息搜集的各类奇淫巧技吧。</p>
+<h2 id="3-1-信息搜集的分类"><a href="#3-1-信息搜集的分类" class="headerlink" title="3-1-信息搜集的分类"></a>3.1 信息搜集的分类</h2>
+<p>1、主动式信息搜集（可获取到的信息较多，但易被目标发现）</p>
+<p>2、通过直接发起与被测目标网络之间的互动来获取相关信息，如通过Nmap扫描目标系统。</p>
+<p>3、被动式信息搜集（搜集到的信息较少，但不易被发现）</p>
+<p>4、通过第三方服务来获取目标网络相关信息。如通过搜索引擎方式来搜集信息。</p>
+<h2 id="3-2-搜集什么信息"><a href="#3-2-搜集什么信息" class="headerlink" title="3-2-搜集什么信息"></a>3.2 搜集什么信息</h2>
+<blockquote>
+<p>1、whois信息（微步）</p>
+<p>2、网站架构</p>
+<p>3、dns信息（通过查询dns我们可以检测是否存在dns域传送漏洞）</p>
+<p>4、子域名搜集</p>
+<p>5、敏感目录及敏感信息、源码泄露（搜索引擎+工具）</p>
+<p>6、脆弱系统（网络空间）</p>
+<p>7、旁站查询</p>
+<p>8、C端查询</p>
+<p>9、指纹信息</p>
+<p>10、端口服务</p>
+<p>11、备案信息</p>
+<p>12、真实ip</p>
+<p>13、探测waf</p>
+<p>14、社工（朋友圈、微博、qq空间、求职、交易等社交平台）</p>
+<p>15、企业信息（天眼查、企业信用信息公示系统、工业和信息化部ICP/IP地址/域名信息备案管理系统）</p>
+</blockquote>
+<h2 id="3-3-目标确认"><a href="#3-3-目标确认" class="headerlink" title="3-3-目标确认"></a>3.3 目标确认</h2>
+<h3 id="域名注册信息"><a href="#域名注册信息" class="headerlink" title="域名注册信息"></a>域名注册信息</h3>
+<p><strong>通过如下步骤确认目标所有者信息：</strong></p>
+<blockquote>
+<p>Whois 目标域名/主机名：whois <a href="http://example.com">http://example.com</a><br>
+解析目标域名/主机名的IP地址：dig +short <a href="http://example.com">http://example.com</a><br>
+获取域名的详细解析过程：dig +trace <a href="http://example.com">http://example.com</a></p>
+</blockquote>
+<p>后续用于字典制作和进一步收集目标信息的基础</p>
+<h4 id="whois命令"><a href="#whois命令" class="headerlink" title="whois命令"></a>whois命令</h4>
+<p>whois就是一个用来查询域名是否已经被注册，以及注册域名的详细信息的<code>数据库</code>（如域名所有人、<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=%E5%9F%9F%E5%90%8D%E6%B3%A8%E5%86%8C&amp;spm=1001.2101.3001.7020">域名注册</a>商）。</p>
+<p>whois信息可以获取关键注册人的信息，包括注册商、联系人、联系邮箱、联系电话、创建时间等,可以进行邮箱反查域名，爆破邮箱，社工，域名劫持等等。</p>
+<p>注：不同域名后缀的whois信息需要到不同的whois数据库查询</p>
+<p>主要的实现原理：</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs scss"><span class="hljs-number">1</span>.根据域名从根服务器获取域名所在whois服务器<br><span class="hljs-number">2</span>.再根据域名从域名所在whois服务器获取域名信息<br>即<br>domain + rootServer =&gt; targetServer<br>domain + targetServer =&gt; domainInfo<br>当然，如果知道了域名信息所在服务器，可以跳过第一步，直接查询域名信息<br></code></pre></td></tr></table></figure>
+<p>下面实操一手。</p>
+<h5 id="方法一：根服务器"><a href="#方法一：根服务器" class="headerlink" title="方法一：根服务器"></a>方法一：根服务器</h5>
+<p>通过原始网页查询：首先根据域名从whois的根服务器获取域名所在的whois服务器：<a target="_blank" rel="noopener" href="https://www.iana.org/whois">https://www.iana.org/whois</a></p>
+<p class='item-img' data-src='image-20240101185641310.png'><img src="image-20240101185641310.png" alt="image-20240101185641310"></p>
+<p>或者根据域名后缀在数据库中查询对应whois服务器地址：<a target="_blank" rel="noopener" href="https://www.iana.org/domains/root/db">https://www.iana.org/domains/root/db</a></p>
+<p>这里我们就以.cn为例，查询一下，如下图可以看到该域名对应的whois服务器</p>
+<p class='item-img' data-src='image-20240101185846245.png'><img src="image-20240101185846245.png" alt="image-20240101185846245"></p>
+<p>接下来就是根据得到的whois服务器获取域名信息，结果如下，但这里只能查询一级域名，不能携带www之类的前缀</p>
+<p class='item-img' data-src='image-20240101190016712.png'><img src="image-20240101190016712.png" alt="image-20240101190016712"></p>
+<p>这里也能看到如果域名后缀不对应，也是查询不到的</p>
+<p class='item-img' data-src='image-20240101190119728.png'><img src="image-20240101190119728.png" alt="image-20240101190119728"></p>
+<h5 id="方法二：第三方服务查询"><a href="#方法二：第三方服务查询" class="headerlink" title="方法二：第三方服务查询"></a>方法二：第三方服务查询</h5>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://whois.aliyun.com/">https://whois.aliyun.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://whois.cloud.tencent.com/">https://whois.cloud.tencent.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://who.is/">https://who.is/</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.whois.com/whois/">https://www.whois.com/whois/</a></li>
+<li><a target="_blank" rel="noopener" href="https://whois.chinaz.com/">https://whois.chinaz.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://whois.aizhan.com/">https://whois.aizhan.com/</a></li>
+</ul>
+<p class='item-img' data-src='image-20240101191413063.png'><img src="image-20240101191413063.png" alt="image-20240101191413063"></p>
+<p>下方有对应的英文详细信息：</p>
+<p class='item-img' data-src='image-20240101191442021.png'><img src="image-20240101191442021.png" alt="image-20240101191442021"></p>
+<p>体验下来感觉<a target="_blank" rel="noopener" href="https://www.whois.com/whois%E6%9B%B4%E5%A5%BD%E4%B8%80%E7%82%B9%EF%BC%8C%E4%BF%A1%E6%81%AF%E6%8C%BA%E5%AE%8C%E5%96%84%E7%9A%84%E3%80%82%E4%B8%8D%E8%BF%87%E6%9C%AC%E8%B4%A8%E6%9D%A5%E4%BC%BC%E4%B9%8E%E9%83%BD%E6%98%AF%E6%9D%A5%E8%87%AAwhois%E6%A0%B9%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%9F%A5%E8%AF%A2%E5%88%B0%E7%9A%84%E4%BF%A1%E6%81%AF%EF%BC%8C%E6%95%B4%E5%90%88%E4%BA%86%E4%B8%80%E4%B8%8B%E8%80%8C%E5%B7%B2%E3%80%82%E8%80%8C%E9%98%BF%E9%87%8C%E4%BA%91%E5%92%8C%E8%85%BE%E8%AE%AF%E4%BA%91%E7%9A%84%E6%84%9F%E8%A7%89%E7%94%A8%E4%BA%8E%E6%9F%A5%E5%9B%BD%E5%86%85%E5%B0%B1%E8%A1%8C%E4%BA%86%EF%BC%8C%E6%9C%80%E5%90%8E%E4%B8%80%E4%B8%AA%E7%AB%99%E9%95%BF%E5%B7%A5%E5%85%B7%E7%9A%84whois%E4%B8%8D%E5%A4%AA%E5%AE%8C%E5%96%84%EF%BC%8C%E4%BD%86%E7%9B%B4%E6%8E%A5%E6%8F%90%E4%BE%9B%E4%BA%86%E5%8F%8D%E6%9F%A5%E5%8A%9F%E8%83%BD%EF%BC%8C%E6%84%9F%E8%A7%89%E8%BF%98%E7%AE%97%E4%B8%8D%E9%94%99%EF%BC%88%E6%84%9F%E8%A7%89%E6%98%AF%E6%9F%A5%E5%9B%BD%E5%86%85%E6%8C%BA%E6%95%88%E7%8E%87%E7%9A%84%E5%B7%A5%E5%85%B7%E4%BA%86%EF%BC%89">https://www.whois.com/whois更好一点，信息挺完善的。不过本质来似乎都是来自whois根服务器查询到的信息，整合了一下而已。而阿里云和腾讯云的感觉用于查国内就行了，最后一个站长工具的whois不太完善，但直接提供了反查功能，感觉还算不错（感觉是查国内挺效率的工具了）</a></p>
+<p class='item-img' data-src='image-20240101191921703.png'><img src="image-20240101191921703.png" alt="image-20240101191921703"></p>
+<p class='item-img' data-src='image-20240101192120541.png'><img src="image-20240101192120541.png" alt="image-20240101192120541"></p>
+<p>这里还有爱站</p>
+<p class='item-img' data-src='image-20240101210107271.png'><img src="image-20240101210107271.png" alt="image-20240101210107271"></p>
+<p>这里最全面的感觉就是微步社区了</p>
+<p class='item-img' data-src='image-20240101210308820.png'><img src="image-20240101210308820.png" alt="image-20240101210308820"></p>
+<p class='item-img' data-src='image-20240101210313055.png'><img src="image-20240101210313055.png" alt="image-20240101210313055"></p>
+<p>可以看到结果很全面，就是想要查询一些隐私还得氪金~~~</p>
+<h5 id="方法三：whois命令"><a href="#方法三：whois命令" class="headerlink" title="方法三：whois命令"></a>方法三：whois命令</h5>
+<p>就是用whois命令进行查询，这个命令在Linux与Windows下都可安装，这里用Linux演示了，至于安装办法就不赘述了</p>
+<p class='item-img' data-src='image-20240101192245053.png'><img src="image-20240101192245053.png" alt="image-20240101192245053"></p>
+<p class='item-img' data-src='image-20240101192300021.png'><img src="image-20240101192300021.png" alt="image-20240101192300021"></p>
+<p>同样的如下图，二级域名就查询不到了</p>
+<p class='item-img' data-src='image-20240101192340912.png'><img src="image-20240101192340912.png" alt="image-20240101192340912"></p>
+<p>这里需要注意的是国际域名可以设置隐私保护，但像国内.cn等域名是不可以设置隐私保护的。</p>
+<h5 id="方法四：中文域名"><a href="#方法四：中文域名" class="headerlink" title="方法四：中文域名"></a>方法四：中文域名</h5>
+<p>这里看了几篇文章，还有用代码去实现的（自我感觉没太必要），这里的代码可以自己写，也可以直接用第三方库</p>
+<p>具体的感兴趣参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/mouday/article/details/129691736?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522170410215916800227411682%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=170410215916800227411682&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-4-129691736-null-null.142%5Ev99%5Epc_search_result_base2&amp;utm_term=whois%E5%91%BD%E4%BB%A4&amp;spm=1018.2226.3001.4187">一文搞定：whois数据库查询域名信息（WHOIS）</a></p>
+<p>这里介绍这篇文章提到的中文域名查询。。。</p>
+<p>他这里说：通过接口直接查询中文域名，会提示没有查询结果。这时候需要将中文域名进行编码</p>
+<p>在线编码：<a target="_blank" rel="noopener" href="http://tools.jb51.net/punycode/index.php">http://tools.jb51.net/punycode/index.php</a></p>
+<p class='item-img' data-src='image-20240101192800298.png'><img src="image-20240101192800298.png" alt="image-20240101192800298"></p>
+<p>其实，中文后缀的域名可以不编码，主要是中英结合的域名, 比如 <a target="_blank" rel="noopener" href="http://xn--chq7c.cn/">http://中万.cn/</a></p>
+<p>从浏览器直接复制过来是<a target="_blank" rel="noopener" href="http://xn--chq7c.cn/">http://xn–chq7c.cn/</a></p>
+<p>这是一种叫做：Punycode的编码方式</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;中万&quot;</span>.encode(<span class="hljs-string">&#x27;punycode&#x27;</span>).decode())<br><span class="hljs-comment"># chq7c</span><br><span class="hljs-number">12</span><br></code></pre></td></tr></table></figure>
+<p>然后加上前缀<code>xn--</code>，就和上面的结果一致了</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scss">xn<span class="hljs-attr">--chq7c</span><br></code></pre></td></tr></table></figure>
+<p>可以看到还是可以查询到的，不过这里如果进入其对应的refer服务器中就查询错误（格式不正确）</p>
+<p class='item-img' data-src='image-20240101193453609.png'><img src="image-20240101193453609.png" alt="image-20240101193453609"></p>
+<p>不过这里竟然可以直接中文域名查询！！当然whois根服务器也可以</p>
+<p class='item-img' data-src='image-20240101193650786.png'><img src="image-20240101193650786.png" alt="image-20240101193650786"></p>
+<p>这里附上一个whois查询信息的解释：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">01 whois：是查询命令<br><br>02 qqpk.cn：是要查询的域名<br><br>03 Domain.name：域名<br><br>04 ROID：是Register Object ID号，相当于注册对象的一个身份证号码<br><br>05 Domain Status: CLIENT TRANSFER PROHIBITED <br>   【也就是客户端禁止转移，该状态由注册商设置，域名可以更新（域名信息修改）、续费、删除，需要指派至少一台域名服务器则可以正常使用。】<br><br>06 Registrant：域名注册人的姓名<br><br>07 Registrant Contact Email：注册人的联系邮箱<br><br>08 Sponsoring Registrar：注册商 <br>   【他们进行抢注域名，然后进行high价转让的公司】<br><br>09 Name Server：也就是DNS域名解析服务器，它在互联网的作用是把域名转换成为网络可以识别的IP地址<br><br>10 Registration Time：注册该域名的时间<br><br>11 Expiration Time：该域名到期时间<br><br>12 DNSSEC：unsigne <br>   【DNSSEC=Domain Name System Security Extensions (DNSSEC)，DNS安全扩展，是由IETF提供的一系列DNS安全认证的机制（可参考RFC2535）。它提供了一种来源鉴定和数据完整性的扩展，但不去保障可用性、加密性和证实域名不存在。】<br>   【Unsigned：未设置、未部署】<br></code></pre></td></tr></table></figure>
+<h4 id="dig命令"><a href="#dig命令" class="headerlink" title="dig命令"></a>dig命令</h4>
+<p>dig（domain information group）是常用的域名查询工具，可以从DNS域名服务器查询主机地址信息，获取到详细的域名信息。这个命令是Bind的一部分，本身并没有在Windows和<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=Linux&amp;spm=1001.2101.3001.7020">Linux</a>系统中集成，所以如果我们想要使用该命令就需要先下载相应的软件包。–至于下载方式这里就不说了</p>
+<p>简单使用：<code>dig www.baidu.com</code></p>
+<p class='item-img' data-src='image-20240101200849679.png'><img src="image-20240101200849679.png" alt="image-20240101200849679"></p>
+<p>对一些字段的解释：</p>
+<blockquote>
+<p>第一二行：输出了有关dig的版本信息，和全局设置选项：+cmd，以及输入参数信息</p>
+<p>Got answer：输出了从DNS返回的技术信息，比较重要的是 status，如果 status 的值为 NOERROR ，则说明本次查询成功。这段信息可以用选项 [no]comments 来控制是否显示，但是小心禁止掉comments也可能关闭一些其它的选项。</p>
+</blockquote>
+<p class='item-img' data-src='image-20240101201303974.png'><img src="image-20240101201303974.png" alt="image-20240101201303974"></p>
+<p class='item-img' data-src='image-20240101201637507.png'><img src="image-20240101201637507.png" alt="image-20240101201637507"></p>
+<blockquote>
+<p>QUESTION SECTION：查询字段，显示了我们查询的域名以及查询的服务，A代表的是查询A记录，即主机查询</p>
+<p>ANSWER SECTION：回答字段这里的结果表示：要查询www.baidu.com先查询CNAME记录，对www.a.shifen.com进行访问，当我们访问www.a.shifen.com后，该主机让我们访问110.242.68.3，我们访问110.242.68.3后，这个ip的主机会告诉我们www.baidu.com的IP是110.242.68.4</p>
+</blockquote>
+<p class='item-img' data-src='image-20240101201839925.png'><img src="image-20240101201839925.png" alt="image-20240101201839925"></p>
+<blockquote>
+<p>这部分显示了请求所花的时间，dns服务器，当前时间，以及查询信息的大小</p>
+</blockquote>
+<p>还有一个值得记录的是-x选项，说是根据IP反查域名（另外每个命令后面添加+short可以简化输出信息）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">dig -x 183.84.6.134	# 访问PTR记录，查询该IP地址所对应的主机名，DNS解析是用域名查IP，而PTR记录是IP查域名<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20240101202406892.png'><img src="image-20240101202406892.png" alt="image-20240101202406892"></p>
+<p>不过这里始终没看出来域名在哪里。。。。还有一个+trace命令可以看到域名解析详细过程</p>
+<p class='item-img' data-src='image-20240101204008916.png'><img src="image-20240101204008916.png" alt="image-20240101204008916"></p>
+<h3 id="获取真实IP"><a href="#获取真实IP" class="headerlink" title="获取真实IP"></a>获取真实IP</h3>
+<p>为了保证网络的稳定和快速传输，网站服务商会在网络的不同位置设置节点服务器，通过 CDN（Content Delivery Network，内容分发网络）技术，将网络请求分发到最优的节点服务器上面。如果网站开启了 CDN 加速，就无法通过网站的域名信息获取真实的 IP，要对目标的 IP 资源进行收集，就要绕过 CDN 查询到其真实的 IP 信息。</p>
+<p>一个小tip：浏览器切换手机模式，可能是真实ip，公众号、小程序中的资产也可能对应真实ip。</p>
+<h4 id="如何判断是否有CDN"><a href="#如何判断是否有CDN" class="headerlink" title="如何判断是否有CDN"></a>如何判断是否有CDN</h4>
+<p>在对目标 IP 信息收集之前，首先要判断目标网站是否开启了 CDN，一般通过不同地方的主机 ping 域名和 nslookup 域名解析两种方法，通过查看返回的 IP 是否是多个的方式来判断网站是否开启了 CDN，如果返回的 IP 信息是多个不同的 IP，那就有可能使用了 CDN 技术。</p>
+<h5 id="方法一：多地ping"><a href="#方法一：多地ping" class="headerlink" title="方法一：多地ping"></a>方法一：多地ping</h5>
+<p>使用各种多地 ping 的服务，查看对应 IP 地址是否唯一，如果不唯一多半是使用了CDN， 多地 Ping 网站有：</p>
+<p class='item-img' data-src='image-20240101205110956.png'><img src="image-20240101205110956.png" alt="image-20240101205110956"></p>
+<p class='item-img' data-src='image-20240101205140092.png'><img src="image-20240101205140092.png" alt="image-20240101205140092"></p>
+<p>可以到有多个IP，一般这种方法要根据多个网站都进行尝试一下，才能更好的确定，不过这里能用的我知道的只有两个</p>
+<p><a target="_blank" rel="noopener" href="http://ping.chinaz.com/%E3%80%81http://ping.aizhan.com/%E8%80%8C%E4%B8%94%E5%90%8E%E8%80%85%E8%BF%98%E4%BC%BC%E4%B9%8E%E5%B4%A9%E4%BA%86%EF%BC%8C%E6%9F%A5%E8%AF%A2%E6%B2%A1%E5%8F%8D%E5%BA%94">http://ping.chinaz.com/、http://ping.aizhan.com/而且后者还似乎崩了，查询没反应</a></p>
+<p>又去谷歌找了一番，无果，感觉有需要的话需要多翻翻一些网站了。</p>
+<h5 id="方法二：nslookup"><a href="#方法二：nslookup" class="headerlink" title="方法二：nslookup"></a>方法二：nslookup</h5>
+<p>试用nslookup进行检测，如果返回域名解析对应多个IP，那么多半是试用了CDN.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">nslookup http://example.com<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='image-20240101210831289.png'><img src="image-20240101210831289.png" alt="image-20240101210831289"></p>
+<p>这里看到一个是有多个IP地址，一个是name的值直接就是cdn.net什么的，这很明显就是有CDN了</p>
+<h5 id="方法三：在线工具"><a href="#方法三：在线工具" class="headerlink" title="方法三：在线工具"></a>方法三：在线工具</h5>
+<p>在线工具查看是否存在CDN，可以参考以下站点:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.cdnplanet.com/tools/cdnfinder">http://www.cdnplanet.com/tools/cdnfinder</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.ipip.net/ip.html">http://www.ipip.net/ip.html</a></li>
+</ul>
+<p>这里推荐第二个站点</p>
+<p class='item-img' data-src='image-20240101211349443.png'><img src="image-20240101211349443.png" alt="image-20240101211349443"></p>
+<h4 id="绕过CDN"><a href="#绕过CDN" class="headerlink" title="绕过CDN"></a>绕过CDN</h4>
+<h5 id="查询历史DNS记录"><a href="#查询历史DNS记录" class="headerlink" title="查询历史DNS记录"></a>查询历史DNS记录</h5>
+<p>查看 IP 与 域名绑定的历史记录，可能会存在使用 CDN 前的记录，相关查询网站有</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://x.threatbook.cn/">https://x.threatbook.cn/</a></li>
+</ul>
+<p class='item-img' data-src='image-20240101220032934.png'><img src="image-20240101220032934.png" alt="image-20240101220032934"></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://censys.io/ipv4?q=baidu.com">https://censys.io/ipv4?q=baidu.com</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/projectdiscovery/cdncheck">https://github.com/projectdiscovery/cdncheck</a> –未仔细查看</li>
+<li><a target="_blank" rel="noopener" href="https://viewdns.info/iphistory/">https://viewdns.info/iphistory/</a></li>
+</ul>
+<p class='item-img' data-src='image-20240101212421633.png'><img src="image-20240101212421633.png" alt="image-20240101212421633"></p>
+<p><a target="_blank" rel="noopener" href="https://securitytrails.com/">https://securitytrails.com/</a> –需要企业邮箱注册，不过很全</p>
+<p>SecurityTrails（前身为 DNS Trails）拥有大约3.5万亿DNS记录，3亿whois记录，8亿SSL证书记录以及超过4.5亿子域的记录数据。自2008年以来，网站每天都收集和更新海量数据。</p>
+<p>DNS 记录：</p>
+<p class='item-img' data-src='image-20240101214927518.png'><img src="image-20240101214927518.png" alt="image-20240101214927518"></p>
+<p>IP历史</p>
+<p class='item-img' data-src='image-20240101214837563.png'><img src="image-20240101214837563.png" alt="image-20240101214837563"></p>
+<p>子域名：</p>
+<p class='item-img' data-src='image-20240101215012570.png'><img src="image-20240101215012570.png" alt="image-20240101215012570"></p>
+<p>Complete DNS（<a target="_blank" rel="noopener" href="https://completedns.com/%EF%BC%89Complete">https://completedns.com/）Complete</a> DNS 拥有超过 22 亿个DNS变更记录，提供API，支持同时进行多域名/IP查询。</p>
+<p class='item-img' data-src='image-20240101215229120.png'><img src="image-20240101215229120.png" alt="image-20240101215229120"></p>
+<p>WhoISrequest （<a target="_blank" rel="noopener" href="https://whoisrequest.com/%EF%BC%89">https://whoisrequest.com/）</a></p>
+<p>WhoISrequest 这个网站自2002年以来一直在跟踪和记录DNS历史变更，数据底蕴很足。</p>
+<p>不过这里查了半天没查到什么信息，而且这个网站似乎对于dns历史记录用的是上面的网站的api</p>
+<p>Whoxy（<a target="_blank" rel="noopener" href="https://www.whoxy.com/%EF%BC%89">https://www.whoxy.com/）</a></p>
+<p>Whoxy 拥有爬取超过 3.65亿个子域数据，该网站 API 调用非常方便，以 XML 和 JSON 格式返回数据。</p>
+<p class='item-img' data-src='image-20240101215944112.png'><img src="image-20240101215944112.png" alt="image-20240101215944112"></p>
+<p>还有很多网站，这里就不一一介绍了，详细可浏览参考文章，这里汇总一下</p>
+<blockquote>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.cdnplanet.com/tools/cdnfinder">http://www.cdnplanet.com/tools/cdnfinder</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.ipip.net/ip.html">http://www.ipip.net/ip.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://x.threatbook.cn/">https://x.threatbook.cn/</a></li>
+<li><a target="_blank" rel="noopener" href="https://censys.io/ipv4?q=baidu.com">https://censys.io/ipv4?q=baidu.com</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/projectdiscovery/cdncheck">https://github.com/projectdiscovery/cdncheck</a></li>
+<li><a target="_blank" rel="noopener" href="https://viewdns.info/iphistory/">https://viewdns.info/iphistory/</a></li>
+<li><a target="_blank" rel="noopener" href="https://securitytrails.com/">https://securitytrails.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://completedns.com/">https://completedns.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://whoisrequest.com/">https://whoisrequest.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.whoxy.com/">https://www.whoxy.com/</a></li>
+<li><a target="_blank" rel="noopener" href="https://dnsdb.io/">https://dnsdb.io/</a></li>
+<li><a target="_blank" rel="noopener" href="https://reverse-ip.whoisxmlapi.com/">https://reverse-ip.whoisxmlapi.com/</a></li>
+</ul>
+</blockquote>
+<h5 id="使用国外主机请求域名"><a href="#使用国外主机请求域名" class="headerlink" title="使用国外主机请求域名"></a>使用国外主机请求域名</h5>
+<p>部分国内的 CDN 加速服务商只对国内的线路做了 CDN 加速，但是国外的线路没有做加速，这样就可以通过国外的主机来探测真实的 IP 信息。</p>
+<p>探测的方式也有两种，可以利用已有的国外主机直接进行探测；如果没有国外主机，可以利用公开的多地 ping 服务（多地 ping 服务有国外的探测节点），可以利用国外的探测节点返回的信息来判断真实的 IP 信息。</p>
+<h5 id="网站信息泄露漏洞"><a href="#网站信息泄露漏洞" class="headerlink" title="网站信息泄露漏洞"></a>网站信息泄露漏洞</h5>
+<p>利用网站存在的漏洞和信息泄露的敏感信息、文件（如：phpinfo 文件、网站源码文件、Github 泄露的信息等）获取真实的 IP 信息。</p>
+<p>phpinfo 页面中有一个 SERVER_ADDR 字段会显示该主机真实 IP。</p>
+<h5 id="查询子域名"><a href="#查询子域名" class="headerlink" title="查询子域名"></a>查询子域名</h5>
+<p>这里注意的就是子域名、C段以及旁站（同IP网站）</p>
+<p>由于 CDN 加速需要支付一定的费用，很多网站只对主站做了 CDN 加速，子域名没有做 CDN 加速，子域名可能跟主站在同一个服务器或者同一个 C 段网络中，可以通过子域名探测的方式，收集目标的子域名信息，通过查询子域名的 IP 信息来辅助判断主站的真实 IP 信息。   ———具体的方法在下面叙述</p>
+<h5 id="邮件信息"><a href="#邮件信息" class="headerlink" title="邮件信息"></a>邮件信息</h5>
+<p>一般的邮件系统都在内部，没有经过 CDN 的解析，通过利用目标网站的邮箱注册、找回密码或者 RSS 订阅等功能，接收到发来的邮件后，查看邮件源码就可以获得目标的真实 IP。–这里附上一个网上的成果图</p>
+<p class='item-img' data-src='image-20240102153303790.png'><img src="image-20240102153303790.png" alt="image-20240102153303790"></p>
+<h5 id="目标网站-APP-应用"><a href="#目标网站-APP-应用" class="headerlink" title="目标网站-APP-应用"></a>目标网站 APP 应用</h5>
+<p>如果目标网站有自己的 App，可以尝试利用 Burp Suite 等流量抓包工具抓取 App 的请求，从里面可能会找到目标的真实 IP。</p>
+<h3 id="子域名查询"><a href="#子域名查询" class="headerlink" title="子域名查询"></a>子域名查询</h3>
+<p>这里除了常见的网络空间如fofa、shodan、zoomeye、censys等，就是一些强大脚本工具了。这里熟悉几个常见的</p>
+<h4 id="SubDomainsBrute"><a href="#SubDomainsBrute" class="headerlink" title="SubDomainsBrute"></a>SubDomainsBrute</h4>
+<p>项目地址：<a target="_blank" rel="noopener" href="https://github.com/lijiejie/subDomainsBrute">https://github.com/lijiejie/subDomainsBrute</a></p>
+<p>SubDomainsBrute 是通过纯 DNS 爆破来寻找子域名，为了最大提升脚本效率，采用协程+多进程的方式进行爆破。Python 3.5 以上需要安装 aiodns 库进行异步查询，python 2 需要安装 dnspython 库和 gevent 协程库。</p>
+<p>且在最近更新之后是支持扫描泛解析域名的，使用 -w 参数。</p>
+<p>如图，我们针对一个泛解析的域名进行爆破，subDomainsBrute 会提示 any-sub 错误，之后使用 -w 参数开启泛解析强制爆破：</p>
+<h1>0x09 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/post/7075240551456440333">Web安全渗透测试基本流程</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_40748006/article/details/106328924?ops_request_misc=&amp;request_id=&amp;biz_id=102&amp;utm_term=dig%E5%91%BD%E4%BB%A4&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-3-106328924.142%5Ev99%5Epc_search_result_base4&amp;spm=1018.2226.3001.4187">DNS篇之dig使用详解 </a>  ——很详细</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41982020/article/details/121231166?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522170410967216800213037345%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=170410967216800213037345&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-1-121231166-null-null.142%5Ev99%5Epc_search_result_base4&amp;utm_term=dig%E5%91%BD%E4%BB%A4&amp;spm=1018.2226.3001.4187">dig命令的介绍与使用</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages" style="justify-content: flex-end"><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2023/12/27/ssrf%E6%89%93redis/">ssrf打redis Prev →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="To Top" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="To Catalog">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="Change Theme"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>Catalog</h1><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">0x02 渗透测试基本流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E7%A1%AE%E5%AE%9A%E7%9B%AE%E6%A0%87"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 确定目标</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8C%83%E5%9B%B4%E7%9A%84%E7%A1%AE%E5%AE%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">范围的确定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%84%E5%88%99%E7%9A%84%E7%A1%AE%E5%AE%9A"><span class="toc-number">2.1.2.</span> <span class="toc-text">规则的确定</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9C%80%E6%B1%82%E7%9A%84%E7%A1%AE%E5%AE%9A"><span class="toc-number">2.1.3.</span> <span class="toc-text">需求的确定</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%88%86%E6%9E%90%E9%A3%8E%E9%99%A9%EF%BC%8C%E8%8E%B7%E5%BE%97%E6%8E%88%E6%9D%83"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 分析风险，获得授权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 信息搜集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E6%BC%8F%E6%B4%9E%E6%8E%A2%E6%B5%8B%EF%BC%88%E6%89%8B%E5%8A%A8-%E8%87%AA%E5%8A%A8%EF%BC%89"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 漏洞探测（手动&amp;自动）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A2%E6%B5%8B%E6%96%B9%E6%B3%95"><span class="toc-number">2.4.1.</span> <span class="toc-text">探测方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8E%A2%E6%B5%8B%E5%86%85%E5%AE%B9"><span class="toc-number">2.4.2.</span> <span class="toc-text">探测内容</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E6%BC%8F%E6%B4%9E%E9%AA%8C%E8%AF%81"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 漏洞验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-%E4%BF%A1%E6%81%AF%E5%88%86%E6%9E%90"><span class="toc-number">2.6.</span> <span class="toc-text">2.6 信息分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-7-%E5%88%A9%E7%94%A8%E6%BC%8F%E6%B4%9E%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE"><span class="toc-number">2.7.</span> <span class="toc-text">2.7 利用漏洞获取数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-8-%E4%BF%A1%E6%81%AF%E6%95%B4%E7%90%86"><span class="toc-number">2.8.</span> <span class="toc-text">2.8 信息整理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-9-%E5%BD%A2%E6%88%90%E6%8A%A5%E5%91%8A"><span class="toc-number">2.9.</span> <span class="toc-text">2.9 形成报告</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">0x03 信息搜集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 信息搜集的分类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%90%9C%E9%9B%86%E4%BB%80%E4%B9%88%E4%BF%A1%E6%81%AF"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 搜集什么信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E7%9B%AE%E6%A0%87%E7%A1%AE%E8%AE%A4"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 目标确认</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%9F%E5%90%8D%E6%B3%A8%E5%86%8C%E4%BF%A1%E6%81%AF"><span class="toc-number">3.3.1.</span> <span class="toc-text">域名注册信息</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#whois%E5%91%BD%E4%BB%A4"><span class="toc-number">3.3.1.1.</span> <span class="toc-text">whois命令</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80%EF%BC%9A%E6%A0%B9%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-number">3.3.1.1.1.</span> <span class="toc-text">方法一：根服务器</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9A%E7%AC%AC%E4%B8%89%E6%96%B9%E6%9C%8D%E5%8A%A1%E6%9F%A5%E8%AF%A2"><span class="toc-number">3.3.1.1.2.</span> <span class="toc-text">方法二：第三方服务查询</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%89%EF%BC%9Awhois%E5%91%BD%E4%BB%A4"><span class="toc-number">3.3.1.1.3.</span> <span class="toc-text">方法三：whois命令</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E5%9B%9B%EF%BC%9A%E4%B8%AD%E6%96%87%E5%9F%9F%E5%90%8D"><span class="toc-number">3.3.1.1.4.</span> <span class="toc-text">方法四：中文域名</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#dig%E5%91%BD%E4%BB%A4"><span class="toc-number">3.3.1.2.</span> <span class="toc-text">dig命令</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E7%9C%9F%E5%AE%9EIP"><span class="toc-number">3.3.2.</span> <span class="toc-text">获取真实IP</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E6%9C%89CDN"><span class="toc-number">3.3.2.1.</span> <span class="toc-text">如何判断是否有CDN</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80%EF%BC%9A%E5%A4%9A%E5%9C%B0ping"><span class="toc-number">3.3.2.1.1.</span> <span class="toc-text">方法一：多地ping</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9Anslookup"><span class="toc-number">3.3.2.1.2.</span> <span class="toc-text">方法二：nslookup</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%89%EF%BC%9A%E5%9C%A8%E7%BA%BF%E5%B7%A5%E5%85%B7"><span class="toc-number">3.3.2.1.3.</span> <span class="toc-text">方法三：在线工具</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%95%E8%BF%87CDN"><span class="toc-number">3.3.2.2.</span> <span class="toc-text">绕过CDN</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%8E%86%E5%8F%B2DNS%E8%AE%B0%E5%BD%95"><span class="toc-number">3.3.2.2.1.</span> <span class="toc-text">查询历史DNS记录</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%9B%BD%E5%A4%96%E4%B8%BB%E6%9C%BA%E8%AF%B7%E6%B1%82%E5%9F%9F%E5%90%8D"><span class="toc-number">3.3.2.2.2.</span> <span class="toc-text">使用国外主机请求域名</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BD%91%E7%AB%99%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2%E6%BC%8F%E6%B4%9E"><span class="toc-number">3.3.2.2.3.</span> <span class="toc-text">网站信息泄露漏洞</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%AD%90%E5%9F%9F%E5%90%8D"><span class="toc-number">3.3.2.2.4.</span> <span class="toc-text">查询子域名</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E9%82%AE%E4%BB%B6%E4%BF%A1%E6%81%AF"><span class="toc-number">3.3.2.2.5.</span> <span class="toc-text">邮件信息</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%9B%AE%E6%A0%87%E7%BD%91%E7%AB%99-APP-%E5%BA%94%E7%94%A8"><span class="toc-number">3.3.2.2.6.</span> <span class="toc-text">目标网站 APP 应用</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%90%E5%9F%9F%E5%90%8D%E6%9F%A5%E8%AF%A2"><span class="toc-number">3.3.3.</span> <span class="toc-text">子域名查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#SubDomainsBrute"><span class="toc-number">3.3.3.1.</span> <span class="toc-text">SubDomainsBrute</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">0x09 参考文章</span></a></li></ol></div></div><footer><nobr>Published with <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> Theme <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>by <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
