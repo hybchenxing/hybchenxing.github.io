@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="en" theme-mode="dark"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>THM-RootMe | hybcx's blog</title><link rel="icon" type="image/x-icon" href="/favicon.ico"><script>var config = {"root":"/","search":{"preload":false,"activeHolder":"键入以继续","blurHolder":"数据检索","noResult":"无 $0 相关数据"},"code":{"codeInfo":"$0 - $1 行","copy":"code.copy","copyFinish":"code.copyFinish","expand":"code.expand"}}</script><link rel="stylesheet" href="//unpkg.com/@waline/client@v2/dist/waline.css"><script src="//unpkg.com/mermaid@9.2.2/dist/mermaid.min.js"></script><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lightgallery.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-zoom.css"><link type="text/css" rel="stylesheet" href="//unpkg.com/lightgallery@2.7.1/css/lg-thumbnail.css"><link type="text/css" rel="stylesheet" href="/lib/fontawesome/css/all.min.css"><link rel="stylesheet" href="/css/arknights.css"><script>if (window.localStorage.getItem('theme-mode') === 'light') document.documentElement.setAttribute('theme-mode', 'light')
+if (window.localStorage.getItem('theme-mode') === 'dark') document.documentElement.setAttribute('theme-mode', 'dark')</script><style>@font-face {
+ font-family: BenderLight;
+ src: local('Bender'), url("/font/BenderLight.ttf");
+}
+@font-face {
+ font-family: 'JetBrains Mono';
+ src: local('JetBrains Mono'), url('/font/JetBrainsMono-Regular.woff2') format('woff2');
+}</style><style>:root {
+  --dark-background: url('https://ak.hypergryph.com/assets/index/images/ak/pc/bk.jpg');
+  --light-background: url('/img/bk.jpg');
+}</style><meta name="generator" content="Hexo 6.3.0"></head><body><div class="loading" style="opacity: 0;"><div class="loadingBar left"></div><div class="loadingBar right"></div></div><main><header class="closed"><nav><div class="navBtn"><i class="navBtnIcon"><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span><span class="navBtnIconBar"></span></i></div><div class="navItem" id="search-header"><span class="navItemTitle"><input autocomplete="off" autocorrect="off" autocapitalize="none" placeholder="数据检索" spellcheck="false" maxlength="50" type="text" id="search-input"></span></div><div class="navItem" id="search-holder"></div><div class="search-popup"><div id="search-result"></div></div><ol class="navContent"><li class="navItem"><a class="navBlock" href="/"><span class="navItemTitle">Home</span></a></li><li class="navItem" matchdata="categories,tags"><a class="navBlock" href="/archives/"><span class="navItemTitle">Archives</span></a></li><li class="navItem"><a class="navBlock" href="/friends/"><span class="navItemTitle">Friends</span></a></li><li class="navItem"><a class="navBlock" href="/about"><span class="navItemTitle">About</span></a></li></ol></nav></header><div id="shadow-header"></div><article><div id="post-bg"><div id="post-title"><h1>THM-RootMe</h1><div id="post-info"><span>文章发布时间: <div class="control"><time datetime="2024-02-08T14:38:17.691Z" id="date"> 2024-02-08</time></div></span><br><span>最后更新时间: <div class="control"><time datetime="2024-02-08T16:14:34.140Z" id="updated"> 2024-02-09</time></div></span><br><span>文章总字数: <div class="control">808</div></span><br><span>预计阅读时间: <div class="control">3 分钟</div></span></div></div><hr><div id="post-content"><h1>0x01 前言</h1>
+<p>第一次做THM的靶机，对渗透啥的思路不咋有，边做边学吧。</p>
+<h1>0x02 任务框架</h1>
+<p>部署机器-》侦查-》获取shell-》权限提升</p>
+<h1>0x03 靶机之旅</h1>
+<p>鉴于我是新手，前期就记录的详细一些，方便日后复盘。</p>
+<h2 id="nmap扫描"><a href="#nmap扫描" class="headerlink" title="nmap扫描"></a>nmap扫描</h2>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scss">nmap -sS -sV -<span class="hljs-selector-tag">A</span> -<span class="hljs-selector-tag">p</span> <span class="hljs-number">1</span>-<span class="hljs-number">65535</span> <span class="hljs-number">10.10</span><span class="hljs-selector-class">.92</span><span class="hljs-selector-class">.95</span><br></code></pre></td></tr></table></figure>
+<p>这种扫描方式有亿点慢，以后看着换什么方式好（但很全）</p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208231847904.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208231847904.png" alt="image-20240208231847904"></p>
+<p>端口信息如上，可以看到只开启了22与80端口</p>
+<h2 id="Gobuster扫目录"><a href="#Gobuster扫目录" class="headerlink" title="Gobuster扫目录"></a>Gobuster扫目录</h2>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scss">gobuster dir -u &quot;http://<span class="hljs-number">10.10</span>.<span class="hljs-number">92.95</span>/<span class="hljs-string">&quot; -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt</span><br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208231942590.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208231942590.png" alt="image-20240208231942590"></p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208231826083.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208231826083.png" alt="image-20240208231826083"></p>
+<p>接下来的任务是让我们拿到反向shell，那我们就访问一下web目录看看</p>
+<h2 id="访问Web目录"><a href="#访问Web目录" class="headerlink" title="访问Web目录"></a>访问Web目录</h2>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208232831904.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208232831904.png" alt="image-20240208232831904"></p>
+<p>找寻一番，只发现panel这一目录可疑，文件上传点，这里我先是随便上传了个带马的PHP文件，发现被ban了，这时候没啥思路了，看了一下walkthrough：</p>
+<p>结合shell的目的，估计就是上传带有反向shell的PHP脚本，连到我们的攻击机。脚本地址如下：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/pentestmonkey/php-reverse-shell">https://github.com/pentestmonkey/php-reverse-shell</a></p>
+<p>下载好之后，找到PHP文件，修改最终反弹的地址：</p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208233259304.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208233259304.png" alt="image-20240208233259304"></p>
+<p>我们找到openvpn对应IP修改即可</p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208233344009.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208233344009.png" alt="image-20240208233344009"></p>
+<p>使用以下命令使 php-reverse-shell 脚本可执行：<code>chmod +x php_reverse_shell.php</code></p>
+<h2 id="文件上传漏洞"><a href="#文件上传漏洞" class="headerlink" title="文件上传漏洞"></a>文件上传漏洞</h2>
+<p>这里修改好之后就是上传文件了，可以看到上图上传的时候，显示的似乎是不允许PHP后缀的文件上传。其实这里测试几番我发现我自己是真的菜，学了很多绕过思路，到这里就无从下手，垃圾死了！！之后无奈看了wp发现他们利用了Apache解析漏洞，其实这里在nmap的时候就提示我们了，不过我心里感觉是不会有Apache漏洞的。。。。</p>
+<p>不多说废话，我们可以尝试上传php5后缀、phtml或者解析漏洞：jpg.php</p>
+<p>参考地址：<a target="_blank" rel="noopener" href="https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload">https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload</a></p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234649817.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234649817.png" alt="image-20240208234649817"></p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234736650.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234736650.png" alt="image-20240208234736650"></p>
+<p>这里我就用php5了，可以看到成功上传</p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234758685.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234758685.png" alt="image-20240208234758685"></p>
+<p>接下来访问上传地址（页面有回显），访问uploads目录看看（这里我直接点了超链接进入到文件上传地址，不过我们也可以手动访问）如下图，点击即可</p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234917974.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234917974.png" alt="image-20240208234917974"></p>
+<p>但要注意提前开启监听：</p>
+<h2 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h2>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234939042.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208234939042.png" alt="image-20240208234939042"></p>
+<p>可以看到在点击文件之后，我们就拿到了shell，之后发现权限不够，肯定就是提权了。</p>
+<p>题目也提示我们suid提权：</p>
+<h2 id="suid提权"><a href="#suid提权" class="headerlink" title="suid提权"></a>suid提权</h2>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scss">find / -user root -perm -<span class="hljs-number">4000</span> -print <span class="hljs-number">2</span>&gt;/dev/null<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208235605746.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240208235605746.png" alt="image-20240208235605746"></p>
+<p>这里发现python比较可疑，进一步查看，如下图，含有权限s，意味着被设置了suid权限</p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209000004297.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209000004297.png" alt="image-20240209000004297"></p>
+<p>那直接python提权即可：<a target="_blank" rel="noopener" href="https://gtfobins.github.io/gtfobins/python/">https://gtfobins.github.io/gtfobins/python/</a></p>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209000855054.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209000855054.png" alt="image-20240209000855054"></p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scss">python -c &#x27;import os; os<span class="hljs-selector-class">.system</span>(&quot;/bin/sh&quot;)&#x27;<br></code></pre></td></tr></table></figure>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209000927070.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209000927070.png" alt="image-20240209000927070"></p>
+<p>成功提权</p>
+<h2 id="拿flag"><a href="#拿flag" class="headerlink" title="拿flag"></a>拿flag</h2>
+<h3 id="flag1"><a href="#flag1" class="headerlink" title="flag1"></a>flag1</h3>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209001027974.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209001027974.png" alt="image-20240209001027974"></p>
+<h3 id="flag2"><a href="#flag2" class="headerlink" title="flag2"></a>flag2</h3>
+<p class='item-img' data-src='https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209001152211.png'><img src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240209001152211.png" alt="image-20240209001152211"></p>
+<h1>0x04 总结</h1>
+<p>至于suid提权，还需要进一步总结，这里就不赘述了。后续另起文章吧</p>
+<p>总的来说这个靶机很基础，但对我确有难度~~，继续勉励！</p>
+<h1>0x05 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://blog.securelayer7.net/tryhackme-rootme-a-beginners-guide-to-capture-the-flag/">RootMe CTF: TryHackMe A Beginner’s Guide to Capture the flag</a></p>
+<p><a target="_blank" rel="noopener" href="https://infosecwriteups.com/tryhackme-rootme-ctf-walkthrough-detailed-a7c521df7339">TryHackMe : RootMe CTF Writeup (Detailed)</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_52742680/article/details/135679936">TryHackMe-RootMe</a></p>
+<p><a target="_blank" rel="noopener" href="https://wcute.github.io/2019/03/29/Nmap%20%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E6%80%BB%E7%BB%93/">Nmap 常用命令总结</a></p>
+<p><a target="_blank" rel="noopener" href="https://tttang.com/archive/1793/#toc_find-exec">2022蓝帽杯遇见的 SUID 提权 总结篇</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/12535?time__1311=mqmhD50KBKDK50Hq4%2B26DnlbG8FWdx&amp;alichlgref=https%3A%2F%2Fwww.google.com%2F#toc-12">浅谈linux suid提权</a></p>
+<div id="paginator"></div></div><div id="post-footer"><div id="pages"><div class="footer-link" style="width: 50%;text-align:right;border-right:1px #fe2 solid"><a href="/2024/02/09/THM-%E5%85%A5%E4%BE%B5AD/">← 下一篇 THM-入侵AD</a></div><div class="footer-link" style="width: 50%;right:1px;border-left:1px #fe2 solid"><a href="/2024/02/06/THM-Windows%E6%9C%AC%E5%9C%B0%E6%8C%81%E4%B9%85%E6%80%A7/">THM-Windows本地持久性 上一篇 →</a></div></div></div><div id="comments"><div id="waline"></div></div></div><div class="bottom-btn"><div><a class="i-top" id="to-top" onClick="scrolls.scrolltop();" title="回到顶部" style="opacity: 0; display: none;">∧</a><a class="i-index" id="to-index" href="#toc-div" title="文章目录">≡</a><a class="i-color" id="color-mode" onClick="colorMode.change()" title="切换主题"></a></div></div></article><aside><div id="about"><a href="/" id="logo"><img src="https://ak.hypergryph.com/assets/index/images/ak/pc/faction/1.png" alt="Logo"></a><h1 id="Dr"><a href="/">hybcx</a></h1><div id="description"><p></p></div></div><div id="aside-block"><div id="toc-div"><h1>目录</h1><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">1.</span> <span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">2.</span> <span class="toc-text">0x02 任务框架</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">3.</span> <span class="toc-text">0x03 靶机之旅</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#nmap%E6%89%AB%E6%8F%8F"><span class="toc-number">3.1.</span> <span class="toc-text">nmap扫描</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Gobuster%E6%89%AB%E7%9B%AE%E5%BD%95"><span class="toc-number">3.2.</span> <span class="toc-text">Gobuster扫目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BF%E9%97%AEWeb%E7%9B%AE%E5%BD%95"><span class="toc-number">3.3.</span> <span class="toc-text">访问Web目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E"><span class="toc-number">3.4.</span> <span class="toc-text">文件上传漏洞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E5%BC%B9shell"><span class="toc-number">3.5.</span> <span class="toc-text">反弹shell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#suid%E6%8F%90%E6%9D%83"><span class="toc-number">3.6.</span> <span class="toc-text">suid提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8B%BFflag"><span class="toc-number">3.7.</span> <span class="toc-text">拿flag</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#flag1"><span class="toc-number">3.7.1.</span> <span class="toc-text">flag1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#flag2"><span class="toc-number">3.7.2.</span> <span class="toc-text">flag2</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">4.</span> <span class="toc-text">0x04 总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-number">5.</span> <span class="toc-text">0x05 参考文章</span></a></li></ol></div></div><footer><nobr>构建自 <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a></nobr><wbr><nobr> 使用主题 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus/hexo-theme-arknights">Arknights</a></nobr><wbr><nobr>主题作者 <a target="_blank" rel="noopener" href="https://github.com/Yue-plus">Yue_plus</a></nobr></footer></aside><div id="shadow-aside"></div></main><canvas id="canvas-dust"></canvas><script src="/js/search.js"></script><script type="module">import { init } from 'https://unpkg.com/@waline/client@v2/dist/waline.mjs';
+window.waline = init;
+</script><script src="/js/arknights.js"></script><script src="//unpkg.com/lightgallery@2.7.1/lightgallery.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script><script src="//unpkg.com/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script><script src="/js/pjax.js"></script><script class="pjax-js">reset= () => {if (document.querySelector('#waline'))
+ waline({
+   el: '#waline',
+   dark: ':root[theme-mode="dark"]',
+   serverURL: 'https://waline-blog-iwqdtxise-hybchenxing.vercel.app',
+   path: window.location.pathname,
+ });document.querySelector('.lg-container')?.remove()
+lightGallery(document.getElementById('post-bg'), {
+  plugins: [lgZoom,lgThumbnail],
+  selector: '.item-img'})}</script><script>window.addEventListener("load",() => {pjax = new Pjax({
+ cacheBust: false,
+ selectors: ['title','article','#aside-block','.pjax-js'],
+ switches: {'article': Pjax.switches.sideBySide},
+ switchesOptions: {
+   'article': {
+     classNames: {
+       remove: "pjax-out",
+       add: "pjax-in"
+     }
+   }
+ }
+});
+document.addEventListener("pjax:complete", reset);reset()})</script></body></html>
