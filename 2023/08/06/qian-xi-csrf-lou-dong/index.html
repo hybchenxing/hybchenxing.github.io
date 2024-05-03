@@ -5,7 +5,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="浅析CSRF漏洞, hybcx&#39;s blog">
-    <meta name="description" content="">
+    <meta name="description" content="1、CSRF漏洞介绍
+CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click attack 或者 session riding，通常缩写为 CSRF 或者 XSRF .它是一种常见的 W">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,27 +14,48 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
     <title>浅析CSRF漏洞 | hybcx&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    
 
-    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
-    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/matery.css">
-    <link rel="stylesheet" type="text/css" href="/css/my.css">
 
-    <script src="/libs/jquery/jquery.min.js"></script>
+    <!-- bg-cover style     -->
 
-<meta name="generator" content="Hexo 6.3.0">
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 
 
 <body>
@@ -45,7 +67,7 @@
                     
                     <img src="/medias/logo.png" class="logo-img" alt="LOGO">
                     
-                    <span class="logo-span">hybcx&#39;s blog</span>
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
                 </a>
             </div>
             
@@ -135,6 +157,11 @@
       <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
     </a>
   </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
 </ul>
 
 
@@ -151,8 +178,6 @@
             
         </div>
     </div>
-
-    
 
     <ul class="menu-list mobile-menu-list">
         
@@ -330,99 +355,7 @@
 <main class="post-container content">
 
     
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-<style>
-    #articleContent h1::before,
-    #articleContent h2::before,
-    #articleContent h3::before,
-    #articleContent h4::before,
-    #articleContent h5::before,
-    #articleContent h6::before {
-        display: block;
-        content: " ";
-        height: 100px;
-        margin-top: -100px;
-        visibility: hidden;
-    }
-
-    #articleContent :focus {
-        outline: none;
-    }
-
-    .toc-fixed {
-        position: fixed;
-        top: 64px;
-    }
-
-    .toc-widget {
-        width: 345px;
-        padding-left: 20px;
-    }
-
-    .toc-widget .toc-title {
-        padding: 35px 0 15px 17px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    .toc-widget ol {
-        padding: 0;
-        list-style: none;
-    }
-
-    #toc-content {
-        padding-bottom: 30px;
-        overflow: auto;
-    }
-
-    #toc-content ol {
-        padding-left: 10px;
-    }
-
-    #toc-content ol li {
-        padding-left: 10px;
-    }
-
-    #toc-content .toc-link:hover {
-        color: #42b983;
-        font-weight: 700;
-        text-decoration: underline;
-    }
-
-    #toc-content .toc-link::before {
-        background-color: transparent;
-        max-height: 25px;
-
-        position: absolute;
-        right: 23.5vw;
-        display: block;
-    }
-
-    #toc-content .is-active-link {
-        color: #42b983;
-    }
-
-    #floating-toc-btn {
-        position: fixed;
-        right: 15px;
-        bottom: 76px;
-        padding-top: 15px;
-        margin-bottom: 0;
-        z-index: 998;
-    }
-
-    #floating-toc-btn .btn-floating {
-        width: 48px;
-        height: 48px;
-    }
-
-    #floating-toc-btn .btn-floating i {
-        line-height: 48px;
-        font-size: 1.4rem;
-    }
-</style>
-<div class="row">
+    <div class="row">
     <div id="main-content" class="col s12 m12 l9">
         <!-- 文章内容详情 -->
 <div id="artDetail">
@@ -459,12 +392,32 @@
                 
 
                 
-
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2023-08-06
+                </div>
                 
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    5.4k
+                </div>
+                
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    20 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -480,7 +433,11 @@
             <div id="articleContent">
                 <h2 id="1、CSRF漏洞介绍">1、CSRF漏洞介绍</h2>
 <p>CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click attack 或者 session riding，通常缩写为 CSRF 或者 XSRF .它是一种常见的 Web攻击方式。是一种劫持用户在当前已登录的Web应用程序上执行非本意操作一种攻击.</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">说的直白一点就是:别人盗用(劫持)你的身份去做坏事.<br><br>（1）别人--&gt;这里指的是攻击者<br>（2）你----&gt;A站(web服务器)上注册的合法用户(客户端)<br>（3）做坏事---&gt;去请求合法站点A(比如web服务器)存在CSRF攻击的URL,实现类似发送恶意邮件/转账/创建账户/修改密码等"你不希望执行"操作.<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">说的直白一点就是:别人盗用(劫持)你的身份去做坏事.
+
+（1）别人--&gt;这里指的是攻击者
+（2）你----&gt;A站(web服务器)上注册的合法用户(客户端)
+（3）做坏事---&gt;去请求合法站点A(比如web服务器)存在CSRF攻击的URL,实现类似发送恶意邮件/转账/创建账户/修改密码等"你不希望执行"操作.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="1-1-危害">1.1 危害</h3>
 <p>以用户的名义发邮件/发消息</p>
 <p>转换/购买商品等;</p>
@@ -494,7 +451,7 @@
 <h3 id="2-2-漏洞利用的条件">2.2 漏洞利用的条件</h3>
 <p>(1)用户必须登录A网站,生成了cookie</p>
 <p>(2)登录的同时访问了恶意URL(包含CSRF恶意代码的URL).</p>
-<p><img src="image-20230618201202133.png" alt="image-20230618201202133"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201202133.png" alt="image-20230618201202133"></p>
 <h3 id="2-3-CSRF和XSS的不同">2.3 CSRF和XSS的不同</h3>
 <p><strong>(1)XSS主要用户获取用户的cookie信息,达到控制客户端的目的</strong></p>
 <p>XSS----&gt;把你的腰牌(用户身份象征也就是cookie)偷到手,黑客自己去搞破坏.</p>
@@ -506,26 +463,26 @@
 <p>XSS只要一次点击或者存储到服务器即可.</p>
 <h2 id="3、CSRF之GET型代码分析">3、CSRF之GET型代码分析</h2>
 <p>GET型CSRF代码举例</p>
-<p><img src="image-20230618201506020.png" alt="image-20230618201506020"></p>
-<p><img src="image-20230618201653804.png" alt="image-20230618201653804"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201506020.png" alt="image-20230618201506020"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201653804.png" alt="image-20230618201653804"></p>
 <p>问题：</p>
 <p>（1）但是URL直接写用户名和密码的方式太过于明显,我们可以通过访问页面的方式进行伪装;</p>
 <p>（2）或者通过XSS页面,直接把这个恶意URL链接发给客户端,在客户登录页面的同时访问这个恶意URL,也可以创建用户;</p>
 <p>（3）通过伪造页面诱导客户点击</p>
-<p><img src="image-20230618201755484.png" alt="image-20230618201755484"></p>
-<p><img src="image-20230618201804285.png" alt="image-20230618201804285"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201755484.png" alt="image-20230618201755484"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201804285.png" alt="image-20230618201804285"></p>
 <h2 id="4、CSRF之POST型代码分析">4、CSRF之POST型代码分析</h2>
 <p>（1）有人说,GET方式容易出现CSRF攻击,那用post是不是就可以万无一失呢?<br>
 （2）当然不是,因为post只是提交的方式改变了,如果原始页面还是存在CSRF漏洞,我们自己创建一个POST页面来模拟用户提交数据,还是可以进行利用的</p>
 <p>（3）post_csrf.php用来模拟存在csrf漏洞的web页面,代码如下：</p>
-<p><img src="image-20230618202028634.png" alt="image-20230618202028634"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202028634.png" alt="image-20230618202028634"></p>
 <p>（4）页面显示如下：</p>
-<p><img src="image-20230618202055930.png" alt="image-20230618202055930"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202055930.png" alt="image-20230618202055930"></p>
 <p>post型需要黑客自己来构造表单提交的参数<br>
 为了不易发现,提交表单的数据都直接隐藏hidden;<br>
-post.html代码如下:<img src="image-20230618202121176.png" alt="image-20230618202121176"></p>
-<p><img src="image-20230618202246962.png" alt="image-20230618202246962"></p>
-<p><img src="image-20230618202255053.png" alt="image-20230618202255053"></p>
+post.html代码如下:<img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202121176.png" alt="image-20230618202121176"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202246962.png" alt="image-20230618202246962"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202255053.png" alt="image-20230618202255053"></p>
 <h2 id="5、DVWA中CSRF利用实战">5、DVWA中CSRF利用实战</h2>
 <h3 id="5-1-挖掘CSRF的方法">5.1 挖掘CSRF的方法:</h3>
 <p>(1)使用burp抓包后修改Referer字段再重新提交,如果能请求就存在CSRF漏洞.</p>
@@ -543,14 +500,31 @@ post.html代码如下:<img src="image-20230618202121176.png" alt="image-20230618
 <p>在这平静的外表之下，黑客的攻击已然得手。小明的<code>Gmail</code>中，被偷偷设置了一个过滤规则，这个规则使得所有的邮件都会被自动转发到<code>hacker@hackermail.com</code>。小明还在继续刷着邮件，殊不知他的邮件正在一封封地，如脱缰的野马一般地，持续不断地向着黑客的邮箱转发而去。</p>
 <p>不久之后的一天，小明发现自己的域名已经被转让了。懵懂的小明以为是域名到期自己忘了续费，直到有一天，对方开出了<code> $650</code> 的赎回价码，小明才开始觉得不太对劲。</p>
 <p>小明仔细查了下域名的转让，对方是拥有自己的验证码的，而域名的验证码只存在于自己的邮箱里面。小明回想起那天奇怪的链接，打开后重新查看了“空白页”的源码：</p>
-<figure class="highlight html"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"POST"</span> <span class="hljs-attr">action</span>=<span class="hljs-string">"https://mail.google.com/mail/h/ewt1jmuj4ddv/?v=prf"</span> <span class="hljs-attr">enctype</span>=<span class="hljs-string">"multipart/form-data"</span>&gt;</span> <br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"hidden"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"cf2_emc"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"true"</span>/&gt;</span> <br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"hidden"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"cf2_email"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"hacker@hakermail.com"</span>/&gt;</span> <br>    .....<br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"hidden"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"irf"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"on"</span>/&gt;</span> <br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"hidden"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"nvp_bu_cftb"</span> <span class="hljs-attr">value</span>=<span class="hljs-string">"Create Filter"</span>/&gt;</span> <br><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span> <br><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript"> </span><br><span class="language-javascript">    <span class="hljs-variable language_">document</span>.<span class="hljs-property">forms</span>[<span class="hljs-number">0</span>].<span class="hljs-title function_">submit</span>();</span><br><span class="language-javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>POST<span class="token punctuation">"</span></span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>https://mail.google.com/mail/h/ewt1jmuj4ddv/?v=prf<span class="token punctuation">"</span></span> <span class="token attr-name">enctype</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>multipart/form-data<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span> 
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>cf2_emc<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>true<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span> 
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>cf2_email<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>hacker@hakermail.com<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span> 
+    .....
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>irf<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>on<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span> 
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>nvp_bu_cftb<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Create Filter<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span> 
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span> 
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span><span class="token punctuation">&gt;</span></span><span class="token script"><span class="token language-javascript"> 
+    document<span class="token punctuation">.</span>forms<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">submit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这个页面只要打开，就会向Gmail发送一个post请求。请求中，执行了“Create Filter”命令，将所有的邮件，转发到“hacker@hackermail.com”。</p>
 <p>小明由于刚刚就登陆了Gmail，所以这个请求发送时，携带着小明的登录凭证（Cookie），Gmail的后台接收到请求，验证了确实有小明的登录凭证，于是成功给小明配置了过滤器。</p>
 <p>黑客可以查看小明的所有邮件，包括邮件里的域名验证码等隐私信息。拿到验证码之后，黑客就可以要求域名服务商把域名重置给自己。</p>
 <p>小明很快打开Gmail，找到了那条过滤器，将其删除。然而，已经泄露的邮件，已经被转让的域名，再也无法挽回了……</p>
 <p>以上就是小明的悲惨遭遇。而“点开一个黑客的链接，所有邮件都被窃取”这种事情并不是杜撰的，此事件原型是2007年Gmail的<a target="_blank" rel="noopener" href="https://link.segmentfault.com/?enc=6wNtw%2BHHPTxbvfKq9QtMEw%3D%3D.HtoL%2BapPs7EP4HCtIW9ZhGEUNP%2B4xV4xu%2FU%2F21ea6wp76oV%2FDif%2FLiYnqw1iB2X7aWNxKJb16ssAAxe333laxQ%3D%3D">CSRF漏洞</a></p>
 <h2 id="7、CSRF漏洞防御">7、CSRF漏洞防御</h2>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">修改密码时,需要原密码;<br><br>对客户来讲,不要点击来历不明的链接或图片;养成定时退出的好习惯;安装安全防护软件等<br><br>验证 Referer/Content-Type<br><br>对于用户修改删除等操作最好都使用POST操作<br><br>避免全站通用的Cookie，严格设置Cookie的域<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">修改密码时,需要原密码;
+
+对客户来讲,不要点击来历不明的链接或图片;养成定时退出的好习惯;安装安全防护软件等
+
+验证 Referer/Content-Type
+
+对于用户修改删除等操作最好都使用POST操作
+
+避免全站通用的Cookie，严格设置Cookie的域<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>CSRF通常从第三方网站发起，被攻击的网站无法防止攻击发生，只能通过增强自己网站针对CSRF的防护能力来提升安全性。</p>
 <p>上文中讲了CSRF的两个特点：</p>
 <ul>
@@ -598,26 +572,73 @@ post.html代码如下:<img src="image-20230618202121176.png" alt="image-20230618
 漏洞修补逻辑分析:如果服务器在用户登录之后给予用户一个唯一合法令牌，每一次操作过程中，服务器都会验证令牌是否正确，如果正确那么执行操作，不正确不执行操作。<br>
 一般情况下，给予的令牌写入表单隐藏域的value中，随着表单内容进行提交<br>
 Token防御代码分析</p>
-<p><img src="image-20230618211328913.png" alt="image-20230618211328913"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618211328913.png" alt="image-20230618211328913"></p>
 <p>代码的意思是hello加上当前时间进行md5编码，当然hello可以改为其它复杂的字符串，这样不容易被破解出来，每一秒的值都会发生变化，如<br>
-<img src="image-20230618211344186.png" alt="image-20230618211344186"></p>
+<img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618211344186.png" alt="image-20230618211344186"></p>
 <p>实例使用Token进行CSRF防御</p>
 <p>1.登陆验证成功之后，在会话SESSION[“user_token”]中保存Token</p>
 <p>2.在后台操作中，增删改表单中添加隐藏域hidden，设置value为Token</p>
 <p>3.提交之后验证Token是否正确</p>
 <p>附上代码</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>    <span class="hljs-title function_ invoke__">session_start</span>();<br>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">token_generate</span>(<span class="hljs-params"></span>)</span><br><span class="hljs-function">    </span>{<br>        <span class="hljs-variable">$salt</span> = <span class="hljs-string">"hello"</span>.<span class="hljs-title function_ invoke__">date</span>(<span class="hljs-string">"h:i:s"</span>);<br>        <span class="hljs-variable">$token</span> = <span class="hljs-title function_ invoke__">md5</span>(<span class="hljs-variable">$salt</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable">$token</span>;<br>    }<br>    <span class="hljs-variable">$token</span> = <span class="hljs-title function_ invoke__">token_generate</span>();<br>    <span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">"user_token"</span>] = <span class="hljs-variable">$token</span>;<br><span class="hljs-meta">?&gt;</span><br>&lt;html&gt;<br>    &lt;head&gt;<br>        &lt;meta charset=<span class="hljs-string">"utf-8"</span>&gt;<br>        &lt;title&gt;CSRF_TOKEN&lt;/title&gt;<br>    &lt;/head&gt;<br>    &lt;body&gt;<br>    &lt;h1&gt;CSRF_TOKEN&lt;/h1&gt;<br>        &lt;form action=<span class="hljs-string">"check.php"</span> method=<span class="hljs-string">"post"</span>&gt;<br>            &lt;input type=<span class="hljs-string">"text"</span> value=<span class="hljs-string">"111"</span>&gt;<br>            &lt;input type=<span class="hljs-string">"hidden"</span> name=<span class="hljs-string">"user_token"</span> value=<span class="hljs-string">"&lt;?php echo <span class="hljs-subst">$token</span>;?&gt;"</span>&gt;<br>            &lt;input type=<span class="hljs-string">"submit"</span> name=<span class="hljs-string">"submit"</span> value=<span class="hljs-string">"提交"</span>&gt;<br>        &lt;/form&gt;<br>    &lt;/body&gt;<br>&lt;/html&gt;<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+    <span class="token function">session_start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">function</span> <span class="token function-definition function">token_generate</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token variable">$salt</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"hello"</span><span class="token operator">.</span><span class="token function">date</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"h:i:s"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token variable">$token</span> <span class="token operator">=</span> <span class="token function">md5</span><span class="token punctuation">(</span><span class="token variable">$salt</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token variable">$token</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token variable">$token</span> <span class="token operator">=</span> <span class="token function">token_generate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"user_token"</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token variable">$token</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>head</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>utf-8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>title</span><span class="token punctuation">&gt;</span></span>CSRF_TOKEN<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>title</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>h1</span><span class="token punctuation">&gt;</span></span>CSRF_TOKEN<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>h1</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>check.php<span class="token punctuation">"</span></span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>text<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>111<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>hidden<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>user_token<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span><span class="token php language-php"><span class="token delimiter important">&lt;?php</span> <span class="token keyword">echo</span> <span class="token variable">$token</span><span class="token punctuation">;</span><span class="token delimiter important">?&gt;</span></span><span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>提交<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>再附上check.php验证脚本代码</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>    <span class="hljs-title function_ invoke__">session_start</span>();<br>    <span class="hljs-variable">$user_token</span> = <span class="hljs-variable">$_POST</span>[<span class="hljs-string">"user_token"</span>];<br>    <span class="hljs-keyword">if</span>(<span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">"user_token"</span>] == <span class="hljs-variable">$user_token</span>)<br>    {<br>        <span class="hljs-keyword">echo</span> <span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">"user_token"</span>];<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">"&lt;br&gt;"</span>;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">"<span class="hljs-subst">$user_token</span>"</span>;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">"&lt;br&gt;"</span>;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">"successful"</span>;<br>    }<br>    <span class="hljs-keyword">else</span><br>    {<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">"fail"</span>;<br>    }<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+    <span class="token function">session_start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$user_token</span> <span class="token operator">=</span> <span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"user_token"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"user_token"</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token variable">$user_token</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">echo</span> <span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"user_token"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">echo</span> <span class="token string double-quoted-string">"&lt;br&gt;"</span><span class="token punctuation">;</span>
+        <span class="token keyword">echo</span> <span class="token string double-quoted-string">"<span class="token interpolation"><span class="token variable">$user_token</span></span>"</span><span class="token punctuation">;</span>
+        <span class="token keyword">echo</span> <span class="token string double-quoted-string">"&lt;br&gt;"</span><span class="token punctuation">;</span>
+        <span class="token keyword">echo</span> <span class="token string double-quoted-string">"successful"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">echo</span> <span class="token string double-quoted-string">"fail"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>为何token可以有效地防御：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">token 是被开发者发送给后端的，攻击者如果无法获取到token 是无法通过后端服务器的校验的<br><br>但是cookie 不同，只要在同一个浏览器，浏览器就会自动将cookie 放入请求头中，如果用cookie 做登录验证，在同一个浏览器并且一登陆的情况下后端服务器将自动识别cookie 对请求进行放行例如：<br><br>小明登录了csdn, 此时小明突然想到了一件事情，登录了另一个网站，而这个网站被不知名的人埋入了一些请求，这些请求是当其他人进入该网站，则请求csdn 友好的帮助访问者发布一篇文章，<br><br>假如csdn 使用的是cookie做登录判断，小明访问该网站时触发了该请求，浏览器会自动将cookie 放入请求头中传给后端，后端服务器判断cookie 是已登录则放行了该网站的操作，小明在不知情的情况下被发布的一篇文章，这里只是一个例子，但是如果这里的请求变为自动将小明的钱包余额转账给那位不知名的人，就比较危险了<br><br>而如果使用token,token 并不会自动被浏览器放入请求头，当其他攻击者像服务器发送请求时，是不会携带token 的，后端服务器没有获取到token 则不会对请求进行放行，保证了用户数据的安全性<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">token 是被开发者发送给后端的，攻击者如果无法获取到token 是无法通过后端服务器的校验的
+
+但是cookie 不同，只要在同一个浏览器，浏览器就会自动将cookie 放入请求头中，如果用cookie 做登录验证，在同一个浏览器并且一登陆的情况下后端服务器将自动识别cookie 对请求进行放行例如：
+
+小明登录了csdn, 此时小明突然想到了一件事情，登录了另一个网站，而这个网站被不知名的人埋入了一些请求，这些请求是当其他人进入该网站，则请求csdn 友好的帮助访问者发布一篇文章，
+
+假如csdn 使用的是cookie做登录判断，小明访问该网站时触发了该请求，浏览器会自动将cookie 放入请求头中传给后端，后端服务器判断cookie 是已登录则放行了该网站的操作，小明在不知情的情况下被发布的一篇文章，这里只是一个例子，但是如果这里的请求变为自动将小明的钱包余额转账给那位不知名的人，就比较危险了
+
+而如果使用token,token 并不会自动被浏览器放入请求头，当其他攻击者像服务器发送请求时，是不会携带token 的，后端服务器没有获取到token 则不会对请求进行放行，保证了用户数据的安全性<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>Referer防御CSRF原理：HTTP Referer是header的一部分，当浏览器向web服务器发送请求的时候，一般会带上Referer，告诉服务器我是从哪个页面链接过来的，服务器基于此可以获得一些信息用于处理<br>
 当用户点击被构造好的CSRF利用页面，那么在执行用户对应操作时，提交的HTTP请求中就有对应的Referer值，此时服务端判断Referer值是否与服务器的域名信息有关，如果不关则不执行操作<br>
 Refer防御代码编写<br>
 在PHP中使用$_SERVER[‘HTTP_REFERER’]获取页面提交请求中的Referer值<br>
 这里需要用到一个strpos函数，用法参考<a target="_blank" rel="noopener" href="http://https//www.w3school.com.cn/php/func_string_strpos.asp">https://www.w3school.com.cn/php/func_string_strpos.asp</a><br>
 附上防御代码：</p>
-<p><img src="image-20230618211536552.png" alt="image-20230618211536552"></p>
+<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618211536552.png" alt="image-20230618211536552"></p>
 <p>strpos函数里面的意思也就是在获取的Referer值里面是否包含xx.com这个域名，如果包含了说明是正确的，没包含就可能是恶意的</p>
 <h3 id="7-4-验证码防御CSRF">7.4 验证码防御CSRF</h3>
 <p>验证码防御被认为是对抗CSRF最简单而且有效的防御方法，CSRF在用户不知情的情况下完成对应操作，而验证码强制用户与应用程序交互，才能最终完成操作，可以被认为是二次验证，但是出于对用户体验考虑，不可能每一次操作都加入验证码。所以验证码只是一种辅助手段，不能作为防御CSRF的主要解决方案</p>
@@ -659,14 +680,26 @@ Refer防御代码编写<br>
 <p>防止CSRF攻击的办法已经有上面的预防措施。为了从源头上解决这个问题，Google起草了一份草案来改进HTTP协议，那就是为Set-Cookie响应头新增Samesite属性，它用来标明这个 Cookie是个“同站 Cookie”，同站Cookie只能作为第一方Cookie，不能作为第三方Cookie，Samesite 有两个属性值，分别是 Strict 和 Lax，下面分别讲解：</p>
 <h4 id="Samesite-Strict">Samesite=Strict</h4>
 <p>这种称为严格模式，表明这个 Cookie 在任何情况下都不可能作为第三方 Cookie，绝无例外。比如说 <a target="_blank" rel="noopener" href="http://b.com">b.com</a> 设置了如下 Cookie：</p>
-<figure class="highlight html"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs html">Set-Cookie: foo=1; Samesite=Strict<br>Set-Cookie: bar=2; Samesite=Lax<br>Set-Cookie: baz=3<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup">Set-Cookie: foo=1; Samesite=Strict
+Set-Cookie: bar=2; Samesite=Lax
+Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>我们在 <a target="_blank" rel="noopener" href="http://a.com">a.com</a> 下发起对 <a target="_blank" rel="noopener" href="http://b.com">b.com</a> 的任意请求，foo 这个 Cookie 都不会被包含在 Cookie 请求头中，但 bar 会。举个实际的例子就是，假如淘宝网站用来识别用户登录与否的 Cookie 被设置成了 Samesite=Strict，那么用户从百度搜索页面甚至天猫页面的链接点击进入淘宝后，淘宝都不会是登录状态，因为淘宝的服务器不会接受到那个 Cookie，其它网站发起的对淘宝的任意请求都不会带上那个 Cookie。</p>
 <h4 id="Samesite-Lax">Samesite=Lax</h4>
 <p>这种称为宽松模式，比 Strict 放宽了点限制：假如这个请求是这种请求（改变了当前页面或者打开了新页面）且同时是个GET请求，则这个Cookie可以作为第三方Cookie。比如说 b.com设置了如下Cookie：</p>
-<figure class="highlight html"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs html">Set-Cookie: foo=1; Samesite=Strict<br>Set-Cookie: bar=2; Samesite=Lax<br>Set-Cookie: baz=3<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup">Set-Cookie: foo=1; Samesite=Strict
+Set-Cookie: bar=2; Samesite=Lax
+Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>当用户从 <a target="_blank" rel="noopener" href="http://a.com">a.com</a> 点击链接进入 <a target="_blank" rel="noopener" href="http://b.com">b.com</a> 时，foo 这个 Cookie 不会被包含在 Cookie 请求头中，但 bar 和 baz 会，也就是说用户在不同网站之间通过链接跳转是不受影响了。但假如这个请求是从 <a target="_blank" rel="noopener" href="http://a.com">a.com</a> 发起的对 <a target="_blank" rel="noopener" href="http://b.com">b.com</a> 的异步请求，或者页面跳转是通过表单的 post 提交触发的，则bar也不会发送。</p>
 <p>生成Token放到Cookie中并且设置Cookie的Samesite，Java代码如下：</p>
-<figure class="highlight java"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">addTokenCookieAndHeader</span><span class="hljs-params">(HttpServletRequest httpRequest, HttpServletResponse httpResponse)</span> {<br>       <span class="hljs-comment">//生成token</span><br>       <span class="hljs-type">String</span> <span class="hljs-variable">sToken</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.generateToken();<br>       <span class="hljs-comment">//手动添加Cookie实现支持“Samesite=strict”</span><br>       <span class="hljs-comment">//Cookie添加双重验证</span><br>       <span class="hljs-type">String</span> <span class="hljs-variable">CookieSpec</span> <span class="hljs-operator">=</span> String.format(<span class="hljs-string">"%s=%s; Path=%s; HttpOnly; Samesite=Strict"</span>, <span class="hljs-built_in">this</span>.determineCookieName(httpRequest), sToken, httpRequest.getRequestURI());<br>       httpResponse.addHeader(<span class="hljs-string">"Set-Cookie"</span>, CookieSpec);<br>       httpResponse.setHeader(CSRF_TOKEN_NAME, token);<br>   }<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">private</span> <span class="token keyword">void</span> <span class="token function">addTokenCookieAndHeader</span><span class="token punctuation">(</span><span class="token class-name">HttpServletRequest</span> httpRequest<span class="token punctuation">,</span> <span class="token class-name">HttpServletResponse</span> httpResponse<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+       <span class="token comment">//生成token</span>
+       <span class="token class-name">String</span> sToken <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">generateToken</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+       <span class="token comment">//手动添加Cookie实现支持“Samesite=strict”</span>
+       <span class="token comment">//Cookie添加双重验证</span>
+       <span class="token class-name">String</span> <span class="token class-name">CookieSpec</span> <span class="token operator">=</span> <span class="token class-name">String</span><span class="token punctuation">.</span><span class="token function">format</span><span class="token punctuation">(</span><span class="token string">"%s=%s; Path=%s; HttpOnly; Samesite=Strict"</span><span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">determineCookieName</span><span class="token punctuation">(</span>httpRequest<span class="token punctuation">)</span><span class="token punctuation">,</span> sToken<span class="token punctuation">,</span> httpRequest<span class="token punctuation">.</span><span class="token function">getRequestURI</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+       httpResponse<span class="token punctuation">.</span><span class="token function">addHeader</span><span class="token punctuation">(</span><span class="token string">"Set-Cookie"</span><span class="token punctuation">,</span> <span class="token class-name">CookieSpec</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+       httpResponse<span class="token punctuation">.</span><span class="token function">setHeader</span><span class="token punctuation">(</span><span class="token constant">CSRF_TOKEN_NAME</span><span class="token punctuation">,</span> token<span class="token punctuation">)</span><span class="token punctuation">;</span>
+   <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>代码源自<a target="_blank" rel="noopener" href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)_Prevention_Cheat_Sheet#Implementation_example">OWASP Cross-Site_Request_Forgery #Implementation example</a></p>
 <h4 id="如何使用SamesiteCookie">如何使用SamesiteCookie</h4>
 <p>如果SamesiteCookie被设置为Strict，浏览器在任何跨域请求中都不会携带Cookie，新标签重新打开也不携带，所以说CSRF攻击基本没有机会。</p>
@@ -758,100 +791,7 @@ Refer防御代码编写<br>
                 </div>
             </div>
             
-                <style>
-    #reward {
-        margin: 40px 0;
-        text-align: center;
-    }
-
-    #reward .reward-link {
-        font-size: 1.4rem;
-        line-height: 38px;
-    }
-
-    #reward .btn-floating:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #rewardModal {
-        width: 320px;
-        height: 350px;
-    }
-
-    #rewardModal .reward-title {
-        margin: 15px auto;
-        padding-bottom: 5px;
-    }
-
-    #rewardModal .modal-content {
-        padding: 10px;
-    }
-
-    #rewardModal .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 1.3rem;
-        line-height: 20px;
-        cursor: pointer;
-    }
-
-    #rewardModal .close:hover {
-        color: #ef5350;
-        transform: scale(1.3);
-        -moz-transform:scale(1.3);
-        -webkit-transform:scale(1.3);
-        -o-transform:scale(1.3);
-    }
-
-    #rewardModal .reward-tabs {
-        margin: 0 auto;
-        width: 210px;
-    }
-
-    .reward-tabs .tabs {
-        height: 38px;
-        margin: 10px auto;
-        padding-left: 0;
-    }
-
-    .reward-content ul {
-        padding-left: 0 !important;
-    }
-
-    .reward-tabs .tabs .tab {
-        height: 38px;
-        line-height: 38px;
-    }
-
-    .reward-tabs .tab a {
-        color: #fff;
-        background-color: #ccc;
-    }
-
-    .reward-tabs .tab a:hover {
-        background-color: #ccc;
-        color: #fff;
-    }
-
-    .reward-tabs .wechat-tab .active {
-        color: #fff !important;
-        background-color: #22AB38 !important;
-    }
-
-    .reward-tabs .alipay-tab .active {
-        color: #fff !important;
-        background-color: #019FE8 !important;
-    }
-
-    .reward-tabs .reward-img {
-        width: 210px;
-        height: 210px;
-    }
-</style>
-
-<div id="reward">
+                <div id="reward">
     <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
 
     <!-- Modal Structure -->
@@ -892,6 +832,275 @@ Refer防御代码编写<br>
     
 
     
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
 
     
 
@@ -996,9 +1205,12 @@ Refer防御代码编写<br>
 <!-- 代码块功能依赖 -->
 <script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-<!-- 代码语言 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
 
 
 <!-- 代码块复制 -->
@@ -1008,7 +1220,6 @@ Refer防御代码编写<br>
 
 <!-- 代码块收缩 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
 
 
     </div>
@@ -1038,19 +1249,6 @@ Refer防御代码编写<br>
             headingsOffset: -($(window).height() * 0.4 - 45),
             collapseDepth: Number('0'),
             headingSelector: 'h2, h3, h4'
-        });
-
-        // modify the toc link href to support Chinese.
-        let i = 0;
-        let tocHeading = 'toc-heading-';
-        $('#toc-content a').each(function () {
-            $(this).attr('href', '#' + tocHeading + (++i));
-        });
-
-        // modify the heading title id to support Chinese.
-        i = 0;
-        $('#articleContent').children('h2, h3, h4').each(function () {
-            $(this).attr('id', tocHeading + (++i));
         });
 
         // Set scroll toc fixed.
@@ -1114,89 +1312,42 @@ Refer防御代码编写<br>
 
     <footer class="page-footer bg-color">
     
-        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-    .aplayer .aplayer-lrc p {
-        
-        display: none;
-        
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 16px !important;
-    }
 
-    .aplayer .aplayer-lrc p.aplayer-lrc-current {
-        
-        display: none;
-        
-        font-size: 15px;
-        color: #42b983;
-    }
-
-    
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-        left: -66px !important;
-    }
-
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-        left: 0px !important;
-    }
-
-    
-</style>
-<div class="">
-    
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="503838841"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'
-        >
-        </meting-js>
-    </div>
-</div>
-
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-
-    
-    <div class="container row center-align" style="margin-bottom: 0px !important;">
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
                 <span id="year">2019-2024</span>
             
-            <span id="year">2019</span>
             <a href="/about" target="_blank">hybcx</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
             <br>
             
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
             
             
             
+                
             
             
-            <span id="busuanzi_container_site_pv">
-                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
-                    class="white-color"></span>&nbsp;次
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
             </span>
             
             
-            <span id="busuanzi_container_site_uv">
-                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
-                    class="white-color"></span>&nbsp;人
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
             </span>
             
             <br>
+
+            <!-- 运行天数提醒. -->
             
             <br>
             
@@ -1343,6 +1494,30 @@ $(function () {
 });
 </script>
 
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
     <!-- 回到顶部按钮 -->
 <div id="backTop" class="top-scroll">
     <a class="btn-floating btn-large waves-effect waves-light" href="#!">
@@ -1357,6 +1532,33 @@ $(function () {
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
     <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
 
     <!-- Baidu Analytics -->
 
@@ -1384,10 +1586,39 @@ $(function () {
     
 
     
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
 
     
 
-	
+    <!--腾讯兔小巢-->
+    
     
 
     
@@ -1398,6 +1629,6 @@ $(function () {
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
 
-</body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 
 </html>

