@@ -15,10 +15,20 @@ SQL
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>攻防世界-unfinish | hybcx&#39;s blog</title>
@@ -264,7 +274,7 @@ SQL
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -321,7 +331,7 @@ SQL
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -416,11 +426,6 @@ SQL
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -437,21 +442,21 @@ SQL
                 <h2 id="题目描述：">题目描述：</h2>
 <p>SQL</p>
 <h2 id="题目解题：">题目解题：</h2>
-<p><img src="/2023/08/24/unfinish/image-20230824202759310.png" alt="image-20230824202759310"></p>
+<p><img src="image-20230824202759310.png" alt="image-20230824202759310"></p>
 <p>进入页面发现没啥信息，邮箱也必须符合正常格式，源代码也没用，因此就用dirsearch扫了一下，发现个register.php页面，此刻我就想到可能存在二次注入，毕竟就这俩页面。其次，大家也可以用awvs扫一下，也可以扫出来</p>
-<p><img src="/2023/08/24/unfinish/image-20230824202934025.png" alt="image-20230824202934025"></p>
+<p><img src="image-20230824202934025.png" alt="image-20230824202934025"></p>
 <p>确定是注入后，就是寻找注入点了，这里输入正常的注册内容抓包看一下</p>
-<p><img src="/2023/08/24/unfinish/image-20230824203543192.png" alt="image-20230824203543192"></p>
+<p><img src="image-20230824203543192.png" alt="image-20230824203543192"></p>
 <p>结合下图的页面发现会回显用户名，那基本注入点就在用户名了</p>
 <p>用户名注册时加个单引号注册失败，双引号注册成功，说明可能为单引号闭合·，</p>
-<p><img src="/2023/08/24/unfinish/image-20230824203519266.png" alt="image-20230824203519266"></p>
+<p><img src="image-20230824203519266.png" alt="image-20230824203519266"></p>
 <p>随后就是对用户名过滤字符的fuzz了</p>
-<p><img src="/2023/08/24/unfinish/image-20230824204222042.png" alt="image-20230824204222042"></p>
+<p><img src="image-20230824204222042.png" alt="image-20230824204222042"></p>
 <p>可以看到这有这四个没有过滤，接着就开始借鉴wp了</p>
 <p>看了看大佬的wp，翻译一下，就是通过使用<code>0’+1+'0</code>作为用户名，在注册的时候，猜想使用sql语句插入到表中，如：</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">insert</span> <span class="token keyword">into</span> <span class="token keyword">tables</span> <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token string">'$email'</span><span class="token punctuation">,</span><span class="token string">'$username'</span><span class="token punctuation">,</span><span class="token string">'$password'</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>在插入中将<code>0’+1+‘0</code>插入，取的时候，MySQL语言的一种特性，就是<code>+</code>在MySQL中是作为运算符的，<a target="_blank" rel="noopener" href="https://warm-glow.fun/posts/83ad408f/#more">引用一幅图</a>：</p>
-<p><img src="/2023/08/24/unfinish/image-20230824204726384.png" alt="image-20230824204726384"></p>
+<p><img src="image-20230824204726384.png" alt="image-20230824204726384"></p>
 <p>如果加号运算中有字符，那么mysql就会把字符转变为数字在相加，比如select ‘1’+‘1a’;结果为2，转换过程跟php类似。</p>
 <p>下面是几个例子：</p>
 <pre class="line-numbers language-mysql" data-language="mysql"><code class="language-mysql">mysql&gt; select '1'+'1a';
@@ -586,7 +591,7 @@ login_url <span class="token operator">=</span> <span class="token string">'http
     <span class="token comment"># 使用正则表达式搜索 res_.text 中的 &lt;span class="user-name"&gt;数字&lt;/span&gt; 的模式，提取其中的数字部分。这个数字可能是从数据库中提取的信息的一部分。</span>
     code <span class="token operator">=</span> re<span class="token punctuation">.</span>search<span class="token punctuation">(</span><span class="token string">r'&lt;span class="user-name"&gt;\s*(\d*)\s*&lt;/span&gt;'</span><span class="token punctuation">,</span> res_<span class="token punctuation">.</span>text<span class="token punctuation">)</span>
     <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token builtin">chr</span><span class="token punctuation">(</span><span class="token builtin">int</span><span class="token punctuation">(</span>code<span class="token punctuation">.</span>group<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> end<span class="token operator">=</span><span class="token string">''</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/08/24/unfinish/image-20230824211014230.png" alt="image-20230824211014230"></p>
+<p><img src="image-20230824211014230.png" alt="image-20230824211014230"></p>
 <p>对代码中的group的研究：</p>
 <p><strong>正则</strong></p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> re
@@ -701,7 +706,7 @@ a <span class="token operator">=</span> <span class="token string">"123abc456"</
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -709,7 +714,7 @@ a <span class="token operator">=</span> <span class="token string">"123abc456"</
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -989,12 +994,12 @@ a <span class="token operator">=</span> <span class="token string">"123abc456"</
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1123,6 +1128,8 @@ a <span class="token operator">=</span> <span class="token string">"123abc456"</
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1150,8 +1157,8 @@ a <span class="token operator">=</span> <span class="token string">"123abc456"</
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1234,8 +1241,6 @@ a <span class="token operator">=</span> <span class="token string">"123abc456"</
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1255,24 +1260,28 @@ a <span class="token operator">=</span> <span class="token string">"123abc456"</
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1484,8 +1493,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

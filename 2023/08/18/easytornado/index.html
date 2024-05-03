@@ -20,10 +20,20 @@ Tornado 框架
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>攻防世界-easytornado | hybcx&#39;s blog</title>
@@ -269,7 +279,7 @@ Tornado 框架
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -326,7 +336,7 @@ Tornado 框架
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -421,11 +431,6 @@ Tornado 框架
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -442,20 +447,20 @@ Tornado 框架
                 <h2 id="题目描述：">题目描述：</h2>
 <p>Tornado 框架</p>
 <h2 id="题目解题：">题目解题：</h2>
-<p><img src="/2023/08/18/easytornado/image-20230818163614625.png" alt="image-20230818163614625"></p>
+<p><img src="image-20230818163614625.png" alt="image-20230818163614625"></p>
 <p>进入题目看到如上，一个个点击看看</p>
-<p><img src="/2023/08/18/easytornado/image-20230818163635642.png" alt="image-20230818163635642"></p>
-<p><img src="/2023/08/18/easytornado/image-20230818163648731.png" alt="image-20230818163648731"></p>
-<p><img src="/2023/08/18/easytornado/image-20230818163659536.png" alt="image-20230818163659536"></p>
+<p><img src="image-20230818163635642.png" alt="image-20230818163635642"></p>
+<p><img src="image-20230818163648731.png" alt="image-20230818163648731"></p>
+<p><img src="image-20230818163659536.png" alt="image-20230818163659536"></p>
 <p>既然是hint，那这里就是提示了这里的含义应该是，将filename经过md5加密，再加上cookie最后在加密</p>
 <p>也就分析到这里了，后面没啥头绪，只是确定的是这估计是个ssti注入漏洞，看了wp发现</p>
 <p>我们要访问/fllllllllllllag文件，url中也要以GET方式提交了2个参数：filename=/fllllllllllllag&amp;filehash=</p>
 <pre class="line-numbers language-none"><code class="language-none">62499926a4a274c1614cf899bf7816b0<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>直接访问是会报错的：<br>
 <code>http://111.200.241.244:53713/file?filename=/fllllllllllllag</code></p>
-<p><img src="/2023/08/18/easytornado/image-20230818170116756.png" alt="image-20230818170116756"></p>
+<p><img src="image-20230818170116756.png" alt="image-20230818170116756"></p>
 <p>但细细观察发现msg参数的内容与前端页面内容一致，那么可以猜测这时就是注入点，那我们尝试一下即可</p>
-<p><img src="/2023/08/18/easytornado/image-20230818170327782.png" alt="image-20230818170327782"></p>
+<p><img src="image-20230818170327782.png" alt="image-20230818170327782"></p>
 <p>但这里缺报错了，有点蒙，那估计就和框架有关了，在看wp发现，还是结合提示，这里我们首先已经得知要访问的文件名，那么此时就要想法获得cooki_secret。</p>
 <h3 id="查看tornado的官方文档">查看tornado的官方文档</h3>
 <p>cookie_secret在tornado框架中的tornado.web.RequestHandler和tornado.web.Application类中有使用到：<br>
@@ -472,7 +477,7 @@ tornado.web.Application.settings：<br>
 <p>所以可以访问到cookie_secret的函数有：RequestHandler.get_secure_cookie、RequestHandler.settings、self.application.settings、<br>
 访问</p>
 <pre class="line-numbers language-none"><code class="language-none">http://61.147.171.105:60053/error?msg={{RequestHandler.get_secure_cookie}}<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/18/easytornado/image-20230818170653569.png" alt="image-20230818170653569"></p>
+<p><img src="image-20230818170653569.png" alt="image-20230818170653569"></p>
 <p>突然发现不能直接用类名调用函数去访问到它settings，必须要用实例化的对象调用函数去访问，而handler就是处理当前这个页面的HTTP请求的RequestHandler对象</p>
 <pre class="line-numbers language-none"><code class="language-none">（另：在Tornado的前端页面模板中，Tornado提供了一些对象别名来快速访问对象，Handler对象指向的处理当前这个页面的RequestHandler对象。执行?msg={{datetime}} 还可以访问到datetime模块）<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <h3 id="得到cookie-secret的值">得到cookie_secret的值</h3>
@@ -481,7 +486,7 @@ tornado.web.Application.settings：<br>
 </code></pre>
 <p>get_secure_cookie函数还是被过滤了</p>
 <pre class="line-numbers language-none"><code class="language-none">http://61.147.171.105:60053/error?msg={{handler.settings}}<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/18/easytornado/image-20230818170944826.png" alt="image-20230818170944826"></p>
+<p><img src="image-20230818170944826.png" alt="image-20230818170944826"></p>
 <p>成功找到</p>
 <h3 id="计算md5值">计算md5值</h3>
 <p>之后我们继续计算哈希值：md5(cookie_secret+md5(/fllllllllllllag))<br>
@@ -493,7 +498,7 @@ tornado.web.Application.settings：<br>
 <pre class="line-numbers language-none"><code class="language-none">faaa34dd-fbe3-4b1b-9e2e-8071918f97453bf9f6cf685a6dd8defadabfb41a03a1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>再经过一次32小写MD5值加密：</p>
 <pre class="line-numbers language-none"><code class="language-none">8b82faf703302b0590f91499236c86fa<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/18/easytornado/image-20230818171402829.png" alt="image-20230818171402829"></p>
+<p><img src="image-20230818171402829.png" alt="image-20230818171402829"></p>
 <p>得到flag</p>
 <h2 id="参考文章：">参考文章：</h2>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_43168364/article/details/111871465?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169234912916800225580030%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169234912916800225580030&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-6-111871465-null-null.142%5Ev93%5EchatgptT3_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Ceasytornado&amp;spm=1018.2226.3001.4187">wp参考一</a></p>
@@ -588,7 +593,7 @@ tornado.web.Application.settings：<br>
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -596,7 +601,7 @@ tornado.web.Application.settings：<br>
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -876,12 +881,12 @@ tornado.web.Application.settings：<br>
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1010,6 +1015,8 @@ tornado.web.Application.settings：<br>
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1037,8 +1044,8 @@ tornado.web.Application.settings：<br>
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1121,8 +1128,6 @@ tornado.web.Application.settings：<br>
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1142,24 +1147,28 @@ tornado.web.Application.settings：<br>
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1371,8 +1380,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

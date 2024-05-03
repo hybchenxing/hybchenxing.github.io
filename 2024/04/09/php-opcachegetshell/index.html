@@ -13,10 +13,20 @@ PHP项目中，尤其是在高并发大流量的场景中，如何提升PHP的�
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>PHP-OPcacheGetshell学习 | hybcx&#39;s blog</title>
@@ -262,7 +272,7 @@ PHP项目中，尤其是在高并发大流量的场景中，如何提升PHP的�
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -319,7 +329,7 @@ PHP项目中，尤其是在高并发大流量的场景中，如何提升PHP的�
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -418,11 +428,6 @@ PHP项目中，尤其是在高并发大流量的场景中，如何提升PHP的�
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -574,8 +579,8 @@ PHP项目中，尤其是在高并发大流量的场景中，如何提升PHP的�
 <p>这个<code>index.php.bin</code> 就是 <code>index.php</code> 的缓存文件。并且作为<code>www-data</code>用户，我们对 <code>5672f68788bcb25b11403b33f5d1497f</code> 具有读写执行权限。这样，我们想办法把这个<code>index.php.bin</code>替换为包含有恶意代码的<code>index.php.bin</code>文件，当我们再次去访问<code>index.php</code>时，php会选择加载这个缓存文件，从而我们达到了getshell的目的。</p>
 <h2 id="漏洞利用条件">漏洞利用条件</h2>
 <p>知道opcache的缓存路径、且服务端开启了opcache.file_cache_only（也就是缓存文件优先级 优先的意思）、禁用了opcache.validate_timestamps（关闭时间戳验证）。不过这里如果开启了时间戳验证也是可以getshell，不过更麻烦</p>
-<p><img src="/2024/04/09/php-opcachegetshell/image-20240410200317796.png" alt="image-20240410200317796"></p>
-<p><img src="/2024/04/09/php-opcachegetshell/image-20240410200338228.png" alt="image-20240410200338228"></p>
+<p><img src="image-20240410200317796.png" alt="image-20240410200317796"></p>
+<p><img src="image-20240410200338228.png" alt="image-20240410200338228"></p>
 <p>可以总结出利用方法如下：</p>
 <ol>
 <li>弄清楚受害者使用的是32位还是64位操作系统</li>
@@ -649,9 +654,9 @@ zend_extension=opcache.so
 <p>1.在本地php.ini中设置opcache.file_cache为你所想要指定的缓存目录</p>
 <p>2.运行php服务器向index发送请求，触发缓存疫情进行文件缓存</p>
 <p>3.打开缓存目录中的index.php.bin文件修改里面的的system_id为目标站点的system_id 记事本打开就ok改成我们用脚本计算出来的system_id值</p>
-<p><img src="/2024/04/09/php-opcachegetshell/image-20240410204951492.png" alt="image-20240410204951492"></p>
+<p><img src="image-20240410204951492.png" alt="image-20240410204951492"></p>
 <p>通过上传漏洞将修改后的index.php.bin上传到tmp/opcache/[system_id]/var/www/index.php.bin覆盖掉原来的index.php.bin</p>
-<p><img src="/2024/04/09/php-opcachegetshell/image-20240410205100392.png" alt="image-20240410205100392"></p>
+<p><img src="image-20240410205100392.png" alt="image-20240410205100392"></p>
 <p>至于2023春秋杯夏季赛的php_again，思路也大致相同，不过那个是php8.0版本的getshell，更为复杂，而且里面涉及到了软链接，同时还需要用到一个python的提权RCE，有点复杂，暂时只想看个思路了，复现有点难（毕竟环境还搭不起来）</p>
 <h1>0x06 参考文章</h1>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/m0_64583630/article/details/131293337">CISCN2023 unzip软链接getshell</a></p>
@@ -754,7 +759,7 @@ zend_extension=opcache.so
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -762,7 +767,7 @@ zend_extension=opcache.so
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1042,12 +1047,12 @@ zend_extension=opcache.so
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1180,6 +1185,8 @@ zend_extension=opcache.so
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1207,8 +1214,8 @@ zend_extension=opcache.so
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1291,8 +1298,6 @@ zend_extension=opcache.so
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1312,24 +1317,28 @@ zend_extension=opcache.so
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1541,8 +1550,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

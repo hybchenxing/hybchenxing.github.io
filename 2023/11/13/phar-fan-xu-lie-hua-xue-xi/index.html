@@ -15,10 +15,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>Phar反序列化 | hybcx&#39;s blog</title>
@@ -264,7 +274,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -321,7 +331,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -420,11 +430,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -460,12 +465,12 @@
 <p>可以理解为一个标志，格式为<code>xxx&lt;?php xxx; __HALT_COMPILER();?&gt;</code>，前面内容不限，但必须以<code>__HALT_COMPILER();?&gt;</code>来结尾，否则phar扩展将无法识别这个文件为phar文件。也就是说如果我们留下这个标志位，构造一个图片或者其他文件，那么可以绕过上传限制，并且被 phar 函数识别利用。</p>
 <p><strong>2. a manifest describing the contents</strong><br>
 phar文件本质上是一种压缩文件，其中每个被压缩文件的权限、属性等信息都放在这部分。这部分还会以<strong>序列化</strong>的形式存储用户自定义的meta-data，这是上述攻击手法最核心的地方。</p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113204139373.png" alt="image-20231113204139373"></p>
+<p><img src="image-20231113204139373.png" alt="image-20231113204139373"></p>
 <p><strong>3. the file contents</strong><br>
 被压缩文件的内容。</p>
 <p><strong>4. [optional] a signature for verifying Phar integrity (phar file format only)</strong><br>
 签名，放在文件末尾，格式如下：</p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113204257222.png" alt="image-20231113204257222"></p>
+<p><img src="image-20231113204257222.png" alt="image-20231113204257222"></p>
 <h2 id="2-2-demo测试">2.2 demo测试</h2>
 <p>根据文件结构我们来自己构建一个phar文件，php内置了一个Phar类来处理相关操作。</p>
 <p>注意：要将php.ini中的<code>phar.readonly</code>选项设置为<code>Off</code>，否则无法生成phar文件。</p>
@@ -488,14 +493,14 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
 <p>这里对test.txt那一行代码产生了疑惑：为何要存在这一行代码？问了GPT，回答如下：</p>
 <p>这行代码是为了在 PHAR 文件中包含一个示例文件，以便在需要时可以从 PHAR 归档中提取和使用这个文件。</p>
 <p>emmm暂时还是理解不，先继续往下学吧</p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113205224550.png" alt="image-20231113205224550"></p>
+<p><img src="image-20231113205224550.png" alt="image-20231113205224550"></p>
 <p>可以明显的看到meta-data是以序列化的形式存储的：</p>
 <p>有序列化数据必然会有反序列化操作，php一大部分的<a target="_blank" rel="noopener" href="http://php.net/manual/en/ref.filesystem.php">文件系统函数</a>在通过<code>phar://</code>伪协议解析phar文件时，都会将meta-data进行反序列化，测试后受影响的函数如下：</p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113205312788.png" alt="image-20231113205312788"></p>
+<p><img src="image-20231113205312788.png" alt="image-20231113205312788"></p>
 <p>这里看着佬看起了底层代码实现逻辑，但目前的我肯定看不懂，因此这里我抱着看懂大概，跟着看着学的心态了。</p>
 <p>来看一下php底层代码是如何处理的：</p>
 <pre class="line-numbers language-none"><code class="language-none">php-src/ext/phar/phar.c<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210012327.png" alt="image-20231113210012327"></p>
+<p><img src="image-20231113210012327.png" alt="image-20231113210012327"></p>
 <p>看不懂，但能猜到上述箭头处是对我们phar文件中的metadata数据进行反序列化操作。</p>
 <p>这里借用佬的例子证明了（不想费时间写了。。。</p>
 <p>phar_test1.php</p>
@@ -509,7 +514,7 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
     <span class="token variable">$filename</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'phar://phar.phar/test.txt'</span><span class="token punctuation">;</span>
     <span class="token function">file_get_contents</span><span class="token punctuation">(</span><span class="token variable">$filename</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210118189.png" alt="image-20231113210118189"></p>
+<p><img src="image-20231113210118189.png" alt="image-20231113210118189"></p>
 <p>其他函数当然也是可行的：</p>
 <p>phar_test2.php</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span> 
@@ -541,8 +546,8 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
     <span class="token comment">//签名自动计算</span>
     <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">stopBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210347172.png" alt="image-20231113210347172"></p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210715458.png" alt="image-20231113210715458"></p>
+<p><img src="image-20231113210347172.png" alt="image-20231113210347172"></p>
+<p><img src="image-20231113210715458.png" alt="image-20231113210715458"></p>
 <p>那么我们看看这个假装自己是图片的phar文件最后的效果。</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
 <span class="token keyword">include</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'phar://phar.jpg'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -553,12 +558,12 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210806276.png" alt="image-20231113210806276"></p>
+<p><img src="image-20231113210806276.png" alt="image-20231113210806276"></p>
 <p>成功反序列化识别文件内容，采用这种方法可以绕过很大一部分上传检测。</p>
 <h2 id="2-4-触发反序列化的文件操作函数">2.4 触发反序列化的文件操作函数</h2>
 <p>我们继续跟着那位师傅再次分析一波文件操作函数</p>
 <p>受影响函数如下：</p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113210934251.png" alt="image-20231113210934251"></p>
+<p><img src="image-20231113210934251.png" alt="image-20231113210934251"></p>
 <p>为什么 Phar 会反序列化处理文件并且在文件操作中能够成功反序列化呢？这里需要通过php底层代码才能知道，关于这个问题ZSX师傅的</p>
 <p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2958#toc-0">Phar与Stream Wrapper造成PHP RCE的深入挖掘</a>已经详细分析了。这里通过一个demo论证一下上述结论。仍然以上面的phar文件为例</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -575,11 +580,11 @@ phar文件本质上是一种压缩文件，其中每个被压缩文件的权限�
 <span class="token variable">$filename</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'phar://phar.phar/test.txt'</span><span class="token punctuation">;</span>
 <span class="token function">file_get_contents</span><span class="token punctuation">(</span><span class="token variable">$filename</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113211612793.png" alt="image-20231113211612793"></p>
+<p><img src="image-20231113211612793.png" alt="image-20231113211612793"></p>
 <p>这里可以看到已经反序列化成功触发<code>__destruct</code>方法并且读取了文件内容。其他函数也是可以的，就不一一试了，</p>
 <p>如果题目限制了，<code>phar://</code>不能出现在头几个字符。可以用<code>Bzip / Gzip</code>协议绕过。</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token variable">$filename</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'compress.zlib://phar://phar.phar/test.txt'</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113212809318.png" alt="image-20231113212809318"></p>
+<p><img src="image-20231113212809318.png" alt="image-20231113212809318"></p>
 <p>虽然会警告但仍会执行，它同样适用于<code>compress.bzip2://</code>。</p>
 <p>当文件系统函数的参数可控时，我们可以在不调用<code>unserialize()</code>的情况下进行反序列化操作，极大的拓展了反序列化攻击面。</p>
 <h2 id="2-5-触发反序列化之操作文件的touch">2.5 触发反序列化之操作文件的touch</h2>
@@ -698,8 +703,8 @@ $zip-&gt;extractTo('phar://test.phar/test');<span aria-hidden="true" class="line
 <span class="token comment">//签名自动计算</span>
 <span class="token variable">$phar</span><span class="token operator">-&gt;</span><span class="token function">stopBuffering</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113215703702.png" alt="image-20231113215703702"></p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113220205457.png" alt="image-20231113220205457"></p>
+<p><img src="image-20231113215703702.png" alt="image-20231113215703702"></p>
+<p><img src="image-20231113220205457.png" alt="image-20231113220205457"></p>
 <p>这里搞完，发现那位师傅就去分析了tp5.2版本的pop链对phar反序列化的利用，由于这里我没学习tp框架，暂时不搞了，后续学了再来更新</p>
 <h2 id="3-2-导致phar触发的其他地方-sql">3.2 导致phar触发的其他地方(sql)</h2>
 <h3 id="Postgres">Postgres</h3>
@@ -729,7 +734,7 @@ $zip-&gt;extractTo('phar://test.phar/test');<span aria-hidden="true" class="line
 local-infile=1
 secure_file_priv=""<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>这里由于我懒得配置mysql了，就借用师傅的图吧。。。</p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231113222019397.png" alt="image-20231113222019397"></p>
+<p><img src="image-20231113222019397.png" alt="image-20231113222019397"></p>
 <p>可以看到mysql进行phar文件读取时成功触发反序列化。</p>
 <h1>0x04 实战例题</h1>
 <p>等遇到的时候补充吧。。。</p>
@@ -750,11 +755,11 @@ php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidd
 <p>因为phar中的<code>a stub</code>字段必须以<code>__HALT_COMPILER();</code>字符串来结尾，否则<code>phar</code>扩展将无法识别这个文件为<code>phar</code>文件，所以这段字符串不能省略，只能绕过</p>
 <h3 id="方法一：">方法一：</h3>
 <p>首先将 phar 文件使用 gzip 命令进行压缩，可以看到压缩之后的文件中就没有了<code>__HALT_COMPILER()</code>，将 phar.gz 后缀改为 png（png文件可以上传）</p>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231114182402667.png" alt="image-20231114182402667"></p>
+<p><img src="image-20231114182402667.png" alt="image-20231114182402667"></p>
 <p>文件上传成功后，利用文件包含漏洞包含文件</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php">file_un<span class="token operator">.</span>php<span class="token operator">?</span>filename<span class="token operator">=</span>phar<span class="token punctuation">:</span><span class="token comment">//pic/phar.phar.gz/phar.phar</span>
 <span class="token comment"># file_un.php中包含__destruct并且可以被触发</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p><img src="/2023/11/13/phar-fan-xu-lie-hua-xue-xi/image-20231114182512761.png" alt="image-20231114182512761"></p>
+<p><img src="image-20231114182512761.png" alt="image-20231114182512761"></p>
 <h3 id="方法二：">方法二：</h3>
 <p>将phar的内容写进压缩包注释中，也同样能够反序列化成功，压缩为zip也会绕过该正则</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -869,7 +874,7 @@ php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidd
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -877,7 +882,7 @@ php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidd
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1157,12 +1162,12 @@ php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidd
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1307,6 +1312,8 @@ php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidd
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1334,8 +1341,8 @@ php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidd
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1418,8 +1425,6 @@ php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidd
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1439,24 +1444,28 @@ php://filter/read=convert.base64-encode/resource=phar://phar.phar<span aria-hidd
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1668,8 +1677,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

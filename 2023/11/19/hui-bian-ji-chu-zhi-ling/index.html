@@ -14,10 +14,20 @@
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <!-- Global site tag (gtag.js) - Google Analytics -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-BYTY196ENH');
+    </script>
 
 
     <title>汇编基础指令 | hybcx&#39;s blog</title>
@@ -263,7 +273,7 @@
         
         <li><div class="divider"></div></li>
         <li>
-            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
                 <i class="fab fa-github-square fa-fw"></i>Fork Me
             </a>
         </li>
@@ -320,7 +330,7 @@
     }
 </style>
 
-<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
    data-tooltip="Fork Me" data-position="left" data-delay="50">
     <svg viewBox="0 0 250 250" aria-hidden="true">
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
@@ -419,11 +429,6 @@
                 
 
                 
-                    <div id="busuanzi_container_page_pv" class="info-break-policy">
-                        <i class="far fa-eye fa-fw"></i>阅读次数:&nbsp;&nbsp;
-                        <span id="busuanzi_value_page_pv"></span>
-                    </div>
-				
             </div>
         </div>
         <hr class="clearfix">
@@ -572,20 +577,20 @@
 <h1>0x03 内存模型：Heap</h1>
 <p>寄存器只能存放很少量的数据，大多数时候，CPU 要指挥寄存器，直接跟内存交换数据。所以，除了寄存器，还必须了解内存怎么储存数据。</p>
 <p>程序运行的时候，操作系统会给它分配一段内存，用来储存程序和运行产生的数据。这段内存有起始地址和结束地址，比如从<code>0x1000</code>到<code>0x8000</code>，起始地址是较小的那个地址，结束地址是较大的那个地址。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119101942817.png" alt="image-20231119101942817"></p>
+<p><img src="image-20231119101942817.png" alt="image-20231119101942817"></p>
 <p>程序运行过程中，对于动态的内存占用请求（比如新建对象，或者使用<code>malloc</code>命令），系统就会从预先分配好的那段内存之中，划出一部分给用户，具体规则是从起始地址开始划分（实际上，起始地址会有一段静态数据，这里忽略）。举例来说，用户要求得到10个字节内存，那么从起始地址<code>0x1000</code>开始给他分配，一直分配到地址<code>0x100A</code>，如果再要求得到22个字节，那么就分配到<code>0x1020</code>。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119101952917.png" alt="image-20231119101952917"></p>
+<p><img src="image-20231119101952917.png" alt="image-20231119101952917"></p>
 <p>这种因为用户主动请求而划分出来的内存区域，叫做 Heap（堆）。它由起始地址开始，从低位（地址）向高位（地址）增长。Heap 的一个重要特点就是不会自动消失，必须手动释放，或者由垃圾回收机制来回收。</p>
 <h1>0x04 内存模型：Stack</h1>
 <p>除了 Heap 以外，其他的内存占用叫做 Stack（栈）。简单说，Stack 是由于函数运行而临时占用的内存区域。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119102033874.png" alt="image-20231119102033874"></p>
+<p><img src="image-20231119102033874.png" alt="image-20231119102033874"></p>
 <p>请看下面的例子。</p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
    <span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
    <span class="token keyword">int</span> b <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 <p>上面代码中，系统开始执行<code>main</code>函数时，会为它在内存里面建立一个帧（frame），所有<code>main</code>的内部变量（比如<code>a</code>和<code>b</code>）都保存在这个帧里面。<code>main</code>函数执行结束后，该帧就会被回收，释放所有的内部变量，不再占用空间。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119102055485.png" alt="image-20231119102055485"></p>
+<p><img src="image-20231119102055485.png" alt="image-20231119102055485"></p>
 <p>如果函数内部调用了其他函数，会发生什么情况？</p>
 <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
    <span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
@@ -593,12 +598,12 @@
    <span class="token keyword">return</span> <span class="token function">add_a_and_b</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>上面代码中，<code>main</code>函数内部调用了<code>add_a_and_b</code>函数。执行到这一行的时候，系统也会为<code>add_a_and_b</code>新建一个帧，用来储存它的内部变量。也就是说，此时同时存在两个帧：<code>main</code>和<code>add_a_and_b</code>。一般来说，调用栈有多少层，就有多少帧。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119102118853.png" alt="image-20231119102118853"></p>
+<p><img src="image-20231119102118853.png" alt="image-20231119102118853"></p>
 <p>等到<code>add_a_and_b</code>运行结束，它的帧就会被回收，系统会回到函数<code>main</code>刚才中断执行的地方，继续往下执行。通过这种机制，就实现了函数的层层调用，并且每一层都能使用自己的本地变量。</p>
 <p>所有的帧都存放在 Stack，由于帧是一层层叠加的，所以 Stack 叫做栈。生成新的帧，叫做"入栈"，英文是 push；栈的回收叫做"出栈"，英文是 pop。Stack 的特点就是，最晚入栈的帧最早出栈（因为最内层的函数调用，最先结束运行），这就叫做"后进先出"的数据结构。每一次函数执行结束，就自动释放一个帧，所有函数执行结束，整个 Stack 就都释放了。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119102130802.png" alt="image-20231119102130802"></p>
+<p><img src="image-20231119102130802.png" alt="image-20231119102130802"></p>
 <p>Stack 是由内存区域的结束地址开始，从高位（地址）向低位（地址）分配。比如，内存区域的结束地址是<code>0x8000</code>，第一帧假定是16字节，那么下一次分配的地址就会从<code>0x7FF0</code>开始；第二帧假定需要64字节，那么地址就会移动到<code>0x7FB0</code>。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119102138709.png" alt="image-20231119102138709"></p>
+<p><img src="image-20231119102138709.png" alt="image-20231119102138709"></p>
 <p>8086CPU提供入栈和出栈的指令：<code>PUSH</code>和<code>POP</code>，任意时刻，寄存器<code>SS:SP</code>指向栈顶元素。</p>
 <p>push指令执行：</p>
 <ul>
@@ -654,7 +659,7 @@ _main:
 <p>虽然看上去很简单，<code>push</code>指令其实有一个前置操作。它会先取出 ESP 寄存器里面的地址，将其减去4个字节，然后将新地址写入 ESP 寄存器。使用减法是因为 Stack 从高位向低位发展，4个字节则是因为<code>3</code>的类型是<code>int</code>，占用4个字节。得到新地址以后， 3 就会写入这个地址开始的四个字节。</p>
 <pre class="line-numbers language-assembly" data-language="assembly"><code class="language-assembly">push   2<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <p>第二行也是一样，<code>push</code>指令将<code>2</code>写入<code>main</code>这个帧，位置紧贴着前面写入的<code>3</code>。这时，ESP 寄存器会再减去 4个字节（累计减去8）。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119104334762.png" alt="image-20231119104334762"></p>
+<p><img src="image-20231119104334762.png" alt="image-20231119104334762"></p>
 <h2 id="5-3-call-指令">5.3 call 指令</h2>
 <p>第三行的<code>call</code>指令用来调用函数。</p>
 <pre class="line-numbers language-assembly" data-language="assembly"><code class="language-assembly">call   _add_a_and_b<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
@@ -983,7 +988,7 @@ POP DWORD　EAX                     // 将栈顶的元素取出放入EAX寄存�
 <p>使用这两个指令需要理解EIP寄存器的作用。当一个程序被编译完成之后，程序的执行方法即已经确定，即A=&gt;B=&gt;C的顺序进行执行，且他们使用的内存空间说连续的，计算机执行一行指令后，下一次要执行的内容都保存在EIP寄存器保存的地址处。所以EIP寄存器指向的内容，就是程序下一次执行的指令。也就是说，A执行时，EIP寄存器中保存的是B的地址，这样执行A后将会获取B的信息并执行。如果A是一个JMP或者CALL指令，执行依次<code>JMP EIP D</code>，这条指令表示将EIP中的值改为D的地址，所以下一次执行的即为D指令。由此实现了跳转。这样的方式当程序跳转到D指令后，程序无法返回B指令了，因为我们找不到B的地址，想要重新回到B指令，需要将B的地址保存，使用时取回即可，通常是将其入栈。这样就和CALL指令的使用方式相同了。</p>
 <pre class="line-numbers language-assembly" data-language="assembly"><code class="language-assembly">JMP EIP, 地址   // 修改EIP寄存器中的值。
 CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转前，将下一行地址入栈，<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231120193326379.png" alt="image-20231120193326379"></p>
+<p><img src="image-20231120193326379.png" alt="image-20231120193326379"></p>
 <h1>0x07 linux 和 windows 下汇编的区别</h1>
 <p>前面说到 <code>linux</code> 和 <code>windows</code> 下的汇编语法是不同的，其实两种语法的不同和系统不同没有绝对的关系，一般在 <code>linux</code> 上会使用 <code>gcc/g++</code> 编译器，而在 <code>windows</code> 上会使用微软的 <code>cl</code> 也就是 <code>MSBUILD</code>，所以产生不同的代码是因为编译器不同，<code>gcc</code> 下采用的是AT&amp;T的汇编语法格式，<code>MSBUILD</code> 采用的是Intel汇编语法格式。</p>
 <table>
@@ -1031,59 +1036,59 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
 <h2 id="9-1-概念">9.1 概念</h2>
 <p>字节序指的是，<strong>多字节数据的内存排列顺序</strong>。这样说比较抽象，使用图形解释就很好懂。</p>
 <p>内存好比一排房间，每个字节是一间房。每间房都有门牌号（内存地址），从0号开始，然后是1号、2号…</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100702283.png" alt="image-20231119100702283"></p>
+<p><img src="image-20231119100702283.png" alt="image-20231119100702283"></p>
 <p>0号字节的地址小，称为低位内存；3号字节的地址大，称为高位内存。</p>
 <p>现在有一个数值<code>abcd</code>要放进这些房间，每个房间放一个数字，那么有两种放法。</p>
 <p>第一种放法是，第一位<code>a</code>放在低位地址（0号），最后一位<code>d</code>放在高位地址（3号）。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100710379.png" alt="image-20231119100710379"></p>
+<p><img src="image-20231119100710379.png" alt="image-20231119100710379"></p>
 <p>这种排列称为"<strong>大端序</strong>"（big-endian，简称 BE），即大头在前，因为<code>a</code>是<code>abcd</code>的大头（最重要的数字）。</p>
 <p>第二种放法是，第一位<code>a</code>放在高位地址（3号地址），最后一位<code>d</code>放在低位地址（0号地址）。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100719213.png" alt="image-20231119100719213"></p>
+<p><img src="image-20231119100719213.png" alt="image-20231119100719213"></p>
 <p>这种排列称为"<strong>小端序</strong>"（little-endian，简称 LE），即小头<code>d</code>在前。</p>
 <p>大端序和小端序合称字节序，这两个名字来自18世纪的英国小说《格列佛游记》。某国分成两派，一派认为鸡蛋应该从大头吃起，称为"大端派"；另一派认为，鸡蛋应该从小头吃起，称为"小端派"。两派相执不下，谁也无法说服谁，最后甚至为此交战。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100732966.png" alt="image-20231119100732966"></p>
+<p><img src="image-20231119100732966.png" alt="image-20231119100732966"></p>
 <h2 id="9-2-可读性">9.2 可读性</h2>
 <p>对于人类来说，不同字节序的可读性是不一样的。大部分国家的阅读习惯是从左到右阅读。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100747791.png" alt="image-20231119100747791"></p>
+<p><img src="image-20231119100747791.png" alt="image-20231119100747791"></p>
 <p>大端序的最高位在左边，最低位在右边，符合阅读习惯。所以，对于这些国家的人来说，<strong>从左到右的大端序的可读性更好。</strong></p>
 <p>但是现实中，从右到左的小端序虽然可读性差，但应用更广泛，x86 和 ARM 这两种 CPU 架构都采用小端序，这是为什么？</p>
 <p>或者换一种问法，两种不同的字节序为什么会并存，统一规定只使用一种，难道不是更方便吗？</p>
 <p>原因是它们有各自的适用场景，某些场景大端序有优势，另一些场景小端序有优势，下面就逐一分析。</p>
 <h2 id="9-3-检查奇偶性">9.3 检查奇偶性</h2>
 <p>小端序优势最明显的，大概就是检查奇偶性，即通过查看个位数，确定某个数字是奇数还是偶数。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100802290.png" alt="image-20231119100802290"></p>
+<p><img src="image-20231119100802290.png" alt="image-20231119100802290"></p>
 <p>以<code>123456</code>为例，大端序从左到右排列，计算机必须一直读到最后一位的个位数<code>6</code>，才能确定这是偶数。</p>
 <p>小端序是从右到左排列，个位数在第一位。所以，只要读取第一位，就能确定它是偶数。</p>
 <h2 id="9-4-检查正负号">9.4 检查正负号</h2>
 <p>一个类似的场景是检查正负号，确定一个数是正数还是负数。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100810206.png" alt="image-20231119100810206"></p>
+<p><img src="image-20231119100810206.png" alt="image-20231119100810206"></p>
 <p>大端序的符号位在左边第一位，小端序的符号位在右边最后一位。所以，大端序有优势，只看第一位就能知道是不是负数。</p>
 <h2 id="9-5-比较大小">9.5 比较大小</h2>
 <p>下一个操作是比较大小。现在有三个数字，需要比较大小：43662576，594，2。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100817614.png" alt="image-20231119100817614"></p>
+<p><img src="image-20231119100817614.png" alt="image-20231119100817614"></p>
 <p>上图是大端序排列，因为是从左到右排列，所以三个数字在右边个位数对齐。比较大小时，计算机就不得不读取每一个数的所有位，直到个位数，再进行比较。</p>
 <p>如果改成小端序，就是下面的排列方式。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100834253.png" alt="image-20231119100834253"></p>
+<p><img src="image-20231119100834253.png" alt="image-20231119100834253"></p>
 <p>小端序是从右到左，所以三个数字在第一位对齐。计算机就不需要读取所有位，哪个数字先读不到下一位，就是最小的。比如，<code>2</code>这个数字就没有第二位，所以读到第二位时，就知道它是最小的。</p>
 <p>所以，比较大小时，小端序有优势。</p>
 <h2 id="9-6-乘法">9.6 乘法</h2>
 <p>接下来，再看乘法操作。</p>
 <p>乘法是逐位相乘，每一轮乘法都要向前进位。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100846922.png" alt="image-20231119100846922"></p>
+<p><img src="image-20231119100846922.png" alt="image-20231119100846922"></p>
 <p>上图是大端序的24165乘以3841。大端序的乘法是向左进位，也就是向左边扩展，必须等到每一轮的结果都出来（上例是四轮），再相加统一写入内存。</p>
 <p>如果改成小端序的乘法，就不需要等待下一轮的结果，每一轮都可以直接写入内存。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100858692.png" alt="image-20231119100858692"></p>
+<p><img src="image-20231119100858692.png" alt="image-20231119100858692"></p>
 <p>上图是小端序的24165乘以3841。小端序的乘法是向右进位，也就是向右边扩展，左边的边界不变。每一轮结果写入内存后，就不需要移动，后面有变化只需要改动对应的位就行了。</p>
 <p>因此，小端序的乘法有明显优势。</p>
 <h2 id="9-7-任意精度整数">9.7 任意精度整数</h2>
 <p>上一个例子的从低位开始计算的特性，对于任意精度整数特别有用。任意精度整数又称大整数，可以存放任意大小的整数。</p>
 <p>它的内部实现是把整数分成一个个较小的单位，通常是 uint32（无符号32位整数）或 uint64（无符号64位整数），按顺序组合在一起。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100906634.png" alt="image-20231119100906634"></p>
+<p><img src="image-20231119100906634.png" alt="image-20231119100906634"></p>
 <p>如果是大端序，第一个 u64 就是这个整数最大的部分。运算时，一旦这个数发生变化，需要进位，后面的所有位都必须移动和改写。小端序发生进位时，往往就不需要所有位移动。</p>
 <p>小端序的另一个好处是，如果逐字节的运算从个位数开始（比如乘法和加法），可以从左到右依次运算一个个 u64，算完上一个再读取下一个。大端序就不行，必须读取整个数以后再进行运算。</p>
 <h2 id="9-8-更改类型">9.8 更改类型</h2>
 <p>最后一个例子是，C 语言有一种 cast 操作，可以强制改变变量的数据类型，比如把32位整数强行改变为16位整数。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119100914441.png" alt="image-20231119100914441"></p>
+<p><img src="image-20231119100914441.png" alt="image-20231119100914441"></p>
 <p>上图中，32位整数<code>0x00000001</code>更改为16位整数<code>0x0001</code>，大端序是截去前面两个字节，这时指向这个地址的指针必须向后移动两个字节。</p>
 <p>小端序就没有这个问题，截去的是后面两个字节，第一位的地址是不变的，所以指针不需要移动。</p>
 <h2 id="9-9-总结">9.9 总结</h2>
@@ -1101,14 +1106,14 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
 <h2 id="11-1-计算机的基本硬件组成">11.1 计算机的基本硬件组成</h2>
 <p>早年，要自己组装一台计算机，要先有三大件，CPU、内存和主板。</p>
 <p>在这三大件中，我们首先要说的是<strong>CPU</strong>，它是计算机最重要的核心配件，全名你肯定知道，叫中央处理器（Central Processing Unit）。为什么说 CPU 是“最重要”的呢？因为计算机的所有“计算”都是由 CPU 来进行的。自然，CPU 也是整台计算机中造价最昂贵的部分之一。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119110740067.png" alt="image-20231119110740067"></p>
+<p><img src="image-20231119110740067.png" alt="image-20231119110740067"></p>
 <p>CPU 是一个超级精细的印刷电路版，<a target="_blank" rel="noopener" href="https://www.flickr.com/photos/130561288@N04/39836037882/in/photolist-23Gb7cm-25V6DAn-q421FW-qMvhAJ-7yVugk-qMvgHb-o3NoQV-qMwDkj-qMvgT1-7yVu7T-qMvgMj-7yVu5c-py3Fpg-8pZhf1-7yZhR5-7yVuax-ewr4C-7TQAKk-7SbTox-8pZh3b-fkLugb-HCGERb-231L6Mo-5SSUsD-28WhLvN-K2Tvk-98Cc4e-6ag8YH-7Sf6KS-aDGEYV-7yY2XT-b66LSc-r2oZqk-rPcasz-7TQ1dB-754sSu-qMwEzy-npvMDK-4BDkou-zrid4-a8X3jn-5uTaCd-7SbRFV-7TTeJh-6ag8zX-6akhEm-7ihCSj-8Whgmi-6j5iUJ-6ag8m8">图片来源</a></p>
 <p>第二个重要的配件，就是<strong>内存</strong>（Memory）。你撰写的程序、打开的浏览器、运行的游戏，都要加载到内存里才能运行。程序读取的数据、计算得到的结果，也都要放在内存里。内存越大，能加载的东西自然也就越多。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119110753185.png" alt="image-20231119110753185"></p>
+<p><img src="image-20231119110753185.png" alt="image-20231119110753185"></p>
 <p>内存通常直接可以插在主板上，<a target="_blank" rel="noopener" href="https://www.flickr.com/photos/dennissylvesterhurd/7633424314/in/photolist-cCxi73-4DT7ov-5SFN7f-22ptD6Q-5SEAjJ-5SMkhQ-qvfnJh-7TQ7bM-5SAgnX-jwzhXx-5SFTJY-7TQe2k-atvnG7-YGowK7-4w9tXh-5SEDih-dPcqJ1-5SAgFV-8EboSi-5SGJ9r-62Yv2h-5Tft1r-5Xz9Na-89gSAF-5SFFVy-5SMcvH-5KtAAz-eaehyJ-8kYkea-rEdcLj-b39Kug-EST98f-8tR3Vk-7ihCSj-dTYG6-YL543f-4dEEe-BJ8QZ-88ZMZg-6ZzkhW-8Z6NkM-5SBoXn-6JKJfA-7Zx3Su-5SFT2q-7TQkLk-75VyrS-5SGnr4-5SJnWV-5SBpq8">图片来源</a></p>
 <p>存放在内存里的程序和数据，需要被 CPU 读取，CPU 计算完之后，还要把数据写回到内存。然而 CPU 不能直接插到内存上，反之亦然。于是，就带来了最后一个大件——<strong>主板</strong>（Motherboard）。</p>
 <p>主板是一个有着各种各样，有时候多达数十乃至上百个插槽的配件。我们的 CPU 要插在主板上，内存也要插在主板上。主板的<strong>芯片组</strong>（Chipset）和<strong>总线</strong>（Bus）解决了 CPU 和内存之间如何通信的问题。芯片组控制了数据传输的流转，也就是数据从哪里到哪里的问题。总线则是实际数据传输的高速公路。因此，<strong>总线速度</strong>（Bus Speed）决定了数据能传输得多快。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119110802154.png" alt="image-20231119110802154"></p>
+<p><img src="image-20231119110802154.png" alt="image-20231119110802154"></p>
 <p>计算机主板上通常有着各种各样的插槽，<a target="_blank" rel="noopener" href="https://www.flickr.com/photos/117150261@N02/12448712795/in/photolist-jY3UBe-7JggqE-DUWwNz-9GWzCa-bvGsRS-8m9cYn-e1BaEo-5SEAjJ-5SMkhQ-2eXVzdk-5SEDoU-dmvKB-5SAgnX-5SFTJY-e1vtir-5Pnxus-5SFFVy-63duyC-5SMcvH-jrTkcC-25V6DAn-imfxix-7VRFgR-inZF2N-io1oLM-zHB1BQ-C7aA66-dmE49-K6oVVQ-7VUTom-4pd9Jb-5SEDih-6LK87S-5SAgFV-5SGJ9r-22u9CTJ-7ihCSj-75VyrS-5PigdF-5SGnr4-5SJnWV-5SBpq8-5SNggT-jrTfcY-5SAjgT-5SSUsD-5SAgMi-4eqcQq-22cvYDk-5SAgSn">图片来源</a></p>
 <p>有了三大件，只要配上<strong>电源</strong>供电，计算机差不多就可以跑起来了。但是现在还缺少各类输入（Input）/ 输出（Output）设备，也就是我们常说的<strong>I/O 设备</strong>。如果你用的是自己的个人电脑，那显示器肯定必不可少，只有有了显示器我们才能看到计算机输出的各种图像、文字，这也就是所谓的<strong>输出设备</strong>。</p>
 <p>同样的，鼠标和键盘也都是必不可少的配件。这样我才能输入文本，写下这篇文章。它们也就是所谓的<strong>输入设备</strong>。</p>
@@ -1124,10 +1129,10 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
 <p>这样看起来，个人电脑和智能手机的硬件组成方式不太一样。可是，我们写智能手机上的 App，和写个人电脑的客户端应用似乎没有什么差别，都是通过“高级语言”这样的编程语言撰写、编译之后，一样是把代码和数据加载到内存里来执行。这是为什么呢？因为，无论是个人电脑、服务器、智能手机，还是 Raspberry Pi 这样的微型卡片机，都遵循着同一个“计算机”的抽象概念。这是怎么样一个“计算机”呢？这其实就是，计算机祖师爷之一冯·诺依曼（John von Neumann）提出的<strong>冯·诺依曼体系结构</strong>（Von Neumann architecture），也叫<strong>存储程序计算机</strong>。</p>
 <p>什么是存储程序计算机呢？这里面其实暗含了两个概念，一个是“<strong>可编程</strong>”计算机，一个是“<strong>存储</strong>”计算机。</p>
 <p>说到“可编程”，估计你会有点懵，你可以先想想，什么是“不可编程”。计算机是由各种门电路组合而成的，然后通过组装出一个固定的电路版，来完成一个特定的计算程序。一旦需要修改功能，就要重新组装电路。这样的话，计算机就是“不可编程”的，因为程序在计算机硬件层面是“写死”的。最常见的就是老式计算器，电路板设好了加减乘除，做不了任何计算逻辑固定之外的事情。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119110821403.png" alt="image-20231119110821403"></p>
+<p><img src="image-20231119110821403.png" alt="image-20231119110821403"></p>
 <p>计算器的本质是一个不可编程的计算机，<a target="_blank" rel="noopener" href="https://www.flickr.com/photos/horiavarlan/4273218725/in/photolist-7vBn3V-3j7qrv-8iUqcs-biaK7a-qdmGPv-3jbGUN-6pFNS-3jbBa1-4MZAxs-292yK5p-2akim1j-26Bw8bE-qgskU-4EeDGe-NhdPhL-28gSRkC-292yLd6-4wVKuz-29iaje9-81BJ2h-27DSFgw-292yQkV-2akis1L-292yWRa-292yTqn-9sATYG-2akirG9-29ian6G-27DSDV5-9sAUCq-8EGHW5-29iaj49-2akigzf-29iarj1-MexNtE-292yUkt-LDNqXB-29jdR8d-4pyKYY-29nivE4-29iavZy-29iamfy-292yUMa-2akig6u-2akifN5-29jdQs5-29jdQhW-2akifUN-29jdRah-29jdQtN">图片来源</a></p>
 <p>我们再来看“存储”计算机。这其实是说，程序本身是存储在计算机的内存里，可以通过加载不同的程序来解决不同的问题。有“存储程序计算机”，自然也有不能存储程序的计算机。典型的就是早年的“Plugboard”这样的插线板式的计算机。整个计算机就是一个巨大的插线板，通过在板子上不同的插头或者接口的位置插入线路，来实现不同的功能。这样的计算机自然是“可编程”的，但是编写好的程序不能存储下来供下一次加载使用，不得不每次要用到和当前不同的“程序”的时候，重新插板子，重新“编程”。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119110829370.png" alt="image-20231119110829370"></p>
+<p><img src="image-20231119110829370.png" alt="image-20231119110829370"></p>
 <p>著名的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Enigma_machine">Engima Machine</a>就用到了 Plugboard 来进行“编程”，<a target="_blank" rel="noopener" href="https://commons.wikimedia.org/wiki/File:Enigma-plugboard.jpg">图片来源</a></p>
 <p>可以看到，无论是“不可编程”还是“不可存储”，都会让使用计算机的效率大大下降。而这个对于效率的追求，也就是“存储程序计算机”的由来。</p>
 <p>于是我们的冯祖师爷，基于当时在秘密开发的 EDVAC 写了一篇报告<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/First_Draft_of_a_Report_on_the_EDVAC"><em>First Draft of a Report on the EDVAC</em></a>，描述了他心目中的一台计算机应该长什么样。这篇报告在历史上有个很特殊的简称，叫<strong>First Draft</strong>，翻译成中文，其实就是《第一份草案》。这样，现代计算机的发展就从祖师爷写的一份草案开始了。</p>
@@ -1138,7 +1143,7 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
 <p>最后就是各种<strong>输入和输出设备</strong>，以及对应的输入和输出机制。我们现在无论是使用什么样的计算机，其实都是和输入输出设备在打交道。个人电脑的鼠标键盘是输入设备，显示器是输出设备。我们用的智能手机，触摸屏既是输入设备，又是输出设备。而跑在各种云上的服务器，则是通过网络来进行输入和输出。这个时候，网卡既是输入设备又是输出设备。</p>
 <p>任何一台计算机的任何一个部件都可以归到运算器、控制器、存储器、输入设备和输出设备中，而所有的现代计算机也都是基于这个基础架构来设计开发的。</p>
 <p>而所有的计算机程序，也都可以抽象为从<strong>输入设备</strong>读取输入信息，通过<strong>运算器</strong>和<strong>控制器</strong>来执行存储在<strong>存储器</strong>里的程序，最终把结果输出到<strong>输出设备</strong>中。而我们所有撰写的无论高级还是低级语言的程序，也都是基于这样一个抽象框架来进行运作的。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119110837770.png" alt="image-20231119110837770"></p>
+<p><img src="image-20231119110837770.png" alt="image-20231119110837770"></p>
 <p>冯·诺依曼体系结构示意图，<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Von_Neumann_architecture#/media/File:Von_Neumann_Architecture.svg">图片来源</a></p>
 <p><strong>冯·诺依曼架构（Von Neumann Architecture）</strong> 是冯·诺依曼和其他人提出的电子计算机通用架构。冯·诺依曼架构将通用计算机定义为以下 3 个基本原则：</p>
 <ul>
@@ -1152,7 +1157,7 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
 <p>要从根本上解决冯·诺依曼瓶颈，还是只能重新构建一套新的计算机体系，例如生物计算机、量子计算机。不过，目前它们都还处在非常原始的阶段。现代计算机体系只能采用优化策略来减弱冯·诺依曼瓶颈的影响。</p>
 <h2 id="12-3-总结">12.3 总结</h2>
 <p><strong>如果说图灵机描述的是计算机的抽象模型，那么冯·诺依曼架构则是对图灵机这个抽象模型的实现架构。</strong> 冯诺依曼架构确立了现代电子计算机的基础和结构，学习计算机组成原理，其实就是学习和拆解冯诺依曼架构。</p>
-<p><img src="/2023/11/19/hui-bian-ji-chu-zhi-ling/image-20231119111138054.png" alt="image-20231119111138054"></p>
+<p><img src="image-20231119111138054.png" alt="image-20231119111138054"></p>
 <h1>0x12 参考文章</h1>
 <p><a target="_blank" rel="noopener" href="https://blog.csdn.net/a20020107020/article/details/130255261">字长与端序</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.ruanyifeng.com/blog/2022/06/endianness-analysis.html">字节序探析：大端与小端的比较</a></p>
@@ -1255,7 +1260,7 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
     <div id="rewardModal" class="modal">
         <div class="modal-content">
             <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">你的赏识是我前进的动力</h4>
+            <h4 class="reward-title">随缘，看各位佬的心情</h4>
             <div class="reward-content">
                 <div class="reward-tabs">
                     <ul class="tabs row">
@@ -1263,7 +1268,7 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
                         <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
                     </ul>
                     <div id="alipay">
-                        <img src="/medias/reward/alipay.jpg" class="reward-img" alt="支付宝打赏二维码">
+                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
                     </div>
                     <div id="wechat">
                         <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
@@ -1543,12 +1548,12 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
 <script>
     new Valine({
         el: '#vcomments',
-        appId: 'fYyLqrwhVuigWcIYcP9sPbBv-MdYXbMMI',
-        appKey: 'ht8iOzVaHwm0miBUeumGrxDF',
-        serverURLs: '',
+        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
+        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
+        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
         notify: 'false' === 'true',
         verify: 'false' === 'true',
-        visitor: 'true' === 'true',
+        visitor: 'false' === 'true',
         avatar: 'mm',
         pageSize: '10',
         lang: 'zh-cn',
@@ -1693,6 +1698,8 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
 
 <!-- 代码块收缩 -->
 
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
 
 
     </div>
@@ -1720,8 +1727,8 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
             tocSelector: '#toc-content',
             contentSelector: '#articleContent',
             headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
+            collapseDepth: Number('3'),
+            headingSelector: 'h2, h3, h4, h5, h6'
         });
 
         // Set scroll toc fixed.
@@ -1804,8 +1811,6 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
             
             
             
-                
-            
             
                 <span id="busuanzi_container_site_pv">
                 &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
@@ -1825,24 +1830,28 @@ CALL　地址　   // 跳转到指定地址，执行该地址的指令，跳转�
             <br>
             
         </div>
-        <div class="col s12 m4 l4 social-link social-statis">
-    <a href="https://github.com/blinkfox" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
         <i class="fab fa-github"></i>
     </a>
 
 
 
-    <a href="mailto:1181062873@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
         <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
+        <i class="fab fa-facebook-f"></i>
     </a>
 
 
 
 
 
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=1181062873" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 1181062873" data-position="top" data-delay="50">
+    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
         <i class="fab fa-qq"></i>
     </a>
 
@@ -2054,8 +2063,6 @@ $(function () {
     
     <script src="/libs/others/clicklove.js" async="async"></script>
     
-    
-    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
     
 
     
