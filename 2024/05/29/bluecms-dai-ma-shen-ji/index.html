@@ -1,0 +1,996 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>BlueCMS代码审计 - hybcx's blog</title>
+
+  
+    <meta name="description" content="0x01 环境搭建 这里不赘述，网上搜搜都有的，我也把参考文章放到了文末，主要还是细心问题，还是可以搭建成功的（但我却踩了很多坑 0x02 前置知识 明确目标： 在审计之前，我们首先先确定自己此次审计的目地，一般会有三种情况：  为了提升自己的审计经验 项目中为了审计出能进一步利用的漏洞，一般需要getshell、ssrf这种级别的。 为了挖点洞，去换钱或者换cve&amp;cnvd。   如果是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BlueCMS代码审计">
+<meta property="og:url" content="http://hybcx.xyz/2024/05/29/bluecms-dai-ma-shen-ji/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="0x01 环境搭建 这里不赘述，网上搜搜都有的，我也把参考文章放到了文末，主要还是细心问题，还是可以搭建成功的（但我却踩了很多坑 0x02 前置知识 明确目标： 在审计之前，我们首先先确定自己此次审计的目地，一般会有三种情况：  为了提升自己的审计经验 项目中为了审计出能进一步利用的漏洞，一般需要getshell、ssrf这种级别的。 为了挖点洞，去换钱或者换cve&amp;cnvd。   如果是">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657686.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657687.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657688.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657689.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657690.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657691.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657692.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657693.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657694.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657696.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657697.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657698.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657699.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657700.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657701.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657702.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657703.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657704.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657705.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657706.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657707.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657708.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657709.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657710.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657711.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657712.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657713.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657714.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657715.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657716.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657717.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657718.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657719.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657720.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657721.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657722.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657723.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657724.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657725.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657726.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657727.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657728.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657729.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657730.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657731.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657732.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657733.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657734.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657735.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657736.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657737.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657738.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657739.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657740.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657741.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657742.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657743.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657744.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657745.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657746.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657747.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657748.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657749.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657750.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657751.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657752.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657753.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657754.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657755.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657756.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657757.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657758.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657759.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657760.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657761.png">
+<meta property="article:published_time" content="2024-05-29T09:35:28.000Z">
+<meta property="article:modified_time" content="2024-06-03T09:12:49.344Z">
+<meta property="article:author" content="hybcx">
+<meta property="article:tag" content="PHP代码审计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657686.png">
+  
+  
+  
+  <meta name="keywords" content="PHP代码审计">
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+    <link rel="shortcut icon" href="/medias/logo.png">
+  
+
+  
+    
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+
+  
+
+  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/03/29/thm-jin-gong-xing-shen-tou-ce-shi/"><span class="title">THM-进攻性渗透测试</span></a><a class="item title" href="/2024/06/01/ju-zhen-bei/"><span class="title">矩阵杯</span></a><a class="item title" href="/2024/05/05/tmh-huan-chong-qu-yi-chu/"><span class="title">TMH-缓冲区溢出学习</span></a><a class="item title" href="/2024/05/29/bluecms-dai-ma-shen-ji/"><span class="title">BlueCMS代码审计</span></a><a class="item title" href="/2024/06/01/seacms-dai-ma-shen-ji/"><span class="title">SeaCMS代码审计</span></a><a class="item title" href="/2024/05/12/h-nctf2024/"><span class="title">H&NCTF2024</span></a><a class="item title" href="/2024/05/26/flask-nei-cun-ma-xue-xi/"><span class="title">Flask内存马学习</span></a><a class="item title" href="/2024/05/21/ciscn-2024wp/"><span class="title">CISCN-2024Wp</span></a><a class="item title" href="/2024/04/30/hnctf-2022/"><span class="title">HNCTF2022</span></a><a class="item title" href="/2024/04/23/php-xue-xi-zong-jie/"><span class="title">PHP学习总结</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">PHP代码审计</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-05-29T09:35:28.000Z">2024-05-29</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-06-03T09:12:49.344Z">2024-06-03</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>BlueCMS代码审计</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="0x01-环境搭建">0x01 环境搭建</h1>
+<p>这里不赘述，网上搜搜都有的，我也把参考文章放到了文末，主要还是细心问题，还是可以搭建成功的（但我却踩了很多坑</p>
+<h1 id="0x02-前置知识">0x02 前置知识</h1>
+<h2 id="明确目标">明确目标：</h2>
+<p>在审计之前，我们首先先确定自己此次审计的目地，一般会有三种情况：</p>
+<ul>
+<li>为了提升自己的审计经验</li>
+<li>项目中为了审计出能进一步利用的漏洞，一般需要getshell、ssrf这种级别的。</li>
+<li>为了挖点洞，去换钱或者换cve&amp;cnvd。</li>
+</ul>
+<blockquote>
+<p>如果是为了提升审计经验，应该要去重点关注历史漏洞，并去复现。</p>
+<p>如果是为了能审出漏洞，去用作渗透中的进一步利用，那么我觉得，可以重点使用xcheck、Fotify等自动化代码审计，然后关注下面的文件上传、包含、sql注入等等有严重危害的漏洞</p>
+<p>如果是为了挖0day，搞证书什么的，那么全方位按步骤过一遍，是不错的选择。</p>
+</blockquote>
+<h2 id="使用框架">使用框架</h2>
+<p>判断是否使用了框架，是蛮重要的，能帮助我们快速定位有用的函数集，筛选不需要去看的代码。</p>
+<p>一般来说，我觉得使用了框架的更好审计一点，因为使用了框架的，他的函数集文件（各种方法function）会比较规整，在某些固定文件夹中，清晰可见，当然需要我们先对框架有所了解。</p>
+<p>目前比较主流的设计模式是MVC，即多层模型（M）、视图（V）、控制器（C），在此不多赘述，php的主流框架几乎都使用了MVC设计模式。PHP底下的开发框架目前见的比较多的有Laravel，ThinkPHP，yi等。</p>
+<h2 id="审计流程">审计流程</h2>
+<p>看了一篇文章是这样说的，PHP代码审计过程是：</p>
+<p>PHP基础语法巩固-》PHP特性-》各类漏洞挖掘方法-》早期CMS程序代码审计实战-》MVC模式程序代码审计实战。</p>
+<p>这位师傅选择的CMS实战依次是这样的：BlueCMS, SeaCMS, DedeCMS, PhpCMS 这 4 个CMS（我认为我也可以采用这个路线）难度逐渐提升。在对这几个系统的代码审计过程中，也能感受到 web 开发技术的发展和趋势，直到PhpCMS，发现已经实现了一个MVC模型的程序。相信完成这步后再审计非 MVC 模式程序的代码就会具有清晰的思路与十足的把握。</p>
+<h2 id="bluecms简介">BlueCMS简介</h2>
+<p>BlueCMS 是一款应用于地方分类信息的门户系统，本文下载的源码为 BlueCMS v1.6 sp1版，可以追溯到2010年左右了，该系统确实很老，但审计该系统有一个好处是，即使现在web开发技术十分成熟了，但仍有人因为经验缺乏或时间原因会开发出类似BlueCMS这样简单的系统，甚至比BlueCMS更简单。通过对 BlueCMS 实战审计，能够熟悉这类简单 CMS 的程序逻辑。</p>
+<p>BlueCMS 被认为是练手代码审计的绝佳项目，以至于现在百度BlueCMS的关键词全是代码审计。那为什么 BlueCMS 都被审计烂了，我还要在发一篇BlueCMS的代码审计博客呢？首先BlueCMS确实经典，是一个入门的好项目；其次BlueCMS是无MVC架构时期最早流行的一批CMS，是早期CMS程序代码审计实战系列最标志的第一环。</p>
+<p>BlueCMS本地部署好后，先访问 /install/index.php 进行安装，感觉过程有点bug，不过返回首页后会发现安装成功。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657686.png" alt="image-20240529211358964"></p>
+<p>按照要求完成之后，访问首页出现上图即可代表安装成功</p>
+<h1 id="0x03-前期审计">0x03 前期审计</h1>
+<p>这里主要还是跟着文章走，没思路。</p>
+<h2 id="入口点分析">入口点分析</h2>
+<p>首先分析目录结构</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657687.png" alt="image-20240529211521552"></p>
+<p>通过目录结构能够看出简单的程序逻辑，目录结构主要是关注入口点，也就是index.php文件位置，该CMS下的程序，index.php就位于根目录下，这是不安全的，会导致整个文件被窃取的风险。</p>
+<p>接下来跟着文章自行分析一边这个入口文件</p>
+<pre><code class="hljs php"><span class="hljs-title function_ invoke__">define</span>(<span class="hljs-string">"IN_BLUE"</span>,<span class="hljs-literal">true</span>);
+<span class="hljs-keyword">require_once</span>(<span class="hljs-string">'include/common.inc.php'</span>);
+<span class="hljs-keyword">require_once</span>(BLUE_ROOT.<span class="hljs-string">'include/index.fun.php'</span>);</code></pre>
+<p>首先定义了常量，然后包含了两个文件，至于做什么先不用管，然后这里调用了do_task函数，参数里面是一个update_info，跟进去发现就是一个更新任务的意思</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657688.png" alt="image-20240529212253545"></p>
+<p>大概意思就是动态包含php文件</p>
+<p>中间部分逻辑相同，无非就是调用函数，获取当前数据库信息，比如新闻列表，分类信息、推荐信息之类的。然后就是通过下面这一部分代码，渲染到前端页面上，这里可以看到采用的是smarty模板引擎渲染</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657689.png" alt="image-20240529213352376"></p>
+<p>这里也就知道了，index.php这个所谓的入口文件，只是单纯的做一个前端页面显示的工作。这里那篇文章说到：这里可以判断出前台是一个多入口的模式，注意多入口的系统需要对每个入口文件单独做出安全过滤，他们都会加载同一个文件来实现，再这个CMS上就是common.inc.php</p>
+<p>然后跟进/include/common.inc.php文件，前面的部分依旧是定义常量，包含某些文件</p>
+<pre><code class="hljs php"><span class="hljs-keyword">if</span>(!<span class="hljs-title function_ invoke__">get_magic_quotes_gpc</span>())
+{
+    <span class="hljs-variable">$_POST</span> = <span class="hljs-title function_ invoke__">deep_addslashes</span>(<span class="hljs-variable">$_POST</span>);
+    <span class="hljs-variable">$_GET</span> = <span class="hljs-title function_ invoke__">deep_addslashes</span>(<span class="hljs-variable">$_GET</span>);
+    <span class="hljs-variable">$_COOKIES</span> = <span class="hljs-title function_ invoke__">deep_addslashes</span>(<span class="hljs-variable">$_COOKIES</span>);
+    <span class="hljs-variable">$_REQUEST</span> = <span class="hljs-title function_ invoke__">deep_addslashes</span>(<span class="hljs-variable">$_REQUEST</span>);
+}</code></pre>
+<p>然后判断，如果没有开启GPC的话，就调用deep_addslashes函数转义这些参数的内容，但是没有过滤$_SERVER过滤，然后就是$db参数在这里充当连接数据库的作用</p>
+<p>下面这里是引入了smarty对象</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657690.png" alt="image-20240529214400110"></p>
+<p>同时还有对用户IP的处理，达到某些条件，将会🈲IP</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657691.png" alt="image-20240529214438219"></p>
+<p>最后就是关于一些cookie以及session会话的处理了，先不关注，这里回到最初，看一下那个过滤函数的内容，毕竟有过滤，那如果能绕过，就有造成漏洞的可能</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657692.png" alt="image-20240529214720162"></p>
+<p>如上图，函数先判读参数是否是数组，如果是的话，递归调用本函数，直到不是数组，然后调用PHP自带的函数addslashes进行特殊字符的转移</p>
+<p>接下来可以再关注数据库连接的内容：当前目录的mysql.class.php，内容大致如下</p>
+<pre><code class="hljs php"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">mysql</span> </span>{
+
+	<span class="hljs-keyword">var</span> <span class="hljs-variable">$linkid</span>=<span class="hljs-literal">null</span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params"><span class="hljs-variable">$dbhost</span>, <span class="hljs-variable">$dbuser</span>, <span class="hljs-variable">$dbpw</span>, <span class="hljs-variable">$dbname</span> = <span class="hljs-string">''</span>, <span class="hljs-variable">$dbcharset</span> = <span class="hljs-string">'gbk'</span>, <span class="hljs-variable">$connect</span> = <span class="hljs-number">1</span></span>) </span>{
+    	<span class="hljs-variable language_">$this</span> -&gt; <span class="hljs-title function_ invoke__">mysql</span>(<span class="hljs-variable">$dbhost</span>, <span class="hljs-variable">$dbuser</span>, <span class="hljs-variable">$dbpw</span>, <span class="hljs-variable">$dbname</span>, <span class="hljs-variable">$dbcharset</span>, <span class="hljs-variable">$connect</span>);
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">mysql</span>(<span class="hljs-params"><span class="hljs-variable">$dbhost</span>, <span class="hljs-variable">$dbuser</span>, <span class="hljs-variable">$dbpw</span>, <span class="hljs-variable">$dbname</span> = <span class="hljs-string">''</span>, <span class="hljs-variable">$dbcharset</span> = <span class="hljs-string">'gbk'</span>, <span class="hljs-variable">$connect</span>=<span class="hljs-number">1</span></span>)</span>{
+    	<span class="hljs-variable">$func</span> = <span class="hljs-keyword">empty</span>(<span class="hljs-variable">$connect</span>) ? <span class="hljs-string">'mysql_pconnect'</span> : <span class="hljs-string">'mysql_connect'</span>;
+    	<span class="hljs-keyword">if</span>(!<span class="hljs-variable language_">$this</span>-&gt;linkid = @<span class="hljs-variable">$func</span>(<span class="hljs-variable">$dbhost</span>, <span class="hljs-variable">$dbuser</span>, <span class="hljs-variable">$dbpw</span>, <span class="hljs-literal">true</span>)){
+    		<span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">dbshow</span>(<span class="hljs-string">'Can not connect to Mysql!'</span>);
+    	} <span class="hljs-keyword">else</span> {
+    		<span class="hljs-keyword">if</span>(<span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">dbversion</span>() &gt; <span class="hljs-string">'4.1'</span>){
+    			<span class="hljs-title function_ invoke__">mysql_query</span>( <span class="hljs-string">"SET NAMES gbk"</span>);
+    			<span class="hljs-keyword">if</span>(<span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">dbversion</span>() &gt; <span class="hljs-string">'5.0.1'</span>){
+    				<span class="hljs-title function_ invoke__">mysql_query</span>(<span class="hljs-string">"SET sql_mode = ''"</span>,<span class="hljs-variable">$this</span>-&gt;linkid);
+    			}
+    		}
+    	}
+    	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$dbname</span>){
+    		<span class="hljs-keyword">if</span>(<span class="hljs-title function_ invoke__">mysql_select_db</span>(<span class="hljs-variable">$dbname</span>, <span class="hljs-variable">$this</span>-&gt;linkid)===<span class="hljs-literal">false</span>){
+    			<span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">dbshow</span>(<span class="hljs-string">"Can't select MySQL database(<span class="hljs-subst">$dbname</span>)!"</span>);
+    		}
+    	}
+    }</code></pre>
+<p>这里可以看到初始化变量，然后调用构造函数，初始化一些信息，并且能看到这里的数据库编码方式为gbk，说不定存在宽字符注入，然后mysql函数中，用mysql_pconnect函数来连接数据库，判断数据库版本信息，然后选择执行对应的语句，剩下没展示的就是一些自定义的sql执行函数</p>
+<h2 id="找后台">找后台</h2>
+<p>后台一般只有通过身份验证后才能访问，提前就有一层安全保障，但后台程序一般都是漏洞百出，我们很多时候只有靠后台才能拿到服务器的shell。这里具体分析一下BlueCMS的后台逻辑</p>
+<p>这里的后台文件，我们看目录不难猜到，有一个/admin/index.php，这里截取部分代码，前面不用说，下面就是判断act参数的值，来对应的展示后台页面</p>
+<pre><code class="hljs php"><span class="hljs-title function_ invoke__">define</span>(<span class="hljs-string">'IN_BLUE'</span>, <span class="hljs-literal">true</span>);
+
+<span class="hljs-keyword">require_once</span>(<span class="hljs-title function_ invoke__">dirname</span>(<span class="hljs-keyword">__FILE__</span>) . <span class="hljs-string">"/include/common.inc.php"</span>);
+<span class="hljs-comment">//require_once(dirname(__FILE__). "/include/menu.fun.php");</span>
+
+<span class="hljs-variable">$act</span>=!<span class="hljs-keyword">empty</span>(<span class="hljs-variable">$_REQUEST</span>[<span class="hljs-string">'act'</span>]) ? <span class="hljs-title function_ invoke__">trim</span>(<span class="hljs-variable">$_REQUEST</span>[<span class="hljs-string">'act'</span>]) : <span class="hljs-string">''</span>;
+
+<span class="hljs-keyword">if</span>(<span class="hljs-variable">$act</span>==<span class="hljs-string">''</span>)
+{
+<span class="hljs-variable">$smarty</span>-&gt;<span class="hljs-title function_ invoke__">display</span>(<span class="hljs-string">'index.htm'</span>);
+}
+<span class="hljs-keyword">elseif</span>(<span class="hljs-variable">$act</span>==<span class="hljs-string">'top'</span>)
+{
+	<span class="hljs-variable">$smarty</span>-&gt;<span class="hljs-title function_ invoke__">assign</span>(<span class="hljs-string">'admin_name'</span>, <span class="hljs-variable">$_SESSION</span>[<span class="hljs-string">'admin_name'</span>]);
+	<span class="hljs-variable">$smarty</span>-&gt;<span class="hljs-title function_ invoke__">display</span>(<span class="hljs-string">'top.htm'</span>);
+}
+<span class="hljs-keyword">elseif</span>(<span class="hljs-variable">$act</span>==<span class="hljs-string">'menu'</span>)
+{
+	<span class="hljs-variable">$cat_list</span> = <span class="hljs-variable">$db</span>-&gt;<span class="hljs-title function_ invoke__">getall</span>(<span class="hljs-string">"SELECT cat_id, cat_name FROM "</span>.<span class="hljs-title function_ invoke__">table</span>(<span class="hljs-string">'category'</span>).<span class="hljs-string">" WHERE parentid=0 ORDER BY show_order,cat_id"</span>);
+	<span class="hljs-variable">$arc_cat_list</span> = <span class="hljs-variable">$db</span>-&gt;<span class="hljs-title function_ invoke__">getall</span>(<span class="hljs-string">"SELECT cat_id, cat_name FROM "</span>.<span class="hljs-title function_ invoke__">table</span>(<span class="hljs-string">'arc_cat'</span>).<span class="hljs-string">" WHERE parent_id=0 ORDER BY show_order, cat_id"</span>);
+	<span class="hljs-title function_ invoke__">template_assign</span>(<span class="hljs-keyword">array</span>(<span class="hljs-string">'cat_list'</span>, <span class="hljs-string">'arc_cat_list'</span>), <span class="hljs-keyword">array</span>(<span class="hljs-variable">$cat_list</span>, <span class="hljs-variable">$arc_cat_list</span>));
+	<span class="hljs-comment">/*if($_SESSION['admin_purview'][0] != 'all'){</span>
+<span class="hljs-comment">		if(!file_exists(BLUE_ROOT.DATA.'admin/menu'.$_SESSION['admin_id'].'.html')){</span>
+<span class="hljs-comment">			create_menu($_SESSION['admin_id']);</span>
+<span class="hljs-comment">		}</span>
+<span class="hljs-comment">		//read_menu($_SESSION['admin_id']);</span>
+<span class="hljs-comment">		$smarty-&gt;display(BLUE_ROOT.'data/admin/menu2.html');</span>
+<span class="hljs-comment">	}else{*/</span>
+		<span class="hljs-variable">$smarty</span>-&gt;<span class="hljs-title function_ invoke__">display</span>(<span class="hljs-string">'menu.htm'</span>);
+	<span class="hljs-comment">//}</span>
+}
+<span class="hljs-keyword">elseif</span>(<span class="hljs-variable">$act</span> == <span class="hljs-string">'main'</span>)
+{</code></pre>
+<p>这里文章说到：关注 index.htm 可以知道后台是通过frame来实现的，这样后台程序的所有功能都可以依附在index.php下实现，在早期的CMS中，基本都是这种实现方案</p>
+<pre><code class="hljs html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span> <span class="hljs-keyword">PUBLIC</span> <span class="hljs-string">"-//W3C//DTD XHTML 1.0 Transitional//EN"</span> <span class="hljs-string">"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">"http://www.w3.org/1999/xhtml"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">http-equiv</span>=<span class="hljs-string">"Content-Type"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"text/html; charset=gb2312"</span> /&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>BlueCMS管理中心<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">frameset</span> <span class="hljs-attr">rows</span>=<span class="hljs-string">"76,*"</span> <span class="hljs-attr">frameborder</span>=<span class="hljs-string">"no"</span> <span class="hljs-attr">border</span>=<span class="hljs-string">"0"</span> <span class="hljs-attr">framespacing</span>=<span class="hljs-string">"0"</span> &gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">frame</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"index.php?act=top"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"topFrame"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"topFrame"</span> <span class="hljs-attr">scrolling</span>=<span class="hljs-string">"no"</span> <span class="hljs-attr">noresize</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">frameset</span> <span class="hljs-attr">cols</span>=<span class="hljs-string">"176,*"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"bodyFrame"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"bodyFrame"</span> <span class="hljs-attr">frameborder</span>=<span class="hljs-string">"no"</span> <span class="hljs-attr">border</span>=<span class="hljs-string">"0"</span> <span class="hljs-attr">framespacing</span>=<span class="hljs-string">"0"</span>  &gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">frame</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"index.php?act=menu"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"menuFrame"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"menuFrame"</span> <span class="hljs-attr">scrolling</span>=<span class="hljs-string">"yes"</span> <span class="hljs-attr">noresize</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">frame</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"index.php?act=main"</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"mainFrame"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"mainFrame"</span> <span class="hljs-attr">scrolling</span>=<span class="hljs-string">"auto"</span> <span class="hljs-attr">noresize</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">frameset</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">frameset</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">noframes</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>你的浏览器不支持框架<span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">noframes</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre>
+<p>这里同时还看到了该页面加载了/admin/include/common.inc.php文件，这个与/include/common.inc.php类似，但不同的是在最后的部分，前者是根据cookie的信息，判断当前管理员的用户名和密码是否存在与数据库中</p>
+<blockquote>
+<p>这一部分先判断，如果管理员当前处于登陆状态，并且对应的admin_id是存在的，则调用update_admin_info更新当前管理员用户的信息。</p>
+<p>如果当前管理员用户的信息是空的，就回去判断对应的cookie信息，如果对应的数据都存在，则调用check_cookie函数，判断该用户的账号密码是否在数据库中，如果该用户是管理员的话，调用update_admin_info更新信息；如果没有设置cookie的信息，就程序自己设置cookie为空，然后跳转到登陆页面。（这里和就防止了未授权，也就是想直接访问index.php的后台页面是不可能的）</p>
+</blockquote>
+<h1 id="0x04-漏洞审计">0x04 漏洞审计</h1>
+<p>目前我的自动话代码审计工具只有个seay，之后了解一下Fotify</p>
+<h2 id="前台sql注入">前台sql注入</h2>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657693.png" alt="image-20240529221746370"></p>
+<p>直接上一手自动化，如上图看到一个可能的sql注入，我们跟进去看看/ad_js.php（被打击到了，太菜了，很简单，但还是没看出来）</p>
+<pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>
+<span class="hljs-title function_ invoke__">define</span>(<span class="hljs-string">'IN_BLUE'</span>, <span class="hljs-literal">true</span>);
+<span class="hljs-keyword">require_once</span> <span class="hljs-title function_ invoke__">dirname</span>(<span class="hljs-keyword">__FILE__</span>) . <span class="hljs-string">'/include/common.inc.php'</span>;
+
+<span class="hljs-variable">$ad_id</span> = !<span class="hljs-keyword">empty</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'ad_id'</span>]) ? <span class="hljs-title function_ invoke__">trim</span>(<span class="hljs-variable">$_GET</span>[<span class="hljs-string">'ad_id'</span>]) : <span class="hljs-string">''</span>;
+<span class="hljs-keyword">if</span>(<span class="hljs-keyword">empty</span>(<span class="hljs-variable">$ad_id</span>))
+{
+	<span class="hljs-keyword">echo</span> <span class="hljs-string">'Error!'</span>;
+	<span class="hljs-keyword">exit</span>();
+}
+
+<span class="hljs-variable">$ad</span> = <span class="hljs-variable">$db</span>-&gt;<span class="hljs-title function_ invoke__">getone</span>(<span class="hljs-string">"SELECT * FROM "</span>.<span class="hljs-title function_ invoke__">table</span>(<span class="hljs-string">'ad'</span>).<span class="hljs-string">" WHERE ad_id ="</span>.<span class="hljs-variable">$ad_id</span>);
+<span class="hljs-keyword">if</span>(<span class="hljs-variable">$ad</span>[<span class="hljs-string">'time_set'</span>] == <span class="hljs-number">0</span>)
+{
+	<span class="hljs-variable">$ad_content</span> = <span class="hljs-variable">$ad</span>[<span class="hljs-string">'content'</span>];
+}
+<span class="hljs-keyword">else</span>
+{
+	<span class="hljs-keyword">if</span>(<span class="hljs-variable">$ad</span>[<span class="hljs-string">'end_time'</span>] &lt; <span class="hljs-title function_ invoke__">time</span>())
+	{
+		<span class="hljs-variable">$ad_content</span> = <span class="hljs-variable">$ad</span>[<span class="hljs-string">'exp_content'</span>];
+	}
+	<span class="hljs-keyword">else</span>
+	{
+		<span class="hljs-variable">$ad_content</span> = <span class="hljs-variable">$ad</span>[<span class="hljs-string">'content'</span>];
+	}
+}
+<span class="hljs-variable">$ad_content</span> = <span class="hljs-title function_ invoke__">str_replace</span>(<span class="hljs-string">'"'</span>, <span class="hljs-string">'\"'</span>,<span class="hljs-variable">$ad_content</span>);
+<span class="hljs-variable">$ad_content</span> = <span class="hljs-title function_ invoke__">str_replace</span>(<span class="hljs-string">"\r"</span>, <span class="hljs-string">"\\r"</span>,<span class="hljs-variable">$ad_content</span>);
+<span class="hljs-variable">$ad_content</span> = <span class="hljs-title function_ invoke__">str_replace</span>(<span class="hljs-string">"\n"</span>, <span class="hljs-string">"\\n"</span>,<span class="hljs-variable">$ad_content</span>);
+<span class="hljs-keyword">echo</span> <span class="hljs-string">"&lt;!--\r\ndocument.write(\""</span>.<span class="hljs-variable">$ad_content</span>.<span class="hljs-string">"\");\r\n--&gt;\r\n"</span>;
+
+<span class="hljs-meta">?&gt;</span></code></pre>
+<p>可以看到这里先是加载了/include/common.inc.php文件，我们知道其中存在着addslashes函数的对特数字符的过滤，然后判断ad_id参数是否存在，如果为空，则赋值为空，不为空，则经过trim函数的处理（也就是去除字符串首位空字符，没啥用），如果为空，则首页然后error后退出。不是空的话，就连接数据库进行语句的查询，中间部分没啥用，到最后就是对回显的内容进行处理，对其中的换行符、双引号之类的进行转移，防止被当成特殊字符对待。</p>
+<p>这里重点看sql查询语句<code>$ad = $db-&gt;getone("SELECT * FROM ".table('ad')." WHERE ad_id =".$ad_id);</code></p>
+<p>tips：当时尴尬了，以为是双引号闭合的，没发现只是单纯的字符串拼接，同时对ad_id没啥过滤（除了addslashes），这样就能知道就是单纯的数字型注入，我们看一下数据库对应的ad表</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657694.png" alt="image-20240529223422628"></p>
+<p>可以看到有7列，那我们直接联合注入即可，这里为了方便，我就将源代码的，对html注释部分取消了，让其直接回显到页面（懒~）</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657696.png" alt="image-20240529224619157"></p>
+<p>这里看到回显位是7，根据数据库的内容，我们一步到位拿到管理员密码，MD5解密一下就是123</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657697.png" alt="image-20240529225222940"></p>
+<h2 id="_server绕过">$_SERVER绕过</h2>
+<p>我们知道在上面提到的函数中common.inc.php并没有对$_SERVER做出过滤，我们可以通过这个传入外部数据造成漏洞，接下来可以看一下，这个在哪里被调用过</p>
+<p>马后炮的话，就是顺着那片文章的思路，我们尝试倒着找一次，因为没有对$_SERVER做出限制，我们可以全局搜索$_SERVER的使用情况</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657698.png" alt="image-20240530002814774"></p>
+<p>如上图，能够看到有很多地方都是用到了，在我看了文章以及自身的思考之后，发现，对于这种情况，我们不必盲目的尝试，我认为可以都先看一遍，重点关注其中参数可控的，比如举几个与漏洞无关的例子</p>
+<p>这里是获取UA头的，明显可控</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657699.png" alt="image-20240530002931916"></p>
+<p>这里一个是获取addr访问者IP的，还有一个是software也就是web服务</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657700.png" alt="image-20240530003019862"></p>
+<p>就这样一个个看过去，最后可以看到我们此次的漏洞点。如下图，这里明显是对于IP是可控的（bp抓包修改即可）</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657701.png" alt="image-20240530003135962"></p>
+<p>但是当我们找到这种类似的情况，又该如何利用，那就是看该值赋给了哪个参数，比如我们的漏洞点这里，赋值给了ip变量，而这个变量又在getip函数中，我们可以看一下，谁调用了这个函数</p>
+<h3 id="insert注入1">Insert注入1</h3>
+<p>如下图，这里能看到有两个地方调用过</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657702.png" alt="image-20240530003336994"></p>
+<p>先看第一个，可以看到这里直接调用getip函数来获取IP，然后insert语句插入到数据库中，我们往上看</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657703.png" alt="image-20240530020924513"></p>
+<p>往上看的原因是，我们需要找到该语句是否有回显的地方，否则，即使有注入点，看不到也没办法（不过突然想到时间盲注似乎可以不必在乎）</p>
+<p>这里它通过comment.htm进行渲染，很明显只显示发送评论的内容，那我们需要想办法将sql注入语句插入到上面的content地方，才能让其有回显</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657704.png" alt="image-20240530021146341"></p>
+<p>这里的其他参数就不赘述了，我们翻看就能知道，只有当act参数为send，参数id存在的时候才行，或者直接在下面的地方，输入内容，点击评论抓包也可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657705.png" alt="image-20240530021339004"></p>
+<p>这里我也是搜了几个注入的方式，但不行，最终找了几篇文章才知道的（我知道了我当时出不来的原因就是脑子太死，用的不灵活，那个sql语句完全不适用于这个地方，不会变通）</p>
+<p>因为这里对是通过$_SERVER[‘REMOTE_ADDR’]获取的IP，我们直接伪造xff头或者client-ip即可，同时有个知识点：</p>
+<pre><code class="hljs scss">insert语句的话，我们可以insert into <span class="hljs-selector-tag">table</span> (a,b,c) values (‘fuck1′,’fuck2′,’fuck3′),(‘fuck4′,’fuck5′,’fuck6′)……这样可以多插几个的。</code></pre>
+<p>因此payload如下图</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657706.png" alt="image-20240530021623117"></p>
+<pre><code class="hljs scss">Client-IP: <span class="hljs-number">1</span><span class="hljs-string">','</span><span class="hljs-number">1</span><span class="hljs-string">'),('</span><span class="hljs-string">', '</span><span class="hljs-number">1</span><span class="hljs-string">', '</span><span class="hljs-number">0</span><span class="hljs-string">', '</span><span class="hljs-number">0</span><span class="hljs-string">', '</span><span class="hljs-number">0</span><span class="hljs-string">',(select concat(admin_name,0x3a,pwd) from blue_admin limit 0,1),'</span><span class="hljs-number">1645457407</span><span class="hljs-string">','</span>sss<span class="hljs-string">','</span><span class="hljs-number">1</span><span class="hljs-string">')#</span></code></pre>
+<p>最终查看即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657707.png" alt="image-20240530021658989"></p>
+<p>这里我们上面也提过，可以无脑sqlmap跑一下，bp抓包，在xff头上个标记：*，然后sqlmap即可</p>
+<pre><code class="hljs scss">python3 sqlmap<span class="hljs-selector-class">.py</span> -r "<span class="hljs-number">1</span><span class="hljs-selector-class">.txt</span>" <span class="hljs-attr">--batch</span> <span class="hljs-attr">--level</span> <span class="hljs-number">4</span> -dbs</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657708.png" alt="image-20240530061857377"></p>
+<h3 id="insert注入2">Insert注入2</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657709.png" alt="image-20240530062045695"></p>
+<p>来到第二个调用点，我们发现该函数的值被赋值给了一个变量，那就继续追踪这个变量。</p>
+<p>如下图，能看到有八个调用点，这里都随便看看就知道，只有guest_book.php，publish.php的地方还有点意思，剩下的虽然有调用点，但是没办法进一步利用。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657710.png" alt="image-20240530062219822"></p>
+<p>比如publish.php中，这里虽然将online_ip参数值插入了进去，但是并没有页面回显的地方</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657711.png" alt="image-20240530064021119"></p>
+<p>但是如下图，我们可以考虑时间盲注，这里也证明是可行的</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657712.png" alt="image-20240530065646820"></p>
+<p>不过当我采用上述同样的insert注入手法，发现总是抱错，这里不太理解为何</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657713.png" alt="image-20240530072848417"></p>
+<h3 id="insert注入3">Insert注入3</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657714.png" alt="image-20240530072940591"></p>
+<p>追踪到guest_book.php，发现这是一个留言板的功能，话不多说，直接尝试注入</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657715.png" alt="image-20240530074051542"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657716.png" alt="image-20240530074103221"></p>
+<p>这里注入的时候还遇到点问题，就是rid参数的值的问题，如下图，这里如果我们点击了发布成功之后显示给我们的超链接，就会调用act=list这一块函数，这里认为，当rid参数值为0的时候，才会正常的去显示评论页面。</p>
+<p>我当时给rid赋值为了1，导致我死活见不到我留言的内容。。。。。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657717.png" alt="image-20240530074031351"></p>
+<h2 id="宽字节注入">宽字节注入</h2>
+<h3 id="后台万能密码">后台万能密码</h3>
+<p>因为我们知道这个数据库选择了GBK编码，那大概率有地方能够利用宽字节注入绕过过滤。我们直接定位到文章所说的地方：/admin/login.php</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657718.png" alt="image-20240530081902826"></p>
+<p>代码逻辑就是，当我们尝试在后台登陆的时候，会跳转到上面这段代码块，首先判断我们输入的用户名和密码是否为空，存在的话，就调用check_admin函数，检查这两个数据在数据库是否存在。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657719.png" alt="image-20240530082011371"></p>
+<p>这个函数内部就是常规的查询语句，我们很容易想到万能密码。不过我们知道post传入的数据会被addslashes函数过滤，但因为是GBK编码，所以可以宽字节绕过。如下图，成功登录</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657720.png" alt="image-20240530081833757"></p>
+<h2 id="编辑会员sql注入">编辑会员sql注入</h2>
+<p>这里也是偶然看到的，看文章说这里存在某个宽字节注入，但是没找到，倒是找到了联合注入：/admin/user.php</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657721.png" alt="image-20240530084250536"></p>
+<p>通读一遍代码就知道这里可疑了，没有任何过滤，因为不需要单引号，因此这个addslashes函数的过滤也就没用了，这里是数字型注入</p>
+<pre><code class="hljs scss">http://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>/bluecms/admin/user.php?act=edit&amp;user_id=-<span class="hljs-number">1</span> union select <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-built_in">user</span>(),<span class="hljs-number">5</span>,<span class="hljs-number">6</span>,<span class="hljs-number">7</span>,<span class="hljs-number">8</span>,<span class="hljs-number">9</span>,<span class="hljs-number">10</span>,<span class="hljs-number">11</span>,<span class="hljs-number">12</span>,<span class="hljs-built_in">version</span>(),<span class="hljs-built_in">group_concat</span>(pwd),<span class="hljs-number">15</span>,<span class="hljs-number">16</span>,<span class="hljs-number">17</span> from blue_admin%<span class="hljs-number">23</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657722.png" alt="image-20240530085044866"></p>
+<h2 id="后台导航sql注入">后台导航sql注入</h2>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657723.png" alt="image-20240531094448701"></p>
+<p>根据seay定位到这里，然后直接数字型注入即可</p>
+<pre><code class="hljs scss">http://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>/bluecms/admin/nav.php?act=edit&amp;navid=<span class="hljs-number">1</span> union select <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-built_in">user</span>(),<span class="hljs-built_in">version</span>(),<span class="hljs-built_in">group_concat</span>(pwd),<span class="hljs-number">6</span> from blue_admin</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657724.png" alt="image-20240531094436952"></p>
+<h2 id="后台属性列表sql注入">后台属性列表sql注入</h2>
+<p>这个点也很疑惑，也说明了，我手工注入有点垃圾啊。这个是看的文章了解到的。</p>
+<p>首先定位到admin/attachment.php，发现下图位置存在sql注入，因为这里对att_id参数没有任何过滤，我们直接输入即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657725.png" alt="image-20240531114841497"></p>
+<p>我开始的payload为：</p>
+<pre><code class="hljs scss">http://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>/bluecms/admin/attachment.php?act=del&amp;att_id=<span class="hljs-built_in">updatexml</span>(<span class="hljs-number">1</span>,<span class="hljs-built_in">concat</span>(<span class="hljs-number">0</span>x7e,<span class="hljs-built_in">database</span>()),<span class="hljs-number">1</span>)</code></pre>
+<p>但是页面只说语法错误，但我不理解为何出不来信息</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657726.png" alt="image-20240531115502538"></p>
+<p>或许又是跟我的环境有关</p>
+<p>但当我尝试用sqlmap去跑的时候，发现延时注入是可以使用的，它使用的payload如下：</p>
+<pre><code class="hljs scss">att_id=(SELECT <span class="hljs-number">4477</span> FROM (SELECT(SLEEP(<span class="hljs-number">5</span>)))tVeo)</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657727.png" alt="image-20240531115600303"></p>
+<p>类似的下面这一个地方，也是跟上述差不多/admin/ad.php</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657728.png" alt="image-20240531120037644"></p>
+<h2 id="任意文件读取">任意文件读取</h2>
+<p>这里根据文章所说：/admin/tpl_manage.php中存在任意文件读取，我们同时可以结合seay能看到敏感函数的位置</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657729.png" alt="image-20240530090323104"></p>
+<p>定位到下图，能看到对传入的参数tpl_name没有过滤，这里的blue_root就是根目录，也就是说，我们只需要向上跳两级即可根据各个文件的位置，任意读文件了</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657730.png" alt="image-20240530090336820"></p>
+<p>如下图：<code>http://127.0.0.1/bluecms/admin/tpl_manage.php?act=edit&amp;tpl_name=../../index.php</code></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657731.png" alt="image-20240530090227895"></p>
+<h2 id="任意文件写入">任意文件写入</h2>
+<p>这里当时没注意，直接看了文章的思路了。</p>
+<p>我们在刚刚的代码处往下看，就知道</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657732.png" alt="image-20240530091056161"></p>
+<p>它将文件输入的内容进行deep_stripslashes的处理了，然后就根据定义的文件路径，写入该文件，我们跟进一下这个函数看看</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657733.png" alt="image-20240530091143390"></p>
+<p>这里无非就是调用PHP自带的stripslashes函数，我们看一下这个函数的作用</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657734.png" alt="image-20240530091215391"></p>
+<p>这里突然就能联想到，这个CMS对全局的post参数还做了某个过滤，就是addslashes，我们知道这个函数是转移单引号这些字符，而stripslashes恰恰相反，是去除这些转移符号，这相当于没有过滤！！</p>
+<p>那我们直接根据代码写入文件即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657735.png" alt="image-20240530091332668"></p>
+<p>蚁剑连接也成功</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657736.png" alt="image-20240530090956158"></p>
+<h2 id="任意文件删除">任意文件删除</h2>
+<h3 id="第一处">第一处</h3>
+<p>这里也是看文章得到的，之前也注意过，不过忽略了（因为某些原因）</p>
+<p>首先根据seay代码审计系统，知道在user.php的位置存在unlink函数，可能会有任意文件删除漏洞，我们跟进看看，第一个就是文章所说的</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657737.png" alt="image-20240530211805975"></p>
+<p>在这里是当act等于这个值的时候，接受一个id参数，然后sql进入数据库查询，之后如果，对应的文件存在的话，就删除，很明显。这里没有对id进行任何过滤，我们直接遍历的话就能删除任意文件，我们可以尝试删除。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657738.png" alt="image-20240530212626869"></p>
+<p>可以看到抱错，这里原因在于数据库初始化的时候，并没有conpany_image这个表，导致这里抱错，但如果这个表存在的话，是不会影响后续unlink的执行的，我们不妨注释一下，测试。</p>
+<pre><code class="hljs scss">http://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>/bluecms/user.php?act=del_pic&amp;id=templates/default/shell.php</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657739.png" alt="image-20240530213151815"></p>
+<p>如上图，发现删除成功。</p>
+<h3 id="第二处">第二处</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657740.png" alt="image-20240530213452813"></p>
+<p>我们先创建一个测试文件，然后继续跟踪unlink的调用，到了下面这里</p>
+<p>这里的调用是当act=edit_user_info的时候，并且只要face_pic1为空，就到了下面的else代码块，然后我们只需要给face_pic3赋值即可（依旧没有任何过滤）</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657741.png" alt="image-20240530213523580"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657742.png" alt="image-20240530213622120"></p>
+<p>最终执行，发现文件成功删除</p>
+<h3 id="第三处">第三处</h3>
+<p>我们继续往上跟踪，可以看到下面这里依旧没有任何过滤，然后调用到这一块代码也很简单，往上走，然后满足各个必要的参数的存在即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657743.png" alt="image-20240530214011771"></p>
+<p>payload如下：如图所示，除了文件路径之外，其他参数都是必要的，执行后我们发现成功删除文件</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657744.png" alt="image-20240530214053781"></p>
+<h2 id="任意文件包含">任意文件包含</h2>
+<p>这里没有复现成功，感觉是我自身环境的问题吧。我们先看漏洞点</p>
+<p>搜寻user.php下的include函数，发现只有下图位置中，存在可控的可能性，只要我们选择act=pay然后，给pay传参进行目录遍历，即可包含任意函数</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657745.png" alt="image-20240530221837742"></p>
+<p>不过需要注意的是，这里后面有index.php的后缀存在，思路一般会有%00截断，或者依靠系统文件路径长度限制</p>
+<pre><code class="hljs scss">Windows <span class="hljs-number">259</span>个字节
+Linux <span class="hljs-number">4096</span>个字节</code></pre>
+<p>因为这里版本5.4.45，那肯定不是00截断，因此会尝试长度截断，这里无非就是这样的payload，后面一堆.来截断，但是我却不能复现出来，猜测是某些环境配置的问题，导致我当前的NTFS文件系统依旧可以处理这样长度的路径。。。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657746.png" alt="image-20240530222058218"></p>
+<p>这里如果成功的话，找一下哪里可以上传，配合图片马即可</p>
+<p>补充一下，突然发现一篇文章说了类似的问题，他是这样说的：</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657747.png" alt="image-20240531120529547"></p>
+<p>然后他尝试了5.2.17的版本，然后成功了，但我在复现的时候还是没成功，估计就是环境每搭好，或者是又变化了。下面是它成功的截图</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657748.png" alt="image-20240531122816340"></p>
+<h2 id="xss漏洞">XSS漏洞</h2>
+<h3 id="第一处">第一处</h3>
+<p>依旧是在user.php中，找trim函数，跟踪发现如下图的地方，存在可以地方，他对大部分参数只进行了trim的处理，很明显，如果该参数参与了前端的渲染，那么就可以造成存储型xss</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657749.png" alt="image-20240531084351112"></p>
+<p>这里测试了一番，发现只有邮件地址这里可以生效</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657750.png" alt="image-20240531084824498"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657751.png" alt="image-20240531083456258"></p>
+<h3 id="第二处">第二处</h3>
+<p>这一个地方也是刚刚关注了，但是以为过滤的没毛病，我就认为没利用点了。。。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657752.png" alt="image-20240531085012585"></p>
+<p>如上图的地方，这里依旧是user.php，然后这里并没有对content和descript这两个参数做出实体转义，这意味着有可能造成xss，我们跟踪一下这两个变量</p>
+<p>其中content参数做了过滤，这里的正则也就是匹配形如<code>&lt;script&gt;、&lt;iframe&gt;、&lt;frame&gt;、&lt;meta&gt;</code>的这类标签</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657753.png" alt="image-20240531085117100"></p>
+<p>这里是可以绕过的，比如img标签或者是双写绕过（这里似乎必须抓包改）</p>
+<pre><code class="hljs scss">&lt;scr&lt;script&gt;ipt&gt;<span class="hljs-built_in">alert</span>(<span class="hljs-number">1</span>)&lt;/scri&lt;script&gt;pt&gt; <span class="hljs-comment">//或者大写绕过</span>
+&lt;<span class="hljs-selector-tag">img</span> <span class="hljs-attribute">src</span>=<span class="hljs-number">1</span> onerror=<span class="hljs-built_in">alert</span>(<span class="hljs-number">1</span>)&gt;</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657754.png" alt="image-20240531090053979"></p>
+<h3 id="第三处">第三处</h3>
+<p>与上面一样，需要在bp提交，他前端有检测的代码，直接写入，会被转义</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657755.png" alt="image-20240531091701949"></p>
+<p>漏洞点还是user.php中的用户注册部分，利用点就是email这个地方，没有进行实体转义</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657756.png" alt="image-20240531091821800"></p>
+<p>然后直接访问user.php即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657757.png" alt="image-20240531091450987"></p>
+<p>同时这里在测试的时候，发现还存在验证码复用的问题。</p>
+<h2 id="ssrf漏洞">SSRF漏洞</h2>
+<p>定位到/user.php，这里的face_pic1的，对于http和https协议的检测，采用的是弱比较类型</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657758.png" alt="image-20240531124041362"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657759.png" alt="image-20240531124127171"></p>
+<p>我们知道这个函数strops返回的是，字符串首次出现的位置，假如我们给face_pic传值为<a target="_blank" rel="noopener" href="http://xxx">http://xxx</a>，那经过这个函数，返回的肯定就是0（首次出现的地方就是0），但由于是弱比较类型，故0!=false很明显返回的是false，故会成功赋值给下面的face_pic变量</p>
+<p>接下来看一下哪里调用过这个face_pic变量，</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657760.png" alt="image-20240531124649117"></p>
+<p>也就是下面的这里将face_pic当作了上传的路径，img_upload函数就是用来上传头像的，与上面配合也就形成了ssrf，我们直接输入如下payload</p>
+<pre><code class="hljs scss">face_pic1=http://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">9999</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202406031657761.png" alt="image-20240531124024399"></p>
+<p>如果这里的strops换成了强等于，那就没事儿了，不过协议过滤也不完整。</p>
+<h1 id="0x05-总结">0x05 总结</h1>
+<p>总体感觉下来，对新手入门来说，审计这个CMS是蛮简单的。可以说只要seay扫出来的可以漏洞，我认为基本都是可以测出来的。</p>
+<p>我感觉除了上述介绍到的，依旧存在其他漏洞，感觉审的足够了，也就没继续了。可以说自己找出来的，和看文章提示的，46开吧。对于这种类型的CMS，我感觉首先判断出总体CMS功能点在哪，防御函数在哪，先看防御类函数是否做到了真正的防御，然后转到功能点，跟着自动化出来的漏洞点，去一个个看，正向或者逆向追踪变量等等。</p>
+<p>这种无MVC的感觉无脑审都行。继续勉励仍有不足</p>
+<h1 id="0x06-参考文章">0x06 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://www.xiebruce.top/1191.html">可能是全网最详细的PhpStorm+xdebug远程调试php代码的教程</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/265092">PHP代码审计一条龙思路</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/web/284008.html">通过 BlueCMS 学习 php 代码审计</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/196190.html">从小众blueCMS入坑代码审计</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/BOHB-yunying/p/12643510.html">bluecms v1.6 sp1 代码审计学习</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7074?time__1311=n4%2BxnD0GDti%3D0%3DGCDR7Dlhjm5x7TlOo%2BBG7bD&amp;alichlgref=https%3A%2F%2Fwww.google.com%2F#toc-14">bluecms v1.6 sp1 代码审计</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6946?time__1311=n4%2BxnD0DRDyD9iDcA%2BD%2Fia4TwiKitKorDuYD&amp;alichlgref=https%3A%2F%2Fwww.google.com%2F#toc-0">PHP代码审计入门篇bluecms</a></p>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/06/01/ju-zhen-bei/">矩阵杯</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/05/26/flask-nei-cun-ma-xue-xi/">Flask内存马学习</a></div></section></div>
+
+
+
+
+  <div class="related-wrap md-text" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-text">0x01 环境搭建</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-text">0x02 前置知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%8E%E7%A1%AE%E7%9B%AE%E6%A0%87"><span class="toc-text">明确目标：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%86%E6%9E%B6"><span class="toc-text">使用框架</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%A1%E8%AE%A1%E6%B5%81%E7%A8%8B"><span class="toc-text">审计流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bluecms%E7%AE%80%E4%BB%8B"><span class="toc-text">BlueCMS简介</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E5%89%8D%E6%9C%9F%E5%AE%A1%E8%AE%A1"><span class="toc-text">0x03 前期审计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A5%E5%8F%A3%E7%82%B9%E5%88%86%E6%9E%90"><span class="toc-text">入口点分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%BE%E5%90%8E%E5%8F%B0"><span class="toc-text">找后台</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E6%BC%8F%E6%B4%9E%E5%AE%A1%E8%AE%A1"><span class="toc-text">0x04 漏洞审计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E5%8F%B0sql%E6%B3%A8%E5%85%A5"><span class="toc-text">前台sql注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#_server%E7%BB%95%E8%BF%87"><span class="toc-text">$_SERVER绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#insert%E6%B3%A8%E5%85%A51"><span class="toc-text">Insert注入1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#insert%E6%B3%A8%E5%85%A52"><span class="toc-text">Insert注入2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#insert%E6%B3%A8%E5%85%A53"><span class="toc-text">Insert注入3</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%BD%E5%AD%97%E8%8A%82%E6%B3%A8%E5%85%A5"><span class="toc-text">宽字节注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0%E4%B8%87%E8%83%BD%E5%AF%86%E7%A0%81"><span class="toc-text">后台万能密码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E8%BE%91%E4%BC%9A%E5%91%98sql%E6%B3%A8%E5%85%A5"><span class="toc-text">编辑会员sql注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0%E5%AF%BC%E8%88%AAsql%E6%B3%A8%E5%85%A5"><span class="toc-text">后台导航sql注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8sql%E6%B3%A8%E5%85%A5"><span class="toc-text">后台属性列表sql注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96"><span class="toc-text">任意文件读取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%86%99%E5%85%A5"><span class="toc-text">任意文件写入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%88%A0%E9%99%A4"><span class="toc-text">任意文件删除</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E5%A4%84"><span class="toc-text">第一处</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E5%A4%84"><span class="toc-text">第二处</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E5%A4%84"><span class="toc-text">第三处</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB"><span class="toc-text">任意文件包含</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xss%E6%BC%8F%E6%B4%9E"><span class="toc-text">XSS漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E5%A4%84"><span class="toc-text">第一处</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E5%A4%84"><span class="toc-text">第二处</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E5%A4%84"><span class="toc-text">第三处</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ssrf%E6%BC%8F%E6%B4%9E"><span class="toc-text">SSRF漏洞</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E6%80%BB%E7%BB%93"><span class="toc-text">0x05 总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-text">0x06 参考文章</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
+    });
+</script>
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
