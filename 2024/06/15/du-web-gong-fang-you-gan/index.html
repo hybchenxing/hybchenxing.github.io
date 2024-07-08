@@ -1,0 +1,1398 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>读web攻防有感 - hybcx's blog</title>
+
+  
+    <meta name="description" content="0x01 概述 背景 在当前背景下，越来越多平台（如银行、保险、证券、电商、P2P、O2O、游戏、社交、招聘、航空等）安全防护措施都在持续的进步和迭代，基于常规渗透测试的技术（owasp top 10）往往已经不能够取得显著的成效了。 故此，业务逻辑漏洞逐渐成为了黑客或者是安全人员渗透测试的重点，对于原因，这里直接照搬文章的说法了： 一方面随着社会及科技的发展，购物、社交、P2P、O2O、游戏、招">
+<meta property="og:type" content="article">
+<meta property="og:title" content="读web攻防有感">
+<meta property="og:url" content="http://hybcx.xyz/2024/06/15/du-web-gong-fang-you-gan/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="0x01 概述 背景 在当前背景下，越来越多平台（如银行、保险、证券、电商、P2P、O2O、游戏、社交、招聘、航空等）安全防护措施都在持续的进步和迭代，基于常规渗透测试的技术（owasp top 10）往往已经不能够取得显著的成效了。 故此，业务逻辑漏洞逐渐成为了黑客或者是安全人员渗透测试的重点，对于原因，这里直接照搬文章的说法了： 一方面随着社会及科技的发展，购物、社交、P2P、O2O、游戏、招">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617151544045.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617151646754.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617173804986.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617174254313.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617175118607.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617175502755.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617184346363.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617175712055.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617180400053.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617183004594.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617201947709.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617201404841.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618164811470.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618165130013.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618165338881.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618165711428.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618170241967.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618171446560.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618171849221.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618172148183.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618172525673.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618193934497.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618194232797.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618194331544.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240630165845636.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240702211452065.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240702211757759.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707101821473.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707103946717.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707141621128.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707141656461.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707142356442.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707142346109.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707144203651.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707144529531.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707145555303.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707145720558.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707145957574.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707150131578.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707150455589.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707150658636.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707151745465.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707151832167.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707151636207.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707152051445.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707152807617.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707152827771.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707152743203.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707154429511.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707154905458.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707160609876.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707160632559.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707162155086.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707162101300.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707162119933.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707162341224.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164947537.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164118489.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164249158.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164728054.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164847963.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164858157.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170114352.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170211000.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170239519.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170916346.png">
+<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170908894.png">
+<meta property="article:published_time" content="2024-06-15T12:48:02.000Z">
+<meta property="article:modified_time" content="2024-07-08T01:00:51.863Z">
+<meta property="article:author" content="hybcx">
+<meta property="article:tag" content="SecBook">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="d:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617151544045.png">
+  
+  
+  
+  <meta name="keywords" content="SecBook">
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+    <link rel="shortcut icon" href="/medias/logo.png">
+  
+
+  
+    
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+
+  
+
+  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/03/29/thm-jin-gong-xing-shen-tou-ce-shi/"><span class="title">THM-进攻性渗透测试</span></a><a class="item title" href="/2024/06/15/du-web-gong-fang-you-gan/"><span class="title">读web攻防有感</span></a><a class="item title" href="/2024/06/29/xuan-ji-ying-ji-xiang-ying-ba-chang/"><span class="title">玄机应急响应靶场</span></a><a class="item title" href="/2024/06/17/thm-corp/"><span class="title">THM-Corp</span></a><a class="item title" href="/2024/06/16/thm-hacking-with-powershell/"><span class="title">THM-Hacking_With_PowerShell</span></a><a class="item title" href="/2024/06/10/thm-exploiting-active-directory/"><span class="title">THM-Exploiting Active Directory</span></a><a class="item title" href="/2024/06/11/thinkphp5-dai-shen/"><span class="title">ThinkPHP5代码审计</span></a><a class="item title" href="/2024/06/01/seacms-dai-ma-shen-ji/"><span class="title">SeaCMS代码审计</span></a><a class="item title" href="/2024/06/09/thm-enumerating-active-directory/"><span class="title">THM-Enumerating Active Directory</span></a><a class="item title" href="/2024/02/19/thm-persisting-active-directory/"><span class="title">THM-Persisting Active Directory</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/SecBook/">SecBook</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-06-15T12:48:02.000Z">2024-06-15</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-07-08T01:00:51.863Z">2024-07-08</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>读web攻防有感</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="0x01-概述">0x01 概述</h1>
+<h2 id="背景">背景</h2>
+<p>在当前背景下，越来越多平台（如银行、保险、证券、电商、P2P、O2O、游戏、社交、招聘、航空等）安全防护措施都在持续的进步和迭代，基于常规渗透测试的技术（owasp top 10）往往已经不能够取得显著的成效了。</p>
+<p>故此，业务逻辑漏洞逐渐成为了黑客或者是安全人员渗透测试的重点，对于原因，这里直接照搬文章的说法了：</p>
+<p>一方面随着社会及科技的发展，购物、社交、P2P、O2O、游戏、招聘等业务纷纷具备了在线支付功能。如电商支付系统保存了用户手机号、姓名、家庭住址，甚至包括支付的银行卡号信息、支付密码信息等，这些都是黑客感兴趣的敏感信息。相比SQL注入漏洞、XSS漏洞、上传、命令执行等传统应用安全方面的漏洞，现在的攻击者更倾向于利用业务逻辑层面存在的安全问题。这类问题往往容易被开发人员忽视，同时又具有很大的危害性，例如一些支付类的逻辑漏洞可能使企业遭受巨大的财产损失。传统的安全防护设备和措施主要针对应用层面，而对业务逻辑层面的防护则收效甚微。攻击者可以利用程序员的设计缺陷进行交易数据篡改、敏感信息盗取、资产的窃取等操作。现在的黑客不再以炫耀技能为主要攻击目的，而主要以经济利益为目的，攻击的目的逐渐转变为趋利化。</p>
+<p>另一方面，如今的业务系统对于传统安全漏洞防护的技术和设备越来越成熟，基于传统安全漏洞入侵也变得越来越困难，增加了黑客的攻击成本。而业务逻辑漏洞可以逃逸各种安全防护，迄今为止没有很好的解决办法。这也是为什么黑客偏好使用业务逻辑漏洞进行攻击的一个原因。</p>
+<h2 id="如何测试">如何测试</h2>
+<p>总结一句话，就是先要掌握一套成熟的业务安全测试的方式方法，消化吸收前人总结的宝贵经验，开拓自己的安全视野。</p>
+<p>其次需要了解目标平台的业务流程。在进行安全测试前，需要对业务的详细流程进行一次全面的梳理。可以先将业务主体划分为几个大模块，再将每个大模块逐个细分为子模块。可以从账号体系开始，如用户的注册、登录、密码找回、信息存储等，再到具体的业务办理，如商品的搜索、选择、支付、生成订单，以及订单查询和用户评论等。对整个业务流程有了一个详细的了解后，再结合前面学到的测试方法，就能更全面地把控业务流程的各个步骤可能存在的风险点。</p>
+<p>应结合被测试对象的实际业务情况，从熟悉公司、组织的业务模式、赢利模式来着手，通过一定程度地理解被测对象的业务模式，了解信息系统所承载的业务数据流转情况，分析出业务对象、渠道，以及各业务系统前、后台业务数据的生成、传输、使用和存储方式，再针对不同的业务场景构建相应的业务安全测试模型。</p>
+<p>在实践层面，推荐使用以下两种测试技巧，以达到事半功倍的效果：</p>
+<ol>
+<li>科学的测试方法。常规的方法有控制变量法、删减法等，如在分析平行权限跨越时，需要明白每一次步骤变的是什么，不变的是什么，控制好不同变量的变化，从而筛选出影响业务流程的参数。</li>
+<li>学会使用思维导图等工具。在面对复杂的系统时，我们需要通过思维导图等工具来协助我们理清各个业务模块之间的联系，从而做到有的放矢。</li>
+</ol>
+<h2 id="测试模型">测试模型</h2>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617151544045.png" alt="image-20240617151544045"></p>
+<ul>
+<li>前台视角：业务使用者（信息系统受众）可见的业务及系统视图，如平台的用户注册、充值、购买、交易、查询等业务。</li>
+<li>后台视角：管理用户（信息系统管理、运营人员）可见的业务及系统视图，如平台的登录认证、结算、对账等业务。</li>
+<li>业务视角：业务使用者（信息系统受众）可见的表现层视图，如 Web 浏览器、手机浏览器展现的页面及其他业务系统用户的UI界面。</li>
+<li>系统视角：业务使用者（信息系统受众）不可见的系统逻辑层视图。</li>
+</ul>
+<p>为了全面测试客户业务系统，在进行业务安全分析的时候，不能拘泥于以上测试模型，在面对不同用户的不同业务的时候，通过深入了解用户业务特点、业务安全需求，应切实地根据客户业务系统的架构，从前/后视角、业务视角与支撑系统视角划分测试对象，根据实际情况选择白灰盒或黑盒的手段进行业务安全测试。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617151646754.png" alt="image-20240617151646754"></p>
+<h2 id="业务风险点">业务风险点</h2>
+<h3 id="业务环节风险">业务环节风险</h3>
+<p>业务环节存在的安全风险指的是业务使用者可见的业务存在的安全风险，如注册、登录和密码找回等身份认证环节，是否存在完善的验证码机制、数据一致性校验机制、Session 和 Cookie 校验机制等，是否能规避验证码绕过、暴利破解和 SQL注入等漏洞。</p>
+<h3 id="支持系统风险">支持系统风险</h3>
+<p>支持系统存在的安全风险，如用户访问控制机制是否完善，是否存在水平越权或垂直越权漏洞。系统内加密存储机制是否完善，业务数据是否明文传输。系统使用的业务接口是否可以未授权访问/调用，是否可以调用重放、遍历，接口调用参数是否可篡改等。</p>
+<h3 id="业务环节风险">业务环节风险</h3>
+<p>业务环节间存在的安全风险，如系统业务流程是否存在乱序，导致某个业务环节可绕过、回退，或某个业务请求可以无限重放。业务环节间传输的数据是否有一致性校验机制，是否存在业务数据可被篡改的风险。</p>
+<h3 id="支持系统风险">支持系统风险</h3>
+<p>支持系统间存在的安全风险，如系统间数据传输是否加密、系统间传输的参数是否可篡改。系统间输入参数的过滤机制是否完善，是否可能导致 SQL 注入、XSS跨站脚本和代码执行漏洞。</p>
+<h3 id="业务环节与支持系统间风险">业务环节与支持系统间风险</h3>
+<p>业务环节与支持系统间存在的风险，如数据传输是否加密、加密方式是否完善，是否采用前端加密、简单MD5编码等不安全的加密方式。系统处理多线程并发请求的机制是否完善，服务端逻辑与数据库读写是否存在时序问题，导致竞争条件漏洞。系统间输入参数的过滤机制是否完善。</p>
+<p>总结一下就是：</p>
+<blockquote>
+<p>验证码机制、session机制、cookie机制、数据一致性校验、用户输入合法性、业务流程乱序；</p>
+<p>业务数据一致性、业务接口恶意调用、系统数据加密存储、访问控制机制、业务接口恶意调用；</p>
+<p>数据加密传输、输入参数过滤、竞争条件漏洞、系统间输入参数校验、数据加密传输</p>
+</blockquote>
+<h1 id="0x02-登录认证模块测试">0x02 登录认证模块测试</h1>
+<p>本次学习，先学理论，后有缘挑选几个靶场实践</p>
+<h2 id="暴力破解测试">暴力破解测试</h2>
+<h3 id="概述">概述</h3>
+<p>暴力破解测试是指针对应用系统用户登录账号与密码进行的穷举测试，针对账号或密码进行逐一比较，直到找出正确的账号与密码。</p>
+<p>一般分为以下三种情况：</p>
+<ul>
+<li>在已知账号的情况下，加载密码字典针对密码进行穷举测试；</li>
+<li>在未知账号的情况下，加载账号字典，并结合密码字典进行穷举测试；</li>
+<li>在未知账号和密码的情况下，利用账号字典和密码字典进行穷举测试。</li>
+</ul>
+<p>这种情况一般是利用bp，这一点可以在ctfshow靶场中进行实践，由于已经搞过了，就懒得再弄了。</p>
+<p>同时，结合了这个ctfshow，针对暴力破解补充以下额外情况：</p>
+<p>针对MD5某个准确的加密值的爆破、随机数种子可爆破（预测）、针对身份证的爆破（社工得到的有部分脱敏的敏感信息）、针对目录的位置进行爆破</p>
+<h3 id="修复建议">修复建议</h3>
+<ul>
+<li>增加验证码，登录失败一次，验证码变换一次。</li>
+<li>配置登录失败次数限制策略，如在同一用户尝试登录的情况下，5 分钟内连续登录失败超过6次，则禁止此用户在3小时内登录系统。</li>
+<li>在条件允许的情况下，增加手机接收短信验证码或邮箱接收邮件验证码，实现双因素认证的防暴力破解机制。</li>
+</ul>
+<h2 id="本地加密传输测试">本地加密传输测试</h2>
+<h3 id="原理">原理</h3>
+<p>本机加密传输测试是针对客户端与服务器的数据传输，查看数据是否采用 SSL（Security Socket Layer，安全套接层）加密方式加密。</p>
+<p>tips：测试验证客户端与服务器交互数据在网络传输过程中是否采用 SSL 进行加密处理，加密数据是否可被破解</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617173804986.png" alt="image-20240617173804986"></p>
+<p>这一点，自行实践的时候，可以利用wireshark等网络抓包工具进行测试验证</p>
+<h3 id="修复建议">修复建议</h3>
+<p>在架设Web应用的服务器上部署有效的SSL证书服务 —— 也就是采用https协议</p>
+<h2 id="session测试">Session测试</h2>
+<p>Session对于Web应用无疑是最重要的，也是最复杂的。对于web应用程序来说，加强安全性的第一条原则就是 – 不要信任来自客户端的数据，一定要进行数据验证以及过滤，才能在程序中使用，进而保存到数据层。 然而，为了维持来自同一个用户的不同请求之间的状态， 客户端必须要给服务器端发送一个唯一的身份标识符(Session ID)。 很显然，这和前面提到的安全原则是矛盾的，但是没有办法，http协议是无状态的，为了维持状态，我们别无选择。 可以看出，web应用程序中最脆弱的环节就是session，因为服务器端是通过来自客户端的一个身份标识来认证用户的， 所以session是web应用程序中最需要加强安全性的环节。</p>
+<p>基于session的攻击有很多种方式。大部分的手段都是首先通过捕获合法用户的session, 然后冒充该用户来访问系统。也就是说，攻击者至少必须要获取到一个有效的session标识符，用于接下来的身份验证。</p>
+<h3 id="session会话固定">Session会话固定</h3>
+<h4 id="原理">原理</h4>
+<p>Session 是应用系统对浏览器客户端身份认证的属性标识，在用户退出应用系统时，应将客户端Session认证属性标识清空。如果未能清空客户端Session标识，在下次登录系统时，系统会重复利用该Session标识进行认证会话。攻击者可利用该漏洞生成固定Session会话，并诱骗用户利用攻击者生成的固定会话进行系统登录，从而导致用户会话认证被窃取。</p>
+<p>在注销退出系统时，对当前浏览器授权SessionID值进行记录。再次登录系统，将本次授权 SessionID 值与上次进行比对校验。判断服务器是否使用与上次相同的SessionID 值进行授权认证，若使用相同 SessionID 值则存在固定会话风险。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617174254313.png" alt="image-20240617174254313"></p>
+<p>说白了，就是攻击者利用某些方式，更改了受害者的SessionID（攻击者也是知道这个ID是什么的），接着用户利用这个ID登录目标网站，而该网站由于存在Session会话固定缺陷，导致即使受害者退出目标网站，攻击者仍可以直接利用ID以受害者的身份登陆目标网站。</p>
+<p>攻击步骤： 攻击者通过某种手段重置目标用户的SessionID，然后监听用户会话状态；目标用户携带攻击者设定的Session ID登录站点；攻击者通过Session ID获得合法会话</p>
+<h4 id="修复建议">修复建议</h4>
+<p>在客户端登录系统时，应首先判断客户端是否提交浏览器的留存Session认证会话属性标识，客户端提交此信息至服务器时，应及时销毁浏览器留存的Session认证会话，并要求客户端浏览器重新生成Session认证会话属性标识。</p>
+<h3 id="session会话注销">Session会话注销</h3>
+<h4 id="原理">原理</h4>
+<p>Session 是应用系统对浏览器客户端身份认证的属性标识，在用户注销或退出应用系统时，系统应将客户端Session认证属性标识清空。如果未能清空Session认证会话，该认证会话将持续有效，此时攻击者获得该Session认证会话会导致用户权限被盗取。</p>
+<p>该项测试主要在用户注销退出系统授权后，判断授权认证SessionID值是否依然有效。若授权认证SessionID依然有效则存在风险。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617175118607.png" alt="image-20240617175118607"></p>
+<h4 id="修复建议">修复建议</h4>
+<p>在用户注销或退出应用系统时，服务器应及时销毁Session认证会话信息并清空客户端浏览器Session属性标识。</p>
+<h3 id="session会话超时">Session会话超时</h3>
+<h4 id="原理">原理</h4>
+<p>在用户成功登录系统获得Session认证会话后，该Session认证会话应具有生命周期，即用户在成功登录系统后，如果在固定时间内（例如10分钟）该用户与服务器无任何交互操作，应销毁该用户Session认证会话信息，要求用户重新登录系统认证。</p>
+<p>对系统会话授权认证时长进行测试，并根据系统承载的业务需求来分析判断当前系统会话授权认证时间是否过长。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617175502755.png" alt="image-20240617175502755"></p>
+<h4 id="修复建议">修复建议</h4>
+<p>对每个生成的Session认证会话配置生命周期（常规业务系统建议30分钟内），从而有效降低因用户会话认证时间过长而导致的信息泄露风险。</p>
+<h3 id="session会话预测">Session会话预测</h3>
+<h4 id="原理">原理</h4>
+<p>简单说明</p>
+<p>预测这种方式，也就是攻击者需要猜测出系统中使用的有效的session标识符（PHP中格式为PHPSESSID=1234），有点类似暴力破解。 php内部session的实现机制虽然不是很安全，但是关于生成session id的环节还是比较安全的，这个随机的session id往往是极其复杂的并且难于被预测出来，所以说，这种攻击方式基本上是不太可能成功的。</p>
+<p>举一个PHPSEEID的例子：</p>
+<p>PHPSESSID生成规则是根据hash_func散列来生成的，相关的参数有：</p>
+<ul>
+<li>客户端IP</li>
+<li>当前时间（秒）</li>
+<li>当前时间（微秒）</li>
+<li>PHP自带的随机数生产器</li>
+</ul>
+<p>秒微秒可以爆破，随机数也可能是伪随机，客户端IP也可以某种手段获取，但是四种同时精准获取，难度极大，但是不排除有成功的可能性。根据生成规则，也有可能爆破出，但是相对来说几乎不太可能。</p>
+<h3 id="session会话劫持">Session会话劫持</h3>
+<h4 id="原理">原理</h4>
+<p>会话劫持（Session hijacking），这是一种通过获取用户Session ID后，使用该Session ID登录目标账号的攻击方法，此时攻击者实际上是使用了目标账户的有效Session。会话劫持的第一步是取得一个合法的会话标识来伪装成合法用户，因此需要保证会话标识不被泄漏。</p>
+<p>目标用户需要先登录站点；登录成功后，该用户会得到站点提供的一个会话标识SessionID；攻击者通过某种攻击手段捕获Session ID；攻击者通过捕获到的Session ID访问站点即可获得目标用户合法会话。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617184346363.png" alt="image-20240617184346363"></p>
+<p>可能的获取方式：</p>
+<ul>
+<li>暴力破解：直接通过大流量爆破出sessionid（一般是不太可能)。</li>
+<li>预测：如果Session ID使用非随机的方式产生，那么就有可能计算出来；</li>
+<li>窃取：XSS劫持，局域网嗅探，会话固定结合，任意文件读取漏洞等等。</li>
+</ul>
+<p>Session ID往往是随机的而且极其复杂的并且难于被预测出来，所以，对于第一、第二种攻击方式基本上是不太可能成功的。对于第三种方式大多使用网络数据通讯层进行攻击获取，可以使用SSL进行防御。</p>
+<p>在应用层上也可以做出相应的防御措施：</p>
+<p>目前有三种广泛使用的在Web环境中维护会话（传递Session ID）的方法：URL参数，隐藏域和Cookie。其中每一种都各有利弊，Cookie已经被证明是三种方法中最方便最安全的。从安全的观点，如果不是全部也是绝大多数针对基于Cookie的会话管理机制的攻击对于URL或是隐藏域机制同样适用，但是反过来却不一定，这就让Cookie成为从安全考虑的最佳选择。</p>
+<h4 id="修复建议">修复建议</h4>
+<ol>
+<li>更改Session名称。PHP中Session的默认名称是PHPSESSID，此变量会保存在Cookie中，如果攻击者不分析站点，就不能猜到Session名称，阻挡部分攻击。</li>
+<li>关闭透明化Session ID。透明化Session ID指当浏览器中的Http请求没有使用Cookie来存放Session ID时，Session ID则使用URL来传递。</li>
+<li>设置HttpOnly。通过设置Cookie的HttpOnly为true，可以防止客户端脚本访问这个Cookie，从而有效的防止XSS攻击。</li>
+<li>关闭所有phpinfo类dump request信息的页面。</li>
+<li>验证HTTP头部信息，在http访问头文件：[Accept-Charset、Accept-Encoding、Accept-Language、User-Agent]，浏览器一般发出的头部不会改</li>
+<li>使用User-Agent检测请求的一致性：确保User-Agent头部信息一致的确是有效的，如果会话标识通过cookie传递，攻击者能取得会话标识，他同时也能取得其它HTTP头部。由于cookie暴露与浏览器漏洞或跨站脚本漏洞相关，受害者需要访问攻击者的网站并暴露所有头部信息。则攻击者只需<strong>重建头部即可进行攻击了</strong>。（因此需要做好XSS防护）</li>
+<li>加入Token校验。同样是用于检测请求的一致性，给攻击者制造一些麻烦，使攻击者即使获取了Session ID，也无法进行破坏，能够减少对系统造成的损失。但Token需要存放在客户端，如果攻击者有办法获取到Session ID，那么也同样可以获取到Token。</li>
+</ol>
+<p>tips：在某些版本的IE浏览器中，用户正常访问一个网页和刷新一个网页时发出的Accept头部信息不同，因此Accept头部不能用来判断一致性。</p>
+<p>有专家警告不要依赖于检查User-Agent的一致性。这是因为服务器群集中的HTTP代理服务器会对User-Agent进行编辑，而本群集中的多个代理服务器在编辑该值时可能会不一致。</p>
+<h2 id="cookie仿冒测试">Cookie仿冒测试</h2>
+<h3 id="原理">原理</h3>
+<p>服务器为鉴别客户端浏览器会话及身份信息，会将用户身份信息存储在 Cookie中，并发送至客户端存储。攻击者通过尝试修改Cookie中的身份标识，从而达到仿冒其他用户身份的目的，并拥有相关用户的所有权限。</p>
+<p>对系统会话授权认证Cookie中会话身份认证标识进行篡改测试，通过篡改身份认证标识值来判断能否改变用户身份会话。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617175712055.png" alt="image-20240617175712055"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>建议对客户端标识的用户敏感信息数据，使用Session会话认证方式，避免被他人仿冒身份。</p>
+<h2 id="密文比对认证测试">密文比对认证测试</h2>
+<h3 id="原理">原理</h3>
+<p>在系统登录时密码加密流程一般是先将用户名和密码发送到服务器，服务器会把用户提交的密码经过Hash算法加密后和数据库中存储的加密值比对，如果加密值相同，则判定用户提交密码正确。</p>
+<p>但有些网站系统的流程是在前台浏览器客户端对密码进行Hash加密后传输给服务器并与数据库加密值进行对比，如果加密值相同，则判定用户提交密码正确。此流程会泄漏密码加密方式，导致出现安全隐患。</p>
+<p>对系统敏感数据加密流程进行测试，判断加密过程或方式是否为客户端加密方式。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617180400053.png" alt="image-20240617180400053"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>将密码加密过程及密文比对过程放置在服务器后台执行。发送用户名和密码到服务器后台，后台对用户提交的密码经过 MD5 算法加密后和数据库中存储的 MD5密码值进行比对，如果加密值相同，则允许用户登录。</p>
+<h2 id="登陆失败信息测试">登陆失败信息测试</h2>
+<h3 id="原理">原理</h3>
+<p>在用户登录系统失败时，系统会在页面显示用户登录的失败信息，假如提交账号在系统中不存在，系统提示“用户名不存在”、“账号不存在”等明确信息；假如提交账号在系统中存在，则系统提示“密码/口令错误”等间接提示信息。攻击者可根据此类登录失败提示信息来判断当前登录账号是否在系统中存在，从而进行有针对性的暴力破解口令测试。</p>
+<p>针对系统返回不同的登录失败提示信息进行逻辑分析，判断是否能通过系统返回的登录失败信息猜测系统账号或密码。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617183004594.png" alt="image-20240617183004594"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>对系统登录失败提示语句表达内容进行统一的模糊描述，从而提高攻击者对登录系统用户名及密码的可猜测难度，如“登录账号或密码错误”、“系统登录失败”等。</p>
+<h1 id="0x03-阶段总结-1">0x03 阶段总结 1</h1>
+<p>主要是对上述登录认证模块测试部分进行总结，这里重点加深一下对于session和cookie的理解，以及它们之间的联系和不同</p>
+<p>在互联网中，对于用户来说不仅仅是单向信息传输，更重要的是信息交互，但是在web中，http协议是无状态的，当一个请求等到了服务器的回应之后，两者连接便中断了，而第二个请求发出后，服务端并不知道你和第一个请求的关系，所以没办法持续保持身份信息，每个http请求对于服务器来说，如果没有身份认证，那么对服务器来说所有人的请求都是一样无区别的。所以在互联网中，在所有需要信息双向交互的地方就需要身份认证，对于不同的身份给予不同的权限，此时就用到会话这个概念。</p>
+<h2 id="cookie">Cookie</h2>
+<p>在session身份认证中，一切用户的session都会存储在服务器，但是如果一旦用户量达到一个上限，那么对于服务器的荷载也是巨大的，但是在cookie实现身份认证中，并不会存储在服务器，而是存储在用户的客户端，cookie的出现是一次重大的变革，也是一项非常有争议的技术，原因就是因为他的透明性以及信息量，很容易泄露用户的隐私。</p>
+<p>在session如果不设置过期时间，在服务器上就会一直存在，永远不会注销，在cookie中如果不设置过期时间，则在关闭浏览器时销毁该cookie，session会给服务器造成很大的负载，但是cookie并不存在这个问题，它将信息保存在了每个用户的客户端。淘宝便是使用了cookie存储一部分信息。</p>
+<h3 id="何为cookie">何为Cookie</h3>
+<p>HTTP cookie 是网站可以在浏览器中设置的变量。Cookies 实际上是一种键值对存储。通常，Web 服务器通过HTTP 响应标头<code>Set-Cookie</code>设置 cookie ，就像这样。</p>
+<p>Cookie严格来说是<strong>存储空间 + 通信机制</strong>，是个载体，用提交持久化的信息。浏览器将一条条数据存储在一个叫Cookies的空间中，这些数据的结构包含：键、值、属性</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617201947709.png" alt="image-20240617201947709"></p>
+<p>Cookie主要用于以下方面：</p>
+<ul>
+<li>会话状态管理(如用户登录状态、购物车、游戏分数或其它需要记录的信息)</li>
+<li>个性化设置(如用户自定义设置、主题等)</li>
+<li>浏览器行为跟踪(如跟踪分析用户行为等)</li>
+</ul>
+<pre><code class="hljs language-yaml">Set-Cookie: SessionId=s3cr3t;</code></pre>
+<p>但是，网站也可以通过 JavaScript 设置 cookie：</p>
+<pre><code class="hljs language-javascript">document.cookie = 'SessionId=s3cr3t'</code></pre>
+<p>这是浏览器 cookie jar 中 cookie 的样子：</p>
+<pre><code class="hljs scss">Name: <span class="hljs-string">'SessionId'</span>
+Value: s3cr3t<span class="hljs-string">"</span>
+<span class="hljs-string">Domain: 'www.example.com'</span>
+<span class="hljs-string">ExpiresOrMaxAge: 'Session'</span>
+<span class="hljs-string">HostOnly: true</span>
+<span class="hljs-string">HttpOnly: false</span>
+<span class="hljs-string">Path: '/'</span>
+<span class="hljs-string">SameSite: 'None'</span>
+<span class="hljs-string">Secure: false</span></code></pre>
+<p>Cookie然后浏览器将这些 cookie 在请求标头中发送回网络服务器，如下所示：</p>
+<pre><code class="hljs scss">Cookie: Foo=Bar; SessionId=s3cret;</code></pre>
+<p>请注意，浏览器只会将 cookie 的名称和值发送回网络服务器。</p>
+<h3 id="cookie作用">Cookie作用</h3>
+<p>Cookie 有多种用途，主要用于跟踪、个性化和会话管理。在本文中，我们主要关注会话管理。例如，Web 应用程序在身份验证时向用户发出会话标识符 cookie 是很常见的。</p>
+<pre><code class="hljs language-yaml">Set-Cookie: SessionId=s3cr3t</code></pre>
+<p>Cookie 有四个影响其范围的属性，即 cookie 被发送到的 URL 地址。这些是：</p>
+<ol>
+<li>domain: 浏览器应该向哪个域（可能包括子域）发送 cookie？</li>
+<li>hostOnly: 浏览器是否应该只将 cookie 发送到设置它的确切域，不包括子域？</li>
+<li>path: 浏览器应该将 cookie 发送到哪些 URL 路径（即 /foo/bar）？</li>
+<li>secure: 浏览器应该只通过加密通道（HTTPS、WSS）还是不加密（HTTP、WS）发送 cookie？</li>
+</ol>
+<p>任何网站都可以设置 cookie：</p>
+<pre><code class="hljs scss">它本身所处的域。
+其父域（TLD 或公共后缀除外）。
+通过扩展，但不是直接，父域的所有子域。</code></pre>
+<p>例如，foo.example.com可以为example.com设置一个 cookie，在这种情况下，浏览器也会将 cookie <a target="_blank" rel="noopener" href="http://xn--example-5t0l64jk82s.xn--combar-k76j.example.com">发送到example.com和bar.example.com</a>。</p>
+<p>通过Domain属性可以方便地指定域。</p>
+<p>值得注意的是，对于Cookie，使用的http协议或者是端口，都不重要，例如：网站<code>https://www.example.com:12345</code>和<code>http://www.example.com</code>共享 cookie。</p>
+<h3 id="domain属性">domain属性</h3>
+<p>此属性确定 cookie 应发送到哪些网站，并且默认为设置 cookie 的网站的主机名。</p>
+<p>如果www.example.com是设置 cookie 的人，<a target="_blank" rel="noopener" href="http://xn--domainwww-ft6nq32j1qzapl9i.example.com">那么domain将是www.example.com</a>.</p>
+<pre><code class="hljs scss">可以将此值更改为，例如<span class="hljs-selector-class">.www</span><span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>，之后浏览器会将 cookie 发送到www<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>及其所有子域（foo<span class="hljs-selector-class">.www</span><span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>、、bar<span class="hljs-selector-class">.www</span><span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span>等）。</code></pre>
+<pre><code class="hljs scss"><span class="hljs-comment">//Send the cookie to www.example.com and all subdomains of www.example.com</span>
+Set-Cookie: SessionId=s3cret; domain=<span class="hljs-selector-class">.www</span><span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span></code></pre>
+<p>即使您指定<code>domain=www.example.com</code>，浏览器也会默默地将其更改为<code>domain=.www.example.com</code>。</p>
+<h3 id="hostonly属性">HostOnly属性</h3>
+<p>该<code>HostOnly</code>属性确定浏览器是否应该只将 cookie 发送到创建它的确切域。如果为 false，浏览器也会将 cookie 发送到子域。</p>
+<pre><code class="hljs scss"><span class="hljs-comment">// Here HostOnly is true</span>
+Set-Cookie: SessionId=s3cret;
+<span class="hljs-comment">// Here HostOnly is false</span>
+Set-Cookie: SessionId=s3cret; domain=www<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.com</span></code></pre>
+<h3 id="path属性">Path属性</h3>
+<p>开发人员可以使用该path属性来限制发送 cookie 的路径。</p>
+<p>通过将 设置path为/foo/bar，浏览器将仅将 cookie 包含在请求中，例如<a target="_blank" rel="noopener" href="https://www.example.com/foo/bar%E6%88%96https://www.example.com/foo/bar/hello%E3%80%82">https://www.example.com/foo/bar或https://www.example.com/foo/bar/hello。</a></p>
+<p>浏览器不会将其发送到<a target="_blank" rel="noopener" href="https://www.eample.com/foo/barbars">https://www.eample.com/foo/barbars</a>.</p>
+<pre><code class="hljs scss"><span class="hljs-comment">//Here, the cookie only gets sent to www.example.com/foo/bar and its subdirectories.</span>
+Set-Cookie: SessionId=s3cr3t; path=/foo/bar</code></pre>
+<p>这一点相关的是XS-Leak漏洞</p>
+<p><a target="_blank" rel="noopener" href="https://www.appsecmonkey.com/blog/xs-leaks">XS-Leaks (Cross-Site Leaks) Attacks and Prevention</a></p>
+<p><a target="_blank" rel="noopener" href="https://xsleaks.dev/">XS-Leaks Wiki</a></p>
+<h3 id="httponly-属性">HttpOnly 属性</h3>
+<p>cookie 安全功能之一是专门用于防止 XSS 的，这就是HttpOnly属性。</p>
+<p>此属性将阻止 JavaScript 代码访问 cookie，从而防止攻击者在 XSS（跨站点脚本）攻击成功时窃取它。</p>
+<pre><code class="hljs scss">Set-Cookie: SessionId=s3cr3t; ..<span class="hljs-selector-class">.other</span> options... HttpOnly</code></pre>
+<pre><code class="hljs scss">expires 和 maxAge：告诉浏览器这个 cookie 什么时候过期，expires 是 UTC 格式时间，maxAge 是 cookie 多久后过期的相对时间。
+当不设置这两个选项时，会产生 session cookie，session cookie 是 transient 的，当用户关闭浏览器时，就被清除。一般用来保存 session 的 session_id。
+
+secure：当 secure 值为 true 时，cookie 在 HTTP 中是无效，在 HTTPS 中才有效。
+
+httpOnly：浏览器不允许脚本操作 document<span class="hljs-selector-class">.cookie</span> 去更改 cookie。
+一般情况下都应该设置这个为 true，这样可以避免被 xss 攻击拿到 cookie。</code></pre>
+<h2 id="session">Session</h2>
+<p>首先要理解tcp的三次握手，一般在TCP三次握手就创建了一个会话，在会话中可以传递信息，等TCP关闭连接就关闭会话了。HTTP协议是基于TCP协议的，所以http会话也是在TCP关闭连接后就关闭会话，而在http1.1中，一般一个连接就只能处理一个请求，所以在需要权限身份认证的时候就需要有一种凭证，才能使得每次请求服务器都知道是你，相当于建立了连续的会话，也就是每次的请求都带有自己的身份凭证。</p>
+<p>简单点，会话就是让你在信息交互的时候让对方知道你是谁，并且一直知道你是谁，但是服务器不是人，没有自我辨别的功能，这时候需要一种凭证，也就是session。站在客户端角度，在你每次登录帐号密码之后，会有一串类似于短秘钥之类的东西，他只属于你，证明你的身份。站在服务器端，在php中，在你进行身份认证之后，会在服务器端保存一个以PHPSESSID为名的文件来储存你的身份，账号等各种信息，在用户每次提交带有session的请求时，自动去搜索这个以session命名的文件，查看里面的反序列化信息（也就是你的身份等信息）。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240617201404841.png" alt="image-20240617201404841"></p>
+<p>说一下sessionid产生的总体流程：</p>
+<p>当程序需要为某个客户端的请求创建一个session时，服务器首先检查这个客户端的请求里是否已包含了一个session标识（称为session id），如果已包含则说明以前已经为此客户端创建过session,服务器就按照session id把这个session检索出来使用（检索不到，会新建一个），如果客户端请求不包含session id，则为此客户端创建一个session并且生成一个与此session相关联的session id，session id的值应该是一个既不会重复，又不容易被找到规律以伪造的字符串，这个session id将被 在本次响应中返回给客户端保存。保存这个session id的方式可以采用cookie，这样在交互过程中浏览器 可以自动的按照规则把这个标识发送给服务器。一般这个cookie的名字就是类似于SESSIONID。</p>
+<h2 id="token">Token</h2>
+<p>token的意思是“令牌”，是用户身份的验证方式，最简单的token组成:uid(用户唯一的身份标识)、time(当前时间的时间戳)、sign(签名，由token的前几位+盐以哈希算法压缩成一定长的十六进制字符串，可以防止恶意第三方拼接token请求服务器)。还可以把不变的参数也放进token，避免多次查。</p>
+<p>而Session（会话），应该是一次<strong>连续的、短暂</strong>的交流。在交流过程中，服务器可以通过Session识别这次会话，区别于其它正在进行的会话。这里的会话可以是一次支付业务，比如用户创建了订单，带着一个session跳到支付平台，回来服务器再校验是否支付成功。这种会话有明确的起点、终点，且不能被中断，比如你关闭浏览器，再打开页面，你仍是登录状态，但是支付流程却只能重新走。这种特性让session在浏览器上更适合存放在Session Storage中</p>
+<p>然而现实和字面意思却相反，开发者们习惯用Session来做令牌，用token来做会话，其它用于校验身份的参数也习惯命名为token</p>
+<h2 id="区别">区别</h2>
+<h3 id="cookie与session">Cookie与Session：</h3>
+<p>1、cookie数据存放在客户的浏览器上，session数据放在服务器上。</p>
+<p>2、session会在一定时间内保存在服务器上。当访问增多，会比较占用你服务器的性能，考虑到减轻服务器性能方面，应当使用COOKIE。</p>
+<p>3、存储大小不同， 单个Cookie 保存的数据不能超过 4K，Session可存储数据远高于Cookie。</p>
+<p>4、建议：将登陆信息等重要信息存放为SESSION；其他信息如果需要保留，可以放在COOKIE中</p>
+<p>5、存取方式的不同，Cookie只能保存 ASCII，Session可以存任意数据类型，比如UserId等</p>
+<p>6、有效期不同，Cookie可设置为长时间保持，比如默认登录功能功能，Session一般有效时间较短，客户端关闭或者Session超时都会失效。</p>
+<h3 id="token与session">Token与Session</h3>
+<p>Session机制通过Cookie来实现。只需在登录成功后，响应中有Set-Cookie Header来设置一个Cookie值，浏览器就会自动保存、刷新Cookie值，后续请求会自动携带此Cookie值，完全不用前端代码</p>
+<p>而token机制一般不通过Cookie来实现，它一般通过自定义一个HTTP Header来实现，或放在HTTP参数中来实现，需要前端手动将其塞进报文中</p>
+<p>即使token为了长期存储放在Cookie中，后端最好也不要通过Cookie Header来校验，比如csrf-token，就得通过HTTP Header、HTTP参数来校验才有意义</p>
+<p>session和oauth token并不矛盾，作为身份认证token安全性比session好，因为每个请求都有签名还能防止监听以及重放攻击，而session就必须靠链路层来保障通讯安全了。如上所说，如果你需要实现有状态的会话，仍然可以增加session来在服务器端保存一些状态。</p>
+<p>Session是一种HTTP存储机制，目的是为无状态的HTTP提供的持久机制。所谓Session认证只是简单的把User信息存储到Session里，因为SID的不可预测性，暂且认为是安全的。这是一种认证手段。</p>
+<p>而Token，如果指的是OAuth Token或类似的机制的话，提供的是认证和授权 ，认证是针对用户，授权是针对App。其目的是让某App有权利访问 某用户 的信息。这里的Token是唯一的。不可以转移到其它App上，也不可以转到其它用户上。</p>
+<p>Session只提供一种简单的认证，即有此SID，即认为有此User的全部权利。是需要严格保密的，这个数据应该只保存在站方，不应该共享给其它网站或者第三方App。所以简单来说，如果你的用户数据可能需要和第三方共享，或者允许第三方调用API接口，用Token。如果永远只是自己的网站，自己的App，用什么就无所谓了。</p>
+<p>token就是令牌，比如你授权（登录）一个程序时，他就是个依据，判断你是否已经授权该软件；cookie就是写在客户端的一个txt文件，里面包括你登录信息之类的，这样你下次在登录某个网站，就会自动调用cookie自动登录用户名；session和cookie差不多，只是session是写在服务器端的文件，也需要在客户端写入cookie文件，但是文件里是你的浏览器编号。Session的状态是存储在服务器端，客户端只有session id；而Token的状态是存储在客户端。</p>
+<h2 id="三者涉及的用户认证安全问题">三者涉及的用户认证安全问题</h2>
+<p>目前的浏览器有以下空间供网站使用</p>
+<ul>
+<li>Cookies：持久保存，大小限制4kb，最多放20个，每次请求都会带上所有Cookie。包含特殊功能属性</li>
+<li>Session Storage：关闭标签后失效，请求不会主动带上</li>
+<li>Local Storage：持久保存，请求不会主动带上</li>
+</ul>
+<p>我们再来看几个Web的安全漏洞</p>
+<ul>
+<li>XSS，跨站脚本攻击。攻击者获得页面的js权限，能操作页面的一切，包括Session Storage和未设置HTTP Only属性的Cookie</li>
+<li>CSRF，跨站请求伪造，就是钓鱼网站，在网站A，发送一个向网站B的请求，由于浏览器会在请求中加上此域的Cookie，所以如果在浏览器登录了网站B，又打开了钓鱼网站A，网站A构造的前往网站B的请求就会带上你的Cookie，如果Cookie中有用户凭证，服务器认为你是登录用户，请求就会被响应。比如点赞、关注、发色情广告等请求</li>
+</ul>
+<p>防御XSS，把关机Cookie设置HTTP Only属性即可，js无权访问</p>
+<p>而防御CSRF，推荐使用token机制，服务器颁发token，按规范来说推荐存储在Session Storage中（也可以放cookie中，由于浏览器的同源策略，网站A无法访问网站B的cookie），js将其添加到请求的参数或Header中</p>
+<h1 id="0x04-业务办理模块测试">0x04 业务办理模块测试</h1>
+<h2 id="订单id篡改测试">订单ID篡改测试</h2>
+<h3 id="原理">原理</h3>
+<p>在有电子交易业务的网站中，用户登录后可以下订单购买相应产品，购买成功后，用户可以查看订单的详情。当开发人员没有考虑登录后用户间权限隔离的问题时，就会导致平行权限绕过漏洞。攻击者只需注册一个普通账户，就可以通过篡改、遍历订单id，获得其他用户订单详情，其中多数会包括用户的姓名、身份证、地址、电话号码等敏感隐私信息。黑色产业链中的攻击者通常会利用此漏洞得到这些隐私信息。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618164811470.png" alt="image-20240618164811470"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>后台查看订单时要通过Session机制判断用户身份，做好平行权限控制，服务端需要校验相应订单是否和登录者的身份一致，如发现不一致则拒绝请求，防止平行权限绕过漏洞泄露用户敏感个人隐私信息。</p>
+<h2 id="手机号码篡改测试">手机号码篡改测试</h2>
+<h3 id="原理">原理</h3>
+<p>手机号通常可以代表一个用户身份。当请求中发现有手机号参数时，我们可以试着修改它，测试是否存在越权漏洞。系统登录功能一般先判断用户名和密码是否正确，然后通过Session机制赋予用户令牌。但是在登录后的某些功能点，开发者很容易忽略登录用户的权限问题。所以当我们用 A 的手机号登录后操作某些功能时，抓包或通过其他方式尝试篡改手机号，即可对这类问题进行测试。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618165130013.png" alt="image-20240618165130013"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>后台请求要通过Session机制判断用户身份，如果需要客户端传输手机号码，则服务端需要校验手机号是否和登录者的身份一致。如发现不一致则拒绝请求，防止平行权限绕过。另外，对于手机 App 程序，不要过于相信从手机中直接读取的手机号码，还是要做常规的身份认证，规范登录流程，防止未授权登录。</p>
+<h2 id="用户id篡改测试">用户ID篡改测试</h2>
+<h3 id="原理">原理</h3>
+<p>从开发的角度，用户登录后查看个人信息时，需要通过sessionid判定用户身份，然后显示相应用户的个人信息。但有时我们发现在GET或POST请求中有userid这类参数传输，并且后台通过此参数显示对应用户隐私信息，这就导致了攻击者可以通过篡改用户ID越权访问其他用户隐私信息。黑色产业链中的攻击者也喜欢利用此类漏洞非法收集个人信息。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618165338881.png" alt="image-20240618165338881"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>后台功能请求要通过 Session 机制判断用户身份，不要相信客户端传来的用户ID。如果确实需要客户端传输userid，则服务端需要校验userid是否和登录者的Session身份一致，如发现不一致则拒绝请求，防止被攻击者篡改，未授权访问他人账号内容。</p>
+<h2 id="邮箱和用户篡改测试">邮箱和用户篡改测试</h2>
+<h3 id="原理">原理</h3>
+<p>在发送邮件或站内消息时，篡改其中的发件人参数，导致攻击者可以伪造发信人进行钓鱼攻击等操作，这也是一种平行权限绕过漏洞。用户登录成功后拥有发信权限，开发者就信任了客户端传来的发件人参数，导致业务安全问题出现。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618165711428.png" alt="image-20240618165711428"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>用户登录后写信、发送消息时要通过Session机制判断用户身份。如果需要客户端传输邮箱、发件人，服务端需要校验邮箱、发件人是否和登录者的身份一致，如发现不一致则拒绝请求，防止被攻击者篡改用于钓鱼攻击。</p>
+<h2 id="商品编号篡改测试">商品编号篡改测试</h2>
+<h3 id="原理">原理</h3>
+<p>在交易支付类型的业务中，最常见的业务漏洞就是修改商品金额。例如在生成商品订单、跳转支付页面时，修改 HTTP 请求中的金额参数，可以实现 1 分买充值卡、1元买特斯拉等操作。此类攻击很难从流量中匹配识别出来，通常只有在事后财务结算时发现大额账务问题，才会被发现。此时，攻击者可能已经通过该漏洞获得了大量利益。如果金额较小或财务审核不严，攻击者则可能细水长流，从中获得持续的利益。事后发现此类漏洞，就大大增加了追责的难度和成本。</p>
+<p>此类业务漏洞的利用方法，攻击者除了直接篡改商品金额，还可以篡改商品编号，同样会造成实际支付金额与商品不对应，但又交易成功的情况。攻击者可以利用此业务漏洞以低价购买高价的物品。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618170241967.png" alt="image-20240618170241967"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>建议商品金额不要在客户端传入，防止被篡改。如果确实需要在客户端传输金额，则服务端在收到请求后必须检查商品价格和交易金额是否一致，或对支付金额做签名校验，若不一致则阻止该交易。</p>
+<h2 id="竞争条件测试">竞争条件测试</h2>
+<h3 id="原理">原理</h3>
+<p>竞争条件通常是在操作系统编程时会遇到的安全问题：当两个或多个进程试图在同一时刻访问共享内存，或读写某些共享数据时，最后的竞争结果取决于线程执行的顺序（线程运行时序），称为竞争条件（Race Conditions）。在Web安全中，我们可以沿用这个概念，在服务端逻辑与数据库读写存在时序问题时，就可能存在竞争条件漏洞，</p>
+<p>举一个例子：攻击者通常利用多线程并发请求，在数据库中的余额字段更新之前，多次兑换积分或购买商品，从中获得利益。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618171446560.png" alt="image-20240618171446560"></p>
+<p>示例PHP代码</p>
+<pre><code class="hljs php"><span class="hljs-variable">$res</span> = <span class="hljs-title function_ invoke__">mysql_query</span>(<span class="hljs-string">"SELECT credit FROM Users WHERE id=<span class="hljs-subst">$id</span>"</span>);
+<span class="hljs-variable">$row</span> = <span class="hljs-title function_ invoke__">mysql_fetch_assoc</span>(<span class="hljs-variable">$res</span>);
+<span class="hljs-keyword">if</span>(<span class="hljs-variable">$row</span>[<span class="hljs-string">'credit'</span>]&gt;=<span class="hljs-variable">$_POST</span>[<span class="hljs-string">'amount'</span>]){
+    <span class="hljs-variable">$new_credit</span> = <span class="hljs-variable">$row</span>[<span class="hljs-string">'credit'</span>] - <span class="hljs-variable">$_POST</span>[<span class="hljs-string">'amount'</span>];
+    <span class="hljs-variable">$res</span> = <span class="hljs-title function_ invoke__">mysql_query</span>(<span class="hljs-string">"UPDATE Users SET credit=<span class="hljs-subst">$new_credit</span> WHERE id=<span class="hljs-subst">$id</span>"</span>);
+}</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618171849221.png" alt="image-20240618171849221"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>在处理订单、支付等关键业务时，使用悲观锁或乐观锁保证事务的ACID特性（原子性、一致性、隔离性、持久性），并避免数据脏读（一个事务读取了另一个事务未提交的数据），解决竞争条件和并发操作可能带来的相关业务问题。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618172148183.png" alt="image-20240618172148183"></p>
+<h1 id="0x05-业务授权访问测试">0x05 业务授权访问测试</h1>
+<h2 id="未授权访问测试">未授权访问测试</h2>
+<p>非授权访问是指用户在没有通过认证授权的情况下能够直接访问需要通过认证才能访问到的页面或文本信息。可以尝试在登录某网站前台或后台之后，将相关的页面链接复制到其他浏览器或其他电脑上进行访问，观察是否能访问成功。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618172525673.png" alt="image-20240618172525673"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>未授权访问可以理解为需要安全配置或权限认证的地址、授权页面存在缺陷，导致其他用户可以直接访问，从而引发重要权限可被操作、数据库、网站目录等敏感信息泄露，所以对未授权访问页面做Session认证，并对用户访问的每一个URL做身份鉴别，正确地校验用户ID及Token等。</p>
+<h2 id="越权测试">越权测试</h2>
+<h3 id="原理">原理</h3>
+<p>越权一般分为水平越权和垂直越权，水平越权是指相同权限的不同用户可以互相访问；垂直越权是指使用权限低的用户可以访问权限较高的用户。</p>
+<blockquote>
+<p>水平越权测试方法主要是看能否通过A用户的操作影响B用户。</p>
+<p>垂直越权测试方法的基本思路是低权限用户越权高权限用户的功能，比如普通用户可使用管理员功能。</p>
+</blockquote>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618193934497.png" alt="image-20240618193934497"></p>
+<p>水平越权测试流程图如下</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618194232797.png" alt="image-20240618194232797"></p>
+<p>垂直越权测试流程图如下：</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240618194331544.png" alt="image-20240618194331544"></p>
+<h3 id="修复建议">修复建议</h3>
+<p>服务端需校验身份唯一性，自己的身份只能查看、修改、删除、添加自己的信息。</p>
+<h1 id="0x06-输入输出模块测试">0x06 输入/输出模块测试</h1>
+<h2 id="sql注入测试">SQL注入测试</h2>
+<p>无非就是分为</p>
+<p>请求类型：get、post型、cookie型等等；<br>
+数据类型：数字型和字符型</p>
+<p>测试方法就有二次注入、报错注入、布尔注入、联合注入、宽字节注入、万能密码等</p>
+<p>具体也不赘述了</p>
+<h3 id="修复建议">修复建议</h3>
+<p>每个提交信息的客户端页面、通过服务器端脚本（JSP、ASP、ASPX、PHP等）生成的客户端页面、提交的表单（FORM）或发出的链接请求中包含的所有变量，必须对变量的值进行检查，过滤其中包含的特殊字符，或对字符进行转义处理。特殊字符如下。</p>
+<blockquote>
+<p>SQL语句关键词：如and、or、select、declare、update、xp_cmdshell；</p>
+<p>SQL语句特殊符号：’、”、；等。</p>
+</blockquote>
+<p>此外，Web 应用系统接入数据库服务器使用的用户不应为系统管理员，用户角色应遵循最小权限原则。</p>
+<h2 id="xss测试">XSS测试</h2>
+<p>网站对攻击者输入的恶意js、html代码没有进行校验，最终导致服务器解析执行这些代码，导致攻击者能够利用此恶意数据获取用户的session、cookie、钓鱼等等</p>
+<p>分为DOM、反射型、存储型等。不赘述</p>
+<h3 id="修复建议">修复建议</h3>
+<p>每个提交信息的客户端页面、通过服务器端脚本（JSP、ASP、ASPX、PHP等）生成的客户端页面、提交的表单（FORM）或发出的链接请求中包含的所有变量，必须对变量的值进行检查，过滤其中包含的特殊字符，或对字符进行转义处理。特殊字符如下。</p>
+<ul>
+<li>HTML标签的&lt;、“、’、%等，以及这些符号的Unicode值；</li>
+<li>客户端脚本（JavaScript、VBScript）关键字：JavaScript、script等。</li>
+</ul>
+<p>此外，对于信息搜索功能，不应在搜索结果页面中回显搜索内容。同时应设置出错页面，防止Web服务器发生内部错误时，将错误信息返回给客户端。具体建议如下：</p>
+<ul>
+<li>
+<p>定义允许的行为，确保Web应用程序根据预期结果的严格定义来验证所有输入参数（Cookie、标头、查询字符串、表单、隐藏字段等）。</p>
+</li>
+<li>
+<p>检查POST和GET请求的响应，以确保返回的对象是预期的内容且有效。</p>
+</li>
+<li>
+<p>通过对用户提供的数据进行编码，从用户输入中移除冲突的字符、括号和单双引号。这将防止插入的脚本以可执行的格式发送给最终用户。</p>
+</li>
+<li>
+<p>只要可能，就应将客户端提供的所有数据限制为字母数字数据。使用此过滤机制时，如果用户输入<code>&lt;script&gt;alertdocumentcookie（'aaa'）&lt;/script&gt;</code>，将缩减为“scriptalertdocumentcookiescript”。如果必须使用非字母数字字符，请先将其编码为HTML 实体，然后再将其用在 HTTP 响应中，这样就无法将它们用于修改HTML文档的结构。</p>
+</li>
+<li>
+<p>使用双因素客户身份验证机制，而非单因素身份验证。</p>
+</li>
+<li>
+<p>在修改或使用脚本之前，验证脚本的来源。不要完全信任其他人提供的脚本并用在自己的代码中（不论是从Web上下载的，还是熟人提供的）。</p>
+</li>
+</ul>
+<h2 id="命令执行测试">命令执行测试</h2>
+<h3 id="原理">原理</h3>
+<p>在应用需要调用一些外部程序去处理内容的情况下，就会用到一些执行系统命令的函数。如PHP中的system、exec、shell_exec等，当用户可以控制命令执行函数中的参数时，将可注入恶意系统命令到正常命令中，造成命令执行攻击。测试中如果没有对参数（如cmd=、command、excute=等）进行过滤，就可以直接造成命令执行漏洞或配合绕过及命令连接符（在操作系统中，“&amp;、|、||、；”都可以作为命令连接符使用，用户通过浏览器提交执行命令，由于服务器端没有针对执行函数做过滤，导致在没有指定绝对路径的情况下就执行命令）等进行命令执行漏洞测试。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>尽量少用执行命令的函数或者直接禁用，参数值尽量使用引号包括在；使用动态函数之前，确保使用的函数是指定的函数之一，在进入执行命令的函数/方法之前，对参数进行过滤，对敏感字符进行转义。</p>
+<h2 id="回退模块测试">回退模块测试</h2>
+<h3 id="原理">原理</h3>
+<p>很多Web业务在密码修改成功后或者订单付款成功后等业务模块，在返回上一步重新修改密码或者重新付款时存在重新设置密码或者付款的功能，这时如果能返回上一步重复操作，而且还能更改或者重置结果，则存在业务回退漏洞。</p>
+<p>比如说是，修改密码的时候。当我们修改密码成功的时候，检查是否可以回退，并进行操作，如果存在，则有回退漏洞（重置完密码之后，可以回退到重置密码那一步）</p>
+<h3 id="修复建议">修复建议</h3>
+<p>对于业务流程有多步的情况，如修改密码或重置密码等业务，首先判断该步骤的请求是否是上一步骤的业务所发起的，如果不是则返回错误提示或页面失效。</p>
+<h1 id="0x07-验证码机制测试">0x07 验证码机制测试</h1>
+<p>这里举一些常见例子。</p>
+<h2 id="验证码可爆破">验证码可爆破</h2>
+<h3 id="原理">原理</h3>
+<p>验证码机制主要被用于防止暴力破解、防止DDoS攻击、识别用户身份等，常见的验证码主要有图片验证码、邮件验证码、短信验证码、滑动验证码和语音验证码。</p>
+<p>以短信验证码为例。短信验证码大部分情况下是由4～6位数字组成，如果没有对验证码的失效时间和尝试失败的次数做限制，攻击者就可以通过尝试这个区间内的所有数字来进行暴力破解攻击。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>针对验证码的暴力测试，建议采取如下的加固方案：</p>
+<p>（1）设置验证码的失效时间，建议为180秒；</p>
+<p>（2）限制单位时间内验证码的失败尝试次数，如5分钟内连续失败5次即锁定该账号15分钟。</p>
+<h2 id="验证码复用">验证码复用</h2>
+<h3 id="原理">原理</h3>
+<p>在网站的登录或评论等页面，如果验证码认证成功后没有将session及时清空，将会导致验证码首次认证成功之后可重复使用。测试时可以抓取携带验证码的数据包重复提交，查看是否提交成功。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>针对验证认证次数问题，建议验证码在一次认证成功后，服务端清空认证成功的session，这样就可以有效防止验证码一次认证反复使用的问题。</p>
+<h2 id="验证码客户端回显">验证码客户端回显</h2>
+<h3 id="原理">原理</h3>
+<p>当验证码在客户端生成而非服务器端生成时，就会造成此类问题。当客户端需要和服务器进行交互发送验证码时，可借助浏览器的工具查看客户端与服务器进行交互的详细信息。</p>
+<p>比如你搞一个手机号，然后点击获取验证码的功能，此时服务器向你指定的手机发送了验证码，但是你会发现，此时浏览器的返回包的信息中就包含验证码，这就导致了问题。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>针对验证码在客户端回显的情况，建议采取如下措施来预防此类问题：</p>
+<p>（1）禁止验证码在本地客户端生成，应采用服务器端验证码生成机制；</p>
+<p>（2）设置验证码的时效性，如180秒过期；</p>
+<p>（3）验证码应随机生成，且使用一次即失效。</p>
+<h2 id="验证码可绕过">验证码可绕过</h2>
+<h3 id="原理">原理</h3>
+<p>在一些案例中，通过修改前端提交服务器返回的数据，可以实现绕过验证码，执行我们的请求。</p>
+<p>当我们测试一个手机号的时候，发送了验证码，但我们并不能知道正确验证码是什么。此时我们可以通过改变http请求包的数据来绕过；比如我们随意输了一个验证码，点击bp抓包，随后发送（但是要截取第一次发送返回的相应包）例如，回显是这样的</p>
+<pre><code class="hljs scss">{"res_code": <span class="hljs-string">"0"</span>}</code></pre>
+<p>意味着当我们验证码输入错误，这里回显的值为0，此时我们可以尝试改成1，点击发包，会发现成功（用于拓展思路）</p>
+<h3 id="修复建议">修复建议</h3>
+<p>针对此漏洞，建议在服务端增加验证码的认证机制，对客户端提交的验证码进行二次校验。</p>
+<h2 id="验证码识别对抗">验证码识别对抗</h2>
+<h3 id="原理">原理</h3>
+<p>前面几小节介绍的测试方法主要针对业务逻辑设计上存在缺陷的验证码机制，而事实上还有很大一部分验证码机制在逻辑上并不存在问题，这就涉及与验证码机制本身的正面对抗，也就是验证码识别技术。</p>
+<p>网站登录页面所使用的图形验证码是出现最早也是使用最为广泛的验证码，我们就以图形验证码为例来讲解如何对其进行自动识别。一般对于此类验证码的识别流程为：图像二值化处理→去干扰→字符分割→字符识别。</p>
+<p>图像二值化就是将图像上像素点的灰度值设置为0或255，也就是将整个图像呈现出明显的黑白效果。为了防止验证码被自动识别，通常用加入一些点、线、色彩之类的方式进行图像干扰，如图所示。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240630165845636.png" alt="image-20240630165845636"></p>
+<p>所以为了达到良好的识别效果，需要对图像进行去干扰处理。</p>
+<p>字符分割主要包括从验证码图像中分割出字符区域，以及把字符区域划分成单个字符。字符识别就是把处理后的图片还原回字符文本的过程。</p>
+<p>攻击过程如下：</p>
+<p>攻击者访问网站登录页面，通过刷新验证码页面查看验证码组成规律，进行图像二值化、去干扰等处理，并进行人工比对，存储成功识别的验证码包，截入工具，利用工具对登录页面进行暴力破解，根据返回包的大小和关键字判断是否破解成功，</p>
+<h3 id="修复建议">修复建议</h3>
+<p>针对验证码被自动识别的风险，建议通过以下几个方面来进行加固：</p>
+<p>（1）增加背景元素的干扰，如背景色、背景字母等；</p>
+<p>（2）字符的字体进行扭曲、粘连；</p>
+<p>（3）使用公式、逻辑验证方法等作为验证码，如四则运算法、问答题等；</p>
+<p>（4）图形验证码和使用者相关，比如选择联系人头像、选择购买过的物品等作为验证码。</p>
+<h1 id="0x08-业务数据安全测试">0x08 业务数据安全测试</h1>
+<h2 id="支付金额篡改">支付金额篡改</h2>
+<p>商品金额篡改测试，通过抓包修改业务流程中的交易金额等字段，例如在支付页面抓取请求中商品的金额字段，修改成任意数额的金额并提交，查看能否以修改后的金额数据完成业务流程。</p>
+<p>根据上述例子，我们可以延伸出如下逻辑漏洞类型：</p>
+<ol>
+<li>
+<p>可以在商品数量提交的时候，修改成非预期数额或者是负数之后提交</p>
+</li>
+<li>
+<p>前端js限制：服务器仅在页面通过js脚本做出限制，没有在服务端校验用户提交的数量（我们只需要抓包修改即可）</p>
+</li>
+<li>
+<p>请求重放测试：情况下所引发的安全问题表现在商品首次购买成功后，参照订购商品的正常流程请求，进行完全模拟正常订购业务流程的重放操作，可以实现“一次购买多次收货”等非预期操作</p>
+</li>
+<li>
+<p>业务上线测试：针对一些电商类应用程序在进行业务办理流程中，服务端没有对用户提交的查询范围、订单数量、金额等数据进行严格校验而引发的一些业务逻辑漏洞。</p>
+</li>
+<li>
+<p>业务流程处理有误：业务处理过程中，用于保证其遵循正常流程的控制机制有误，导致攻击者可以想办法绕过其中必要的步骤，直达预期目标</p>
+</li>
+</ol>
+<h3 id="修复建议">修复建议</h3>
+<p>商品信息，如金额、折扣等原始数据的校验应来自于服务器端，不应接受客户端传递过来的值。</p>
+<p>针对性的修复建议：</p>
+<ol>
+<li>
+<p>服务端应当考虑交易风险控制，对产生异常情况的交易行为（如用户积分数额为负值、兑换库存数量为 0 的商品等）应当直接予以限制、阻断，而非继续完成整个交易流程</p>
+</li>
+<li>
+<p>商品信息，如金额、折扣、数量等原始数据的校验应来自于服务器端，不应该完全相信客户端传递过来的值。如果是跨平台的业务处理，就要处理好数据在平台之间传输的正确性</p>
+</li>
+<li>
+<p>用户每次订单 Token 不应该能重复提交，避免产生重放订购请求的情况。在服务器订单生成关键环节，应该对订单 Token 对应的订购信息内容、用户身份、用户可用积分等进行强校验。</p>
+</li>
+<li>
+<p>在服务器端应该对订单 Token 对应的订购信息内容、用户身份、用户可用积分等进行强校验。服务端应考虑交易风险控制，对产生异常情况的交易行为（如用户积分数额为负值、兑换库存数量为 0 的商品等）应当直接予以限制、阻断，而非继续完成整个交易流程</p>
+</li>
+<li>
+<p>针对此类漏洞，建议对敏感信息如身份 ID、账号密码、订单号、金额等进行加密处理，并在服务端对其进行二次比对。</p>
+</li>
+</ol>
+<h1 id="0x09-密码找回测试">0x09 密码找回测试</h1>
+<h2 id="验证码前端回显">验证码前端回显</h2>
+<p>找回密码测试中要注意验证码是否会回显在响应中，有些网站程序会选择将验证码回显在响应中，来判断用户输入的验证码是否和响应中的验证码一致，如果一致就会通过校验。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>避免返回验证码到响应包中，验证码一定要放在服务端校验。</p>
+<h2 id="接口参数账号修改">接口参数账号修改</h2>
+<p>找回密码功能逻辑中常常会在用户修改密码接口提交参数中存在传递用户账号的参数，而用户账号参数作为一个可控的变量是可以被篡改的，从而导致修改账号密码的凭证或修改的目标账号出现偏差，最终造成任意账号密码修改的漏洞</p>
+<h3 id="修复建议">修复建议</h3>
+<p>对找回密码的 Token 做一对一的校验，一个 Token 只能修改一个用户，同时一定要保证Token不泄露。</p>
+<h2 id="response状态值修改">Response状态值修改</h2>
+<p>Response状态值修改测试，即修改请求的响应结果来达到密码重置的目的，存在这种漏洞的网站或者手机App往往因为校验不严格而导致了非常危险的重置密码操作。</p>
+<p>这种漏洞的利用方式通常是在服务端发送某个密码重置的凭证请求后，出现特定的响应值，比如true、1、ok、success等，网站看到回显内容为特定值后即修改密码，通常这种漏洞的回显值校验是在客户端进行的，所以只需要修改回显即可。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>注意不要在前端利用服务端返回的值判断是否可以修改密码，要把整个校验环节交给服务端验证。</p>
+<h2 id="session覆盖">Session覆盖</h2>
+<p>找回密码逻辑漏洞测试中也会遇到参数不可控的情况，比如要修改的用户名或者绑定的手机号无法在提交参数时修改，服务端通过读取当前session会话来判断要修改密码的账号，这种情况下能否对Session中的内容做修改以达到任意密码重置的目的呢？在某网站中的找回密码功能中，业务逻辑是：由用户使用手机进行注册，然后服务端向手机发送验证码短信，用户输入验证码提交后，进入密码重置页面。</p>
+<p>对网站中Session覆盖的测试如下：</p>
+<p>（1）需要准备自己的账号接收凭证（短信验证码）；</p>
+<p>（2）获得凭证校验成功后进入密码重置页面；</p>
+<p>（3）在浏览器新标签重新打开找回密码页面，输入目标手机号；</p>
+<p>（4）此时当前 Session 账户已经被覆盖，重新回到第二步中打开的重置密码页面即可重置目标手机号。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>Session覆盖类似于账号参数的修改，只是以控制当前Session的方式篡改了要重置密码的账号，在重置密码请求中一定要对修改的账号和凭证是否一致做进一步的校验。</p>
+<h2 id="弱token设计缺陷">弱Token设计缺陷</h2>
+<p>在找回密码功能中，很多网站会向用户邮箱发送找回密码页面链接。用户只需要进入邮箱，打开找回密码邮件中的链接，就可以进入密码重置页面了。找回密码的链接通常会加入校验参数来确认链接的有效性，通过校验参数的值与数据库生成的值是否一致来判断当前找回密码的链接是否有效。</p>
+<p>例如，网站给出的找回密码的url如下，单击这个链接将跳转到重置密码页面。</p>
+<pre><code class="hljs scss">http://www.xxx.com/findpwd?uid=xx-uu-xx-sxx&amp;token=<span class="hljs-number">1497515314</span></code></pre>
+<p>观察这个链接的参数，uid参数可能是对应修改密码的账户，Token就是之前提到的校验参数了，这个参数的值看起来像一个时间戳，猜测系统生成这个token的机制就是使用的时间戳。把这个值通过时间格式化后发现确实变成了日期，那么这个Token就是可预测的一个时间范围的时间戳，只需要通过这个时间段就可以推测或者暴力枚举出系统生成的时间戳值了</p>
+<h3 id="修复建议">修复建议</h3>
+<p>密码找回的Token不能使用时间戳或者用户邮箱和较短有规律可循的数字字符，应当使用复杂的Token生成机制让攻击者无法推测出具体的值。</p>
+<h2 id="密码找回流程绕过">密码找回流程绕过</h2>
+<p>这个看了一眼算是一个未授权访问的过程。</p>
+<p>都知道密码找回功能是这样的：先输入自己想要找回密码的所属账号，然后服务器发送验证码之类的凭证，然后你拿到这个凭证就能访问到重置密码的接口。但这个绕过就是绕过这里的第二步：获取重置密码的api接口。</p>
+<p>也就是想办法拿到重置密码的api接口链接，然后直接访问，看是否能未授权进入</p>
+<p>修复建议就是：防止跳过验证步骤一定要在后端逻辑校验中确认上一步流程已经完成</p>
+<h2 id="callback自定义测试">Callback自定义测试</h2>
+<h3 id="原理">原理</h3>
+<p>在浏览器中存在着同源策略，所谓同源是指域名、协议、端口相同。当使用Ajax异步传输数据时，非同源域名之间会存在限制。其中有一种解决方法是JSONP（JSON withPadding），基本原理是利用了HTML里<script></script>元素标签，远程调用JSON文件来实现数据传递。JSONP 技术中一般使用 Callback（回调函数）参数来声明回调时所使用的函数名，这里往往存在安全问题，由于没有使用白名单的方法进行限制Callback的函数名，导致攻击者可以自定义Callback内容，从而触发XSS等漏洞。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>（1）严格定义 HTTP 响应中的 Content-Type 为 json 数据格式：Content-Type：application/json。</p>
+<p>（2）建立callback函数白名单，如果传入的callback参数值不在白名单内，跳转到统一的异常界面阻止其继续输出。</p>
+<p>（3）对callback参数进行HTML实体编码来过滤掉“&lt;”、“&gt;”等字符。</p>
+<h2 id="webservice测试">WebService测试</h2>
+<p>WebService是一种跨编程语言和跨操作系统平台的远程调用技术。XML+XSD、SOAP（Simple Object Access Protocol）和WSDL（Web Services Description Language）就是构成WebService平台的三大技术，其中XML+XSD用来描述、表达要传输的数据；SOAP是用于交换XML编码信息的轻量级协议，一般以XML或者XSD作为载体，通过HTTP协议发送请求和接收结果，SOAP协议会在HTTP协议的基础上增加一些特定的HTTP消息头；WSDL是一个基于XML的用于描述Web Service及其函数、参数和返回值的语言。</p>
+<p>通过上面的描述，我们可以知道WebService就是一个应用程序向外界暴露出一个能通过Web进行调用的API。这个API接收用户输入的参数，然后返回相关的数据内容。如果一个WebService完全信任用户的输入，不进行过滤，则有可能导致SQL注入漏洞的发生。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>（1）为WebService添加身份认证，认证成功后才允许访问和调用。</p>
+<p>（2）WebService中接收输入参数的函数，在后端应该对输入参数进行过滤及净化，在处理后才入库查询。</p>
+<p>（3）在敏感功能的函数中，添加密码认证，认证后才允许调用敏感功能的函数。</p>
+<h2 id="额外">额外</h2>
+<p>这里记录几个简单的逻辑问题：</p>
+<ol>
+<li>
+<p>一个是接口调用重放测试（重放多次http请求，看是否短时间内的请求会有相应的多个响应出现）</p>
+</li>
+<li>
+<p>接口调用遍历：比如http请求中的参数id，可以修改id的值，看是否会有不同的响应结果（这种情况校验id与session是否匹配即可）</p>
+</li>
+<li>
+<p>由第二个问题引申出的可以是，篡改http请求中的某些参数值，导致的逻辑问题</p>
+</li>
+<li>
+<p>接口未授权访问</p>
+</li>
+</ol>
+<h1 id="0x10-业务逻辑漏洞案例">0x10 业务逻辑漏洞案例</h1>
+<ol>
+<li>github：包括邮件的账号密码、数据库的配置信息、管理员的密码、备份文件、重要源代码等。</li>
+</ol>
+<p>常见google搜集语法：</p>
+<pre><code class="hljs scss">邮件配置信息查询：site：Github<span class="hljs-selector-class">.com</span> smtp password
+数据库信息泄露：site：Github<span class="hljs-selector-class">.com</span> sa password
+svn信息泄露：site：Github<span class="hljs-selector-class">.com</span> svn
+数据库备份文件：site：Github<span class="hljs-selector-class">.com</span> inurl：sql
+找配置信息：site：github<span class="hljs-selector-class">.com</span> password</code></pre>
+<ol start="2">
+<li>
+<p>后台登陆万能密码登录</p>
+</li>
+<li>
+<p>页面前端看一些已经注册的用户，然后F12审查用户元素，可能会审查到与用户有关的凭证ID之类的</p>
+</li>
+<li>
+<p>电子邮件账号泄露事件：google搜索</p>
+</li>
+</ol>
+<h2 id="中间人攻击">中间人攻击</h2>
+<p>中间人攻击，即所谓的Main-in-the-middle（MITM）攻击，顾名思义，就是攻击者插入到原本直接通信的双方中间，让双方以为还在直接跟对方通信，但实际上双方的通信对象已变成了攻击者，同时信息已经被中间人获取或篡改。而中间人攻击不仅可以捕获HTTP未加密的传输数据，更可以捕获HTTPS协议加密的数据。</p>
+<p>HTTPS中间人攻击一般分为SSL连接建立前的攻击，以及HTTPS传输过程中的攻击。常见的HTTPS中间人攻击，会首先需结合ARP、DNS欺骗、伪造CA证书等技术，来对会话进行拦截。</p>
+<h3 id="ssl证书欺骗">SSL证书欺骗</h3>
+<p>SSL证书欺骗攻击较为简单，首先通过DNS劫持和局域网ARP欺骗甚至网关劫持等技术，将用户的访问重定向到攻击者的设备上，让用户机器与攻击者机器建立HTTPS连接（使用伪造的CA证书），而攻击者机器再跟Web服务端连接。这样攻击者的机器分别与用户和真正的服务器建立 SSL 连接，通过这两个连接之间转发数据，就能得到被攻击者和服务器之间交互的数据内容。但用户的浏览器会提示证书不可信，只要用户不单击继续就能避免被劫持。所以这是最简单的攻击方式，也是最容易识别的攻击方式。如图14-18所示，为SSL证书欺骗攻击流程。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240702211452065.png" alt="image-20240702211452065"></p>
+<h3 id="ssl劫持">SSL劫持</h3>
+<p>SSL劫持，是指将页面中的HTTPS超链接全都替换成HTTP版本，让用户始终以明文的形式进行通信。在现实生活中，用户在浏览器上输入域名，大部分采用直接输入网址的方式，从而会忽略该网站采用的协议类型。例如打开百度，<a target="_blank" rel="noopener" href="http://xn--www-p18dk4cw9fn57b2j6aqdvnu4a.baidu.com">一般会直接输入www.baidu.com</a>，用户向百度发送一个 HTTP 请求，而不是 HTTPS。HTTP是以明文传输数据的，因此如果利用 SSL 劫持攻击，使 HTTPS 协议的网站降级到HTTP，就能获取敏感数据。</p>
+<p>有部分网站并非全部采用HTTPS协议，只是在需要进行敏感数据传输时才使用HTTPS 协议，如登录认证、传输敏感身份数据等时候。中间人攻击者在劫持了用户与服务端的会话后，将HTTP页面里所有的HTTPS超链接都换成HTTP，用户在单击相应的链接时，使用HTTP协议来进行访问。这样即使服务器对相应的URL只支持HTTPS链接，但中间人攻击者一样可以和服务建立HTTPS连接之后，将数据使用HTTP协议转发给客户端，实现会话劫持。</p>
+<p>SSL劫持攻击手段更让人防不胜防，因为用户无法提前知道网站是否使用HTTPS 或者 HTTP，而在用户浏览器上更不会弹框告警或者网页错误显示。如图所示为SSL劫持攻击流程。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240702211757759.png" alt="image-20240702211757759"></p>
+<h2 id="撞库攻击">撞库攻击</h2>
+<p>撞库是黑客通过收集互联网已泄露的用户和密码信息，生成对应的字典表，尝试批量登录其他网站后，得到一系列可以登录的用户名和密码组合。由于很多用户在不同网站使用的是相同的账号和密码，因此黑客可以通过获取用户在 A 网站的账户从而尝试登录B网站，这就可以理解为撞库攻击。</p>
+<h3 id="防御建议">防御建议</h3>
+<p>（1）核查数据库中的账号和密码存储方式，自行加密用户敏感数据，严格限制数据库的访问条件，禁止外部连接数据库。</p>
+<p>（2）采用 HTTPS 协议对账户认证过程实现加密封装，确保身份认证过程无法被窃取。</p>
+<p>（3）加强网络信息安全意识，网络管理人员对内部员工进行安全意识培训，禁止使用弱口令，禁止公开个人账号密码，定期修改密码。</p>
+<p>（4）使用数字证书认证。数字证书是通过运用对称和非对称密码体制等密码技术建立起一个严密的身份认证系统，从而保证信息除发送方和接收方外不被其他人窃取。</p>
+<p>（5）了解互联网账号泄露事件，存在账号泄露事件时第一时间通知客户修改个人账号和密码，避免撞库攻击。</p>
+<p>（6）加强对网站的安全防护能力，定期进行安全评估和升级更新，避免攻击者利用漏洞获取账户信息。</p>
+<h2 id="其他案例">其他案例</h2>
+<ol>
+<li>密码找回凭证可暴力破解：当我们在尝试重置密码的时候，验证用户的凭证的验证次数未做限制或者限制不言可以绕过，那我们可以暴力枚举凭证（比如验证码）来重置受害者用户的密码</li>
+<li>密码找回凭证回显客户端：与上述情况一致，只不过凭证（验证码）直接返回到了客户端，攻击者可以直接看到</li>
+<li>密码找回加密验证字符串回显客户端：与上述情况一致，例子就是，当我们想要重置一个账号的时候，再点击发送凭证之后，页面回显了一个加密字符串，这个字符串跟我们重置页面的url中的一部分相同，意味着，我们可以任选一个账号，点击重置，得到的加密字符串拼接到url中，就可以直接进入该账号对应的重置密码页面，进行重置</li>
+<li>网页源代码信息泄露：比如一些密保的问题，在源代码中展现了出来；类似的，还有在充值密码的时候，发送的短信验证码回显到了前端</li>
+<li>密码重置链接存在弱token：比如有的系统在密码找回的功能会在服务端生成一个随机token，发送到用户邮箱中作为找回密码的一个凭证。但如果这个token可以找到其生成规律，破解生成方式，攻击者就能实现任意用户密码重置。具体的例子有：<br>
+时间戳md5作为token、使用服务器时间作为token。</li>
+<li>密码重置凭证与用户账户关联不严：有些系统只在密码找回的时候，校验了用户给出的凭证是否在数据库存在，但是没有校验凭证与当前用户的关联关系，导致攻击者任意用户密码重置。<br>
+例子有：短信验证码不严、邮箱token不严</li>
+<li>服务端验证逻辑缺陷：有些信息系统的服务端验证逻辑存在漏洞。攻击者可以通过删除数据包中的某些参数、修改邮件发送地址或者跳过选择找回方式和身份验证的步骤，直接进入重置密码界面成功重置其他人的密码。<br>
+例子有：未授权访问跳过验证页面、修改http请求包的某些参数绕过、邮箱重绑定绕、重复用户名注册绕过</li>
+</ol>
+<h3 id="修复建议">修复建议</h3>
+<p>（1）在密码找回功能设计时对用户凭证的验证次数和频率进行限制，防止攻击者对用户凭证的暴力枚举攻击。</p>
+<p>（2）对密码找回的各个环节进行梳理，记录分析所有交互数据，避免密码找回凭证等敏感信息直接返回给客户端。</p>
+<p>（3）对服务端密码重置Token的生成算法进行审计，避免使用容易被攻击者破解的简单算法。</p>
+<p>（4）密码重置凭证应与账户严格绑定，并设置有效时间，避免攻击者通过修改账户ID的方式重置他人密码。</p>
+<p>（5）对客户端传入的数据要进行严格的校验，手机号、邮箱地址等重要信息应和后台数据库中已存储的信息进行核对，不应从客户端传入的参数中直接取用。避免攻击者通过篡改传入数据的方式重置他人密码。</p>
+<p>（6）对用户注册、手机邮箱绑定等业务逻辑进行审计，避免攻击者通过用户重复注册和越权绑定等漏洞间接重置他人密码。</p>
+<h2 id="越权访问">越权访问</h2>
+<p><strong>平行越权</strong></p>
+<p>攻击者请求操作（增、删、查、改）某条数据时，Web 应用程序没有判断该数据的所属人，或者在判断数据所属人时直接从用户提交的表单参数中获取（如用户ID），导致攻击者可以自行修改参数（用户ID），操作不属于自己的数据。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707101821473.png" alt="image-20240707101821473"></p>
+<p><strong>垂直越权</strong></p>
+<p>服务器为鉴别客户端浏览器会话及身份信息，会将用户身份信息存储在 Cookie中，并发送至客户端存储。攻击者通过尝试修改Cookie中的身份标识为管理员，欺骗服务器分配管理员权限，达到垂直越权的目的。</p>
+<h3 id="修复建议">修复建议</h3>
+<p>（1）对于开发者而言，一定要有安全意识，时刻保持警惕。</p>
+<p>（2）永远不要相信来自客户端（用户）的输入，对于可控参数进行严格的检查与过滤。</p>
+<p>（3）执行关键操作前必须验证用户身份，多阶段功能的每一步都要验证用户身份。</p>
+<p>（4）对于直接对象引用，加密资源ID，以防止攻击者对ID进行枚举。</p>
+<p>（5）在前端实现的验证并不可靠，前端可以验证用户的输入是否合规，要在服务端对请求的数据和当前用户身份做校验。检查提交CRUD请求的操作者（Session）与目标对象的权限所有者（查数据库）是否一致，如果不一致则阻断。</p>
+<p>（6）在调用功能之前，验证当前用户身份是否有权限调用相关功能（推荐使用过滤器，进行统一权限验证）。</p>
+<p>（7）把属主、权限、对象、操作的场景抽象成一个统一的框架，在框架内统一实现权限的管理和检查。</p>
+<h1 id="0x11-oauth20安全">0x11 OAuth2.0安全</h1>
+<h2 id="认证原理">认证原理</h2>
+<p>Oauth 允许用户让第三方应用访问该用户在某一网站上存储的私密资源（如照片、视频、联系人列表），而无须将用户名和密码提供给第三方应用的协议。</p>
+<p>OAuth 2.0 认证流程如图 17-1 所示。原理很简单，用户访问 App，App 访问Authorization Server请求权限，Authorization Server得到用户同意后，返回Token，App通过这个Token向Authorization Server索要数据，App只能从Authorization Server获取服务器数据，而无法直接访问Resource Server。下面用Facebook的Oath2.0登录过程作为举例。</p>
+<p>步骤一：App向Oauth Server请求的URL里面带着该App的id、key、请求的类型、返回一串的access_token和事件类型code。<a target="_blank" rel="noopener" href="https://facebook.com/dialog/oauth?response_type=code&amp;client_id=YOUR_CLIENT_ID&amp;redirect_uri=REDIRECT_URI&amp;scope=email">https://facebook.com/dialog/oauth?response_type=code&amp;client_id=YOUR_CLIENT_ID&amp;redirect_uri=REDIRECT_URI&amp;scope=email</a></p>
+<p>步骤二：回调，跳转到权限确认页面等待用户确认授权。<a target="_blank" rel="noopener" href="https://facebook.com/dialog/oauth?response_type=code&amp;client_id=28653682475872&amp;redirect_uri=example.com&amp;scope=email">https://facebook.com/dialog/oauth?response_type=code&amp;client_id=28653682475872&amp;redirect_uri=example.com&amp;scope=email</a></p>
+<p>该页面通过redirect_uri，回调到指定的callback页面。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707103946717.png" alt="image-20240707103946717"></p>
+<p>步骤三：利用返回的access_token，将App的id、key以及code代码发包到POST  <a target="_blank" rel="noopener" href="https://graph.facebook.com/oauth/access_token%E3%80%82%E8%BF%99%E4%B8%80%E6%AD%A5%E6%98%AF%E4%B8%BA%E4%BA%86%E8%8E%B7%E5%8F%96Token%E3%80%82">https://graph.facebook.com/oauth/access_token。这一步是为了获取Token。</a></p>
+<p>步骤四：Oauth Server返回Token，这时，就可以通过Token获取用户授权的资源了。</p>
+<p>资料参考：</p>
+<p><a target="_blank" rel="noopener" href="http://oauth.net/2/">http://oauth.net/2/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2">https://www.digitalocean.com/community/tutorials/an-introduction-to-oauth-2</a></p>
+<h2 id="常见安全案例">常见安全案例</h2>
+<ol>
+<li>CSRF：例子就是，在攻击者登录某社交网站的时候，用的是百度OAuth2.0认证流程，其中没用state参数对redirect_uri参数做防御CSRF。这会导致，攻击者可以诱导已经登陆该社交网站的受害者，点击攻击者这个恶意链接，就会跳转到攻击者构造好的网站，点击绑定之后，会将受害者的账号绑定到攻击者的账号</li>
+<li>社区劫持：由于oauth_callback没有与应用oauth_token绑定，没有对可用性进行校验，导致oauth_callback可以修改为任意地址。最终跳转到这个指定地址的时候，oauth_token泄露。</li>
+</ol>
+<p>修复建议：</p>
+<ol>
+<li>OAuth 2.0提供了state参数用于CSRF认证服务器将接收到的state参数按原样返回给redirect_uri，客户端收到该参数并验证与之前生成的值是否一致。除此方法外也可使用传统的CSRF防御方案。</li>
+<li>请遵循OAuth协议规范，将应用的oauth_token与oauth_callback绑定，对oauth_callback进行有效性校验。</li>
+<li>用户授权凭证会由服务器转发到 redirect_uri 对应的地址，如果攻击者伪造redirect_uri为自己的地址，然后诱导用户发送该请求，之后获取的凭证就会发送给攻击者伪造的回调地址。攻击者使用该凭证即可登录用户账号，造成授权劫持。正常情况下，为了防止该情况出现，认证服务器会验证自己的 client_id 与回调地址是否对应。常见的方法是验证回调地址的主域。</li>
+</ol>
+<h1 id="0x12-靶场实践">0x12 靶场实践</h1>
+<h2 id="不受保护的管理功能">不受保护的管理功能</h2>
+<p>实验任务为：</p>
+<p>该实验室有一个不受保护的管理面板。通过删除用户 <code>carlos</code> 来解决本实验。</p>
+<p>直觉让我查看robots.txt，发现一个管理员控制面板的路由</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707141621128.png" alt="image-20240707141621128"></p>
+<p>这意味着我们是未授权访问，如下图，我们可以直接以管理员权限删除指定用户</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707141656461.png" alt="image-20240707141656461"></p>
+<h2 id="修改序列化数据类型">修改序列化数据类型</h2>
+<p>实验任务说明：</p>
+<p>该实验使用基于序列化的会话机制，因此容易受到身份验证绕过。要完成实验，请编辑会话 cookie 中的序列化对象以访问 <code>administrator</code> 帐户。然后，删除用户 <code>carlos</code> 。</p>
+<p>您可以使用以下凭据登录您自己的帐户： <code>wiener:peter</code></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707142356442.png" alt="image-20240707142356442"></p>
+<p>当我们登录之后，如上图，能够发现session会话疑似base64编码，我们可以解码看一下数据</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707142346109.png" alt="image-20240707142346109"></p>
+<p>如上图，发现是administrator的凭据信息，我们可以照原样修改为管理员身份，修改cookie，得到下面的值，但当我尝试直接修改发送之后，页面显示服务器内部错误。</p>
+<pre><code class="hljs scss">Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO3M6MzI6ImtqcjBrbnZlMmIxMjc1NG16b2NmdDdscjgzNnd3bzAyIjt9%<span class="hljs-number">3</span>d%<span class="hljs-number">3</span>d</code></pre>
+<p>当我看到hint：需要利用PHP弱比较特点来访问其他用户。但尝试半天我不能理解这句话的含义，不得已看了解决方案，发现是针对access_token的比较。</p>
+<p>因为即使我修改username为管理员，但是我的access_token并不能与之对应，而我们看到上述cookie的token是字符串类型，后台肯定是将管理员对应的正确token与之比较来赋予权限（马后炮的分析），同时我们联想到PHP中，字符串和数字0比较，是相等的（针对弱比较）</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707144203651.png" alt="image-20240707144203651"></p>
+<p>这里我们可以猜测后台做的就是弱比较，那我们可以做出这样的修改，设置access_token为整数，并且长度为0，我们可以做个测试就知道，长度为零0对应的它的值也是0</p>
+<pre><code class="hljs scss">O:<span class="hljs-number">4</span>:<span class="hljs-string">"User"</span>:<span class="hljs-number">2</span>:{s:<span class="hljs-number">8</span>:<span class="hljs-string">"username"</span>;s:<span class="hljs-number">13</span>:<span class="hljs-string">"administrator"</span>;s:<span class="hljs-number">12</span>:<span class="hljs-string">"access_token"</span>;<span class="hljs-selector-tag">i</span>:<span class="hljs-number">0</span>;}%<span class="hljs-number">3</span>d%<span class="hljs-number">3</span>d</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707144529531.png" alt="image-20240707144529531"></p>
+<pre><code class="hljs scss">Tzo0OiJVc2VyIjoyOntzOjg6InVzZXJuYW1lIjtzOjEzOiJhZG1pbmlzdHJhdG9yIjtzOjEyOiJhY2Nlc3NfdG9rZW4iO2k6MDt9%<span class="hljs-number">3</span>d%<span class="hljs-number">3</span>d</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707145555303.png" alt="image-20240707145555303"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707145720558.png" alt="image-20240707145720558"></p>
+<p>随后访问管理员面板即可删除用户</p>
+<h2 id="未受保护的管理功能和不可预测的-url">未受保护的管理功能和不可预测的 URL</h2>
+<p>实验任务说明：该实验室有一个不受保护的管理面板。它位于不可预测的位置，但该位置已在应用程序中的某处公开。</p>
+<p>通过访问管理面板并使用它删除用户 <code>carlos</code> 来解决本实验。</p>
+<p>这里我们可以选择bp的爬虫功能，关闭拦截，开启代理。单击一下该网站的功能，我们就可以在site中看到完整的站点地图，如下图所示，我们看到了管理员面板</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707145957574.png" alt="image-20240707145957574"></p>
+<p>另外我们也可以直接查看源代码，也可以找到</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707150131578.png" alt="image-20240707150131578"></p>
+<p>访问删除用户即可</p>
+<h2 id="通过请求参数控制用户角色">通过请求参数控制用户角色</h2>
+<p>实验任务说明：该实验室在 <code>/admin</code> 处有一个管理面板，它使用可伪造的 cookie 来识别管理员。通过访问管理面板并使用它删除用户 <code>carlos</code> 来解决本实验。</p>
+<p>您可以使用以下凭据登录您自己的帐户： <code>wiener:peter</code></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707150455589.png" alt="image-20240707150455589"></p>
+<p>看到cookie这里，修改Admin为true，发现出现管理员面板，访问删除用户即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707150658636.png" alt="image-20240707150658636"></p>
+<h2 id="用户配置文件中修改用户角色">用户配置文件中修改用户角色</h2>
+<p>实验任务说明：该实验室的管理面板位于 <code>/admin</code> 。只有 <code>roleid</code> 为 2 的登录用户才能访问。通过访问管理面板并使用它删除用户 <code>carlos</code> 来解决本实验。</p>
+<p>您可以使用以下凭据登录您自己的帐户： <code>wiener:peter</code></p>
+<p>这里测试了半天，没找到思路，看了一眼提示，看到是与邮箱修改有关，我就没再看了，然后尝试在修改邮箱的时候抓包</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707151745465.png" alt="image-20240707151745465"></p>
+<p>如上图，看到这里发送json数据，结合题目让我们的roleid=2，我就尝试添加这个参数值</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707151832167.png" alt="image-20240707151832167"></p>
+<p>点击发送，成功得到管理员权限，访问删除用户即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707151636207.png" alt="image-20240707151636207"></p>
+<h2 id="由请求参数控制的用户id">由请求参数控制的用户ID</h2>
+<p>实验任务说明：该实验室在用户帐户页面上存在水平提权漏洞。要解决该实验，请获取用户 <code>carlos</code> 的 API 密钥并将其作为解决方案提交。</p>
+<p>您可以使用以下凭据登录您自己的帐户： <code>wiener:peter</code></p>
+<p>结合题意：水平越权，一看到这个页面，直接告诉我修改url的id参数值即可，果不其然，我们得到了carlos的apikey</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707152051445.png" alt="image-20240707152051445"></p>
+<h2 id="请求参数控制用户id用户id不可预测">请求参数控制用户ID，用户ID不可预测</h2>
+<p>实验任务说明：该实验室在用户帐户页面上存在水平提权漏洞，但通过 GUID 来识别用户。要解决该实验，请找到 <code>carlos</code> 的 GUID，然后提交他的 API 密钥作为解决方案。</p>
+<p>您可以使用以下凭据登录您自己的帐户： <code>wiener:peter</code></p>
+<p>当我们登陆的时候，这里的id参数值为随机生成的，不可预测的，但是这个id值对于用户来说是固定的。那这里就不好办了，但我发现这里的首页表达的是博客内容，接着我尝试浏览，发现了carlos发的博客，点击访问之后，查到了该用户的userid</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707152807617.png" alt="image-20240707152807617"></p>
+<p>如下图所示</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707152827771.png" alt="image-20240707152827771"></p>
+<p>接着我回到了账户页面，尝试修改id为carlos的userid，如下图，发现成功越权</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707152743203.png" alt="image-20240707152743203"></p>
+<h2 id="请求参数控制用户id重定向时数据泄露">请求参数控制用户ID，重定向时数据泄露</h2>
+<p>实验任务说明：该实验室包含一个访问控制漏洞，其中敏感信息在重定向响应正文中泄露。要解决该实验，请获取用户 <code>carlos</code> 的 API 密钥并将其作为解决方案提交。</p>
+<p>您可以使用以下凭据登录您自己的帐户： <code>wiener:peter</code></p>
+<p>既然题目提示我们是重定向的数据泄露，那我们可以查找该站点的重定向部分，通过bp抓包来获取，同时可以进一步想一下，哪些重定向可能会与carlos用户有所联系，不难想到，修改url的id值为carlos，这一步存在重定向，抓包后如下图所示，找到apikey</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707154429511.png" alt="image-20240707154429511"></p>
+<h2 id="请求参数控制的用户id密码泄露">请求参数控制的用户ID，密码泄露</h2>
+<p>实验任务说明：该实验室的用户帐户页面包含当前用户的现有密码，并预先填充了屏蔽输入。要完成本实验，请检索管理员的密码，然后使用它删除用户 <code>carlos</code> 。</p>
+<p>您可以使用以下凭据登录您自己的帐户： <code>wiener:peter</code></p>
+<p>当我们来到如下图的页面，很容易想要查看是否password的遮挡部分有所泄露，果不其然，当我们F12查看，发现html表单中没有将密码隐藏，我们登录用户即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707154905458.png" alt="image-20240707154905458"></p>
+<pre><code class="hljs scss">administrator
+<span class="hljs-number">33</span>agmszr8lprd8cqu8et</code></pre>
+<p>然后进入管理员面板删除用户即可</p>
+<h2 id="不安全的直接对象引用">不安全的直接对象引用</h2>
+<p>实验任务说明：本实验将用户聊天日志直接存储在服务器的文件系统上，并使用静态 URL 检索它们。</p>
+<p>通过查找用户 <code>carlos</code> 的密码并登录其帐户来完成实验。</p>
+<p>当看到提示，我才恍然大悟，原来这个下载文件的路由是递增的，我没注意到，经此一事，我们点击view transcript之后bp抓包，查看到如下图所示的路由，将其改为1.txt，因为我们第一次下载的文件名为2.txt，故我们需要改为1</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707160609876.png" alt="image-20240707160609876"></p>
+<p>如下图所示，得到密码</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707160632559.png" alt="image-20240707160632559"></p>
+<h2 id="绕过基于-url-的访问控制">绕过基于 URL 的访问控制</h2>
+<p>实验任务说明：该网站在 <code>/admin</code> 处有一个未经身份验证的管理面板，但前端系统已配置为阻止对该路径的外部访问。但是，后端应用程序构建在支持 <code>X-Original-URL</code> 标头的框架上。</p>
+<p>要完成实验，请访问管理面板并删除用户 <code>carlos</code> 。</p>
+<p>网上搜寻了一下X-Original-URL头的相关绕过方法，得到以下思路：</p>
+<p>首先清空http请求包第一行的路径，因为前端会校验这个，我们不能为admin，使用X-Original-URL可以覆盖访问路径，如下图所示，发包之后，我们来到了管理员面板</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707162155086.png" alt="image-20240707162155086"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707162101300.png" alt="image-20240707162101300"></p>
+<p>当时当我们删除的时候，又显示没有权限，仿照上述思路，接着修改相应路径</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707162119933.png" alt="image-20240707162119933"></p>
+<p>如下图。标头只能为指定路径，参数的话，就写在/后面，发包之后，成功删除</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707162341224.png" alt="image-20240707162341224"></p>
+<h2 id="绕过基于方法的访问控制">绕过基于方法的访问控制</h2>
+<p>实验任务说明：本实验部分基于 HTTP 请求方法实现访问控制。您可以使用凭据登录来熟悉管理面板 <code>administrator:admin</code> 。</p>
+<p>要完成该实验，请使用凭据 <code>wiener:peter</code> 登录，并利用有缺陷的访问控制将自己提升为管理员。</p>
+<p>我们先使用管理员身份登录，接着我们发现面板中可以进行用户的升降级</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164947537.png" alt="image-20240707164947537"></p>
+<p>我们可以先抓包carlos升级的请求数据包，如下图所示，同时我们另开一个无缓存浏览器，以wiener身份登录，拿到他的cookie</p>
+<pre><code class="hljs scss">dav4nVVjlxugIQv0eSdO7ik4okw0FZBS</code></pre>
+<p>当我们将carlos的cookie修改为wiener的cookie，发包发现是401未授权</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164118489.png" alt="image-20240707164118489"></p>
+<p>根据文章的分析，这是正常的校验步骤，但是我们可以测试是否：</p>
+<pre><code class="hljs scss">这些访问控制在所有 HTTP 方法中都已到位，而不仅仅是在主要用于该特定请求的方法中实现。然而，我们可以让 Burp 为我们做这件事，而不是手动更改它并可能犯错误，因为我们只是人类。</code></pre>
+<p>如下图所示，我们修改为GET请求，测试他是否对GET请求做了正确的验证</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164249158.png" alt="image-20240707164249158"></p>
+<p>点击发包发现是重定向，跟随之后，是一个401未授权</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164728054.png" alt="image-20240707164728054"></p>
+<pre><code class="hljs scss">可能发生的情况是，我们的请求已通过以升级 Carlos 用户，但由于我们为 wiener 用户使用了会话 cookie，因此可能存在一些额外的访问控制机制阻止我们更改其他用户。</code></pre>
+<p>接下来，我们可以尝试修改username为我们指定的用户wiener，cookie是对应的，发包，跟随302，发现成功升级</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164847963.png" alt="image-20240707164847963"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707164858157.png" alt="image-20240707164858157"></p>
+<h2 id="多步骤过程一步无访问控制">多步骤过程，一步无访问控制</h2>
+<p>实验任务说明：该实验室的管理面板包含有缺陷的用于更改用户角色的多步骤流程。您可以使用凭据登录来熟悉管理面板 <code>administrator:admin</code> 。</p>
+<p>要完成该实验，请使用凭据 <code>wiener:peter</code> 登录，并利用有缺陷的访问控制将自己提升为管理员。</p>
+<pre><code class="hljs scss">wiener的cookie: AeXxhh9boJP5eacg6FpmoofV6fWuxfO2</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170114352.png" alt="image-20240707170114352"></p>
+<p>如上图所示，当我们还是同上一关点击管理员面板，对carlos升级，会发现多了一个确定的步骤，这里我们可以在完成第一个步骤的时候，再次点击第二步的yes，然后请求包如下</p>
+<p>修改cookie和名字为wiener的，发包即可</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170211000.png" alt="image-20240707170211000"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170239519.png" alt="image-20240707170239519"></p>
+<h2 id="基于referer的访问控制">基于Referer的访问控制</h2>
+<p>实验任务说明：本实验根据 Referer 标头控制对某些管理功能的访问。您可以使用凭据登录来熟悉管理面板 <code>administrator:admin</code> 。</p>
+<p>要完成该实验，请使用凭据 <code>wiener:peter</code> 登录，并利用有缺陷的访问控制将自己提升为管理员。</p>
+<pre><code class="hljs SCSS">wiener: QWDnOOWxN3tBbclSA2uxt3R7kVi9Xo0N</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170916346.png" alt="image-20240707170916346"></p>
+<p>有点莫名其妙，直接修改对应参数值为wiener的凭证，发包就发现，成功修改</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5C%E8%AF%BBweb%E6%94%BB%E9%98%B2%E6%9C%89%E6%84%9F%5Cimage-20240707170908894.png" alt="image-20240707170908894"></p>
+<p>对于莫名其妙的点可以看这篇文章：<a target="_blank" rel="noopener" href="https://complexsecurity.io/portswigger-academy/portswigger-access-control">https://complexsecurity.io/portswigger-academy/portswigger-access-control</a></p>
+<p>也就是开发人员只通过referer头是否是来自url/admin来判断当前用户是否有资格访问admin面板，而我们可以轻而易举地修改referer头为url/admin来绕过。</p>
+<h1 id="0x13-参考文章">0x13 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/allway2/article/details/126701904">Cookie 安全</a></p>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/4265?time__1311=n4%2BxnD0D9DgDyG7K4GNepBYDCWDOBG7lieD&amp;alichlgref=https%3A%2F%2Fwww.google.com.hk%2F#toc-1">session，cookie认证会话中的安全问题</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/yunmuq/p/15799113.html">理解Cookie、Session和token机制，及其安全问题 </a></p>
+<p><a target="_blank" rel="noopener" href="https://wuch886.gitbooks.io/front-end-handbook/content/session-cookiehe-token-san-zhe-de-guan-xi-he-qu-bie.html">Session 、Cookie和Token三者的关系和区别</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.51cto.com/article/679219.html">网络面经：你真的了解Cookie和Session吗？</a></p>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/06/16/thm-hacking-with-powershell/">THM-Hacking_With_PowerShell</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/06/11/thinkphp5-dai-shen/">ThinkPHP5代码审计</a></div></section></div>
+
+
+
+
+  <div class="related-wrap md-text" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E6%A6%82%E8%BF%B0"><span class="toc-text">0x01 概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E6%B5%8B%E8%AF%95"><span class="toc-text">如何测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E6%A8%A1%E5%9E%8B"><span class="toc-text">测试模型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E9%A3%8E%E9%99%A9%E7%82%B9"><span class="toc-text">业务风险点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E7%8E%AF%E8%8A%82%E9%A3%8E%E9%99%A9"><span class="toc-text">业务环节风险</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%AF%E6%8C%81%E7%B3%BB%E7%BB%9F%E9%A3%8E%E9%99%A9"><span class="toc-text">支持系统风险</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E7%8E%AF%E8%8A%82%E9%A3%8E%E9%99%A9"><span class="toc-text">业务环节风险</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%AF%E6%8C%81%E7%B3%BB%E7%BB%9F%E9%A3%8E%E9%99%A9"><span class="toc-text">支持系统风险</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E7%8E%AF%E8%8A%82%E4%B8%8E%E6%94%AF%E6%8C%81%E7%B3%BB%E7%BB%9F%E9%97%B4%E9%A3%8E%E9%99%A9"><span class="toc-text">业务环节与支持系统间风险</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E7%99%BB%E5%BD%95%E8%AE%A4%E8%AF%81%E6%A8%A1%E5%9D%97%E6%B5%8B%E8%AF%95"><span class="toc-text">0x02 登录认证模块测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3%E6%B5%8B%E8%AF%95"><span class="toc-text">暴力破解测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AC%E5%9C%B0%E5%8A%A0%E5%AF%86%E4%BC%A0%E8%BE%93%E6%B5%8B%E8%AF%95"><span class="toc-text">本地加密传输测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#session%E6%B5%8B%E8%AF%95"><span class="toc-text">Session测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#session%E4%BC%9A%E8%AF%9D%E5%9B%BA%E5%AE%9A"><span class="toc-text">Session会话固定</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#session%E4%BC%9A%E8%AF%9D%E6%B3%A8%E9%94%80"><span class="toc-text">Session会话注销</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#session%E4%BC%9A%E8%AF%9D%E8%B6%85%E6%97%B6"><span class="toc-text">Session会话超时</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#session%E4%BC%9A%E8%AF%9D%E9%A2%84%E6%B5%8B"><span class="toc-text">Session会话预测</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#session%E4%BC%9A%E8%AF%9D%E5%8A%AB%E6%8C%81"><span class="toc-text">Session会话劫持</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cookie%E4%BB%BF%E5%86%92%E6%B5%8B%E8%AF%95"><span class="toc-text">Cookie仿冒测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E6%96%87%E6%AF%94%E5%AF%B9%E8%AE%A4%E8%AF%81%E6%B5%8B%E8%AF%95"><span class="toc-text">密文比对认证测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%99%BB%E9%99%86%E5%A4%B1%E8%B4%A5%E4%BF%A1%E6%81%AF%E6%B5%8B%E8%AF%95"><span class="toc-text">登陆失败信息测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E9%98%B6%E6%AE%B5%E6%80%BB%E7%BB%93-1"><span class="toc-text">0x03 阶段总结 1</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#cookie"><span class="toc-text">Cookie</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%95%E4%B8%BAcookie"><span class="toc-text">何为Cookie</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cookie%E4%BD%9C%E7%94%A8"><span class="toc-text">Cookie作用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#domain%E5%B1%9E%E6%80%A7"><span class="toc-text">domain属性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hostonly%E5%B1%9E%E6%80%A7"><span class="toc-text">HostOnly属性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#path%E5%B1%9E%E6%80%A7"><span class="toc-text">Path属性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#httponly-%E5%B1%9E%E6%80%A7"><span class="toc-text">HttpOnly 属性</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#session"><span class="toc-text">Session</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#token"><span class="toc-text">Token</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8C%BA%E5%88%AB"><span class="toc-text">区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#cookie%E4%B8%8Esession"><span class="toc-text">Cookie与Session：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#token%E4%B8%8Esession"><span class="toc-text">Token与Session</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E8%80%85%E6%B6%89%E5%8F%8A%E7%9A%84%E7%94%A8%E6%88%B7%E8%AE%A4%E8%AF%81%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98"><span class="toc-text">三者涉及的用户认证安全问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E4%B8%9A%E5%8A%A1%E5%8A%9E%E7%90%86%E6%A8%A1%E5%9D%97%E6%B5%8B%E8%AF%95"><span class="toc-text">0x04 业务办理模块测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A2%E5%8D%95id%E7%AF%A1%E6%94%B9%E6%B5%8B%E8%AF%95"><span class="toc-text">订单ID篡改测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E7%A0%81%E7%AF%A1%E6%94%B9%E6%B5%8B%E8%AF%95"><span class="toc-text">手机号码篡改测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7id%E7%AF%A1%E6%94%B9%E6%B5%8B%E8%AF%95"><span class="toc-text">用户ID篡改测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%82%AE%E7%AE%B1%E5%92%8C%E7%94%A8%E6%88%B7%E7%AF%A1%E6%94%B9%E6%B5%8B%E8%AF%95"><span class="toc-text">邮箱和用户篡改测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%95%86%E5%93%81%E7%BC%96%E5%8F%B7%E7%AF%A1%E6%94%B9%E6%B5%8B%E8%AF%95"><span class="toc-text">商品编号篡改测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%9E%E4%BA%89%E6%9D%A1%E4%BB%B6%E6%B5%8B%E8%AF%95"><span class="toc-text">竞争条件测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E4%B8%9A%E5%8A%A1%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%B5%8B%E8%AF%95"><span class="toc-text">0x05 业务授权访问测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%B5%8B%E8%AF%95"><span class="toc-text">未授权访问测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B6%8A%E6%9D%83%E6%B5%8B%E8%AF%95"><span class="toc-text">越权测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E6%A8%A1%E5%9D%97%E6%B5%8B%E8%AF%95"><span class="toc-text">0x06 输入&#x2F;输出模块测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A5%E6%B5%8B%E8%AF%95"><span class="toc-text">SQL注入测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xss%E6%B5%8B%E8%AF%95"><span class="toc-text">XSS测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E6%B5%8B%E8%AF%95"><span class="toc-text">命令执行测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9E%E9%80%80%E6%A8%A1%E5%9D%97%E6%B5%8B%E8%AF%95"><span class="toc-text">回退模块测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%BA%E5%88%B6%E6%B5%8B%E8%AF%95"><span class="toc-text">0x07 验证码机制测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E7%A0%81%E5%8F%AF%E7%88%86%E7%A0%B4"><span class="toc-text">验证码可爆破</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E7%A0%81%E5%A4%8D%E7%94%A8"><span class="toc-text">验证码复用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E7%A0%81%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%9B%9E%E6%98%BE"><span class="toc-text">验证码客户端回显</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E7%A0%81%E5%8F%AF%E7%BB%95%E8%BF%87"><span class="toc-text">验证码可绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E7%A0%81%E8%AF%86%E5%88%AB%E5%AF%B9%E6%8A%97"><span class="toc-text">验证码识别对抗</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x08-%E4%B8%9A%E5%8A%A1%E6%95%B0%E6%8D%AE%E5%AE%89%E5%85%A8%E6%B5%8B%E8%AF%95"><span class="toc-text">0x08 业务数据安全测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%AF%E4%BB%98%E9%87%91%E9%A2%9D%E7%AF%A1%E6%94%B9"><span class="toc-text">支付金额篡改</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x09-%E5%AF%86%E7%A0%81%E6%89%BE%E5%9B%9E%E6%B5%8B%E8%AF%95"><span class="toc-text">0x09 密码找回测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E7%A0%81%E5%89%8D%E7%AB%AF%E5%9B%9E%E6%98%BE"><span class="toc-text">验证码前端回显</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3%E5%8F%82%E6%95%B0%E8%B4%A6%E5%8F%B7%E4%BF%AE%E6%94%B9"><span class="toc-text">接口参数账号修改</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#response%E7%8A%B6%E6%80%81%E5%80%BC%E4%BF%AE%E6%94%B9"><span class="toc-text">Response状态值修改</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#session%E8%A6%86%E7%9B%96"><span class="toc-text">Session覆盖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%B1token%E8%AE%BE%E8%AE%A1%E7%BC%BA%E9%99%B7"><span class="toc-text">弱Token设计缺陷</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E6%89%BE%E5%9B%9E%E6%B5%81%E7%A8%8B%E7%BB%95%E8%BF%87"><span class="toc-text">密码找回流程绕过</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#callback%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B5%8B%E8%AF%95"><span class="toc-text">Callback自定义测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#webservice%E6%B5%8B%E8%AF%95"><span class="toc-text">WebService测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%9D%E5%A4%96"><span class="toc-text">额外</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x10-%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91%E6%BC%8F%E6%B4%9E%E6%A1%88%E4%BE%8B"><span class="toc-text">0x10 业务逻辑漏洞案例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD%E9%97%B4%E4%BA%BA%E6%94%BB%E5%87%BB"><span class="toc-text">中间人攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ssl%E8%AF%81%E4%B9%A6%E6%AC%BA%E9%AA%97"><span class="toc-text">SSL证书欺骗</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ssl%E5%8A%AB%E6%8C%81"><span class="toc-text">SSL劫持</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%92%9E%E5%BA%93%E6%94%BB%E5%87%BB"><span class="toc-text">撞库攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%98%B2%E5%BE%A1%E5%BB%BA%E8%AE%AE"><span class="toc-text">防御建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E6%A1%88%E4%BE%8B"><span class="toc-text">其他案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B6%8A%E6%9D%83%E8%AE%BF%E9%97%AE"><span class="toc-text">越权访问</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">修复建议</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x11-oauth20%E5%AE%89%E5%85%A8"><span class="toc-text">0x11 OAuth2.0安全</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A4%E8%AF%81%E5%8E%9F%E7%90%86"><span class="toc-text">认证原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E5%AE%89%E5%85%A8%E6%A1%88%E4%BE%8B"><span class="toc-text">常见安全案例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x12-%E9%9D%B6%E5%9C%BA%E5%AE%9E%E8%B7%B5"><span class="toc-text">0x12 靶场实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E5%8F%97%E4%BF%9D%E6%8A%A4%E7%9A%84%E7%AE%A1%E7%90%86%E5%8A%9F%E8%83%BD"><span class="toc-text">不受保护的管理功能</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%BA%8F%E5%88%97%E5%8C%96%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-text">修改序列化数据类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AA%E5%8F%97%E4%BF%9D%E6%8A%A4%E7%9A%84%E7%AE%A1%E7%90%86%E5%8A%9F%E8%83%BD%E5%92%8C%E4%B8%8D%E5%8F%AF%E9%A2%84%E6%B5%8B%E7%9A%84-url"><span class="toc-text">未受保护的管理功能和不可预测的 URL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E8%BF%87%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E6%8E%A7%E5%88%B6%E7%94%A8%E6%88%B7%E8%A7%92%E8%89%B2"><span class="toc-text">通过请求参数控制用户角色</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E4%BF%AE%E6%94%B9%E7%94%A8%E6%88%B7%E8%A7%92%E8%89%B2"><span class="toc-text">用户配置文件中修改用户角色</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%B1%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E6%8E%A7%E5%88%B6%E7%9A%84%E7%94%A8%E6%88%B7id"><span class="toc-text">由请求参数控制的用户ID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E6%8E%A7%E5%88%B6%E7%94%A8%E6%88%B7id%E7%94%A8%E6%88%B7id%E4%B8%8D%E5%8F%AF%E9%A2%84%E6%B5%8B"><span class="toc-text">请求参数控制用户ID，用户ID不可预测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E6%8E%A7%E5%88%B6%E7%94%A8%E6%88%B7id%E9%87%8D%E5%AE%9A%E5%90%91%E6%97%B6%E6%95%B0%E6%8D%AE%E6%B3%84%E9%9C%B2"><span class="toc-text">请求参数控制用户ID，重定向时数据泄露</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0%E6%8E%A7%E5%88%B6%E7%9A%84%E7%94%A8%E6%88%B7id%E5%AF%86%E7%A0%81%E6%B3%84%E9%9C%B2"><span class="toc-text">请求参数控制的用户ID，密码泄露</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E7%9B%B4%E6%8E%A5%E5%AF%B9%E8%B1%A1%E5%BC%95%E7%94%A8"><span class="toc-text">不安全的直接对象引用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%95%E8%BF%87%E5%9F%BA%E4%BA%8E-url-%E7%9A%84%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="toc-text">绕过基于 URL 的访问控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%95%E8%BF%87%E5%9F%BA%E4%BA%8E%E6%96%B9%E6%B3%95%E7%9A%84%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="toc-text">绕过基于方法的访问控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E6%AD%A5%E9%AA%A4%E8%BF%87%E7%A8%8B%E4%B8%80%E6%AD%A5%E6%97%A0%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="toc-text">多步骤过程，一步无访问控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8Ereferer%E7%9A%84%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><span class="toc-text">基于Referer的访问控制</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x13-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-text">0x13 参考文章</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
+    });
+</script>
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
