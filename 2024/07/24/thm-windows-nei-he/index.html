@@ -1,0 +1,1047 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>THM-Windows内核 - hybcx's blog</title>
+
+  
+    <meta name="description" content="学习并了解 Windows 核心运行方式的基础知识。 0x01 介绍 操作系统背后的技术和架构比我们最初看到的要多得多。在这个房间里，我们将观察Windows操作系统和常见的内部组件。 学习目标  了解 Windows 进程及其底层技术并与之交互。 了解核心文件格式及其使用方式。 与 Windows 内部进行交互并了解 Windows 内核的运行方式。 由于 Windows 机器构成了企业基础设施">
+<meta property="og:type" content="article">
+<meta property="og:title" content="THM-Windows内核">
+<meta property="og:url" content="http://hybcx.xyz/2024/07/24/thm-windows-nei-he/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="学习并了解 Windows 核心运行方式的基础知识。 0x01 介绍 操作系统背后的技术和架构比我们最初看到的要多得多。在这个房间里，我们将观察Windows操作系统和常见的内部组件。 学习目标  了解 Windows 进程及其底层技术并与之交互。 了解核心文件格式及其使用方式。 与 Windows 内部进行交互并了解 Windows 内核的运行方式。 由于 Windows 机器构成了企业基础设施">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535899.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535900.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535901.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535903.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535904.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535905.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535906.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535907.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535908.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535909.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535910.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535911.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535912.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535913.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535914.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535915.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535916.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535917.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535918.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535919.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535920.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535921.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535922.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535923.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535924.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535925.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535926.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535928.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535929.png">
+<meta property="article:published_time" content="2024-07-24T08:31:38.000Z">
+<meta property="article:modified_time" content="2024-07-25T07:39:06.752Z">
+<meta property="article:author" content="hybcx">
+<meta property="article:tag" content="tryhackme">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535899.png">
+  
+  
+  
+  <meta name="keywords" content="tryhackme">
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+    <link rel="shortcut icon" href="/medias/logo.png">
+  
+
+  
+    
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+
+  
+
+  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/07/25/thm-windows-api-jie-shao/"><span class="title">THM-Windows-API介绍</span></a><a class="item title" href="/2024/07/24/thm-windows-nei-he/"><span class="title">THM-Windows内核</span></a><a class="item title" href="/2024/07/20/thm-shu-ju-xie-lu/"><span class="title">THM-数据泄露</span></a><a class="item title" href="/2024/07/21/linux-ti-quan-zong-jie/"><span class="title">Linux提权总结</span></a><a class="item title" href="/2024/07/16/thm-enumeration/"><span class="title">THM-Enumeration</span></a><a class="item title" href="/2024/07/16/thm-dang-qian-tai-shi/"><span class="title">THM-当前态势</span></a><a class="item title" href="/2024/02/10/thm-linux-quan-xian-ti-sheng/"><span class="title">THM-Linux权限提升</span></a><a class="item title" href="/2024/02/14/thm-basic-pentesting/"><span class="title">THM-Basic Pentesting</span></a><a class="item title" href="/2024/07/20/linux-ti-quan-xue-xi-yi/"><span class="title">Linux提权学习之rbash逃逸</span></a><a class="item title" href="/2023/08/07/qian-xi-mu-lu-chuan-yue/"><span class="title">浅析目录穿越</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/tryhackme/">tryhackme</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-07-24T08:31:38.000Z">2024-07-24</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-07-25T07:39:06.752Z">2024-07-25</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>THM-Windows内核</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><p>学习并了解 Windows 核心运行方式的基础知识。</p>
+<h1 id="0x01-介绍">0x01 介绍</h1>
+<p>操作系统背后的技术和架构比我们最初看到的要多得多。在这个房间里，我们将观察Windows操作系统和常见的内部组件。</p>
+<h2 id="学习目标">学习目标</h2>
+<ul>
+<li>了解 Windows 进程及其底层技术并与之交互。</li>
+<li>了解核心文件格式及其使用方式。</li>
+<li>与 Windows 内部进行交互并了解 Windows 内核的运行方式。<br>
+由于 Windows 机器构成了企业基础设施的大部分，红队需要了解 Windows 的内部结构以及如何（滥用）使用它们。在制作攻击性工具或漏洞利用时，红队可以（滥用）使用 Windows 来帮助规避和利用。</li>
+</ul>
+<p>在开始本课程之前，请先熟悉 Windows 的基本用法和功能。还建议您具备 C++ 和 PowerShell 的基本编程知识，但不是必需的。</p>
+<p>我们提供了一台基本的 Windows 机器以及完成这个房间所需的文件。您可以使用以下凭据在浏览器中或通过 RDP 访问计算机。</p>
+<p>Machine IP:&nbsp;<code>MACHINE_IP</code>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Username:&nbsp;<code>THM-Attacker</code>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Password:&nbsp;<code>Tryhackme!</code></p>
+<p>这将包含大量信息。请系好安全带并找到最近的灭火器。</p>
+<h1 id="0x02-process">0x02 Process</h1>
+<p>进程维护并代表程序的执行；一个应用程序可以包含一个或多个进程。一个进程有许多组件，它被分解成要存储和交互的组件。<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/procthread/about-processes-and-threads">微软文档</a>对这些其他组件进行了分解，“每个进程都提供执行程序所需的资源。进程具有虚拟地址空间、可执行代码、系统对象的开放句柄、安全上下文、唯一的进程标识符、环境变量、优先级、最小和最大工作集大小以及至少一个执行线程。”这些信息可能看起来令人生畏，但这个房间的目的是让这个概念变得不那么复杂。</p>
+<p>如前所述，进程是通过应用程序的执行而创建的。进程是 Windows 运行的核心，Windows 的大多数功能都可以包含为应用程序并具有相应的进程。以下是启动进程的默认应用程序的一些示例。</p>
+<ul>
+<li>MsMpEng (Microsoft Defender)</li>
+<li>wininit (keyboard and mouse)</li>
+<li>lsass (credential storage)</li>
+</ul>
+<p>攻击者可以瞄准进程来逃避检测并将恶意软件隐藏为合法进程。以下是攻击者可以针对进程使用的一小部分潜在攻击向量，</p>
+<ul>
+<li>Process Injection&nbsp;(<a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/">T1055</a>)   – 进程注入</li>
+<li>Process Hollowing&nbsp;(<a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/012/">T1055.012</a>)   – 进程镂空</li>
+<li>Process Masquerading&nbsp;(<a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/013/">T1055.013</a>)  – 进程伪装</li>
+</ul>
+<p>进程有许多组成部分；它们可以分解为几个关键特征，我们可以使用这些特征在高层次上描述进程。下表描述了进程的每个关键组成部分及其用途。</p>
+<p>流程有很多组成部分；它们可以分为关键特征，我们可以用它们来高层描述流程。下表描述了流程的每个关键组成部分及其用途。</p>
+<table>
+<thead>
+<tr>
+<th><strong>流程组件  <br></strong></th>
+<th><strong>目的</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Private Virtual Address Space</td>
+<td>进程分配的虚拟内存地址。</td>
+</tr>
+<tr>
+<td>Executable Program执行程序</td>
+<td>定义存储在虚拟地址空间中的代码和数据。</td>
+</tr>
+<tr>
+<td>Open Handles&nbsp;开放式手柄</td>
+<td>定义进程可访问的系统资源的句柄。</td>
+</tr>
+<tr>
+<td>Security Context&nbsp;安全上下文</td>
+<td>访问令牌定义用户、安全组、权限和其他安全信息。</td>
+</tr>
+<tr>
+<td>Process ID&nbsp;&nbsp;进程号</td>
+<td>进程的唯一数字标识符。</td>
+</tr>
+<tr>
+<td>Threads&nbsp;线程数</td>
+<td>计划执行的流程的一部分。</td>
+</tr>
+</tbody>
+</table>
+<p>我们还可以在较低级别解释进程，因为它驻留在虚拟地址空间中。下面的表格和图表描述了进程在内存中的样子。</p>
+<table>
+<thead>
+<tr>
+<th><strong>成分  <br></strong></th>
+<th><strong>目的</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code</td>
+<td>由进程执行的代码。</td>
+</tr>
+<tr>
+<td>Global Variables&nbsp;全局变量</td>
+<td>存储的变量。</td>
+</tr>
+<tr>
+<td>Process Heap&nbsp;进程堆</td>
+<td>定义存储数据的堆。</td>
+</tr>
+<tr>
+<td>Process Resources&nbsp;进程资源</td>
+<td>定义进程的更多资源。</td>
+</tr>
+<tr>
+<td>Environment Block&nbsp;环境块</td>
+<td>定义进程信息的数据结构。</td>
+</tr>
+<tr>
+<td><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535899.png" alt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>当我们更深入地利用和滥用底层技术时，拥有这些信息非常有用，但它们仍然非常抽象。我们可以通过在 Windows 任务管理器中观察它们来使该过程变得具体。任务管理器可以报告有关进程的许多组件和信息。下表简要列出了基本流程细节。</p>
+<table>
+<thead>
+<tr>
+<th><strong>Value/Component<br></strong></th>
+<th><strong>Purpose  <br></strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td>定义进程的名称，通常继承自应用程序</td>
+<td>conhost.exe</td>
+</tr>
+<tr>
+<td>PID</td>
+<td>用于识别流程的唯一数值</td>
+<td>7408</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>确定进程如何运行（运行、暂停等）</td>
+<td>Running</td>
+</tr>
+<tr>
+<td>User name</td>
+<td>可以表示进程的特权</td>
+<td>SYSTEM</td>
+</tr>
+</tbody>
+</table>
+<p>这些是您作为最终用户最常与之交互或作为攻击者进行操作的内容。</p>
+<p>有多种实用程序可以使观察过程变得更容易；包括 <a target="_blank" rel="noopener" href="https://github.com/processhacker/processhacker">Process Hacker 2</a>、<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/sysinternals/downloads/process-explorer">Process Explorer</a> 和 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/sysinternals/downloads/procmon">Procmon</a>。</p>
+<p>进程是大多数 Windows 内部组件的核心。以下任务将扩展有关进程及其在 Windows 中的使用方式的信息。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535900.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535901.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535903.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535904.png" alt></p>
+<h1 id="0x03-threads">0x03 Threads</h1>
+<p>线程是进程使用的可执行单元，并根据设备因素进行调度。</p>
+<p>设备因素可能因 CPU 和内存规格、优先级和逻辑因素等而异。</p>
+<p>我们可以简化线程的定义：“控制进程的执行”。</p>
+<p>由于线程控制执行，因此这是一个常见的目标组件。线程滥用可以被单独使用来帮助代码执行，或者更广泛地用于与其他 API 调用链接，作为其他技术的一部分。</p>
+<p>线程与其父进程共享相同的细节和资源，例如代码、全局变量等。线程也有其独特的值和数据，如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th>Component(组件)</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stack(栈)</td>
+<td>与线程相关且特定于线程的所有数据(异常、过程调用等)</td>
+</tr>
+<tr>
+<td>Thread Local Storage(线程本地存储)</td>
+<td>为唯一数据环境分配存储空间的指针</td>
+</tr>
+<tr>
+<td>Stack Argument(栈参数)</td>
+<td>分配给每个线程的唯一值，但并非是唯一标识符</td>
+</tr>
+<tr>
+<td>Context Structure(上下文结构)</td>
+<td>保存由内核维护的计算机寄存器值</td>
+</tr>
+<tr>
+<td>线程可能看起来像骨架和简单组件，但它们的功能对进程至关重要。</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>tips：列出与Thread Create操作相关的内容。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535905.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535906.png" alt></p>
+<p>tips：查看前一个线程的事件属性即可。</p>
+<p>tips：线程的堆栈参数主要涉及到堆栈的大小、起始地址等配置，该参数并不是线程的唯一标识符，也就是说两个具有相同堆栈参数的线程并非就是同一个线程，因为线程ID才是唯一标识线程的值。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535907.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535908.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535909.png" alt></p>
+<h1 id="0x04-虚拟内存">0x04 虚拟内存</h1>
+<p>虚拟内存是Windows内部机制工作以及相互作用的一个关键组件。虚拟内存允许其他Windows内部组件与内存进行交互，就像它是物理内存一样，而不会造成应用程序之间发生冲突。</p>
+<p>虚拟内存会为每个进程提供一个<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/memory/virtual-address-space">私有的虚拟地址空间</a>，而内存管理器则用于将虚拟地址转换为物理地址。通过使用私有虚拟地址空间而不直接写入物理内存，可以降低进程造成损害的风险。</p>
+<p>内存管理器还将使用分页或传输来处理内存。应用程序所使用的虚拟内存可能会多于被分配的物理内存，为了解决这个问题，内存管理器将通过传输或分页的方式，暂时将虚拟内存交换到磁盘上，我们可以通过下面的图像可视化地了解这个概念。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535910.png" alt></p>
+<p>在32位x86系统上，理论上的最大虚拟地址空间为4GB。这个地址空间可以被分为两半，下半部分(<em>0x00000000 - 0x7FFFFFFF</em>)将被分配给如前所述的进程，而上半部分(<em>0x80000000 - 0xFFFFFFFF</em>)则会被分配给操作系统内存利用，管理员可以通过设置(increaseUserVA)或者<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/memory/address-windowing-extensions">AWE(<strong>A</strong>ddress&nbsp;<strong>W</strong>indowing&nbsp;<strong>E</strong>xtensions)</a>来为需要更大地址空间的应用程序更改此分配布局。</p>
+<p>tips：AWE-地址窗口扩展，是Windows应用程序接口，允许32位应用程序访问超出其虚拟地址空间限制的物理内存，AWE将虚拟地址空间映射到物理内存的过程被称为“加窗”，这对于数据密集型应用程序有益。</p>
+<p>在64位现代系统上，理论上的最大虚拟地址空间为256TB，并且64位系统沿用了32位系统的确切地址布局比例。</p>
+<pre><code class="hljs scss">"确切地址布局比例"可以理解为地址空间与地址总线位宽之间的一种对应关系和比例，这种精确的地址布局方式从 <span class="hljs-number">32</span> 位系统中被完整继承到 <span class="hljs-number">64</span> 位系统中。
+
+我们知道<span class="hljs-number">64</span>位系统的最大虚拟地址空间扩大到了<span class="hljs-number">256</span>TB，那么如何理解地址空间与地址总线位宽的比例(确切地址布局比例)仍然保持一致呢?
+主要有以下几点:
+<span class="hljs-number">1</span>. <span class="hljs-number">64</span>位系统扩展了地址总线位宽到<span class="hljs-number">64</span>位，相比<span class="hljs-number">32</span>位系统增加了一倍。
+<span class="hljs-number">2</span>. 与此对应，<span class="hljs-number">64</span>位系统的理论地址空间也从<span class="hljs-number">32</span>位系统的 <span class="hljs-number">4</span>GB 扩展到了 <span class="hljs-number">256</span>TB，同样增加了一倍的数量级。
+<span class="hljs-number">3</span>. 所以虽然地址空间都有数量级的增加，但地址空间容量与地址总线位宽之间的比例关系仍然保持一致。
+<span class="hljs-number">4</span>. 比如，在<span class="hljs-number">32</span>位系统中比例是 <span class="hljs-number">4</span>GB:<span class="hljs-number">32</span>bit，在<span class="hljs-number">64</span>位系统中该比例则变成了<span class="hljs-number">256</span>TB:<span class="hljs-number">64</span>bit。
+<span class="hljs-number">5</span>. 容量级数都成比例地左移了一个数量级，因此两个系统的地址空间与总线位宽的对应关系是一致的。
+<span class="hljs-number">6</span>. 这种比例关系的一致性，保证了软硬件设计和逻辑兼容性。
+综上所述，之所以说<span class="hljs-number">64</span>位系统沿用了<span class="hljs-number">32</span>位系统的地址布局比例，是因为它们地址空间与位宽之间的对应关系是成比例连贯的，所以可以认为地址布局方式是一致的。这种比例逻辑的继承是<span class="hljs-number">64</span>位系统向下兼容的重要基础。
+
+为什么<span class="hljs-number">64</span>位系统中的理论最大虚拟地址空间是<span class="hljs-number">256</span>TB呢？
+因为：
+<span class="hljs-number">1</span>. <span class="hljs-number">32</span>位系统的地址位宽为<span class="hljs-number">32</span>位，所以每个地址可以表示的数量级是<span class="hljs-number">2</span>^<span class="hljs-number">32</span>，约等于<span class="hljs-number">4</span>GB。
+<span class="hljs-number">2</span>. 而<span class="hljs-number">64</span>位系统地址位宽为<span class="hljs-number">64</span>位，每个地址可以表示的数量级是<span class="hljs-number">2</span>^<span class="hljs-number">64</span>，约等于<span class="hljs-number">256</span>TB。
+<span class="hljs-number">3</span>. 从<span class="hljs-number">32</span>位扩展到<span class="hljs-number">64</span>位，地址位数成双倍增长，所以地址空间的数量级是<span class="hljs-number">2</span>的指数级成长，而不是简单的线性增加。
+<span class="hljs-number">4</span>. <span class="hljs-number">2</span>^<span class="hljs-number">64</span>远大于<span class="hljs-number">2</span>^<span class="hljs-number">32</span>的<span class="hljs-number">2</span>倍，所以<span class="hljs-number">64</span>位地址空间理论上不是<span class="hljs-number">8</span>GB，而是可以达到<span class="hljs-number">256</span>TB。
+<span class="hljs-number">5</span>. 这符合地址空间容量与地址位宽之间的指数对应关系(而非线性对应关系)，地址空间容量 = <span class="hljs-number">2</span>的地址位宽次方。
+所以简单来说，地址空间的增长是与地址位数呈指数级对应，而不是线性对称增长，这也是<span class="hljs-number">64</span>位系统具有支持极大内存容量的重要原因之一。</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535911.png" alt></p>
+<p>大多数需要设置(increaseUserVA)或AWE的问题都可以通过增加的理论最大值来解决。</p>
+<p>虽然地址空间分配布局这个概念不能直接转化成Windows内部机制，但是正确理解这一点对于我们利用它来帮助滥用Windows内部机制至关重要。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535912.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535913.png" alt></p>
+<h1 id="0x05-动态链接库">0x05 动态链接库</h1>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/troubleshoot/windows-client/deployment/dynamic-link-library#:~:text=A%20DLL%20is%20a%20library,common%20dialog%20box%20related%20functions.">Microsoft官方文档</a>将DLL描述为“一个包含代码和数据的库，可以同时被多个程序使用。”</p>
+<p>DLL可被用作Windows中应用程序执行背后的核心功能之一。根据<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/troubleshoot/windows-client/deployment/dynamic-link-library#:~:text=A%20DLL%20is%20a%20library,common%20dialog%20box%20related%20functions.">Windows文档</a>所述“DLL的使用有助于促进代码模块化、代码重用、高效内存使用和减少磁盘空间，因此，使用了DLL之后，操作系统和程序加载速度更快，运行速度更快，并会占用计算机上更少的磁盘空间 ”。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535914.png" alt></p>
+<p>当DLL作为程序中的函数被加载时，该DLL将被指定为依赖项。由于程序依赖于DLL，因此攻击者可以针对DLL而不是应用程序本身来控制程序执行或程序功能的某些方面。</p>
+<ul>
+<li>DLL Hijacking-DLL劫持技术 (<a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1574/001/">T1574.001</a>)</li>
+<li>DLL Side-Loading-DLL侧加载技术(白加黑) (<a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1574/002/">T1574.002</a>)</li>
+<li>DLL Injection-DLL注入技术 (<a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/001/">T1055.001</a>)</li>
+</ul>
+<p>DLL的创建方式与创建任何其他项目/应用程序没有什么不同，它们只需要轻微的语法修改即可工作，下面是Visual C++ Win32动态链接库项目中的DLL示例。</p>
+<pre><code class="hljs C++"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">"stdafx.h"</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> EXPORTING_DLL</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">"sampleDLL.h"</span></span>
+<span class="hljs-function">BOOL APIENTRY <span class="hljs-title">DllMain</span><span class="hljs-params">( HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved</span></span>
+<span class="hljs-params"><span class="hljs-function">)</span></span>
+<span class="hljs-function"></span>{
+    <span class="hljs-keyword">return</span> TRUE;
+}
+
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HelloWorld</span><span class="hljs-params">()</span></span>
+<span class="hljs-function"></span>{
+    <span class="hljs-built_in">MessageBox</span>( <span class="hljs-literal">NULL</span>, <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">"Hello World"</span>), <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">"In a DLL"</span>), MB_OK);
+}</code></pre>
+<p>下面是DLL的头文件，它将定义要导入和导出哪些函数。</p>
+<pre><code class="hljs C++"><span class="hljs-meta">#<span class="hljs-keyword">ifndef</span> INDLL_H</span>
+    <span class="hljs-meta">#<span class="hljs-keyword">define</span> INDLL_H</span>
+    <span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> EXPORTING_DLL</span>
+        <span class="hljs-keyword">extern</span> __declspec(dllexport) <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HelloWorld</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-meta">#<span class="hljs-keyword">else</span></span>
+        <span class="hljs-keyword">extern</span> __declspec(dllimport) <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">HelloWorld</span><span class="hljs-params">()</span></span>;
+    <span class="hljs-meta">#<span class="hljs-keyword">endif</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">endif</span></span></code></pre>
+<p>在创建了DLL之后，我们还要知道如何在应用程序中使用它们。</p>
+<p>DLL可以通过使用加载时动态链接(<em>load-time dynamic linking</em>)或者运行时动态链接(<em>run-time dynamic linking</em>)在程序中被加载。</p>
+<p>当使用加载时动态链接(<em>load-time dynamic linking</em>)来加载DLL时，会从应用程序中显式调用DLL函数，我们只能通过提供头文件(.h)和导入库文件(.lib)来实现这种类型的链接。下面是一个从应用程序中调用被导出的DLL函数的示例。</p>
+<pre><code class="hljs c++"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">"stdafx.h"</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">"sampleDLL.h"</span></span>
+<span class="hljs-function"><span class="hljs-type">int</span> APIENTRY <span class="hljs-title">WinMain</span><span class="hljs-params">(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, <span class="hljs-type">int</span> nCmdShow)</span></span>
+<span class="hljs-function"></span>{
+    <span class="hljs-built_in">HelloWorld</span>();
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre>
+<p>当使用运行时动态链接(<em>run-time dynamic linking</em>)来加载DLL时，将使用单独的函数(<code>LoadLibrary</code>或者<code>LoadLibraryEx</code>)在运行时加载DLL，完成加载后，还需要使用<code>GetProcAddress</code>来标识将要调用的被导出的DLL函数。下面是一个在应用程序中加载和导入DLL函数的示例。</p>
+<pre><code class="hljs c++">...
+<span class="hljs-function"><span class="hljs-keyword">typedef</span> <span class="hljs-title">VOID</span> <span class="hljs-params">(*DLLPROC)</span> <span class="hljs-params">(LPTSTR)</span></span>;
+...
+HINSTANCE hinstDLL;
+DLLPROC HelloWorld;
+BOOL fFreeDLL;
+
+hinstDLL = <span class="hljs-built_in">LoadLibrary</span>(<span class="hljs-string">"sampleDLL.dll"</span>);
+<span class="hljs-keyword">if</span> (hinstDLL ! = <span class="hljs-literal">NULL</span>)
+{
+    HelloWorld = (DLLPROC) <span class="hljs-built_in">GetProcAddress</span>(hinstDLL, <span class="hljs-string">"HelloWorld"</span>);
+    <span class="hljs-keyword">if</span> (HelloWorld ! = <span class="hljs-literal">NULL</span>)
+        (HelloWorld);
+    fFreeDLL = <span class="hljs-built_in">FreeLibrary</span>(hinstDLL);
+}
+...</code></pre>
+<p>在恶意代码中，恶意攻击者通常会更多地使用运行时动态链接而不是加载时动态链接。这是因为恶意程序可能需要在内存区域之间传输文件，而传输单个DLL比使用其他文件需求(file requirements)进行导入更加易于管理。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535915.png" alt></p>
+<p>我们重新进行筛选，在Procmon中使用过滤器：进程名称为“notepad.exe”，操作为“load image”，路径以“.dll”结尾。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535916.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535917.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535918.png" alt></p>
+<h1 id="0x06-可移植可执行pe格式">0x06 可移植可执行(PE)格式</h1>
+<p>相关知识点参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.secpulse.com/archives/178258.html">https://www.secpulse.com/archives/178258.html</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/x1183834753/article/details/123865604">https://blog.csdn.net/x1183834753/article/details/123865604</a></li>
+<li><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/12821">https://xz.aliyun.com/t/12821</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jb51.net/article/178797.htm">https://www.jb51.net/article/178797.htm</a></li>
+</ul>
+<p>可执行文件和应用程序是决定Windows内部机制如何在更高的层次上运行的很大一部分因素。PE(Portable Executable-可移植可执行文件)格式定义了关于可执行文件和其所存储的数据的信息，PE格式还定义了用于存储数据组件的结构。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535919.png" alt></p>
+<p>PE(可移植可执行文件)格式是可执行文件和对象文件的总体结构，PE(可移植可执行文件)和COFF(通用对象文件格式)文件组成了PE格式。</p>
+<p>PE数据最常出现在可执行文件的十六进制转储(存储形式)中，下面我们将把calc.exe的十六进制转储(存储形式)分解为由各个部分组成的PE数据。</p>
+<p>PE数据的结构可被分解为多个组成部分：</p>
+<p>DOS头(<strong>DOS Header</strong>&nbsp;)定义了文件的类型。</p>
+<p><code>MZ</code>&nbsp;DOS头将文件格式定义为<code>.exe</code>，DOS头可以在下面的十六进制转储部分中看到。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535920.png" alt></p>
+<pre><code class="hljs scss"><span class="hljs-built_in">Offset</span>(h) <span class="hljs-number">00</span> <span class="hljs-number">01</span> <span class="hljs-number">02</span> <span class="hljs-number">03</span> <span class="hljs-number">04</span> <span class="hljs-number">05</span> <span class="hljs-number">06</span> <span class="hljs-number">07</span> <span class="hljs-number">08</span> <span class="hljs-number">09</span> <span class="hljs-number">0</span>A <span class="hljs-number">0</span>B <span class="hljs-number">0</span>C <span class="hljs-number">0</span>D <span class="hljs-number">0</span>E <span class="hljs-number">0</span>F
+<span class="hljs-number">00000000</span>  <span class="hljs-number">4</span>D <span class="hljs-number">5</span>A <span class="hljs-number">90</span> <span class="hljs-number">00</span> <span class="hljs-number">03</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> FF FF <span class="hljs-number">00</span> <span class="hljs-number">00</span>  MZ..........ÿÿ..
+<span class="hljs-number">00000010</span>  B8 <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  ¸.......@.......
+<span class="hljs-number">00000020</span>  <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  ................
+<span class="hljs-number">00000030</span>  <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> E8 <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  ............è...
+<span class="hljs-number">00000040</span>  <span class="hljs-number">0</span>E <span class="hljs-number">1</span>F BA <span class="hljs-number">0</span>E <span class="hljs-number">00</span> B4 <span class="hljs-number">09</span> CD <span class="hljs-number">21</span> B8 <span class="hljs-number">01</span> <span class="hljs-number">4</span>C CD <span class="hljs-number">21</span> <span class="hljs-number">54</span> <span class="hljs-number">68</span>  ..º..´.Í!¸.LÍ!Th</code></pre>
+<p><strong>DOS Stub</strong>是一个默认运行在文件开头的程序，用于打印兼容性消息，对于大多数用户来说，该程序并不会影响文件的任何功能。</p>
+<p>DOS stub能够打印消息：<code>This program cannot be run in DOS mode</code>。DOS stub可以在下面的十六进制转储部分中看到。</p>
+<pre><code class="hljs scss"><span class="hljs-number">00000040</span>  <span class="hljs-number">0</span>E <span class="hljs-number">1</span>F BA <span class="hljs-number">0</span>E <span class="hljs-number">00</span> B4 <span class="hljs-number">09</span> CD <span class="hljs-number">21</span> B8 <span class="hljs-number">01</span> <span class="hljs-number">4</span>C CD <span class="hljs-number">21</span> <span class="hljs-number">54</span> <span class="hljs-number">68</span>  ..º..´.Í!¸<span class="hljs-selector-class">.L</span>Í!<span class="hljs-selector-tag">Th</span>
+<span class="hljs-number">00000050</span>  <span class="hljs-number">69</span> <span class="hljs-number">73</span> <span class="hljs-number">20</span> <span class="hljs-number">70</span> <span class="hljs-number">72</span> <span class="hljs-number">6</span>F <span class="hljs-number">67</span> <span class="hljs-number">72</span> <span class="hljs-number">61</span> <span class="hljs-number">6</span>D <span class="hljs-number">20</span> <span class="hljs-number">63</span> <span class="hljs-number">61</span> <span class="hljs-number">6</span>E <span class="hljs-number">6</span>E <span class="hljs-number">6</span>F  is program canno
+<span class="hljs-number">00000060</span>  <span class="hljs-number">74</span> <span class="hljs-number">20</span> <span class="hljs-number">62</span> <span class="hljs-number">65</span> <span class="hljs-number">20</span> <span class="hljs-number">72</span> <span class="hljs-number">75</span> <span class="hljs-number">6</span>E <span class="hljs-number">20</span> <span class="hljs-number">69</span> <span class="hljs-number">6</span>E <span class="hljs-number">20</span> <span class="hljs-number">44</span> <span class="hljs-number">4</span>F <span class="hljs-number">53</span> <span class="hljs-number">20</span>  t be run in DOS 
+<span class="hljs-number">00000070</span>  <span class="hljs-number">6</span>D <span class="hljs-number">6</span>F <span class="hljs-number">64</span> <span class="hljs-number">65</span> <span class="hljs-number">2</span>E <span class="hljs-number">0</span>D <span class="hljs-number">0</span>D <span class="hljs-number">0</span>A <span class="hljs-number">24</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  mode....$.......</code></pre>
+<p>PE文件头(<strong>PE file header</strong>)将提供二进制文件的PE头信息，用于定义文件的格式，并且包含签名和图像文件头以及其他信息头。</p>
+<p>PE文件头(PE file header)是具有最少的人类可读输出的部分，我们可以在下面的十六进制转储部分中基于<code>PE</code>&nbsp;stub来识别PE文件头的开始。</p>
+<pre><code class="hljs scss"><span class="hljs-number">000000</span>E0  <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">50</span> <span class="hljs-number">45</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">64</span> <span class="hljs-number">86</span> <span class="hljs-number">06</span> <span class="hljs-number">00</span>  .......<span class="hljs-selector-class">.PE</span>.<span class="hljs-selector-class">.d</span>†..
+<span class="hljs-number">000000</span>F0  <span class="hljs-number">10</span> C4 <span class="hljs-number">40</span> <span class="hljs-number">03</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> F0 <span class="hljs-number">00</span> <span class="hljs-number">22</span> <span class="hljs-number">00</span>  .Ä@.........ð.<span class="hljs-string">".</span>
+<span class="hljs-string">00000100  0B 02 0E 14 00 0C 00 00 00 62 00 00 00 00 00 00  .........b......</span>
+<span class="hljs-string">00000110  70 18 00 00 00 10 00 00 00 00 00 40 01 00 00 00  p..........@....</span>
+<span class="hljs-string">00000120  00 10 00 00 00 02 00 00 0A 00 00 00 0A 00 00 00  ................</span>
+<span class="hljs-string">00000130  0A 00 00 00 00 00 00 00 00 B0 00 00 00 04 00 00  .........°......</span>
+<span class="hljs-string">00000140  63 41 01 00 02 00 60 C1 00 00 08 00 00 00 00 00  cA....`Á........</span>
+<span class="hljs-string">00000150  00 20 00 00 00 00 00 00 00 00 10 00 00 00 00 00  . ..............</span>
+<span class="hljs-string">00000160  00 10 00 00 00 00 00 00 00 00 00 00 10 00 00 00  ................</span>
+<span class="hljs-string">00000170  00 00 00 00 00 00 00 00 94 27 00 00 A0 00 00 00  ........”'.. ...</span>
+<span class="hljs-string">00000180  00 50 00 00 10 47 00 00 00 40 00 00 F0 00 00 00  .P...G...@..ð...</span>
+<span class="hljs-string">00000190  00 00 00 00 00 00 00 00 00 A0 00 00 2C 00 00 00  ......... ..,...</span>
+<span class="hljs-string">000001A0  20 23 00 00 54 00 00 00 00 00 00 00 00 00 00 00   #..T...........</span>
+<span class="hljs-string">000001B0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span>
+<span class="hljs-string">000001C0  10 20 00 00 18 01 00 00 00 00 00 00 00 00 00 00  . ..............</span>
+<span class="hljs-string">000001D0  28 21 00 00 40 01 00 00 00 00 00 00 00 00 00 00  (!..@...........</span>
+<span class="hljs-string">000001E0  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................</span></code></pre>
+<p><strong>Image Optional Header</strong>(可选映像头)有一个具有欺骗性的名称，它实际上是PE文件头(<strong>PE file header</strong>)的重要组成部分。</p>
+<p><strong>Data Dictionaries</strong>是image optional header(可选映像头)的一部分，它们包含了多个image data directory结构，每个image data directory结构都用于描述和指向不同的数据目录，这些数据目录可以包括导入表、导出表、资源表等；换句话说，Data Directories中存储了指向实际数据的指针(以image data directory结构形式存在)，这些指针可用于定位和访问文件中的各种数据。</p>
+<p>在PE (Portable Executable) 文件格式中，image data directory结构是用于描述和定位不同数据目录的一种数据结构，它包含两个字段：VirtualAddress 和 Size。</p>
+<ul>
+<li><strong>VirtualAddress（虚拟地址）：</strong>&nbsp;它是一个相对虚拟地址（RVA），指示相应数据目录在文件中的位置。RVA 是一个相对于映像基址的偏移量，用于定位数据目录。</li>
+<li><strong>Size（大小）：</strong>&nbsp;它表示数据目录中数据的大小，即占用的字节数。</li>
+</ul>
+<p>image data directory结构通常用于描述 PE 文件中的关键信息，比如导入表、导出表、资源表等；当PE文件加载到内存时，这些信息可以通过解析相应的数据目录来获取。</p>
+<p>总的来说，image data directory结构提供了一种灵活的方式，以允许PE文件存储和定位各种重要的数据结构。</p>
+<p><strong>Section Table</strong>(节表)将定义映像中可用的sections(节)和信息。如前所述，sections(节)存储了文件的内容，如代码、imports(导入项)和数据。我们可以从下面的十六进制转储部分的表中识别每个section(节)的定义。</p>
+<pre><code class="hljs scss"><span class="hljs-number">000001</span>F0  <span class="hljs-number">2</span>E <span class="hljs-number">74</span> <span class="hljs-number">65</span> <span class="hljs-number">78</span> <span class="hljs-number">74</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> D0 <span class="hljs-number">0</span>B <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">10</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  <span class="hljs-selector-class">.text</span>...Ð.......
+<span class="hljs-number">00000200</span>  <span class="hljs-number">00</span> <span class="hljs-number">0</span>C <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">04</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  ................
+<span class="hljs-number">00000210</span>  <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">20</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">60</span> <span class="hljs-number">2</span>E <span class="hljs-number">72</span> <span class="hljs-number">64</span> <span class="hljs-number">61</span> <span class="hljs-number">74</span> <span class="hljs-number">61</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  .... ..`<span class="hljs-selector-class">.rdata</span>..
+<span class="hljs-number">00000220</span>  <span class="hljs-number">76</span> <span class="hljs-number">0</span>C <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">20</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">0</span>E <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">10</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  v.... ..........
+<span class="hljs-number">00000230</span>  <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">40</span>  ............@..@
+<span class="hljs-number">00000240</span>  <span class="hljs-number">2</span>E <span class="hljs-number">64</span> <span class="hljs-number">61</span> <span class="hljs-number">74</span> <span class="hljs-number">61</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> B8 <span class="hljs-number">06</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">30</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  .data...¸....<span class="hljs-number">0</span>..
+<span class="hljs-number">00000250</span>  <span class="hljs-number">00</span> <span class="hljs-number">02</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">1</span>E <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  ................
+<span class="hljs-number">00000260</span>  <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> C0 <span class="hljs-number">2</span>E <span class="hljs-number">70</span> <span class="hljs-number">64</span> <span class="hljs-number">61</span> <span class="hljs-number">74</span> <span class="hljs-number">61</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  ....@..À.pdata..
+<span class="hljs-number">00000270</span>  F0 <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">02</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">20</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  ð....@....... ..
+<span class="hljs-number">00000280</span>  <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">40</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">40</span>  ............@..@
+<span class="hljs-number">00000290</span>  <span class="hljs-number">2</span>E <span class="hljs-number">72</span> <span class="hljs-number">73</span> <span class="hljs-number">72</span> <span class="hljs-number">63</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">10</span> <span class="hljs-number">47</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">50</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  .rsrc....G...P..
+<span class="hljs-number">000002</span>A0  <span class="hljs-number">00</span> <span class="hljs-number">48</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">22</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span> <span class="hljs-number">00</span>  .H...<span class="hljs-string">"..........</span>
+<span class="hljs-string">000002B0  00 00 00 00 40 00 00 40 2E 72 65 6C 6F 63 00 00  ....@..@.reloc..</span>
+<span class="hljs-string">000002C0  2C 00 00 00 00 A0 00 00 00 02 00 00 00 6A 00 00  ,.... .......j..</span>
+<span class="hljs-string">000002D0  00 00 00 00 00 00 00 00 00 00 00 00 40 00 00 42  ............@..B</span></code></pre>
+<p>头(headers)已经定义了文件的格式和功能，而节(sections)则用于定义文件的内容和数据。</p>
+<table>
+<thead>
+<tr>
+<th><strong>Section</strong>(节)</th>
+<th><strong>Purpose</strong>(用途)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.text</td>
+<td>包含可执行代码和入口点</td>
+</tr>
+<tr>
+<td>.data</td>
+<td>包含初始化的数据(字符串，变量等)</td>
+</tr>
+<tr>
+<td>.rdata 或者 .idata</td>
+<td>包含导入项(Windows API)和DLLs</td>
+</tr>
+<tr>
+<td>.reloc</td>
+<td>包含基址重定位信息</td>
+</tr>
+<tr>
+<td>.rsrc</td>
+<td>包含应用程序资源(images等)</td>
+</tr>
+<tr>
+<td>.debug</td>
+<td>包含调试信息</td>
+</tr>
+<tr>
+<td><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535921.png" alt></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535922.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535923.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535924.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535925.png" alt></p>
+<h1 id="0x07-与windows内部机制交互">0x07 与Windows内部机制交互</h1>
+<p>与Windows内部机制进行交互可能看起来令人难以理解，但是该过程已经得到了极大的简化。要与Windows内部机制交互，最容易实现和展开研究的选择是通过Windows API调用来建立接口。Windows API为我们提供了与Windows操作系统进行交互的本地功能(本机功能)，该API包含Win32 API和Win64 API(不太常见)。</p>
+<p>在本文内容中，我们仅会提供一些与Windows内部机制相关的特定API调用的简要概述。</p>
+<p>大多数Windows内部组件都需要与物理硬件和内存进行交互。</p>
+<p>Windows内核将控制所有程序和进程，并架起所有软件和硬件交互的桥梁，这一点尤其重要，因为许多Windows内部结构都需要以某种形式与内存进行交互。</p>
+<p>在默认情况下，应用程序通常无法直接与内核交互或者修改物理硬件(因为应用程序需要接口)，这个问题可以通过使用处理器模式和访问级别来解决。</p>
+<p>Windows操作系统的处理器具有用户模式和内核模式，处理器将根据实际访问和被请求的模式在user mode和kernel mode之间进行切换。</p>
+<p>用户模式和内核模式之间的切换通常是通过系统和API调用来实现，在官方文档中，这个点有时被称为“切换点”。</p>
+<table>
+<thead>
+<tr>
+<th><strong>User mode 用户模式</strong></th>
+<th><strong>Kernel Mode 内核模式</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>没有直接的硬件访问权限</td>
+<td>能够直接进行硬件访问</td>
+</tr>
+<tr>
+<td>在私有虚拟地址空间中创建进程</td>
+<td>在单个共享虚拟地址空间中运行进程</td>
+</tr>
+<tr>
+<td>只能访问“该用户已经拥有的内存位置”</td>
+<td>可以访问整个物理内存</td>
+</tr>
+</tbody>
+</table>
+<p>在用户模式或“用户空间”下启动的应用程序将保持该模式，直到进行系统调用或通过API建立交互接口。当进行系统调用时，应用程序将切换模式，下图是描述此过程的流程图。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535926.png" alt></p>
+<p>当研究编程语言如何与Win32 API交互时，这个过程可能会变得更加复杂，应用程序将在使用API之前先经过编程语言运行时。最常见的例子是C#在与Win32 API进行交互和进行系统调用之前会先经历CLR(Common Language Runtime)执行过程。</p>
+<p>tips：CLR(Common Language Runtime)是Microsoft .NET Framework中的核心组件之一，它提供了一种在托管环境中执行和管理.NET应用程序的框架；CLR执行是指通过CLR运行.NET应用程序的过程。</p>
+<p>接下来，我们将在本地进程中注入一个消息框(message box)，以演示与内存交互的概念验证(POC：proof-of-concept)。</p>
+<p>将消息框写入内存的步骤概述如下：</p>
+<ol>
+<li>
+<p>为消息框分配本地进程内存。</p>
+</li>
+<li>
+<p>将消息框写入/复制到已分配的内存中。</p>
+</li>
+<li>
+<p>执行本地进程内存中的消息框。</p>
+</li>
+</ol>
+<p>第一步，我们可以使用<code>OpenProcess</code>来获取指定进程的句柄。</p>
+<pre><code class="hljs C">HANDLE hProcess = OpenProcess(
+	PROCESS_ALL_ACCESS, <span class="hljs-comment">// Defines access rights</span>
+	FALSE, <span class="hljs-comment">// Target handle will not be inhereted</span>
+	DWORD(atoi(argv[<span class="hljs-number">1</span>])) <span class="hljs-comment">// Local process supplied by command-line arguments </span>
+);</code></pre>
+<p>然后，我们可以使用<code>VirtualAllocEx</code>来分配一个带有有效载荷缓冲区(payload buffer)的内存区域。</p>
+<pre><code class="hljs c">remoteBuffer = VirtualAllocEx(
+	hProcess, <span class="hljs-comment">// Opened target process</span>
+	<span class="hljs-literal">NULL</span>, 
+	<span class="hljs-keyword">sizeof</span> payload, <span class="hljs-comment">// Region size of memory allocation</span>
+	(MEM_RESERVE | MEM_COMMIT), <span class="hljs-comment">// Reserves and commits pages</span>
+	PAGE_EXECUTE_READWRITE <span class="hljs-comment">// Enables execution and read/write access to the commited pages</span>
+);</code></pre>
+<p>第二步，我们可以使用<code>WriteProcessMemory</code>将有效载荷(payload)写入已分配的内存区域。</p>
+<pre><code class="hljs c">WriteProcessMemory(
+	hProcess, <span class="hljs-comment">// Opened target process</span>
+	remoteBuffer, <span class="hljs-comment">// Allocated memory region</span>
+	payload, <span class="hljs-comment">// Data to write</span>
+	<span class="hljs-keyword">sizeof</span> payload, <span class="hljs-comment">// byte size of data</span>
+	<span class="hljs-literal">NULL</span>
+);</code></pre>
+<p>第三步，我们可以使用<code>CreateRemoteThread</code>从内存中执行我们所写入的有效载荷(payload)。</p>
+<pre><code class="hljs c">remoteThread = CreateRemoteThread(
+	hProcess, <span class="hljs-comment">// Opened target process</span>
+	<span class="hljs-literal">NULL</span>, 
+	<span class="hljs-number">0</span>, <span class="hljs-comment">// Default size of the stack</span>
+	(LPTHREAD_START_ROUTINE)remoteBuffer, <span class="hljs-comment">// Pointer to the starting address of the thread</span>
+	<span class="hljs-literal">NULL</span>, 
+	<span class="hljs-number">0</span>, <span class="hljs-comment">// Ran immediately after creation</span>
+	<span class="hljs-literal">NULL</span>
+);</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535928.png" alt><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407251535929.png" alt></p>
+<h1 id="0x08-总结">0x08 总结</h1>
+<p>Windows内部结构(Windows内部机制)是Windows操作系统工作原理的核心，如果不影响操作系统的基本运行方式，那么这些内部结构就无法被改变；因此，Windows内部结构对于攻击者来说是一个有利可图的攻击目标，攻击者往往会恶意滥用Windows内部组件的功能。</p>
+<p>本文内容中所涵盖的许多概念可以被转化为Unix系统中相对应的概念，虽然有关攻击的细节及其执行方式可能会发生变化，但是许多核心概念将保持不变。</p>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/07/25/thm-windows-api-jie-shao/">THM-Windows-API介绍</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/07/21/linux-ti-quan-zong-jie/">Linux提权总结</a></div></section></div>
+
+
+
+
+  <div class="related-wrap md-text" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E4%BB%8B%E7%BB%8D"><span class="toc-text">0x01 介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E7%9B%AE%E6%A0%87"><span class="toc-text">学习目标</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-process"><span class="toc-text">0x02 Process</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-threads"><span class="toc-text">0x03 Threads</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98"><span class="toc-text">0x04 虚拟内存</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%BA%93"><span class="toc-text">0x05 动态链接库</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E5%8F%AF%E7%A7%BB%E6%A4%8D%E5%8F%AF%E6%89%A7%E8%A1%8Cpe%E6%A0%BC%E5%BC%8F"><span class="toc-text">0x06 可移植可执行(PE)格式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-%E4%B8%8Ewindows%E5%86%85%E9%83%A8%E6%9C%BA%E5%88%B6%E4%BA%A4%E4%BA%92"><span class="toc-text">0x07 与Windows内部机制交互</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x08-%E6%80%BB%E7%BB%93"><span class="toc-text">0x08 总结</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
+    });
+</script>
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>

