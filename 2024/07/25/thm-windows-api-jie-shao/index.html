@@ -1,110 +1,218 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>THM-Windows-API介绍 | hybcx</title><meta name="keywords" content="TryHackMe"><meta name="author" content="hybcx,19815455497@163.com"><meta name="copyright" content="hybcx"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="THM-Windows-API介绍"><meta name="application-name" content="THM-Windows-API介绍"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="THM-Windows-API介绍"><meta property="og:url" content="http://hybcx.xyz/2024/07/25/thm-windows-api-jie-shao/index.html"><meta property="og:site_name" content="hybcx"><meta property="og:description" content="了解如何与 win32 API 交互并了解其广泛的用例 0x01 介绍 Windows API提供了与Windows操作系统的关键组件进行交互的本地功能。Windows API正在被许多人广泛使用，包括网络安全红队、网络安全威胁参与者、网络安全蓝队、软件开发人员和网络安全解决方案提供商等。 Wind"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="hybcx"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="了解如何与 win32 API 交互并了解其广泛的用例 0x01 介绍 Windows API提供了与Windows操作系统的关键组件进行交互的本地功能。Windows API正在被许多人广泛使用，包括网络安全红队、网络安全威胁参与者、网络安全蓝队、软件开发人员和网络安全解决方案提供商等。 Wind"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://hybcx.xyz/2024/07/25/thm-windows-api-jie-shao/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?d98ea8480e5ec98a243adfc7bd46b93a";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  linkPageTop: {"enable":true,"title":"向✌们无限学习","addFriendPlaceholder":"昵称（请勿包含博客等字样）：\n网站地址（要求博客地址，请勿提交个人主页）：\n头像图片url（请提供尽可能清晰的图片，我会上传到我自己的图床）：\n描述：\n站点截图（可选）：\n"},
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: {"enable":true,"ck":"3JLPGIZJOJw6Nvu2","LingQueMonitorID":"3JLPOLHV5W6IAty5"},
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":null},
+  algolia: {"appId":"Z7A3XW4R2I","apiKey":"12db1ad54372045549ef465881c17e743","indexName":"my-hexo-blog","hits":{"per_page":6},"languages":{"input_placeholder":"输入关键词后按下回车查找","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"It has been","messageNext":"days since the last update, the content of the article may be outdated."},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    simplehomepage: false,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: hybcx","link":"链接: ","source":"来源: hybcx","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'hybcx',
+  title: 'THM-Windows-API介绍',
+  postAI: '',
+  pageFillDescription: '0x01 介绍, 本文学习目标, 0x02 与子系统、硬件交互, 0x03 Windows API的组件, 0x04 操作系统库(OS Libraries), Windows头文件, P/Invoke, 总结, 拓展, 0x05 API调用结构, 0x06 C API 实现, 0x07 .NET和PowerShell API实现, 0x08 常见的被滥用的API调用, 0x09 恶意软件案例研究, Keylogger(键盘记录器), Shellcode启动器, 0x10 总结了解如何与交互并了解其广泛的用例介绍提供了与操作系统的关键组件进行交互的本地功能正在被许多人广泛使用包括网络安全红队网络安全威胁参与者网络安全蓝队软件开发人员和网络安全解决方案提供商等可以与系统无缝集成并且能够为我们提供广泛的使用案例你可能会看到被用于攻击性工具和恶意软件开发端点检测与响应工程以及一般的软件应用程序有关用例的更多信息请查看索引本文学习目标了解是什么的相关用例有哪些以及它如何与操作系统子系统进行交互学习如何用不同的编程语言来实现从恶意的角度来理解如何使用并且分解实际的恶意利用案例以供研究在开始学习本文相关内容之前建议读者能够对操作系统架构有一个大致的了解还建议读者具备基本的编程知识但这不是必需的本文的目的在于学习有关的基础知识我们将简要介绍的实现并且将重点讨论为什么要使用调用功能以及从何处开始进行调用与子系统硬件交互一个程序通常需要访问或修改子系统或硬件但是这种访问和修改往往受限于维护机器的稳定性为了解决这个问题微软发布了它是一组用于操作系统的应用程序编程接口允许开发者与操作系统进行交互并且访问底层系统功能这些包含在操作系统的动态链接库中开发者可以通过在程序中引用这些库来使用这些通过两种不同的模式来区分硬件访问情况用户模式和内核模式这些模式决定了应用程序或驱动程序被允许访问的硬件内核和内存而或系统调用会在这两种模式之间提供接口从而将信息发送到系统以便在内核模式下进行处理用户模式内核模式没有直接的硬件访问权限能够直接进行硬件访问只能访问该用户已经拥有的内存位置可以访问整个物理内存有关内存管理的详细信息请参考博文内部机制基础红队下面是用户应用程序如何使用调用来修改内核组件的可视化表示在研究编程语言如何与交互时上述过程可能会变得更加复杂应用程序将在使用之前先经过编程语言运行最常见的例子是在与进行交互和进行系统调用之前会先经历执行过程当你以管理员身份启动一个应用程序时实际上你是以更高的用户权限例如用户或中的管理员用户来运行该程序这意味着该程序在用户模式下运行但拥有更高的用户权限可以执行一些普通用户无法执行的操作例如修改系统配置文件访问受限的系统资源安装或卸载软件执行其他需要管理员权限的操作然而这并不意味着该程序会运行在内核模式下即使以管理员身份启动应用程序仍然运行在用户模式下只是具有更高的用户权限什么时候运行在内核模式下只有操作系统的核心组件和一些特殊的系统服务如设备驱动程序和内核模块才会在内核模式下运行这些组件在设计上需要直接访问硬件资源和系统内存因此需要在内核模式下运行总结以管理员身份启动应用程序并不会在内核模式下打开进程该程序仍然在用户模式下运行但拥有更高的用户权限内核模式运行通常仅限于操作系统的核心组件和设备驱动程序的组件通常被称为具有多个依赖组件这些组件可用于定义的结构和组织形式让我们通过自上而下的方式拆解我们将假设是顶层而组成特定调用的参数是底层在下面的表格中我们将概括地描述这种自上而下的结构并在后文中进行详细介绍层解释用于描述结构中的任何调用的顶层通用术语头文件或导入项定义要在运行时被导入的库由头文件或库导入定义使用指针来获取相关函数地址核心核心动态链接库一组用于定义调用结构的四个和这些定义了不包含在单一子系统中的内核和用户服务附加补充性动态链接库被定义为的一部分的其他这些控制着操作系统的独立子系统大约有个已定义的其他包括等调用结构或调用方式定义调用本身以及调用的参数调用在程序中使用的调用从指针中获取相关函数地址输入输出参数由调用结构定义的参数值在下文内容中我们将继续讨论导入库核心头文件和调用结构等概念我们将更加深入地研究调用并且了解在何处以及如何进行调用以便更好地理解调用参数变量可以在维基百科中搜索依靠关键词进行进一步搜索操作系统库库的每个调用都驻留在内存中并且需要一个指向内存地址的指针而由于地址空间布局随机化的实施获取这些函数指针的过程将变得模糊为此每种编程语言或软件包都有独特的过程来克服在本文中我们将讨论两种最流行的用于克服以便在调用过程中获取函数指针的实现和头文件头文件微软已经发布了头文件通过使用和头文件可以为我们提供关于实现问题的间接解决方案从概念层面上来理解在运行时加载程序将确定正在进行哪些函数调用并创建一个用于处理不同调用约定的中间层结构以获取函数地址或指针相关官方文档或一旦文件被包含在非托管程序的顶部就允许实现任何函数的调用微软将或平台调用描述为一种允许你从托管代码中访问非托管库中的结构回调和函数的技术相关官方文档或提供了一些工具用于处理从托管代码调用非托管函数或者换句话说调用的整个过程将通过导入包含非托管函数或调用的所需来启动下面是导入带有选项的的示例这段代码使用了语言中的特性用于导入名为的动态链接库在这个导入语句中使用了一些选项包括和指定了字符集的使用方式而则表示在调用导入的函数后是否设置的值这个代码段使用了特性通过引入并声明的方式使得代码能够调用操作系统的用户界面库中的函数这些函数通常是非托管的这个过程被称为非托管函数调用因为它调用的是原生的由操作系统提供的函数而不是由托管代码如实现的函数在上面的代码中我们正在使用特性导入注意以上代码中未包含分号是因为函数尚未完成接下来我们还可以将托管方法定义为外部方法并且添加关键字该关键字将向运行时通知先前导入的特定下面是创建外部方法的示例这个代码段使用了关键字声明了一个名为的函数这个函数在代码中通常被当作托管方法调用然而根据代码片段本身它并没有提供具体的实现而是假设存在一个外部的非托管函数这段代码本身没有提供具体的实现而是用于告诉编译器在程序运行时会有一个名为的外部函数在实际使用中你需要确保在代码其他地方调用了这个方法并提供正确的参数如上所示现在我们可以将该函数作为托管方法调用但是实际上我们正在试图调用的是一个外部的非托管函数在本节的第二个代码段中我们通过关键字声明了一个方法这个方法看起来像是的托管方法但实际上是指外部的非托管函数即操作系统的函数换句话说如果我们在中以托管方法的方式调用了这个方法那么这个方法的实际执行是在由操作系统提供的非托管环境中完成的尽管我们以的方式调用这个方法但实际上底层执行的是一个非托管函数总结是提供的一项服务用于在托管代码中调用非托管代码特别是调用或其他本地库的函数这项服务允许在托管环境中声明和调用非托管函数使得应用程序可以与底层平台进行交互允许代码调用汇编等非托管语言编写的函数并在参数返回值等方面进行交互这种能力对于与操作系统或其他原生库进行集成以执行底层任务非常重要使用的主要步骤包括声明非托管函数在托管代码中使用特性声明非托管函数这个特性提供了关于如何调用该函数的信息包括函数名库的名称和其他调用约定等调用非托管函数在代码中像调用任何其他托管函数一样调用已声明的非托管函数在这个调用示例中用于表示空窗口句柄参数字符串作为消息文本参数作为消息框标题参数整数值则作为参数通过开发者可以借助非托管代码的功能访问系统级别的功能执行底层操作以及与其他编程语言或原生库进行集成拓展在框架中托管和非托管是两个关键的概念它们描述了在应用程序中运行的代码的性质托管代码托管代码是在运行时环境下执行的代码它由编程语言如编写并在运行时由运行时进行管理托管代码受到的管理和控制包括内存管理垃圾回收类型安全性等托管代码在运行时受到框架的约束和监控具有更高的安全性和可靠性非托管代码非托管代码是在不受运行时管理的环境中执行的代码它可以是使用其他编程语言如编写的直接针对操作系统或硬件的代码非托管代码通常需要开发者手动管理内存资源而不依赖于的垃圾回收机制与托管代码相比非托管代码可能更容易导致内存泄漏安全漏洞等问题在应用程序中通常会同时存在托管和非托管代码例如通过使用开发者可以在托管代码中调用非托管的原生函数这种托管代码和非托管代码混合使用的能力使得平台可以与底层的原生库操作系统进行交互同时也充分利用了所提供的高级特性调用结构调用是库的主要组件之一这些调用提供了可扩展性和灵活性能够用于满足大量用例大多数调用都有比较完整的文档记录我们可以通过访问以下链接来了解更多相关信息以及在本小节中我们将简单介绍调用的命名方案和输入输出参数调用功能可以通过修改命名方案和附加表示性字符来扩展下面是所支持的关于命名方案的字符表字符解释表示采用编码的位字符集表示编码为调用提供扩展功能或输入输出参数有关此概念的详细信息请查看相关的文档每个调用还有一个预定义的结构来定义它的输入输出参数你可以在文档的相应调用文档页面中找到其中的大多数结构以及关于每个参数的说明我们以调用为例以下是从相关文档页面所获取到的关于此调用的结构对于每个参数文档还解释了它的用途预期的输入或输出以及可接受的值即使有了官方文档的解释确定这些值有时候对于特定的调用也是具有挑战性的事情因此我们建议在具体代码中使用调用之前最好先尝试研究并找到相关的调用的使用示例实现微软为和等低级编程语言提供了一组预配置的库我们可以使用这些库来访问所需的调用如前所述第四小节头文件可被用于定义调用结构并获取函数指针如果要包含头文件请将以下代码行添加到任何或程序之前即可让我们直接开始创建第一个调用作为我们的第一个示例我们的目标是使用来创建一个标题为的弹出窗口为了重申上文第五小节中所涉及的内容让我们先观察一下相关调用的参数让我们使用上述预定义的参数并为它们赋值正如第五小节中所述关于调用中的每个参数都有对其用途和潜在值的说明下面是对的完整调用的示例我们已经用语言定义了第一个调用现在我们可以将其实现到应用程序中并使用调用的功能下面是一个示例应用程序该程序将使用来创建一个小的空白窗口如果一切顺利当我们运行上述示例应用程序之时我们将看到一个标题为的窗口成功弹出正如本小节所演示的案例一样使用低级编程语言使得快速定义调用变得非常容易而由于语言的易于使用性和可扩展性基于的编程语言在网络安全威胁参与者和网络安全供应商中很受欢迎和实现如第四小节中所述允许我们导入并将指针分配给调用为了理解是如何实现这种效果的让我们先看一下以下示例这段代码是一个使用的类用于调用中的函数该函数的目的是获取计算机的名称让我们逐行解析这个代码段这是一个名为的类这是一个特性用于指示编译器去寻找名为的库并在其中查找函数是的一部分它允许代码调用非托管中的函数这是一个用于声明对函数的引用的方法它包括以下几个部分这表示方法是公开的可以从类外部访问这表示方法是静态的可以通过类名直接调用而不需要创建类的实例这表示方法是在外部实现的也就是说它是通过调用非托管代码实现的这是返回类型表示函数返回一个指针在这里函数返回计算机名的字符串的指针这是方法的名称对应于中的函数名称这是方法的参数列表用于接收计算机名的字符串用于接收字符串的长度这个方法的作用是调用中的函数将计算机名存储在传递的中并通过参数返回计算机名的长度上述的类函数通常将存储已定义的调用以及要在所有将来的方法中引用的定义接下来我们必须使用特性来导入存储了调用结构的库导入的的作用类似于头文件包但是要求基于我们所寻找的调用来导入指定的我们可以参考索引或来确定特定的调用在中的位置在进行导入时我们可以创建一个指向我们想要使用的调用的新指针在中是由类型所定义的指针与一些低级语言不同在中导入时我们还必须在指针中指定参数结构正如上文第五小节中所提及的那样我们可以在相关的文档中找到我们所需的调用的参数现在我们可以在应用程序中实现上述已定义的调用并使用其功能下面是一个示例应用程序它将使用来获取运行它的设备的计算机名称以及其他信息是缓冲区的初始大小需要注意的是这个例子中的缓冲区大小是一个初始值如果获取的计算机名比缓冲区大函数会修改参数并返回所需的缓冲区大小你需要根据返回的大小重新调整缓冲区的大小然后再次调用函数以确保缓冲区有足够的空间来存储计算机名如果一切顺利那么上述示例程序的运行结果应该返回当前设备的计算机名称现在我们已经介绍了如何在中完成实现接下来让我们看看如何调整相同的语法以便在中完成类似示例在中定义调用几乎与在中相同但是我们需要创建一个方法而不是一个类并且还要添加一些额外的运算符这段代码是一个脚本片段用于定义包含标记的方法让我来逐步解释这是一个变量存储了包含方法定义的文本这是中的一个特殊标记用于创建一个字符串其中可以包含多行文本在这里它用于包含方法的定义这是的特性用于指示编译器在运行时调用非托管中的函数在这里它指示要调用的是中的函数这是一个方法的定义使用了特性它声明了一个叫做的函数该函数用于获取一个模块中导出函数的地址表示模块的句柄表示要获取地址的函数的名称这同样是一个使用了特性的方法的定义该方法用于获取模块的句柄表示要获取句柄的模块的名称这是又一个使用了特性的方法的定义该方法用于更改内存页面的保护属性表示要更改保护属性的内存地址表示内存区域的大小表示新的保护属性表示旧的保护属性将被写入这个参数中上述这三个方法都是通过特性进行声明以便之后调用函数总的来说这段代码声明了三个函数它们是使用调用的中的函数这些函数通常用于与内存和模块有关的底层操作在中使用这种方法可以方便地进行一些低级别的操作而无需在外部文件中编写整个类基于上述这些声明我们将被允许在中调用函数如上所示我们已经定义了调用但是在中还需要进一步执行一个步骤才能初始化它们我们必须在相关方法定义中为每个的指针创建一个新类型以下是一个示例函数将在目录中放置一个临时文件并使用来编译所需的函数函数将在目录中生成临时文件在中命令用于动态添加类型当你运行上述命令时将生成一个源代码文件其中包含了中定义的成员上文所定义的三个函数这个文件通常会被放置在目录中使用编译是编译器用于将源代码编译成可执行程序或库在这里将使用编译在目录中生成的临时文件以创建类型在这个特定的例子中使用了参数它会在目录通常是表示系统的临时目录中创建一个临时的源代码文件并使用编译器来编译这个源代码文件简而言之这条命令使用将代码嵌入到中并创建了一个名为的类型具体地说它包含了变量中定义的三个函数的声明这三个函数分别是用于在指定模块中查找导出函数的地址返回指定模块的句柄用于更改指定内存区域的保护属性这样通过使用命令你在中就可以通过访问这些函数以便在中调用与这些函数相关的功能然后我们可以通过以下语法来使用我们所需的调用这段语法是在中使用来调用通过命令定义的类型中的函数具体解释如下这部分表示你正在引用的是命名空间下的类型这里是你要调用的具体的函数这是你在之前通过定义的类型中引入的函数所以完整的语法是它表示你正在调用命名空间下的类型中的某个函数例如如果你之前通过添加了一个叫做的函数到类型中你可以使用如下语法来调用它常见的被滥用的调用库中的多个调用很容易被恶意活动利用一些网络实体会试图记录和组织所有针对调用的可用恶意载体如虽然有很多调用会被滥用但是有些调用的在恶意利用会更加常见下表列出了在一组样本中最经常被滥用的按频率排列调用解释将指定的映射到调用进程的地址空间中检索与当前线程关联的用户的名称检索本地计算机的或名称获取关于当前所运行的操作系统的版本信息检索指定模块和进程的文件的完全限定路径检索结构的内容窗口站桌面标准句柄和进程的外观返回指定模块的模块句柄前提是指定模块已经映射到调用进程的地址空间中返回指定被导出的函数的地址更改对调用进程的虚拟地址空间中的内存区域的保护上表内容中的映射指的是将模块加载到进程的内存中使得它可以被进程访问和执行在下一小节中我们将基于两个恶意软件案例来深入探讨一些调用是如何被滥用的恶意软件案例研究现在我们已经简单了解了库的基础实现以及一些常见的被滥用的调用接下来让我们研究两个恶意软件样本并观察它们的调用情况在本小节中我们将简单地分解研究键盘记录器案例和启动器案例键盘记录器为了开始分析键盘记录器我们需要收集它正在实现哪些调用和钩子由于作为本小节示例的键盘记录器是用编写的因此它必须使用来获取每个调用的指针下面是键盘记录器示例中关于定义的源代码片段上面这段代码使用了在中声明了一些的调用以下是关于这些声明的解释函数声明该声明用于调用函数该函数用于设置安装钩子是钩子类型的标识符这里使用了表示低级键盘输入事件的钩子钩子过程的委托通常是一个回调函数用于处理接收到的钩子消息是包含钩子过程处理钩子事件的函数称为钩子过程所在的模块的句柄使用获取当前进程的模块句柄是与要监视的线程相关联的线程标识符传入表示将钩子与所有线程关联函数声明该声明用于调用函数该函数用于解除卸载之前安装的钩子是要解除的钩子的句柄函数声明该声明用于调用函数该函数用于获取指定模块的句柄是要获取句柄的模块的名称我们可以使用属性来获取当前进程的进程名以指定模块也可以直接将设置为或者这样函数将返回调用进程的模块句柄常量的定义这是一个表示低级键盘输入事件的钩子类型的常量这个值对应于函数声明该声明用于调用函数该函数用于获取当前进程的伪句柄在计算机编程和软件开发领域通常指的是一种机制或技术它用于截取或拦截系统应用程序中特定事件的发生通过使用开发者可以在事件发生前或事件发生后注入自定义代码从而改变或扩展系统应用程序的行为钩子过程是在安装了系统或应用程序的钩子后用于处理特定事件的由用户定义的函数钩子是一种机制允许应用程序监视拦截或修改操作系统中的消息事件或者其他形式的处理流程以下是关于每个调用及其各自用法的说明调用解释将内存钩子安装到钩子链中以监视某些事件从钩子链中移除已安装的钩子返回指定模块的模块句柄前提是指定模块已经映射到调用进程的地址空间中检索当前进程的伪句柄在操作系统中有两种类型的句柄实际句柄和伪句柄实际句柄实际句柄是操作系统内部分配的实际资源句柄用于标识和操作系统资源交互例如文件句柄线程句柄进程句柄等都属于实际句柄伪句柄伪句柄是一个在逻辑上标识资源但不直接与实际系统资源关联的值伪句柄是为了方便编程而引入的在很多情况下使用伪句柄来表示当前进程或当前线程这些伪句柄无需对底层资源进行实际操作只是一种标识符上表中的所返回的是表示当前进程的伪句柄伪句柄不是典型的内核对象句柄这个伪句柄不直接映射到实际的系统资源而是作为标识符方便进行与当前进程相关的操作使用伪句柄而不是实际句柄的一个好处是不需要关闭或释放伪句柄因为它们不引用实际的资源因此返回的伪句柄只是用于标识当前进程并用于引用当前进程的一种方便的方式接下来我们将分析键盘记录器示例如何在当前进程上设置钩子下面是键盘记录器示例中的钩子部分的源代码片段这是一个使用钩子监控低级键盘事件的代码片段让我解释一下主要部分方法是应用程序的入口点是一个变量用于存储设置的钩子的标识符方法用于设置键盘钩子是一个代表低级键盘过程的委托具体的解释如下方法调用方法设置键盘钩子并将返回的标识符存储在中启动应用程序的消息循环使应用程序保持运行状态在应用程序退出前解除键盘钩子退出应用程序方法获取当前进程的对象调用函数来设置键盘低级钩子是用于指定键盘低级钩子的常量是用于处理低级键盘事件的回调函数获取当前进程的模块句柄表示将钩子安装在所有线程上注意这段代码片段在使用钩子的同时涉及到系统级的操作如键盘事件的监控使用钩子是一个强大而敏感的操作需要小心处理以避免潜在的问题此外根据使用场景和权限可能需要以管理员身份运行应用程序让我们了解键盘记录器的使用目标和实现步骤然后从示例代码片段中确定相关的调用情况参考文档和上述代码片段内容开始分析键盘记录器示例并回答本小节答题部分的问题启动器要开始分析启动器我们需要收集它正在实现哪些调用这个过程看起来应该与上一个案例研究相同下面是启动器示例中关于定义的一个源代码片段上面这段代码使用了在中声明了三个函数的调用函数声明此处的表示将内存块提交为可用的物理存储器即将一块虚拟地址空间映射到实际的物理存储器上此处的表示内存页具有可执行可读可写的保护属性函数用于在进程的虚拟地址空间中分配内存是用于指定分配内存的选项之一是用于指定内存页的保护属性之一参数说明指定欲分配的内存块的首地址可以设为表示由系统决定分配的地址指定欲分配的内存大小单位为字节指定内存分配的类型这里使用了常量指定内存页的保护属性这里使用了常量此函数的目的是在进程的虚拟地址空间中分配一块内存这块内存可以用于执行代码并允许读写这种技术通常用于实现一些底层的系统编程或者与非托管代码的交互例如创建远程线程等这也是一种常见的用于注入代码的技术函数声明函数用于等待一个指定的对象如线程或进程变为可用参数说明指定要等待的对象的句柄例如线程或进程的句柄指定等待的时间以毫秒为单位如果设置为无穷大则函数将一直等待直到对象变为可用此函数通常用于等待某个事件的发生例如等待线程执行完毕等待进程退出等函数是提供的等待对象的标准方法之一函数声明函数用于在一个进程的虚拟地址空间中创建一个新的线程是函数的参数用于接收新线程的标识符参数说明线程的安全属性一般设置为表示默认安全性新线程的堆栈大小一般设置为表示使用默认堆栈大小新线程的起始地址即线程开始执行的函数的地址传递给新线程的参数可以设置为以表示没有参数控制线程的创建标志例如可以指定是否立即启动线程等用于接收新线程的标识符此函数通常用于创建一个新的执行线程其中参数指定了新线程的起始执行点函数返回新线程的句柄可以通过该句柄对新线程进行操作这种技术通常用于一些需要并发执行的任务例如在注入代码时创建远程线程上述这些函数通常被用于一些底层的系统编程或者与非托管代码交互的情境中请注意上述代码片段可能缺少了一些参数的具体值因此在实际使用时还需要根据具体情况提供正确的参数值以下是关于每个调用及其各自用法的说明调用解释在调用进程的虚拟地址空间中保留提交或更改内存页面区域的状态等待指定对象处于信号状态或超时间隔结束创建要在调用进程的虚拟地址空间内执行的线程接下来我们将分析如何将写入内存并从内存中执行这段代码的目的是执行以下操作分配可执行内存使用函数分配一块可执行的内存表示将内存提交为可用的物理存储器表示该内存可执行且可读写具体分配的内存大小为字节将复制到分配的内存中使用函数将复制到刚刚分配的可执行内存中创建线程并执行使用函数创建一个新线程并将其起始地址设置为刚刚分配的可执行内存的地址然后等待线程执行完毕返回程序执行完上述操作后直接返回总体而言这段代码的目的是执行一个自定义的即将其加载到分配的可执行内存中并在新线程中执行请注意执行这样的操作需要谨慎处理因为它涉及到执行外部代码这可能会导致出现一些安全风险在实际应用中请确保充分了解并信任我们将要执行的代码让我们了解执行的目标和过程然后从示例代码片段中确定相关的调用情况参考文档和上述启动器代码片段内容开始分析启动器示例并回答本小节答题部分的问题总结本文所涉及的内容只是的基础知识关于的功能性和可扩展性还有许多其他的应用案例我们并未提及正因为可以为我们提供各种各样的用例因此在实际运用中我们往往还需要探索更多相关的知识点',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-01 16:12:03',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
 
-<!DOCTYPE html><html lang="zh-CN">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
-  
-  <meta name="generator" content="Hexo 7.2.0">
-  <meta http-equiv='x-dns-prefetch-control' content='on' />
-  
-  <meta name="renderer" content="webkit">
-  <meta name="force-rendering" content="webkit">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-  <meta name="HandheldFriendly" content="True" >
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
-  
-  <title>THM-Windows-API介绍 - hybcx's blog</title>
-
-  
-    <meta name="description" content="了解如何与 win32 API 交互并了解其广泛的用例 0x01 介绍 Windows API提供了与Windows操作系统的关键组件进行交互的本地功能。Windows API正在被许多人广泛使用，包括网络安全红队、网络安全威胁参与者、网络安全蓝队、软件开发人员和网络安全解决方案提供商等。 Windows API可以与Windows系统无缝集成，并且能够为我们提供广泛的使用案例。你可能会看到Win">
-<meta property="og:type" content="article">
-<meta property="og:title" content="THM-Windows-API介绍">
-<meta property="og:url" content="http://hybcx.xyz/2024/07/25/thm-windows-api-jie-shao/index.html">
-<meta property="og:site_name" content="hybcx&#39;s blog">
-<meta property="og:description" content="了解如何与 win32 API 交互并了解其广泛的用例 0x01 介绍 Windows API提供了与Windows操作系统的关键组件进行交互的本地功能。Windows API正在被许多人广泛使用，包括网络安全红队、网络安全威胁参与者、网络安全蓝队、软件开发人员和网络安全解决方案提供商等。 Windows API可以与Windows系统无缝集成，并且能够为我们提供广泛的使用案例。你可能会看到Win">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://hybcx.xyz/2024/07/25/SecImages/Pasted%20image%2020240725153942.png">
-<meta property="og:image" content="http://hybcx.xyz/2024/07/25/SecImages/Pasted%20image%2020240725154147.png">
-<meta property="og:image" content="http://hybcx.xyz/2024/07/25/SecImages/Pasted%20image%2020240725155307.png">
-<meta property="og:image" content="http://hybcx.xyz/2024/07/25/SecImages/Pasted%20image%2020240725155300.png">
-<meta property="og:image" content="http://hybcx.xyz/2024/07/25/SecImages/Pasted%20image%2020240725155136.png">
-<meta property="article:published_time" content="2024-07-25T07:28:57.000Z">
-<meta property="article:modified_time" content="2024-07-25T07:53:09.175Z">
-<meta property="article:author" content="hybcx">
-<meta property="article:tag" content="tryhackme">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://hybcx.xyz/2024/07/25/SecImages/Pasted%20image%2020240725153942.png">
-  
-  
-  
-  <meta name="keywords" content="tryhackme">
-
-  <!-- feed -->
-  
-    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
-  
-
-  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
-
-  
-    <link rel="shortcut icon" href="/medias/logo.png">
-  
-
-  
-    
-<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
-
-  
-
-  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
-
-<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
-</head>
-<body>
-
-<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
-
-
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
-
-<div class="nav-area">
-<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
-
-
-<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
-</div>
-<div class="widgets">
-
-
-<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/07/25/thm-windows-api-jie-shao/"><span class="title">THM-Windows-API介绍</span></a><a class="item title" href="/2024/07/24/thm-windows-nei-he/"><span class="title">THM-Windows内核</span></a><a class="item title" href="/2024/07/20/thm-shu-ju-xie-lu/"><span class="title">THM-数据泄露</span></a><a class="item title" href="/2024/07/21/linux-ti-quan-zong-jie/"><span class="title">Linux提权总结</span></a><a class="item title" href="/2024/07/16/thm-enumeration/"><span class="title">THM-Enumeration</span></a><a class="item title" href="/2024/07/16/thm-dang-qian-tai-shi/"><span class="title">THM-当前态势</span></a><a class="item title" href="/2024/02/10/thm-linux-quan-xian-ti-sheng/"><span class="title">THM-Linux权限提升</span></a><a class="item title" href="/2024/02/14/thm-basic-pentesting/"><span class="title">THM-Basic Pentesting</span></a><a class="item title" href="/2024/07/20/linux-ti-quan-xue-xi-yi/"><span class="title">Linux提权学习之rbash逃逸</span></a><a class="item title" href="/2023/08/07/qian-xi-mu-lu-chuan-yue/"><span class="title">浅析目录穿越</span></a></div></widget>
-</div>
-<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
-</div></aside><div class="l_main" id="main">
-
-
-
-
-
-<div class="article banner top">
-  <div class="content">
-    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/tryhackme/">tryhackme</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-07-25T07:28:57.000Z">2024-07-25</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-07-25T07:53:09.175Z">2024-07-25</time></span></div></div></div>
-    
-    <div class="bottom only-title">
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
       
-      <div class="text-area">
-        <h1 class="text title"><span>THM-Windows-API介绍</span></h1>
-        
-      </div>
-    </div>
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
     
-  </div>
-  </div><article class="md-text content"><p>了解如何与 win32 API 交互并了解其广泛的用例</p>
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">hybcx</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 1.05rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 1.05rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 1.05rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 1.05rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 1.05rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 1.05rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 1.05rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 1.05rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 1.05rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 1.05rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 1.05rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span><a class="card-more-btn" href="/archives/" title="查看更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/08/"><span class="card-archive-list-date">八月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">16</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/06/"><span class="card-archive-list-date">六月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">9</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/05/"><span class="card-archive-list-date">五月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/04/"><span class="card-archive-list-date">四月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">5</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/03/"><span class="card-archive-list-date">三月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">18</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/02/"><span class="card-archive-list-date">二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">12</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/01/"><span class="card-archive-list-date">一月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/TryHackMe/" itemprop="url">TryHackMe</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/TryHackMe/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>TryHackMe</span></a></span></div></div><h1 class="post-title" itemprop="name headline">THM-Windows-API介绍</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2024-07-25T07:28:57.000Z" title="发表于 2024-07-25 15:28:57">2024-07-25</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2024-08-01T08:12:03.897Z" title="更新于 2024-08-01 16:12:03">2024-08-01</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">11k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>37分钟</span></span><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="THM-Windows-API介绍"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为太原"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>太原</span><span class="post-meta-separator"></span><span class="post-meta-commentcount"><i class="anzhiyufont anzhiyu-icon-comments post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2024/07/25/thm-windows-api-jie-shao/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2024/07/25/thm-windows-api-jie-shao/" itemprop="commentCount"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></a></span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://hybcx.xyz/2024/07/25/thm-windows-api-jie-shao/"><header><a class="post-meta-categories" href="/categories/TryHackMe/" itemprop="url">TryHackMe</a><a href="/tags/TryHackMe/" tabindex="-1" itemprop="url">TryHackMe</a><h1 id="CrawlerTitle" itemprop="name headline">THM-Windows-API介绍</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">hybcx</span><time itemprop="dateCreated datePublished" datetime="2024-07-25T07:28:57.000Z" title="发表于 2024-07-25 15:28:57">2024-07-25</time><time itemprop="dateCreated datePublished" datetime="2024-08-01T08:12:03.897Z" title="更新于 2024-08-01 16:12:03">2024-08-01</time></header><p>了解如何与 win32 API 交互并了解其广泛的用例</p>
 <h1 id="0x01-介绍">0x01 介绍</h1>
 <p>Windows API提供了与Windows操作系统的关键组件进行交互的本地功能。Windows API正在被许多人广泛使用，包括网络安全红队、网络安全威胁参与者、网络安全蓝队、软件开发人员和网络安全解决方案提供商等。</p>
 <p>Windows API可以与Windows系统无缝集成，并且能够为我们提供广泛的使用案例。你可能会看到Win32 API被用于攻击性工具和恶意软件开发、EDR(端点检测与响应)工程以及一般的软件应用程序。有关Windows API用例的更多信息，请查看<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list">Windows API索引</a>。</p>
@@ -139,9 +247,9 @@
 </table>
 <p>有关内存管理的详细信息，请参考博文：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/Hekeats-L/p/17847693.html">【THM】Windows Internals(Windows内部机制基础)-红队</a></p>
 <p>下面是用户应用程序如何使用API调用来修改内核组件的可视化表示：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="../SecImages/Pasted%20image%2020240725153942.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749735.png" alt></p>
 <p>在研究编程语言如何与Win32 API交互时，上述过程可能会变得更加复杂，应用程序将在使用API之前先经过编程语言运行。最常见的例子是C#在与Win32 API进行交互和进行系统调用之前会先经历CLR(Common Language Runtime)执行过程。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="../SecImages/Pasted%20image%2020240725154147.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749736.png" alt></p>
 <pre><code class="hljs scss">当你以管理员身份启动一个应用程序时，实际上你是以更高的用户权限（例如root用户或Windows中的管理员用户）来运行该程序。这意味着该程序在用户模式下运行，但拥有更高的用户权限，可以执行一些普通用户无法执行的操作，例如：
 
 - 修改系统配置文件。
@@ -201,442 +309,895 @@
 </table>
 <p>在下文内容中，我们将继续讨论导入库、核心头文件和调用结构等概念，我们将更加深入地研究“调用”，并且了解在何处(以及如何)进行调用以便更好地理解调用参数、变量。</p>
 <p>可以在维基百科中，搜索windows.h，依靠关键词进行进一步搜索</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="../SecImages/Pasted%20image%2020240725155307.png" alt></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="../SecImages/Pasted%20image%2020240725155300.png" alt></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="../SecImages/Pasted%20image%2020240725155136.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749737.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749738.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749739.png" alt></p>
+<h1 id="0x04-操作系统库os-libraries">0x04 操作系统库(OS Libraries)</h1>
+<p>Win32库的每个API调用都驻留在内存中，并且需要一个指向内存地址的指针，而由于ASLR(<strong>A</strong>ddress&nbsp;<strong>S</strong>pace&nbsp;<strong>L</strong>ayout&nbsp;<strong>R</strong>andomization-地址空间布局随机化)的实施，获取这些函数指针的过程将变得模糊，为此每种编程语言或软件包都有独特的过程来克服ASLR；在本文中，我们将讨论两种最流行的用于克服ASLR以便在API调用过程中获取函数指针的实现：<a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke">Platform Invoke</a>和<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers">Windows头文件</a>。</p>
+<h2 id="windows头文件">Windows头文件</h2>
+<p>微软已经发布了Windows头文件，通过使用Windows API和头文件可以为我们提供关于ASLR实现问题的间接解决方案，从概念层面上来理解：在运行时(runtime)，加载程序将确定正在进行哪些函数调用，并创建一个thunk table(用于处理不同调用约定的中间层结构)以获取函数地址或指针。<br>
+相关官方文档：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers">https://docs.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers</a><br>
+或<br>
+<a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/winprog/using-the-windows-headers">https://learn.microsoft.com/zh-cn/windows/win32/winprog/using-the-windows-headers</a></p>
+</blockquote>
+<p>一旦windows.h文件被包含在非托管程序的顶部，就允许实现任何Win32函数的调用。</p>
+<h2 id="pinvoke">P/Invoke</h2>
+<p>微软将P/Invoke或平台调用描述为“一种允许你从托管代码中访问非托管库中的结构、回调和函数的技术”。</p>
+<p>相关官方文档：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke">https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke</a></p>
+<p>或</p>
+<p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/dotnet/standard/native-interop/pinvoke">https://learn.microsoft.com/zh-cn/dotnet/standard/native-interop/pinvoke</a></p>
+</blockquote>
+<p>P/invoke提供了一些工具，用于处理从托管代码调用非托管函数(或者换句话说，调用 Win32 API)的整个过程。P/invoke将通过导入包含非托管函数或Win32 API调用的所需DLL来启动，下面是导入带有选项的DLL的示例。</p>
+<pre><code class="hljs C#"><span class="hljs-keyword">using</span> System;
+<span class="hljs-keyword">using</span> System.Runtime.InteropServices;
 
-<div class="article-footer fs14">
-    <section id="license">
-      <div class="header"><span>许可协议</span></div>
-      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
-</div>
-    </section>
-    </div>
-</article>
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/07/24/thm-windows-nei-he/">THM-Windows内核</a></div></section></div>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Program</span>
+{
+[<span class="hljs-meta">DllImport(<span class="hljs-string">"user32.dll"</span>, CharSet = CharSet.Unicode, SetLastError = true)</span>]
+...
+} 
 
+<span class="hljs-comment">//这段代码使用了C#语言中的 DllImport 特性，用于导入名为 "user32.dll" 的动态链接库（DLL）。</span>
+<span class="hljs-comment">//在这个导入语句中，使用了一些选项，包括CharSet和SetLastError。CharSet 指定了字符集的使用方式，而 SetLastError 则表示在调用导入的函数后 是否设置 Marshal.GetLastWin32Error 的值</span>
 
+<span class="hljs-comment">//这个代码段使用了DllImport特性，通过引入user32.dll并声明DllImport的方式，使得C#代码能够调用Windows操作系统的用户界面库中的函数，这些函数通常是非托管的。这个过程被称为非托管函数调用，因为它调用的是原生的、由操作系统提供的函数，而不是由托管代码（如C#）实现的函数。</span></code></pre>
+<p>在上面的代码中，我们正在使用<code>DLLImport</code>特性导入<code>user32</code>DLL 。</p>
+<p>注意：以上代码中未包含分号是因为p/invoke函数尚未完成。</p>
+<p>接下来，我们还可以将托管方法定义为外部方法，并且添加<code>extern</code>关键字，该关键字将向运行时通知先前导入的特定DLL，下面是创建外部方法的示例。</p>
+<pre><code class="hljs c#"><span class="hljs-keyword">using</span> System;
+<span class="hljs-keyword">using</span> System.Runtime.InteropServices;
 
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Program</span>
+{
+...
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> <span class="hljs-built_in">int</span> <span class="hljs-title">MessageBox</span>(<span class="hljs-params">IntPtr hWnd, <span class="hljs-built_in">string</span> lpText, <span class="hljs-built_in">string</span> lpCaption, <span class="hljs-built_in">uint</span> uType</span>)</span>;
+} 
 
-  <div class="related-wrap md-text" id="comments">
-    <section class='header cmt-title cap theme'>
-      <p>感谢大佬们的不吝赐教！</p>
+<span class="hljs-comment">//这个代码段使用了 extern 关键字，声明了一个名为 MessageBox 的函数，这个函数在 C# 代码中通常被当作托管方法调用；然而，根据代码片段本身，它并没有提供具体的实现，而是假设存在一个外部的非托管函数MessageBox。</span>
 
-    </section>
-    <section class='body cmt-body twikoo'>
-      
+<span class="hljs-comment">//这段代码本身没有提供具体的实现，而是用于告诉编译器在程序运行时会有一个名为 MessageBox 的外部函数。在实际使用中，你需要确保在代码其他地方调用了这个方法，并提供正确的参数。</span></code></pre>
+<p>如上所示，现在我们可以将该函数（<code>MessageBox</code>）作为托管方法调用，但是实际上我们正在试图调用的是一个外部的非托管函数。</p>
+<p>tips：在本节的第二个代码段中，我们通过&nbsp;<code>extern</code>&nbsp;关键字声明了一个方法&nbsp;<code>MessageBox</code>，这个方法看起来像是C#的托管方法，但实际上是指外部的非托管函数，即 Windows操作系统的&nbsp;<code>MessageBox</code>&nbsp;函数；换句话说，如果我们在C#中以托管方法的方式调用了这个方法，那么这个方法的实际执行是在由操作系统提供的非托管环境中完成的(尽管我们以C#的方式调用这个方法，但实际上底层执行的是一个非托管函数)。</p>
+<h2 id="总结">总结</h2>
+<p>Platform Invocation Services（P/Invoke）<a target="_blank" rel="noopener" href="http://xn--0iv.NET">是.NET</a> Framework提供的一项服务，用于在托管代码中调用非托管代码，特别是调用Windows API或其他本地库的函数，这项服务允许在托管环境中声明和调用非托管函数，使得.NET应用程序可以与底层平台进行交互。</p>
+<p>P/Invoke允许.NET代码调用C、C++、汇编等非托管语言编写的函数，并在参数、返回值等方面进行交互，这种能力对于与操作系统或其他原生库进行集成以执行底层任务非常重要。</p>
+<p>使用P/Invoke的主要步骤包括：</p>
+<ol>
+<li>声明非托管函数： 在托管代码中使用<code>DllImport</code>特性声明非托管函数。这个特性提供了关于如何调用该函数的信息，包括函数名、库的名称和其他调用约定等。</li>
+</ol>
+<pre><code class="hljs C#">[<span class="hljs-meta">DllImport(<span class="hljs-string">"user32.dll"</span>, CharSet = CharSet.Unicode, SetLastError = true)</span>]
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> <span class="hljs-built_in">int</span> <span class="hljs-title">MessageBox</span>(<span class="hljs-params">IntPtr hWnd, <span class="hljs-built_in">string</span> lpText, <span class="hljs-built_in">string</span> lpCaption, <span class="hljs-built_in">uint</span> uType</span>)</span>;</code></pre>
+<ol start="2">
+<li>调用非托管函数： 在.NET代码中像调用任何其他托管函数一样调用已声明的非托管函数。</li>
+</ol>
+<pre><code class="hljs c#">MessageBox(IntPtr.Zero, <span class="hljs-string">"Hello, P/Invoke!"</span>, <span class="hljs-string">"Greetings"</span>, <span class="hljs-number">0</span>);
 
-<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
-    </section>
-  </div>
+<span class="hljs-comment">//在这个调用示例中，IntPtr.Zero 用于表示空窗口句柄（hWnd 参数），字符串 "Hello, P/Invoke!" 作为消息文本（lpText 参数），"Greetings" 作为消息框标题（lpCaption 参数），整数值 0 则作为 uType 参数。</span></code></pre>
+<p>通过P/Invoke，.NET开发者可以借助非托管代码的功能，访问系统级别的功能，执行底层操作，以及与其他编程语言或原生库进行集成。</p>
+<h2 id="拓展">拓展</h2>
+<p>在.NET框架中，“托管”（Managed）和"非托管"（Unmanaged）是两个关键的概念，它们描述了在.NET应用程序中运行的代码的性质。</p>
+<ol>
+<li>
+<p>托管代码（Managed Code）：</p>
+<ul>
+<li>托管代码是在.NET运行时环境下执行的代码。</li>
+<li>它由.NET编程语言（如C#、<a target="_blank" rel="noopener" href="http://VB.NET">VB.NET</a>）编写，并在运行时由.NET运行时（Common Language Runtime，CLR）进行管理。</li>
+<li>托管代码受到CLR的管理和控制，包括内存管理、垃圾回收、类型安全性等。</li>
+<li>托管代码在运行时受到.NET框架的约束和监控，具有更高的安全性和可靠性。</li>
+</ul>
+</li>
+<li>
+<p>非托管代码（Unmanaged Code）：</p>
+<ul>
+<li>非托管代码是在不受.NET运行时管理的环境中执行的代码。</li>
+<li>它可以是使用其他编程语言（如C、C++）编写的、直接针对操作系统或硬件的代码。</li>
+<li>非托管代码通常需要开发者手动管理内存、资源，而不依赖于CLR的垃圾回收机制。</li>
+<li>与托管代码相比，非托管代码可能更容易导致内存泄漏、安全漏洞等问题。</li>
+</ul>
+</li>
+</ol>
+<p>在.NET应用程序中，通常会同时存在托管和非托管代码，例如通过使用P/Invoke（Platform Invocation Services），开发者可以在托管代码中调用非托管的原生函数。这种托管代码和非托管代码混合使用的能力使得.NET平台可以与底层的原生库、操作系统进行交互，同时也充分利用了CLR所提供的高级特性。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749740.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749741.png" alt></p>
+<h1 id="0x05-api调用结构">0x05 API调用结构</h1>
+<p>API调用是Win32库的主要组件之一，这些调用提供了可扩展性和灵活性，能够用于满足大量用例。大多数Win32 API调用都有比较完整的文档记录，我们可以通过访问以下链接来了解更多相关信息：<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list">Windows API documentation</a>以及<a target="_blank" rel="noopener" href="http://pinvoke.net/">pinvoke.net</a>。</p>
+<p>在本小节中，我们将简单介绍API调用的命名方案和输入/输出参数。</p>
+<p>API调用功能可以通过修改命名方案和附加表示性字符来扩展，下面是Microsoft所支持的关于命名方案的字符表。</p>
+<table>
+<thead>
+<tr>
+<th><strong>Character 字符</strong></th>
+<th><strong>Explanation 解释</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>表示采用ANSI编码的8位字符集</td>
+</tr>
+<tr>
+<td>W</td>
+<td>表示 Unicode 编码</td>
+</tr>
+<tr>
+<td>Ex</td>
+<td>为 API 调用提供扩展功能或输入/输出参数</td>
+</tr>
+</tbody>
+</table>
+<p>有关此概念的详细信息，请查看<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/learnwin32/working-with-strings">相关的Microsoft文档</a>。</p>
+<p>每个API调用还有一个预定义的结构来定义它的输入/输出参数，你可以在<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list">Windows文档</a>的相应API调用文档页面中找到其中的大多数结构，以及关于每个I/O参数的说明。</p>
+<p>我们以<code>WriteProcessMemory</code>&nbsp;API调用为例，以下是从<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-writeprocessmemory">相关文档页面</a>所获取到的关于此调用的 I/O结构：</p>
+<pre><code class="hljs c#"><span class="hljs-function">BOOL <span class="hljs-title">WriteProcessMemory</span>(<span class="hljs-params"></span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]  HANDLE  hProcess,</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]  LPVOID  lpBaseAddress,</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]  LPCVOID lpBuffer,</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]  SIZE_T  nSize,</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">out</span>] SIZE_T  *lpNumberOfBytesWritten</span></span>
+<span class="hljs-params"><span class="hljs-function"></span>)</span>;</code></pre>
+<p>对于每个I/O参数，Microsoft文档还解释了它的用途、预期的输入或输出以及可接受的值，即使有了官方文档的解释，确定这些值有时候对于特定的调用也是具有挑战性的事情，因此我们建议在具体代码中使用调用之前，最好先尝试研究并找到相关的API调用的使用示例。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749742.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749743.png" alt></p>
+<h1 id="0x06-c-api-实现">0x06 C API 实现</h1>
+<p>微软为C和C++等低级编程语言提供了一组预配置的库，我们可以使用这些库来访问所需的API调用。</p>
+<p>如前所述(第四小节)，<code>windows.h</code>头文件可被用于定义调用结构并获取函数指针。如果要包含windows头文件，请将以下代码行添加到任何C或C++程序之前即可。</p>
+<p><code>#include &lt;windows.h&gt;</code></p>
+<p>让我们直接开始创建第一个 API 调用，作为我们的第一个示例，我们的目标是使用<code>CreateWindowExA</code>来创建一个标题为“Hello THM!”的弹出窗口，为了重申上文第五小节中所涉及的内容，让我们先观察一下相关调用的in/out参数。</p>
+<pre><code class="hljs c#"><span class="hljs-function">HWND <span class="hljs-title">CreateWindowExA</span>(<span class="hljs-params"></span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]           DWORD     dwExStyle, // Optional windows styles</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>, optional] LPCSTR    lpClassName, // Windows <span class="hljs-keyword">class</span></span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>, optional] LPCSTR    lpWindowName, // Windows text</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]           DWORD     dwStyle, // Windows style</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]           <span class="hljs-built_in">int</span>       X, // X position</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]           <span class="hljs-built_in">int</span>       Y, // Y position</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]           <span class="hljs-built_in">int</span>       nWidth, // Width size</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>]           <span class="hljs-built_in">int</span>       nHeight, // Height size</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>, optional] HWND      hWndParent, // Parent windows</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>, optional] HMENU     hMenu, // Menu</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>, optional] HINSTANCE hInstance, // Instance handle</span></span>
+<span class="hljs-params"><span class="hljs-function">  [<span class="hljs-keyword">in</span>, optional] LPVOID    lpParam // Additional application data</span></span>
+<span class="hljs-params"><span class="hljs-function"></span>)</span>;</code></pre>
+<p>让我们使用上述预定义的参数并为它们赋值，正如第五小节中所述，关于API调用中的每个参数都有对其用途和潜在值的说明。下面是对<code>CreateWindowsExA</code>的完整调用的示例。</p>
+<pre><code class="hljs c#">HWND hwnd = CreateWindowsEx(
+	<span class="hljs-number">0</span>,
+	CLASS_NAME,
+	L<span class="hljs-string">"Hello THM!"</span>,
+	WS_OVERLAPPEDWINDOW,
+	CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
+	NULL,
+	NULL,
+	hInstance,
+	NULL
+	);</code></pre>
+<p>我们已经用c语言定义了第一个API调用，现在我们可以将其实现到应用程序中，并使用API调用的功能。下面是一个示例应用程序，该程序将使用API来创建一个小的空白窗口。</p>
+<pre><code class="hljs c#"><span class="hljs-function">BOOL <span class="hljs-title">Create</span>(<span class="hljs-params"></span></span>
+<span class="hljs-params"><span class="hljs-function">        PCWSTR lpWindowName,</span></span>
+<span class="hljs-params"><span class="hljs-function">        DWORD dwStyle,</span></span>
+<span class="hljs-params"><span class="hljs-function">        DWORD dwExStyle = <span class="hljs-number">0</span>,</span></span>
+<span class="hljs-params"><span class="hljs-function">        <span class="hljs-built_in">int</span> x = CW_USEDEFAULT,</span></span>
+<span class="hljs-params"><span class="hljs-function">        <span class="hljs-built_in">int</span> y = CW_USEDEFAULT,</span></span>
+<span class="hljs-params"><span class="hljs-function">        <span class="hljs-built_in">int</span> nWidth = CW_USEDEFAULT,</span></span>
+<span class="hljs-params"><span class="hljs-function">        <span class="hljs-built_in">int</span> nHeight = CW_USEDEFAULT,</span></span>
+<span class="hljs-params"><span class="hljs-function">        HWND hWndParent = <span class="hljs-number">0</span>,</span></span>
+<span class="hljs-params"><span class="hljs-function">        HMENU hMenu = <span class="hljs-number">0</span></span></span>
+<span class="hljs-params"><span class="hljs-function">        </span>)</span>
+    {
+        WNDCLASS wc = {<span class="hljs-number">0</span>};
 
+        wc.lpfnWndProc   = DERIVED_TYPE::WindowProc;
+        wc.hInstance     = GetModuleHandle(NULL);
+        wc.lpszClassName = ClassName();
 
+        RegisterClass(&amp;wc);
 
-<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
-本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
-</div></footer>
-<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-<div class="widgets">
+        m_hwnd = CreateWindowEx(
+            dwExStyle, ClassName(), lpWindowName, dwStyle, x, y,
+            nWidth, nHeight, hWndParent, hMenu, GetModuleHandle(NULL), <span class="hljs-keyword">this</span>
+            );
 
+        <span class="hljs-keyword">return</span> (m_hwnd ? TRUE : FALSE);
+    }</code></pre>
+<p>如果一切顺利，当我们运行上述示例应用程序之时，我们将看到一个标题为“Hello THM!”的窗口成功弹出。</p>
+<p>正如本小节所演示的案例一样，使用低级编程语言使得快速定义API调用变得非常容易，而由于C语言的易于使用性和可扩展性，基于C的编程语言在网络安全威胁参与者和网络安全供应商中很受欢迎。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749744.png" alt></p>
+<h1 id="0x07-net和powershell-api实现">0x07 .NET和PowerShell API实现</h1>
+<p>如第四小节中所述，P/Invoke允许我们导入DLLs并将指针分配给API调用，为了理解P/Invoke是如何实现这种效果的，让我们先看一下以下示例：</p>
+<pre><code class="hljs c#"><span class="hljs-keyword">class</span> <span class="hljs-title">Win32</span> {
+	[<span class="hljs-meta">DllImport(<span class="hljs-string">"kernel32.dll"</span>)</span>]
+	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> IntPtr <span class="hljs-title">GetComputerNameA</span>(<span class="hljs-params">StringBuilder lpBuffer, <span class="hljs-keyword">ref</span> <span class="hljs-built_in">uint</span> lpnSize</span>)</span>;
+}</code></pre>
+<p>这段代码是一个使用 P/Invoke（Platform Invocation Services）的 C# 类，用于调用 Windows API 中的&nbsp;<code>GetComputerNameA</code>&nbsp;函数，该函数的目的是获取计算机的名称。</p>
+<p>让我们逐行解析这个代码段：</p>
+<ol>
+<li>
+<p><code>class Win32</code>: 这是一个名为&nbsp;<code>Win32</code>&nbsp;的 C# 类。</p>
+</li>
+<li>
+<p><code>[DllImport("kernel32.dll")]</code>: 这是一个特性，用于指示编译器去寻找名为&nbsp;<code>kernel32.dll</code>&nbsp;的库，并在其中查找&nbsp;<code>GetComputerNameA</code>&nbsp;函数。<code>DllImport</code>&nbsp;是 P/Invoke 的一部分，它允许 C# 代码调用非托管 DLL 中的函数。</p>
+</li>
+<li>
+<p><code>public static extern IntPtr GetComputerNameA(StringBuilder lpBuffer, ref uint lpnSize)</code>: 这是一个用于声明对&nbsp;<code>GetComputerNameA</code>&nbsp;函数的引用的 C# 方法。它包括以下几个部分：</p>
+<ul>
+<li><code>public</code>: 这表示方法是公开的，可以从类外部访问。</li>
+<li><code>static</code>: 这表示方法是静态的，可以通过类名直接调用，而不需要创建类的实例。</li>
+<li><code>extern</code>: 这表示方法是在外部实现的，也就是说，它是通过 P/Invoke 调用非托管代码实现的。</li>
+<li><code>IntPtr</code>: 这是返回类型，表示函数返回一个指针。在这里，<code>GetComputerNameA</code>&nbsp;函数返回计算机名的字符串的指针。</li>
+<li><code>GetComputerNameA</code>: 这是方法的名称，对应于&nbsp;<code>kernel32.dll</code>&nbsp;中的函数名称。</li>
+<li><code>(StringBuilder lpBuffer, ref uint lpnSize)</code>: 这是方法的参数列表。<code>StringBuilder</code>&nbsp;用于接收计算机名的字符串，<code>ref uint</code>&nbsp;用于接收字符串的长度。</li>
+</ul>
+</li>
+</ol>
+<p>这个方法的作用是调用 Windows API 中的&nbsp;<code>GetComputerNameA</code>&nbsp;函数，将计算机名存储在传递的&nbsp;<code>StringBuilder</code>&nbsp;中，并通过&nbsp;<code>ref uint</code>&nbsp;参数返回计算机名的长度。</p>
+<p>上述的class Win32类函数通常将存储已定义的API调用以及要在所有将来的方法中引用的定义。</p>
+<p>接下来我们必须使用<code>DllImport</code>特性来导入存储了API调用结构的库，导入的DLLs的作用类似于头文件包，但是要求基于我们所寻找的API调用来导入指定的DLL；我们可以参考<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list">API索引</a>或<a target="_blank" rel="noopener" href="http://pinvoke.net/">pinvoke.net</a>来确定特定的API调用在DLL中的位置。</p>
+<p>在进行DLL导入时，我们可以创建一个指向我们想要使用的API调用的新指针(在C#中是由&nbsp;<code>IntPtr</code>&nbsp;类型所定义的指针)，与一些低级语言不同，在.NET中导入DLL时我们还必须在指针中指定in/out参数结构，正如上文第五小节中所提及的那样，我们可以在<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list">相关的Windows文档</a>中找到我们所需的API调用的in/out参数。</p>
+<p>现在我们可以在应用程序中实现上述已定义的API调用并使用其功能，下面是一个示例应用程序，它将使用API来获取运行它的设备的计算机名称以及其他信息。</p>
+<pre><code class="hljs c#"><span class="hljs-keyword">class</span> <span class="hljs-title">Win32</span> {
+	[<span class="hljs-meta">DllImport(<span class="hljs-string">"kernel32.dll"</span>)</span>]
+	<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> IntPtr <span class="hljs-title">GetComputerNameA</span>(<span class="hljs-params">StringBuilder lpBuffer, <span class="hljs-keyword">ref</span> <span class="hljs-built_in">uint</span> lpnSize</span>)</span>;
+}
 
+<span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Main</span>(<span class="hljs-params"><span class="hljs-built_in">string</span>[] args</span>)</span> {
+	<span class="hljs-built_in">bool</span> success;
+	StringBuilder name = <span class="hljs-keyword">new</span> StringBuilder(<span class="hljs-number">260</span>); <span class="hljs-comment">// 260 是缓冲区的初始大小</span>
+	<span class="hljs-built_in">uint</span> size = <span class="hljs-number">260</span>;
+	success = GetComputerNameA(name, <span class="hljs-keyword">ref</span> size);
+	Console.WriteLine(name.ToString());
+}
+<span class="hljs-comment">//需要注意的是，这个例子中的缓冲区(name)大小是一个初始值，如果获取的计算机名比缓冲区大，GetComputerNameA函数会修改 `lpnSize` 参数并返回所需的缓冲区大小，你需要根据返回的大小重新调整缓冲区(name)的大小，然后再次调用函数以确保缓冲区(name)有足够的空间来存储计算机名。</span></code></pre>
+<p>如果一切顺利，那么上述示例程序的运行结果应该返回当前设备的计算机名称。</p>
+<p>现在，我们已经介绍了如何在.NET中完成API实现，接下来让我们看看如何调整相同的语法以便在PowerShell中完成类似示例。</p>
+<p>在PowerShell中定义API调用几乎与在.NET中相同，但是我们需要创建一个方法而不是一个类，并且还要添加一些额外的运算符。</p>
+<pre><code class="hljs c#">$MethodDefinition = <span class="hljs-string">@"</span>
+<span class="hljs-string">    [DllImport("</span>kernel32.dll<span class="hljs-string">")]</span>
+<span class="hljs-string">    public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);</span>
+<span class="hljs-string">    [DllImport("</span>kernel32.dll<span class="hljs-string">")]</span>
+<span class="hljs-string">    public static extern IntPtr GetModuleHandle(string lpModuleName);</span>
+<span class="hljs-string">    [DllImport("</span>kernel32.dll<span class="hljs-string">")]</span>
+<span class="hljs-string">    public static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);</span>
+<span class="hljs-string">"</span>@;
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E4%BB%8B%E7%BB%8D"><span class="toc-text">0x01 介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AC%E6%96%87%E5%AD%A6%E4%B9%A0%E7%9B%AE%E6%A0%87"><span class="toc-text">本文学习目标</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E4%B8%8E%E5%AD%90%E7%B3%BB%E7%BB%9F-%E7%A1%AC%E4%BB%B6%E4%BA%A4%E4%BA%92"><span class="toc-text">0x02 与子系统、硬件交互</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-windows-api%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="toc-text">0x03 Windows API的组件</span></a></li></ol></div><div class="widget-footer">
+<span class="hljs-meta">#这段代码是一个 PowerShell 脚本片段，用于定义包含 P/Invoke（Platform Invocation Services）标记的 C# 方法。让我来逐步解释：</span>
 
-<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
-</div></aside><div class='float-panel blur'>
-  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-  </button>
-  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
-  </button>
-</div>
-</div><div class="scripts">
-<script type="text/javascript">
-  const ctx = {
-    date_suffix: {
-      just: `刚刚`,
-      min: `分钟前`,
-      hour: `小时前`,
-      day: `天前`,
-    },
-    root : `/`,
-  };
+<span class="hljs-meta">#1. $MethodDefinition</span>
+<span class="hljs-meta">#   - 这是一个 PowerShell 变量，存储了包含 C# 方法定义的文本。</span>
 
-  // required plugins (only load if needs)
-  if (`local_search`) {
-    ctx.search = {};
-    ctx.search.service = `local_search`;
-    if (ctx.search.service == 'local_search') {
-      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
-      ctx.search[ctx.search.service] = service_obj;
-    }
-  }
-  const def = {
-    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
-    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
-  };
-  const deps = {
-    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
-    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
-  }
-  
+<span class="hljs-meta">#2. @" ... "@：</span>
+<span class="hljs-meta">#   - 这是 PowerShell 中的一个特殊标记，用于创建一个字符串，其中可以包含多行文本。在这里，它用于包含 C# 方法的定义。</span>
 
-</script>
+<span class="hljs-meta">#3. [DllImport("kernel32")]</span>
+<span class="hljs-meta">#   - 这是 C# 的 [DllImport] 特性，用于指示编译器在运行时调用非托管 DLL 中的函数。在这里，它指示要调用的是 kernel32.dll 中的函数。</span>
 
-<script type="text/javascript">
-  const utils = {
-    // 懒加载 css https://github.com/filamentgroup/loadCSS
-    css: (href, before, media, attributes) => {
-      var doc = window.document;
-      var ss = doc.createElement("link");
-      var ref;
-      if (before) {
-        ref = before;
-      } else {
-        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
-        ref = refs[refs.length - 1];
-      }
-      var sheets = doc.styleSheets;
-      if (attributes) {
-        for (var attributeName in attributes) {
-          if (attributes.hasOwnProperty(attributeName)) {
-            ss.setAttribute(attributeName, attributes[attributeName]);
-          }
-        }
-      }
-      ss.rel = "stylesheet";
-      ss.href = href;
-      ss.media = "only x";
-      function ready(cb) {
-        if (doc.body) {
-          return cb();
-        }
-        setTimeout(function () {
-          ready(cb);
-        });
-      }
-      ready(function () {
-        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
-      });
-      var onloadcssdefined = function (cb) {
-        var resolvedHref = ss.href;
-        var i = sheets.length;
-        while (i--) {
-          if (sheets[i].href === resolvedHref) {
-            return cb();
-          }
-        }
-        setTimeout(function () {
-          onloadcssdefined(cb);
-        });
-      };
-      function loadCB() {
-        if (ss.addEventListener) {
-          ss.removeEventListener("load", loadCB);
-        }
-        ss.media = media || "all";
-      }
-      if (ss.addEventListener) {
-        ss.addEventListener("load", loadCB);
-      }
-      ss.onloadcssdefined = onloadcssdefined;
-      onloadcssdefined(loadCB);
-      return ss;
-    },
+<span class="hljs-meta">#4. public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);</span>
+<span class="hljs-meta">#   - 这是一个 C# 方法的定义，使用了 [DllImport] 特性，它声明了一个叫做 GetProcAddress 的函数，该函数用于获取一个模块中导出函数的地址。</span>
+<span class="hljs-meta">#IntPtr hModule 表示模块的句柄，string procName 表示要获取地址的函数的名称。</span>
 
-    js: (src, opt) => new Promise((resolve, reject) => {
-      var script = document.createElement('script');
-      if (src.startsWith('/')){
-        src = ctx.root + src.substring(1);
-      }
-      script.src = src;
-      if (opt) {
-        for (let key of Object.keys(opt)) {
-          script[key] = opt[key]
-        }
-      } else {
-        // 默认异步，如果需要同步，第二个参数传入 {} 即可
-        script.async = true
-      }
-      script.onerror = reject
-      script.onload = script.onreadystatechange = function() {
-        const loadState = this.readyState
-        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-        script.onload = script.onreadystatechange = null
-        resolve()
-      }
-      document.head.appendChild(script)
-    }),
+<span class="hljs-meta">#5. public static extern IntPtr GetModuleHandle(string lpModuleName);</span>
+<span class="hljs-meta">#   - 这同样是一个使用了 [DllImport] 特性的 C# 方法的定义，该方法用于获取模块的句柄。</span>
+<span class="hljs-meta">#string lpModuleName 表示要获取句柄的模块的名称。</span>
 
-    jq: (fn) => {
-      if (typeof jQuery === 'undefined') {
-        utils.js(deps.jquery).then(fn)
-      } else {
-        fn()
-      }
-    },
-    
-    onLoading: (el) => {
-      if (el) {
-        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
-      }
-    },
-    onLoadSuccess: (el) => {
-      if (el) {
-        $(el).find('.loading-wrap').remove();
-      }
-    },
-    onLoadFailure: (el) => {
-      if (el) {
-        $(el).find('.loading-wrap svg').remove();
-        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
-        $(el).find('.loading-wrap').addClass('error');
-      }
-    },
-    request: (el, url, callback, onFailure) => {
-      let retryTimes = 3;
-      utils.onLoading(el);
-      function req() {
-        return new Promise((resolve, reject) => {
-          let status = 0; // 0 等待 1 完成 2 超时
-          let timer = setTimeout(() => {
-            if (status === 0) {
-              status = 2;
-              timer = null;
-              reject('请求超时');
-              if (retryTimes == 0) {
-                onFailure();
-              }
-            }
-          }, 5000);
-          fetch(url).then(function(response) {
-            if (status !== 2) {
-              clearTimeout(timer);
-              resolve(response);
-              timer = null;
-              status = 1;
-            }
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('Network response was not ok.');
-          }).then(function(data) {
-            retryTimes = 0;
-            utils.onLoadSuccess(el);
-            callback(data);
-          }).catch(function(error) {
-            if (retryTimes > 0) {
-              retryTimes -= 1;
-              setTimeout(() => {
-                req();
-              }, 5000);
-            } else {
-              utils.onLoadFailure(el);
-              onFailure();
-            }
-          });
-        });
-      }
-      req();
-    },
-  };
-</script>
+<span class="hljs-meta">#6. public static extern bool VirtualProtect(IntPtr lpAddress, UIntPtr dwSize, uint flNewProtect, out uint lpflOldProtect);</span>
+<span class="hljs-meta">#  - 这是又一个使用了 [DllImport] 特性的 C# 方法的定义，该方法用于更改内存页面的保护属性。</span>
+<span class="hljs-meta">#IntPtr lpAddress 表示要更改保护属性的内存地址，UIntPtr dwSize 表示内存区域的大小，</span>
+<span class="hljs-meta">#uint flNewProtect 表示新的保护属性，out uint lpflOldProtect 表示旧的保护属性将被写入这个参数中。</span>
 
-<script>
-  const sidebar = {
-    leftbar: () => {
-      if (l_body) {
-        l_body.toggleAttribute('leftbar');
-        l_body.removeAttribute('rightbar');
-      }
-    },
-    rightbar: () => {
-      if (l_body) {
-        l_body.toggleAttribute('rightbar');
-        l_body.removeAttribute('leftbar');
-      }
-    },
-    dismiss: () => {
-      if (l_body) {
-        l_body.removeAttribute('leftbar');
-        l_body.removeAttribute('rightbar');
-      }
-    },
-    toggleTOC: () => {
-      document.querySelector('#data-toc').classList.toggle('collapse');
-    }
-  }
-</script>
+<span class="hljs-meta">#上述这三个方法都是通过 [DllImport] 特性进行声明，以便之后调用Windows API函数。</span>
 
-<!-- required -->
-<script src="/js/main.js?v=1.28.1" async></script>
+<span class="hljs-meta">#总的来说，这段代码声明了三个API函数，它们是使用 P/Invoke 调用的kernel32.dll中的函数，这些函数通常用于与内存和模块有关的底层操作；在PowerShell中使用这种方法可以方便地进行一些低级别的操作，而无需在外部文件中编写整个 C# 类，基于上述这些声明，我们将被允许在PowerShell中调用Windows API函数。</span></code></pre>
+<p>如上所示，我们已经定义了API调用，但是在PowerShell中还需要进一步执行一个步骤才能初始化它们，我们必须在相关方法定义中为每个Win32 DLL的指针创建一个新类型。以下是一个示例，函数<code>Add-Type</code>将在<code>/temp</code>目录中放置一个临时文件，并使用csc.exe来编译所需的函数。</p>
+<pre><code class="hljs c#">$Kernel32 = Add-Type -MemberDefinition $MethodDefinition -Name <span class="hljs-string">'Kernel32'</span> -NameSpace <span class="hljs-string">'Win32'</span> -PassThru;
 
-<!-- optional -->
+<span class="hljs-meta">#函数Add-Type将在/temp目录中生成临时文件(在PowerShell中，Add-Type 命令用于动态添加 C# 类型)：</span>
+<span class="hljs-meta">#当你运行上述命令时，Add-Type 将生成一个 C# 源代码文件，其中包含了 $MethodDefinition 中定义的成员(上文所定义的三个函数)，这个文件通常会被放置在 /temp 目录中。</span>
 
-  <script>
-    function load_twikoo() {
-        if (!document.querySelectorAll("#twikoo_container")[0]) return;
-        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
-            const el = document.getElementById("twikoo_container");
-            var path = el.getAttribute('comment_id');
-            if (!path) {
-                path = decodeURI(window.location.pathname);
-            }
-            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
-                el: '#twikoo_container',
-                path: path,
-            }));
-        });
-    }
-
-    window.addEventListener('DOMContentLoaded', (event) => {
-        load_twikoo();
-    });
-</script>
+<span class="hljs-meta">#使用csc.exe编译：</span>
+<span class="hljs-meta">#csc.exe 是 Microsoft C# 编译器，用于将 C# 源代码编译成可执行程序或库；在这里，Add-Type 将使用 csc.exe 编译在 /temp 目录中生成的临时文件，以创建 Kernel32类型。</span>
 
 
+<span class="hljs-meta">#在这个特定的例子中，使用了 -PassThru 参数，它会在 /temp 目录（通常是 %TEMP%，表示系统的临时目录）中创建一个临时的 C# 源代码文件，并使用 C# 编译器 csc.exe 来编译这个源代码文件。</span>
 
-<script defer>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
-    for (let id of Object.keys(ctx.services)) {
-      const js = ctx.services[id].js;
-      if (id == 'siteinfo') {
-        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
-        if (ctx.cardlinks?.length > 0) {
-          utils.js(js, { defer: true }).then(function () {
-            setCardLink(ctx.cardlinks);
-          });
-        }
-      } else {
-        const els = document.getElementsByClassName(`ds-${id}`);
-        if (els?.length > 0) {
-          utils.jq(() => {
-            if (id == 'timeline' || 'memos' || 'marked') {
-              utils.js(deps.marked).then(function () {
-                utils.js(js, { defer: true });
-              });
-            } else {
-              utils.js(js, { defer: true });
-            }
-          });
-        }
-      }
-    }
-  });
-</script>
+<span class="hljs-meta">#简而言之：这条 PowerShell 命令使用 Add-Type 将 C# 代码嵌入到 PowerShell 中，并创建了一个名为 Kernel32 的类型。</span>
+<span class="hljs-meta">#具体地说，它包含了 $MethodDefinition 变量中定义的三个函数的声明，这三个函数分别是：</span>
+<span class="hljs-meta">#GetProcAddress: 用于在指定模块中查找导出函数的地址。</span>
+<span class="hljs-meta">#GetModuleHandle: 返回指定模块的句柄。</span>
+<span class="hljs-meta">#VirtualProtect: 用于更改指定内存区域的保护属性。</span>
+<span class="hljs-meta">#这样，通过使用 Add-Type 命令，你在 PowerShell 中就可以通过 [Win32.Kernel32] 访问这些函数，以便在 PowerShell 中调用与这些 Windows API 函数相关的功能。</span></code></pre>
+<p>然后，我们可以通过以下语法来使用我们所需的API调用：</p>
+<pre><code class="hljs c#">[<span class="hljs-meta">Win32.Kernel32</span>]::&lt;Imported Call&gt;()
 
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    ctx.search = {
-      path: `/search.json`,
-    }
-    utils.js('/js/search/local-search.js', { defer: true });
-  });
-</script><script>
-  window.FPConfig = {
-    delay: 0,
-    ignoreKeywords: [],
-    maxRPS: 5,
-    hoverDelay: 25
-  };
-</script>
-<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
-<script>
-  // https://www.npmjs.com/package/vanilla-lazyload
-  // Set the options globally
-  // to make LazyLoad self-initialize
-  window.lazyLoadOptions = {
-    elements_selector: ".lazy",
-  };
-  // Listen to the initialization event
-  // and get the instance of LazyLoad
-  window.addEventListener(
-    "LazyLoad::Initialized",
-    function (event) {
-      window.lazyLoadInstance = event.detail.instance;
-    },
-    false
+<span class="hljs-meta">#这段语法是在 PowerShell 中使用 P/Invoke（Platform Invocation Services）来调用通过 Add-Type 命令定义的 C# 类型中的 API 函数。</span>
+
+<span class="hljs-meta">#具体解释如下：</span>
+
+<span class="hljs-meta">#[Win32.Kernel32]::： 这部分表示你正在引用的是 Win32 命名空间下的 Kernel32 类型。</span>
+
+<span class="hljs-meta">#&lt;Imported Call&gt;： 这里是你要调用的具体的 API 函数。这是你在之前通过 Add-Type 定义的类型中引入的函数。</span>
+
+<span class="hljs-meta">#所以，完整的语法是 [Win32.Kernel32]::&lt;Imported Call&gt;()，它表示你正在调用 Win32 命名空间下的 Kernel32 类型中的某个 API 函数。</span>
+<span class="hljs-meta">#例如，如果你之前通过 Add-Type 添加了一个叫做 MyFunction 的函数到 Kernel32 类型中，你可以使用如下语法来调用它：</span>
+<span class="hljs-meta">#[Win32.Kernel32]::MyFunction()</span></code></pre>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749745.png" alt></p>
+<h1 id="0x08-常见的被滥用的api调用">0x08 常见的被滥用的API调用</h1>
+<p>Win32库中的多个API调用很容易被恶意活动利用。</p>
+<p>一些网络实体会试图记录和组织所有针对API调用的可用恶意载体，如：&nbsp;<a target="_blank" rel="noopener" href="https://www.sans.org/white-papers/33649/">SANs</a>、<a target="_blank" rel="noopener" href="http://malapi.io/">MalAPI.io</a>。</p>
+<p>虽然有很多API调用会被滥用，但是有些API调用的在恶意利用会更加常见，下表列出了在一组样本中最经常被滥用的API(按频率排列)：</p>
+<table>
+<thead>
+<tr>
+<th><strong>API Call (API 调用)</strong></th>
+<th><strong>Explanation (解释)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LoadLibraryA</td>
+<td>将指定的DLL映射到调用进程的地址空间中</td>
+</tr>
+<tr>
+<td>GetUserNameA</td>
+<td>检索与当前线程关联的用户的名称</td>
+</tr>
+<tr>
+<td>GetComputerNameA</td>
+<td>检索本地计算机的NetBIOS或DNS名称</td>
+</tr>
+<tr>
+<td>GetVersionExA</td>
+<td>获取关于当前所运行的操作系统的版本信息</td>
+</tr>
+<tr>
+<td>GetModuleFileNameA</td>
+<td>检索指定模块和进程的文件的完全限定路径</td>
+</tr>
+<tr>
+<td>GetStartupInfoA</td>
+<td>检索STARTUPINFO结构的内容(窗口站、桌面、标准句柄和进程的外观)</td>
+</tr>
+<tr>
+<td>GetModuleHandle</td>
+<td>返回指定模块的模块句柄 (前提是指定模块已经映射到调用进程的地址空间中)</td>
+</tr>
+<tr>
+<td>GetProcAddress</td>
+<td>返回指定被导出的DLL函数的地址</td>
+</tr>
+<tr>
+<td>VirtualProtect</td>
+<td>更改对调用进程的虚拟地址空间中的内存区域的保护</td>
+</tr>
+</tbody>
+</table>
+<p>tips：上表内容中的"映射" 指的是将模块加载到进程的内存中，使得它可以被进程访问和执行。</p>
+<p>在下一小节中，我们将基于两个恶意软件案例来深入探讨一些API调用是如何被滥用的。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749746.png" alt></p>
+<h1 id="0x09-恶意软件案例研究">0x09 恶意软件案例研究</h1>
+<p>现在我们已经简单了解了Win32库的基础实现以及一些常见的被滥用的API调用，接下来让我们研究两个恶意软件样本并观察它们的API调用情况。</p>
+<p>在本小节中，我们将简单地分解研究C#键盘记录器案例和shellcode启动器案例。</p>
+<h2 id="keylogger键盘记录器">Keylogger(键盘记录器)</h2>
+<p>为了开始分析键盘记录器，我们需要收集它正在实现哪些API调用和钩子(hooks)。由于作为本小节示例的键盘记录器是用C#编写的，因此它必须使用P/Invoke来获取每个调用的指针，下面是键盘记录器示例中关于p/invoke定义的源代码片段：</p>
+<pre><code class="hljs c#">[<span class="hljs-meta">DllImport(<span class="hljs-string">"user32.dll"</span>, CharSet = CharSet.Auto, SetLastError = true)</span>]
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> IntPtr <span class="hljs-title">SetWindowsHookEx</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, <span class="hljs-built_in">uint</span> dwThreadId</span>)</span>;
+[<span class="hljs-meta">DllImport(<span class="hljs-string">"user32.dll"</span>, CharSet = CharSet.Auto, SetLastError = true)</span>]
+[<span class="hljs-meta">return: MarshalAs(UnmanagedType.Bool)</span>]
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> <span class="hljs-built_in">bool</span> <span class="hljs-title">UnhookWindowsHookEx</span>(<span class="hljs-params">IntPtr hhk</span>)</span>;
+[<span class="hljs-meta">DllImport(<span class="hljs-string">"kernel32.dll"</span>, CharSet = CharSet.Auto, SetLastError = true)</span>]
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> IntPtr <span class="hljs-title">GetModuleHandle</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> lpModuleName</span>)</span>;
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">int</span> WHKEYBOARDLL = <span class="hljs-number">13</span>;
+[<span class="hljs-meta">DllImport(<span class="hljs-string">"kernel32.dll"</span>, CharSet = CharSet.Auto, SetLastError = true)</span>]
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> IntPtr <span class="hljs-title">GetCurrentProcess</span>()</span>;
+
+<span class="hljs-comment">//上面这段代码使用了 P/Invoke（Platform Invocation Services）在 C# 中声明了一些 Windows API 的调用，以下是关于这些声明的解释：</span>
+
+<span class="hljs-comment">//1. `SetWindowsHookEx` 函数声明：</span>
+<span class="hljs-comment">//    ```csharp</span>
+<span class="hljs-comment">//    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]</span>
+<span class="hljs-comment">//    private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);</span>
+<span class="hljs-comment">//    ```</span>
+<span class="hljs-comment">//   - 该声明用于调用 `SetWindowsHookEx` 函数，该函数用于设置(安装)钩子。</span>
+<span class="hljs-comment">//   - `idHook` 是钩子类型的标识符，这里使用了 `WHKEYBOARDLL`，表示低级键盘输入事件的钩子。</span>
+<span class="hljs-comment">//   - `lpfn` 钩子过程的委托，通常是一个回调函数，用于处理接收到的钩子消息。</span>
+<span class="hljs-comment">//   - `hMod` 是包含钩子过程(处理钩子事件的函数称为"钩子过程")所在的模块的句柄，使用 `GetModuleHandle`获取当前进程的模块句柄。</span>
+<span class="hljs-comment">//   - `dwThreadId` 是与要监视的线程相关联的线程标识符，传入0表示将钩子与所有线程关联。</span>
+
+<span class="hljs-comment">//2. `UnhookWindowsHookEx` 函数声明：</span>
+<span class="hljs-comment">//    ```csharp</span>
+<span class="hljs-comment">//    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]</span>
+<span class="hljs-comment">//    [return: MarshalAs(UnmanagedType.Bool)]</span>
+<span class="hljs-comment">//    private static extern bool UnhookWindowsHookEx(IntPtr hhk);</span>
+<span class="hljs-comment">//    ```</span>
+<span class="hljs-comment">//   - 该声明用于调用 `UnhookWindowsHookEx` 函数，该函数用于解除(卸载)之前安装的钩子。</span>
+<span class="hljs-comment">//   - `hhk` 是要解除的钩子的句柄。</span>
+
+<span class="hljs-comment">//3. `GetModuleHandle` 函数声明：</span>
+<span class="hljs-comment">//   ```csharp</span>
+<span class="hljs-comment">//   [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]</span>
+<span class="hljs-comment">//    private static extern IntPtr GetModuleHandle(string lpModuleName);</span>
+<span class="hljs-comment">//   ```</span>
+<span class="hljs-comment">//   - 该声明用于调用 `GetModuleHandle` 函数，该函数用于获取指定模块的句柄。</span>
+<span class="hljs-comment">//  - `lpModuleName` 是要获取句柄的模块的名称，我们可以使用ProcessName属性来获取当前进程的进程名以指定模块，也可以直接将lpModuleName设置为 null 或者 IntPtr.Zero，这样GetModuleHandle函数将返回调用进程的模块句柄。</span>
+
+<span class="hljs-comment">//4. 常量 `WHKEYBOARDLL` 的定义：</span>
+<span class="hljs-comment">//  ```csharp</span>
+<span class="hljs-comment">//private static int WHKEYBOARDLL = 13;</span>
+<span class="hljs-comment">//```</span>
+<span class="hljs-comment">//- 这是一个表示低级键盘输入事件的钩子类型的常量，这个值 `13` 对应于 `WHKEYBOARDLL`。</span>
+
+<span class="hljs-comment">//5. `GetCurrentProcess` 函数声明：</span>
+<span class="hljs-comment">//  ```csharp</span>
+<span class="hljs-comment">//[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]</span>
+<span class="hljs-comment">// private static extern IntPtr GetCurrentProcess();</span>
+<span class="hljs-comment">//```</span>
+<span class="hljs-comment">// - 该声明用于调用 `GetCurrentProcess` 函数，该函数用于获取当前进程的伪句柄。</span></code></pre>
+<p>tips：在计算机编程和软件开发领域，“hooks” 通常指的是一种机制或技术，它用于截取或拦截系统、应用程序中特定事件的发生；通过使用hooks，开发者可以在事件发生前或事件发生后注入自定义代码，从而改变或扩展系统、应用程序的行为。</p>
+<p>tips：“钩子过程”（hook procedure）是在安装了系统或应用程序的钩子后，用于处理特定事件的由用户定义的函数；钩子是一种机制，允许应用程序监视、拦截或修改操作系统中的消息、事件或者其他形式的处理流程。</p>
+<p>以下是关于每个API调用及其各自用法的说明：</p>
+<table>
+<thead>
+<tr>
+<th><strong>API Call (API 调用)</strong></th>
+<th><strong>Explanation (解释)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SetWindowsHookEx</td>
+<td>将内存钩子安装到钩子链中以监视某些事件</td>
+</tr>
+<tr>
+<td>UnhookWindowsHookEx</td>
+<td>从钩子链中移除已安装的钩子</td>
+</tr>
+<tr>
+<td>GetModuleHandle</td>
+<td>返回指定模块的模块句柄 (前提是指定模块已经映射到调用进程的地址空间中)</td>
+</tr>
+<tr>
+<td>GetCurrentProcess</td>
+<td>检索当前进程的伪句柄(pseudo handle)</td>
+</tr>
+</tbody>
+</table>
+<p>tips：在 Windows 操作系统中，有两种类型的句柄：实际句柄和伪句柄。</p>
+<ol>
+<li><strong>实际句柄：</strong>&nbsp;实际句柄是操作系统内部分配的实际资源句柄，用于标识和操作系统资源交互。例如，文件句柄、线程句柄、进程句柄等都属于实际句柄。</li>
+<li><strong>伪句柄：</strong>&nbsp;伪句柄是一个在逻辑上标识资源但不直接与实际系统资源关联的值。伪句柄是为了方便编程而引入的。在很多情况下，Windows API 使用伪句柄来表示当前进程或当前线程，这些伪句柄无需对底层资源进行实际操作，只是一种标识符。</li>
+</ol>
+<p>上表中的<code>GetCurrentProcess</code>&nbsp;所返回的是表示当前进程的伪句柄，伪句柄不是典型的内核对象句柄，这个伪句柄不直接映射到实际的系统资源，而是作为标识符，方便进行与当前进程相关的操作。</p>
+<p>使用伪句柄而不是实际句柄的一个好处是：不需要关闭或释放伪句柄，因为它们不引用实际的资源。因此，<code>GetCurrentProcess</code>&nbsp;返回的伪句柄只是用于标识当前进程并用于引用当前进程的一种方便的方式。</p>
+<p>接下来，我们将分析键盘记录器示例如何在当前进程上设置钩子，下面是键盘记录器示例中的钩子部分的源代码片段。</p>
+<pre><code class="hljs c#"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Main</span>()</span> {
+	_hookID = SetHook(_proc);
+	Application.Run();
+	UnhookWindowsHookEx(_hookID);
+	Application.Exit();
+}
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> IntPtr <span class="hljs-title">SetHook</span>(<span class="hljs-params">LowLevelKeyboardProc proc</span>)</span> {
+	<span class="hljs-keyword">using</span> (Process curProcess = Process.GetCurrentProcess()) {
+		<span class="hljs-keyword">return</span> SetWindowsHookEx(WHKEYBOARDLL, proc, GetModuleHandle(curProcess.ProcessName), <span class="hljs-number">0</span>);
+	}
+}
+<span class="hljs-comment">//这是一个使用 Windows 钩子（Windows Hooks）监控低级键盘事件的 C# 代码片段。让我解释一下主要部分：</span>
+<span class="hljs-comment">//Main 方法是应用程序的入口点。</span>
+<span class="hljs-comment">//_hookID 是一个变量，用于存储设置的钩子的标识符。</span>
+<span class="hljs-comment">//SetHook 方法用于设置键盘钩子。LowLevelKeyboardProc 是一个代表低级键盘过程的委托（delegate）。</span>
+
+<span class="hljs-comment">//具体的解释如下：</span>
+<span class="hljs-comment">//Main 方法：</span>
+<span class="hljs-comment">//_hookID = SetHook(_proc); 调用 SetHook 方法设置键盘钩子，并将返回的标识符存储在 _hookID 中。</span>
+<span class="hljs-comment">//Application.Run(); 启动应用程序的消息循环，使应用程序保持运行状态。</span>
+<span class="hljs-comment">//UnhookWindowsHookEx(_hookID); 在应用程序退出前解除键盘钩子。</span>
+<span class="hljs-comment">//Application.Exit(); 退出应用程序。</span>
+
+<span class="hljs-comment">//SetHook 方法：</span>
+<span class="hljs-comment">//using (Process curProcess = Process.GetCurrentProcess()) 获取当前进程的 Process 对象。</span>
+<span class="hljs-comment">//SetWindowsHookEx(WHKEYBOARDLL, proc, GetModuleHandle(curProcess.ProcessName), 0) 调用 SetWindowsHookEx 函数来设置键盘低级钩子。</span>
+<span class="hljs-comment">//WHKEYBOARDLL 是用于指定键盘低级钩子的常量。</span>
+<span class="hljs-comment">//proc 是用于处理低级键盘事件的回调函数。</span>
+<span class="hljs-comment">//GetModuleHandle(curProcess.ProcessName) 获取当前进程的模块句柄。</span>
+<span class="hljs-comment">//0 表示将钩子安装在所有线程上。</span>
+
+<span class="hljs-comment">//注意，这段代码片段在使用钩子的同时涉及到系统级的操作，如键盘事件的监控。使用钩子是一个强大而敏感的操作，需要小心处理以避免潜在的问题，此外，根据使用场景和权限，可能需要以管理员身份运行应用程序。</span></code></pre>
+<p>让我们了解键盘记录器的使用目标和实现步骤，然后从示例代码片段中确定相关的API调用情况。</p>
+<p>参考<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list">Windows API 文档</a>和上述Keylogger代码片段内容，开始分析键盘记录器示例并回答本小节答题部分的问题1 - 4 。</p>
+<h2 id="shellcode启动器">Shellcode启动器</h2>
+<p>要开始分析shellcode启动器，我们需要收集它正在实现哪些API调用，这个过程看起来应该与上一个案例研究相同。下面是shellcode启动器示例中关于p/invoke定义的一个源代码片段：</p>
+<pre><code class="hljs c#"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> UInt32 MEM_COMMIT = <span class="hljs-number">0x1000</span>;
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> UInt32 PAGE_EXECUTE_READWRITE = <span class="hljs-number">0x40</span>;
+[<span class="hljs-meta">DllImport(<span class="hljs-string">"kernel32.dll"</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> UInt32 <span class="hljs-title">VirtualAlloc</span>(<span class="hljs-params">UInt32 lpStartAddr, UInt32 size, UInt32 flAllocationType, UInt32 flProtect</span>)</span>;
+[<span class="hljs-meta">DllImport(<span class="hljs-string">"kernel32.dll"</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> UInt32 <span class="hljs-title">WaitForSingleObject</span>(<span class="hljs-params">IntPtr hHandle, UInt32 dwMilliseconds</span>)</span>;
+[<span class="hljs-meta">DllImport(<span class="hljs-string">"kernel32.dll"</span>)</span>]
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">extern</span> IntPtr <span class="hljs-title">CreateThread</span>(<span class="hljs-params">UInt32 lpThreadAttributes, UInt32 dwStackSize, UInt32 lpStartAddress, IntPtr param, UInt32 dwCreationFlags, <span class="hljs-keyword">ref</span> UInt32 lpThreadId</span>)</span>;
+
+<span class="hljs-comment">//上面这段代码使用了 P/Invoke（Platform Invocation Services）在 C# 中声明了三个 Windows API 函数的调用：</span>
+
+
+<span class="hljs-comment">//1. VirtualAlloc 函数声明：</span>
+<span class="hljs-comment">//   ```csharp</span>
+<span class="hljs-comment">//   private static UInt32 MEM_COMMIT = 0x1000;//此处的0x1000表示将内存块提交为可用的物理存储器，即将一块虚拟地址空间映射到实际的物理存储器上。</span>
+<span class="hljs-comment">//   private static UInt32 PAGE_EXECUTE_READWRITE = 0x40; //此处的0x40表示内存页具有可执行、可读、可写的保护属性。</span>
+
+<span class="hljs-comment">//   [DllImport("kernel32.dll")]</span>
+<span class="hljs-comment">//   private static extern UInt32 VirtualAlloc(UInt32 lpStartAddr, UInt32 size, UInt32 flAllocationType, UInt32 flProtect);</span>
+<span class="hljs-comment">//   ```</span>
+<span class="hljs-comment">//   - `VirtualAlloc` 函数用于在进程的虚拟地址空间中分配内存。</span>
+<span class="hljs-comment">//   - `MEM_COMMIT` 是用于指定分配内存的选项之一。</span>
+<span class="hljs-comment">//   - `PAGE_EXECUTE_READWRITE` 是用于指定内存页的保护属性之一。</span>
+<span class="hljs-comment">//参数说明：</span>
+<span class="hljs-comment">//lpStartAddr：指定欲分配的内存块的首地址，可以设为 0 表示由系统决定分配的地址。</span>
+<span class="hljs-comment">//size：指定欲分配的内存大小，单位为字节。</span>
+<span class="hljs-comment">//flAllocationType：指定内存分配的类型，这里使用了常量 MEM_COMMIT。</span>
+<span class="hljs-comment">//flProtect：指定内存页的保护属性，这里使用了常量 PAGE_EXECUTE_READWRITE。</span>
+<span class="hljs-comment">//此函数的目的是在进程的虚拟地址空间中分配一块内存，这块内存可以用于执行代码并允许读写，这种技术通常用于实现一些底层的系统编程或者与非托管代码的交互，例如创建远程线程等，这也是一种常见的用于注入代码的技术。</span>
+
+
+<span class="hljs-comment">//2. WaitForSingleObject 函数声明：</span>
+<span class="hljs-comment">//   ```csharp</span>
+<span class="hljs-comment">//   [DllImport("kernel32.dll")]</span>
+<span class="hljs-comment">//   private static extern UInt32 WaitForSingleObject(IntPtr hHandle, UInt32 dwMilliseconds);</span>
+<span class="hljs-comment">//   ```</span>
+<span class="hljs-comment">//   - `WaitForSingleObject` 函数用于等待一个指定的对象（如线程或进程）变为可用。</span>
+<span class="hljs-comment">//参数说明：</span>
+<span class="hljs-comment">//hHandle：指定要等待的对象的句柄（例如，线程或进程的句柄）。</span>
+<span class="hljs-comment">//dwMilliseconds：指定等待的时间，以毫秒为单位，如果设置为 INFINITE（无穷大），则函数将一直等待直到对象变为可用。</span>
+<span class="hljs-comment">//此函数通常用于等待某个事件的发生，例如等待线程执行完毕、等待进程退出等，WaitForSingleObject 函数是 Windows API 提供的等待对象的标准方法之一。</span>
+
+
+<span class="hljs-comment">//3. CreateThread 函数声明：</span>
+<span class="hljs-comment">//   ```csharp</span>
+<span class="hljs-comment">//   [DllImport("kernel32.dll")]</span>
+<span class="hljs-comment">//   private static extern IntPtr CreateThread(UInt32 lpThreadAttributes, UInt32 dwStackSize, UInt32 lpStartAddress, IntPtr param, //UInt32 dwCreationFlags, ref UInt32 lpThreadId);</span>
+<span class="hljs-comment">//  ```</span>
+<span class="hljs-comment">//   - `CreateThread` 函数用于在一个进程的虚拟地址空间中创建一个新的线程。</span>
+<span class="hljs-comment">//   - `lpThreadAttributes`、`dwStackSize`、`lpStartAddress`、`param`、`dwCreationFlags` 是函数的参数。</span>
+<span class="hljs-comment">//   - `ref UInt32 lpThreadId` 用于接收新线程的标识符。</span>
+<span class="hljs-comment">// 参数说明：</span>
+<span class="hljs-comment">// lpThreadAttributes：线程的安全属性，一般设置为 0 表示默认安全性。</span>
+<span class="hljs-comment">// dwStackSize：新线程的堆栈大小，一般设置为 0 表示使用默认堆栈大小。</span>
+<span class="hljs-comment">// lpStartAddress：新线程的起始地址，即线程开始执行的函数的地址。</span>
+<span class="hljs-comment">// param：传递给新线程的参数，可以设置为 IntPtr.Zero 以表示没有参数。</span>
+<span class="hljs-comment">// dwCreationFlags：控制线程的创建标志，例如，可以指定是否立即启动线程等。</span>
+<span class="hljs-comment">// ref UInt32 lpThreadId：用于接收新线程的标识符。</span>
+<span class="hljs-comment">// 此函数通常用于创建一个新的执行线程，其中 lpStartAddress 参数指定了新线程的起始执行点。CreateThread 函数返回新线程的句柄，可以通过该句柄对新线程进行操作。这种技术通常用于一些需要并发执行的任务，例如在注入代码时创建远程线程。</span>
+
+
+<span class="hljs-comment">//上述这些函数通常被用于一些底层的系统编程或者与非托管代码交互的情境中，请注意，上述代码片段可能缺少了一些参数的具体值，因此在实际使用时，还需要根据具体情况提供正确的参数值。</span></code></pre>
+<p>以下是关于每个API调用及其各自用法的说明：</p>
+<table>
+<thead>
+<tr>
+<th><strong>API Call (API 调用)</strong></th>
+<th><strong>Explanation (解释)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VirtualAlloc</td>
+<td>在调用进程的虚拟地址空间中保留、提交或更改内存页面区域的状态。</td>
+</tr>
+<tr>
+<td>WaitForSingleObject</td>
+<td>等待指定对象处于信号状态或超时间隔结束</td>
+</tr>
+<tr>
+<td>CreateThread</td>
+<td>创建要在调用进程的虚拟地址空间内执行的线程</td>
+</tr>
+</tbody>
+</table>
+<p>接下来，我们将分析如何将shellcode写入内存并从内存中执行。</p>
+<pre><code class="hljs c#">UInt32 funcAddr = VirtualAlloc(<span class="hljs-number">0</span>, (UInt32)shellcode.Length, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+Marshal.Copy(shellcode, <span class="hljs-number">0</span>, (IntPtr)(funcAddr), shellcode.Length);
+IntPtr hThread = IntPtr.Zero;
+UInt32 threadId = <span class="hljs-number">0</span>;
+IntPtr pinfo = IntPtr.Zero;
+hThread = CreateThread(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, funcAddr, pinfo, <span class="hljs-number">0</span>, <span class="hljs-keyword">ref</span> threadId);
+WaitForSingleObject(hThread, <span class="hljs-number">0xFFFFFFFF</span>);
+<span class="hljs-keyword">return</span>;
+
+<span class="hljs-comment">//这段代码的目的是执行以下操作：</span>
+
+<span class="hljs-comment">//1. 分配可执行内存：</span>
+<span class="hljs-comment">//   使用 `VirtualAlloc` 函数分配一块可执行的内存，`MEM_COMMIT` 表示将内存提交为可用的物理存储器，`PAGE_EXECUTE_READWRITE` 表示该内存可执行且可读写，具体分配的内存大小为 `shellcode.Length` 字节。</span>
+<span class="hljs-comment">//   ```csharp</span>
+<span class="hljs-comment">//   UInt32 funcAddr = VirtualAlloc(0, (UInt32)shellcode.Length, MEM_COMMIT, PAGE_EXECUTE_READWRITE);</span>
+<span class="hljs-comment">//   ```</span>
+
+<span class="hljs-comment">//2. 将 Shellcode 复制到分配的内存中：</span>
+<span class="hljs-comment">//   使用 `Marshal.Copy` 函数将 Shellcode 复制到刚刚分配的可执行内存中。</span>
+<span class="hljs-comment">//   ```csharp</span>
+<span class="hljs-comment">//   Marshal.Copy(shellcode, 0, (IntPtr)(funcAddr), shellcode.Length);</span>
+ <span class="hljs-comment">//  ```</span>
+
+<span class="hljs-comment">//3. 创建线程并执行 Shellcode：</span>
+<span class="hljs-comment">//  使用 `CreateThread` 函数创建一个新线程，并将其起始地址设置为刚刚分配的可执行内存的地址，然后等待线程执行完毕。</span>
+<span class="hljs-comment">//   ```csharp</span>
+<span class="hljs-comment">//   IntPtr hThread = IntPtr.Zero;</span>
+<span class="hljs-comment">//   UInt32 threadId = 0;</span>
+<span class="hljs-comment">//   IntPtr pinfo = IntPtr.Zero;</span>
+<span class="hljs-comment">//   hThread = CreateThread(0, 0, funcAddr, pinfo, 0, ref threadId);</span>
+<span class="hljs-comment">//   WaitForSingleObject(hThread, 0xFFFFFFFF);</span>
+<span class="hljs-comment">//   ```</span>
+
+<span class="hljs-comment">//4. 返回：</span>
+<span class="hljs-comment">//   程序执行完上述操作后，直接返回。</span>
+
+<span class="hljs-comment">//总体而言，这段代码的目的是执行一个自定义的 Shellcode，即：将其加载到分配的可执行内存中，并在新线程中执行。请注意，执行 Shellcode 这样的操作需要谨慎处理，因为它涉及到执行外部代码，这可能会导致出现一些安全风险，在实际应用中，请确保充分了解并信任我们将要执行的代码。</span></code></pre>
+<p>让我们了解shellcode执行的目标和过程，然后从示例代码片段中确定相关的API调用情况。</p>
+<p>参考<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list">Windows API 文档</a>和上述Shellcode启动器代码片段内容，开始分析shellcode启动器示例并回答本小节答题部分的问题5 - 8 。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749747.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202407291749748.png" alt></p>
+<h1 id="0x10-总结">0x10 总结</h1>
+<p>本文所涉及的内容只是Windows API的基础知识，关于API的功能性和可扩展性还有许多其他的应用案例我们并未提及，正因为Windows API可以为我们提供各种各样的用例，因此在实际运用中我们往往还需要探索更多相关的知识点。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">hybcx</div><div class="post-copyright__author_desc">只需热爱, 未来可期！</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://hybcx.xyz/2024/07/25/thm-windows-api-jie-shao/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://hybcx.xyz/2024/07/25/thm-windows-api-jie-shao/')">THM-Windows-API介绍</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://hybcx.xyz/2024/07/25/thm-windows-api-jie-shao/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=THM-Windows-API介绍&amp;url=http://hybcx.xyz/2024/07/25/thm-windows-api-jie-shao/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://hybcx.xyz" target="_blank">hybcx</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/TryHackMe/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>TryHackMe<span class="tagsPageCount">36</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/07/24/thm-windows-nei-he/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">THM-Windows内核</div></div></a></div><div class="next-post pull-right"><a href="/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">THM-滥用Windows内部机制</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2024/02/14/thm-basic-pentesting/" title="THM-Basic Pentesting"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-02-14</div><div class="title">THM-Basic Pentesting</div></div></a></div><div><a href="/2024/07/10/thm-c2-jian-jie/" title="THM-C2简介"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-07-10</div><div class="title">THM-C2简介</div></div></a></div><div><a href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-08-08</div><div class="title">THM-ByPass_UAC</div></div></a></div><div><a href="/2024/06/09/thm-enumerating-active-directory/" title="THM-Enumerating Active Directory"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-06-09</div><div class="title">THM-Enumerating Active Directory</div></div></a></div><div><a href="/2024/06/17/thm-corp/" title="THM-Corp"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-06-17</div><div class="title">THM-Corp</div></div></a></div><div><a href="/2024/07/16/thm-enumeration/" title="THM-Enumeration"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-07-16</div><div class="title">THM-Enumeration</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">这有关于<b style="color:#fff">产品、设计、开发</b>相关的问题和看法，还有<b style="color:#fff">文章翻译</b>和<b style="color:#fff">分享</b>。</div><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">相信你可以在这里找到对你有用的<b style="color:#fff">知识</b>和<b style="color:#fff">教程</b>。</div></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/about"><h1 class="author-info__name">hybcx</h1><div class="author-info__desc">只需热爱, 未来可期！</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/hybchenxing" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a><a class="social-icon faa-parent animated-hover" href="https://space.bilibili.com/1761635300" target="_blank" title="Email"><i class="anzhiyufont anzhiyu-icon-bilibili"></i></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">0x01 介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%AC%E6%96%87%E5%AD%A6%E4%B9%A0%E7%9B%AE%E6%A0%87"><span class="toc-number">1.1.</span> <span class="toc-text">本文学习目标</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E4%B8%8E%E5%AD%90%E7%B3%BB%E7%BB%9F-%E7%A1%AC%E4%BB%B6%E4%BA%A4%E4%BA%92"><span class="toc-number">2.</span> <span class="toc-text">0x02 与子系统、硬件交互</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-windows-api%E7%9A%84%E7%BB%84%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text">0x03 Windows API的组件</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%BA%93os-libraries"><span class="toc-number">4.</span> <span class="toc-text">0x04 操作系统库(OS Libraries)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#windows%E5%A4%B4%E6%96%87%E4%BB%B6"><span class="toc-number">4.1.</span> <span class="toc-text">Windows头文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#pinvoke"><span class="toc-number">4.2.</span> <span class="toc-text">P&#x2F;Invoke</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.3.</span> <span class="toc-text">总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8B%93%E5%B1%95"><span class="toc-number">4.4.</span> <span class="toc-text">拓展</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-api%E8%B0%83%E7%94%A8%E7%BB%93%E6%9E%84"><span class="toc-number">5.</span> <span class="toc-text">0x05 API调用结构</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-c-api-%E5%AE%9E%E7%8E%B0"><span class="toc-number">6.</span> <span class="toc-text">0x06 C API 实现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-net%E5%92%8Cpowershell-api%E5%AE%9E%E7%8E%B0"><span class="toc-number">7.</span> <span class="toc-text">0x07 .NET和PowerShell API实现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x08-%E5%B8%B8%E8%A7%81%E7%9A%84%E8%A2%AB%E6%BB%A5%E7%94%A8%E7%9A%84api%E8%B0%83%E7%94%A8"><span class="toc-number">8.</span> <span class="toc-text">0x08 常见的被滥用的API调用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x09-%E6%81%B6%E6%84%8F%E8%BD%AF%E4%BB%B6%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6"><span class="toc-number">9.</span> <span class="toc-text">0x09 恶意软件案例研究</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#keylogger%E9%94%AE%E7%9B%98%E8%AE%B0%E5%BD%95%E5%99%A8"><span class="toc-number">9.1.</span> <span class="toc-text">Keylogger(键盘记录器)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#shellcode%E5%90%AF%E5%8A%A8%E5%99%A8"><span class="toc-number">9.2.</span> <span class="toc-text">Shellcode启动器</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x10-%E6%80%BB%E7%BB%93"><span class="toc-number">10.</span> <span class="toc-text">0x10 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-yun-xing-shi-gui-bi-jian-ce/" title="THM-运行时规避检测">THM-运行时规避检测</a><time datetime="2024-08-08T14:19:16.000Z" title="发表于 2024-08-08 22:19:16">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC">THM-ByPass_UAC</a><time datetime="2024-08-08T07:36:41.000Z" title="发表于 2024-08-08 15:36:41">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/07/thm-qian-ming-gui-bi/" title="THM-签名规避">THM-签名规避</a><time datetime="2024-08-07T09:11:33.000Z" title="发表于 2024-08-07 17:11:33">2024-08-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/05/windows-ti-quan-zong-jie/" title="Windows提权总结">Windows提权总结</a><time datetime="2024-08-05T02:59:37.000Z" title="发表于 2024-08-05 10:59:37">2024-08-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/02/thm-dai-ma-hun-yao-yuan-li/" title="THM-代码混淆原理">THM-代码混淆原理</a><time datetime="2024-08-02T01:46:10.000Z" title="发表于 2024-08-02 09:46:10">2024-08-02</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2024 By <a class="footer-bar-link" href="/" title="hybcx" target="_blank">hybcx</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">199</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">30</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 0.88rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 0.88rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 0.88rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 0.88rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 0.88rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 0.88rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 0.88rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 0.88rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 0.88rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 0.88rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 0.88rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="search-wrap"><div id="algolia-search-input"></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-info"><div class="algolia-stats"></div><div class="algolia-poweredBy"></div></div></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.12",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
   );
-  document.addEventListener('DOMContentLoaded', function () {
-    window.lazyLoadInstance?.update();
-  });
-</script><script>
-  ctx.fancybox = {
-    selector: `.timenode p>img`,
-    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
-    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
-  };
-  var selector = '[data-fancybox]:not(.error)';
-  if (ctx.fancybox.selector) {
-    selector += `, ${ctx.fancybox.selector}`
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 hybcx 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="https://cdn.cbd.int/algoliasearch@4.18.0/dist/algoliasearch-lite.umd.js"></script><script src="https://cdn.cbd.int/instantsearch.js@4.60.0/dist/instantsearch.production.min.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+      appKey: 'iEFJUGMm2FY91n9ZG1gdKBSy',
+      avatar: 'mp',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
   }
-  var needFancybox = document.querySelectorAll(selector).length !== 0;
-  if (!needFancybox) {
-    const els = document.getElementsByClassName('ds-memos');
-    if (els != undefined && els.length > 0) {
-      needFancybox = true;
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
     }
   }
-  if (needFancybox) {
-    utils.css(ctx.fancybox.css);
-    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
-      Fancybox.bind(selector, {
-        hideScrollbar: false,
-        Thumbs: {
-          autoStart: false,
-        },
-        caption: (fancybox, slide) => {
-          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
         }
-      });
-    })
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
   }
-</script>
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    const swiper_api = document.getElementById('swiper-api');
-    if (swiper_api != undefined) {
-      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
-      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
-        const effect = swiper_api.getAttribute('effect') || '';
-        var swiper = new Swiper('.swiper#swiper-api', {
-          slidesPerView: 'auto',
-          spaceBetween: 8,
-          centeredSlides: true,
-          effect: effect,
-          rewind: true,
-          pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-          },
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
-        });
-      })
+
+  const getComment = () => {
+    const serverURL = 'https://7Sc5uZwc.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+        "X-LC-Key": 'iEFJUGMm2FY91n9ZG1gdKBSy',
+        "Content-Type": "application/json"
+      },
     }
-  });
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    window.codeElements = document.querySelectorAll('.code');
-    if (window.codeElements.length > 0) {
-      ctx.copycode = {
-        default_text: `Copy`,
-        success_text: `Copied`,
-        toast: `复制成功`,
-      };
-      utils.js('/js/plugins/copycode.js');
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
     }
-  });
-</script>
+  }
 
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><script src="/js/anzhiyu/right_click_menu.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
 
-<!-- inject -->
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
 
-</div></body></html>
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

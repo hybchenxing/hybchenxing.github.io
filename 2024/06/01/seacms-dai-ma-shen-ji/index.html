@@ -1,247 +1,312 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>SeaCMS代码审计 | hybcx</title><meta name="keywords" content="PHP代码审计"><meta name="author" content="hybcx,19815455497@163.com"><meta name="copyright" content="hybcx"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="SeaCMS代码审计"><meta name="application-name" content="SeaCMS代码审计"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="SeaCMS代码审计"><meta property="og:url" content="http://hybcx.xyz/2024/06/01/seacms-dai-ma-shen-ji/index.html"><meta property="og:site_name" content="hybcx"><meta property="og:description" content="0x01 前言 今天开始第二个代码审计SeaCMS，这里我选择了一个v10.1的版本，原因是找了几篇文章，发现这个版本的漏洞挺多，故此练习一下，还是先靠自己，以文章为辅，尽量自己审出来  如上图，算是搭建完成。 0x02 全局分析 我们按照上一次审计的思路，先分析全局  总体看了一下，发现inclu"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="hybcx"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="0x01 前言 今天开始第二个代码审计SeaCMS，这里我选择了一个v10.1的版本，原因是找了几篇文章，发现这个版本的漏洞挺多，故此练习一下，还是先靠自己，以文章为辅，尽量自己审出来  如上图，算是搭建完成。 0x02 全局分析 我们按照上一次审计的思路，先分析全局  总体看了一下，发现inclu"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://hybcx.xyz/2024/06/01/seacms-dai-ma-shen-ji/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?d98ea8480e5ec98a243adfc7bd46b93a";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  linkPageTop: {"enable":true,"title":"向✌们无限学习","addFriendPlaceholder":"昵称（请勿包含博客等字样）：\n网站地址（要求博客地址，请勿提交个人主页）：\n头像图片url（请提供尽可能清晰的图片，我会上传到我自己的图床）：\n描述：\n站点截图（可选）：\n"},
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: {"enable":true,"ck":"3JLPGIZJOJw6Nvu2","LingQueMonitorID":"3JLPOLHV5W6IAty5"},
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":null},
+  algolia: {"appId":"Z7A3XW4R2I","apiKey":"12db1ad54372045549ef465881c17e743","indexName":"my-hexo-blog","hits":{"per_page":6},"languages":{"input_placeholder":"输入关键词后按下回车查找","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"It has been","messageNext":"days since the last update, the content of the article may be outdated."},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    simplehomepage: false,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: hybcx","link":"链接: ","source":"来源: hybcx","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'hybcx',
+  title: 'SeaCMS代码审计',
+  postAI: '',
+  pageFillDescription: '0x01 前言, 0x02 全局分析, Index.php, Common.php, 后台页面, 0x03 漏洞审计, sql注入1, sql注入2, sql注入3, sql注入4, 后台RCE1, 后台RCE2, 后台RCE3, 后台RCE4, 0x04 参考文章, 0x05 总结前言今天开始第二个代码审计这里我选择了一个的版本原因是找了几篇文章发现这个版本的漏洞挺多故此练习一下还是先靠自己以文章为辅尽量自己审出来如上图算是搭建完成全局分析我们按照上一次审计的思路先分析全局总体看了一下发现这个目录下似乎是公共函数的存放地而是有关管理员的代码处理如上图所示前面就是加载相关文件然后获取一个类型变量随后是对某些全局变量的判断然后确定前置跳转最后调用函数也就是用来渲染前端的似乎没啥特殊的地方与之前不同的地方就是这里没有使用渲染并且入口页面写的很简洁然后分析一下该首页包含的文件开始部分依旧是定义常量包含相关文件然后还根据版本决定了等传参的值从哪获取紧接着下面的这些类似地方主要是先获取变量然后判断等全局数组的键值中是否会匹配到中的关键字这里的就是的进一步实现和改进也没啥大的区别下面这一部分是通过某些头信息来判断客户端是否是手机移动设备这个函数是用来过滤这些全局变量的下面这一部分是用来设置一些站点的相关路径以及目录最后这部分代码的目的是确保定时任务按计划执行使用锁文件防止任务重入并在任务执行后更新任务缓存关键步骤包括检查任务执行时间处理锁文件执行任务和更新任务计划后台页面看了半天感觉就是目录下的就是管理后台的地方其实在网站搭建好的时候就给我们路由了首先下面的页面就是用来判断用户然后决定应该是哪个文件然后就是普通的包含文件的代码接着分析刚开始的部分先是禁止爬虫包含相关文件然后创建安全码随后判断安装目录的安全性感觉暂时不必注意之后判断完当前用户的是合法的之后就进入后台登录的检测了这里在检测的时候调用了函数具体内容如下可以看到相当于白名单用户名和密码不在指定字符内就不会让你通过的登录成功的话会跟及你用户当前的信息进行更新后面的部分就是封装的一些函数用来获取一些关于当前用户的等信息当然这些信息都在查询数据库的时候就赋值给指定的变量了漏洞审计注入才发现这个版本的审计文章很少由于那些文章分析的漏洞都在后台中我也就直接来看后台了分析了一下发现这段代码很可疑前面的部分发现都经过了特殊字符的转义还有函数的强转导致无法注入但这里接受了一个传参并且没有进行过滤有可能可以操作这段代码先是进行了个编码处理不过没啥用随后我们跟进函数看到这里先是判断与数据库是否连接然后调用函数检查传入的语句是否合法随后的代码块进一步过滤其中的不合法字符同时确保回显的数据只有一条跟进函数如下图先是获取一些信息然后就是过滤的部分了前面的替换为了空可绕过后面的干脆就是去掉了某个字符而已这也是可以绕过的比如经过过滤后就是这个版本的文章实在是太少对于这个地方的漏洞我复现不出来首先我们知道这里的参数是存在注入的然后尝试跑参考文章是可以跑出来的但我尝试了次不会搞同时参考文章说道在进行过滤的时候都是使用的小写使用大写可以绕过但是在行对语句使用了处理不能够使用子查询所以此处只能注入出当前数据库还有一种情况就是我数据库这里对应的表中是空的导致跑不出来注入这里依旧没有复现出来说到底工具不会用到了上图会发现这个功能的参数是没有经过过滤的我们可以跟进这里面顾名思义就是删除评论缓存上图的与下面紧跟的对语句的处理差不多如下图所示看到语句不是空的话就进入下面但这里的语句安全检查默认是不开启也说明了没有任何过滤然后执行查询这也说明了调试的重要性要是纯看的话会认为这里是开启的这意味着我们可以进行注入但由于不会玩搞不出来就放一个文章成功的例子吧注入根据文章所说在后台目录的中存在注入这里我们审计的时候感觉有点垃圾发现下图的地方这三个参数是直接接受的传参并没有进行过滤可能存在注入接下来跟踪这些变量看谁调用了他们第一个参数如下图会经过函数的处理这意味着我们的输入的内容只能是参数否则会报错无法利用同样的第二个参数也是如此无法利用第三个参数是可以利用的如下图所示这里该参数参与了这个插入的语句也是没有做出任何过滤这里我们继续跟进可以看到先是做了相关初始化然后判断参数是否为空继续跟进这里就是做一个替换没啥用继续看下面会将参数转化为常规变量随后调用进行语句的安全检查我们调试看一下是否开启这里调试环境出问题了搞了一天没搞好就先跳过去后面去虚拟机搞了当然这里是默认没有进行语句的检查的我这里依旧是跑不出来的语句不会玩放个截图算了注入这个地方的手法没见过在后台的中并且说明一下如果经过了的处理就不可能绕过了本地测试如下可以看到这里的输出为我们后面的内容也就无了但是这里的参数是直接拼接过来的并没有经过任何函数的处理我们跟进函数看到这里进行了的检查不过依照文章所说这里是能绕过的这里说是得用正则绕过来替换达到延时注入的效果戏剧性的是我依旧复现不出来麻了暂时学个思路吧由上面能知道这里没有做出有效的过滤我们看一下文章如何绕过的根据路由我们先写一个初始的无效正常的话没有过滤我们可以通过函数截断来进行延时注入但是下图可以看到采用了正则来检测绕不过去但是他对于关键词却没有过滤完全以前听过一种思路就是通过执行超长语句让数据库不能快速处理导致处理时间延长而形成的延时注入而这里我也遇到了先给出文章的使用正则注入语句代替正则注入语句为下方代码其中最后的的可以为任意的字符代替后编码形成最终的这里改一下他这里是判断的我换成了如上图可以看到函数的多少决定的处理的时长我们接下来分析上述原理通过或构造长字符串加以计算量大的通过的参数可以控制延时长短正则语法匹配任意单个字符匹配个或多个前一个得到的字符匹配任意一个内的字符可匹配空串或者由任意个和组成的字符串匹配开头如匹配以或者开头的字符串匹配结尾如匹配以结尾的字符串匹配前一个字符反复次用字符串对进行右边填补直至它的长度达到个字符长度然后返回如果的长度长于那么它将被截除到个字符复制字符串次这样分析的话上述语句的含义就是用过将字符拼接次然后利用匹配正则其中正则是这样的先拼接次字符串然后通过将其与字符组合拼接最终组合为这样的类似的正则表达式这个表达式会去匹配一个字符后面跟任意数量的任意字符但是最终要以结尾因此如果按照上述语句最终返回结果是但是这正是我们要的结果我们可以测试一下如下图会发现匹配成功的话计算时间远小于匹配失败的计算时间为了达到演示效果我们的最末尾字符不可为接下来可以通过来进行爆破一下数据库名然后分别是指字典的话就简单设置设置个英文字母即可然后开始爆破最后查看响应长度如下图所示按顺序拼接一下不难发现数据库名称就是后台定位到后台的成功保存设置可以看到这里接受两个传参但是没有任何过滤便写入文件中我们可以通过手动闭合和注释来写入木马这里就先写入上图发包成功后我们访问对应的文件发现成功写入后台这里的与上面的漏洞点相同如下图可以看到没有进行任何过滤直接对进行闭合拼接即可如下图为链接由于我看之前的都进行了编码我这里就跟随了访问发现注入成功后台依旧同上述思路没有进行过滤后台由于上述都是同一个类型的我就想着直接全局搜索没想到发现更多的同类型的这里能看到还存在众多注入点由于都是同一类型不赘述了再挑一个复现即可参考文章代码审计实战后台注入漏洞总结这一个审计质量很差尝试了这两个下来给我的感觉还是有点茫然首先要求具有良好的代码功底这点我认为我自己就有不足对于学过的语言只是懂点皮毛也就是说接触过的语言只是了解一个语法基础对于进阶的东西了解的很少也忘了对于这一不足我认为有必要在大学毕业之前弥补对于常用和热门语言需要懂得开发知识同时具备基础开发能力不然真就是一个连脚本小子都不如的了同时在审计这些的时候总是在看了一会儿代码的时候认为没有思路就直接看了文章那得到的回报就有所降低不过懂得了部分代审的思路这需要平时对于这一类文章的积累总结了另外代审也是一个需要耐心的过程我似乎并不能静下心来投入进去总是急于要成果这是导致我审计质量低下的一个原因最后仍然需要持续学习耐心还是有用的',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-06-11 13:47:48',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
 
-<!DOCTYPE html><html lang="zh-CN">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
-  
-  <meta name="generator" content="Hexo 7.2.0">
-  <meta http-equiv='x-dns-prefetch-control' content='on' />
-  
-  <meta name="renderer" content="webkit">
-  <meta name="force-rendering" content="webkit">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-  <meta name="HandheldFriendly" content="True" >
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
-  
-  <title>SeaCMS代码审计 - hybcx's blog</title>
-
-  
-    <meta name="description" content="0x01 前言 今天开始第二个代码审计SeaCMS，这里我选择了一个v10.1的版本，原因是找了几篇文章，发现这个版本的漏洞挺多，故此练习一下，还是先靠自己，以文章为辅，尽量自己审出来  如上图，算是搭建完成。 0x02 全局分析 我们按照上一次审计的思路，先分析全局  总体看了一下，发现include这个目录下似乎是公共函数的存放地，而tutpb3是有关管理员admin的代码处理。 Index.">
-<meta property="og:type" content="article">
-<meta property="og:title" content="SeaCMS代码审计">
-<meta property="og:url" content="http://hybcx.xyz/2024/06/01/seacms-dai-ma-shen-ji/index.html">
-<meta property="og:site_name" content="hybcx&#39;s blog">
-<meta property="og:description" content="0x01 前言 今天开始第二个代码审计SeaCMS，这里我选择了一个v10.1的版本，原因是找了几篇文章，发现这个版本的漏洞挺多，故此练习一下，还是先靠自己，以文章为辅，尽量自己审出来  如上图，算是搭建完成。 0x02 全局分析 我们按照上一次审计的思路，先分析全局  总体看了一下，发现include这个目录下似乎是公共函数的存放地，而tutpb3是有关管理员admin的代码处理。 Index.">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240602192102237.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240602192434684.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603015712430.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603021353673.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603021445823.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191304785.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191547082.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191752956.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603192449561.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603194826223.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603195149726.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603200021831.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203355791.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203732668.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203858244.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603211505092.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220045721.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220233610.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603215615181.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603215724402.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220559603.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604194436744.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195005701.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195151036.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195447020.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195657721.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195742211.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605123928192.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125223091.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125717566.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125723646.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605130053348.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605135115786.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605135003933.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606172402796.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606173832330.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606174247866.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607202651295.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607202726433.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204456560.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204350132.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204420916.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205253774.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205205872.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205235176.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210350599.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210230544.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210302142.png">
-<meta property="article:published_time" content="2024-06-01T14:38:30.000Z">
-<meta property="article:modified_time" content="2024-06-11T05:47:48.651Z">
-<meta property="article:author" content="hybcx">
-<meta property="article:tag" content="PHP代码审计">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240602192102237.png">
-  
-  
-  
-  <meta name="keywords" content="PHP代码审计">
-
-  <!-- feed -->
-  
-    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
-  
-
-  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
-
-  
-    <link rel="shortcut icon" href="/medias/logo.png">
-  
-
-  
-    
-<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
-
-  
-
-  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
-
-<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
-</head>
-<body>
-
-<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
-
-
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
-
-<div class="nav-area">
-<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
-
-
-<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
-</div>
-<div class="widgets">
-
-
-<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/07/25/thm-windows-api-jie-shao/"><span class="title">THM-Windows-API介绍</span></a><a class="item title" href="/2024/07/24/thm-windows-nei-he/"><span class="title">THM-Windows内核</span></a><a class="item title" href="/2024/07/20/thm-shu-ju-xie-lu/"><span class="title">THM-数据泄露</span></a><a class="item title" href="/2024/07/21/linux-ti-quan-zong-jie/"><span class="title">Linux提权总结</span></a><a class="item title" href="/2024/07/16/thm-enumeration/"><span class="title">THM-Enumeration</span></a><a class="item title" href="/2024/07/16/thm-dang-qian-tai-shi/"><span class="title">THM-当前态势</span></a><a class="item title" href="/2024/02/10/thm-linux-quan-xian-ti-sheng/"><span class="title">THM-Linux权限提升</span></a><a class="item title" href="/2024/02/14/thm-basic-pentesting/"><span class="title">THM-Basic Pentesting</span></a><a class="item title" href="/2024/07/20/linux-ti-quan-xue-xi-yi/"><span class="title">Linux提权学习之rbash逃逸</span></a><a class="item title" href="/2023/08/07/qian-xi-mu-lu-chuan-yue/"><span class="title">浅析目录穿越</span></a></div></widget>
-</div>
-<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
-</div></aside><div class="l_main" id="main">
-
-
-
-
-
-<div class="article banner top">
-  <div class="content">
-    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">PHP代码审计</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-06-01T14:38:30.000Z">2024-06-01</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-06-11T05:47:48.651Z">2024-06-11</time></span></div></div></div>
-    
-    <div class="bottom only-title">
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
       
-      <div class="text-area">
-        <h1 class="text title"><span>SeaCMS代码审计</span></h1>
-        
-      </div>
-    </div>
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
     
-  </div>
-  </div><article class="md-text content"><h1 id="0x01-前言">0x01 前言</h1>
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">hybcx</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 1.05rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 1.05rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 1.05rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 1.05rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 1.05rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 1.05rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 1.05rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 1.05rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 1.05rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 1.05rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 1.05rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span><a class="card-more-btn" href="/archives/" title="查看更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/08/"><span class="card-archive-list-date">八月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">16</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/06/"><span class="card-archive-list-date">六月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">9</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/05/"><span class="card-archive-list-date">五月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/04/"><span class="card-archive-list-date">四月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">5</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/03/"><span class="card-archive-list-date">三月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">18</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/02/"><span class="card-archive-list-date">二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">12</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/01/"><span class="card-archive-list-date">一月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" itemprop="url">PHP代码审计</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>PHP代码审计</span></a></span></div></div><h1 class="post-title" itemprop="name headline">SeaCMS代码审计</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2024-06-01T14:38:30.000Z" title="发表于 2024-06-01 22:38:30">2024-06-01</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2024-06-11T05:47:48.651Z" title="更新于 2024-06-11 13:47:48">2024-06-11</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">3.9k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>13分钟</span></span><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="SeaCMS代码审计"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为太原"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>太原</span><span class="post-meta-separator"></span><span class="post-meta-commentcount"><i class="anzhiyufont anzhiyu-icon-comments post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2024/06/01/seacms-dai-ma-shen-ji/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2024/06/01/seacms-dai-ma-shen-ji/" itemprop="commentCount"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></a></span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://hybcx.xyz/2024/06/01/seacms-dai-ma-shen-ji/"><header><a class="post-meta-categories" href="/categories/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" itemprop="url">PHP代码审计</a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" tabindex="-1" itemprop="url">PHP代码审计</a><h1 id="CrawlerTitle" itemprop="name headline">SeaCMS代码审计</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">hybcx</span><time itemprop="dateCreated datePublished" datetime="2024-06-01T14:38:30.000Z" title="发表于 2024-06-01 22:38:30">2024-06-01</time><time itemprop="dateCreated datePublished" datetime="2024-06-11T05:47:48.651Z" title="更新于 2024-06-11 13:47:48">2024-06-11</time></header><h1 id="0x01-前言">0x01 前言</h1>
 <p>今天开始第二个代码审计SeaCMS，这里我选择了一个v10.1的版本，原因是找了几篇文章，发现这个版本的漏洞挺多，故此练习一下，还是先靠自己，以文章为辅，尽量自己审出来</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240602192102237.png" alt="image-20240602192102237"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240602192102237.png" alt="image-20240602192102237"></p>
 <p>如上图，算是搭建完成。</p>
 <h1 id="0x02-全局分析">0x02 全局分析</h1>
 <p>我们按照上一次审计的思路，先分析全局</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240602192434684.png" alt="image-20240602192434684"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240602192434684.png" alt="image-20240602192434684"></p>
 <p>总体看了一下，发现include这个目录下似乎是公共函数的存放地，而tutpb3是有关管理员admin的代码处理。</p>
 <h2 id="indexphp">Index.php</h2>
 <p>index.php</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603015712430.png" alt="image-20240603015712430"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603015712430.png" alt="image-20240603015712430"></p>
 <p>如上图所示，前面就是加载相关文件，然后获取一个SERVER类型变量，随后是对某些全局变量的判断，然后确定前置跳转，最后调用echoIndex函数，也就是用来渲染前端的，似乎没啥特殊的地方。与之前BlueCMS不同的地方就是，这里没有使用smaryt渲染。</p>
 <p>并且入口页面SeaCMS写的很简洁。然后分析一下该首页包含的include/common.php文件</p>
 <h2 id="commonphp">Common.php</h2>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603021353673.png" alt="image-20240603021353673"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603021353673.png" alt="image-20240603021353673"></p>
 <p>开始部分依旧是定义常量，包含相关文件，然后还根据PHP版本，决定了GET、POST等传参的值从哪获取</p>
 <p>紧接着下面的这些类似地方，主要是先获取SERVER_NAME变量，然后判断GET、POST、REQUEST等全局数组的键值中，是否会匹配到m_eregi中的关键字。这里的m_eregi就是preg_match的进一步实现和改进</p>
 <p>也没啥大的区别</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603021445823.png" alt="image-20240603021445823"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603021445823.png" alt="image-20240603021445823"></p>
 <p>下面这一部分是通过某些HTTP头信息来判断客户端是否是手机移动设备</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191304785.png" alt="image-20240603191304785"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191304785.png" alt="image-20240603191304785"></p>
 <p>这个_RunMagicQuotes函数是用来过滤<code>_GET','_POST','_COOKIE','_SERVER'</code>这些全局变量的</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191547082.png" alt="image-20240603191547082"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191547082.png" alt="image-20240603191547082"></p>
 <p>下面这一部分是用来设置一些站点的相关路径以及目录</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191752956.png" alt="image-20240603191752956"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603191752956.png" alt="image-20240603191752956"></p>
 <p>最后这部分代码的目的是确保定时任务按计划执行，使用锁文件防止任务重入，并在任务执行后更新任务缓存。关键步骤包括检查任务执行时间、处理锁文件、执行任务和更新任务计划。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603192449561.png" alt="image-20240603192449561"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603192449561.png" alt="image-20240603192449561"></p>
 <h2 id="后台页面">后台页面</h2>
 <p>看了半天，感觉就是tutp3目录下的就是管理后台的地方。（其实在网站搭建好的时候就给我们路由了）</p>
 <p>首先下面的index.php页面就是用来判断用户id，然后决定myIcoFile应该是哪个文件，然后就是普通的包含文件的代码</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603194826223.png" alt="image-20240603194826223"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603194826223.png" alt="image-20240603194826223"></p>
 <p>接着分析login.php，刚开始的部分：先是禁止爬虫，包含相关文件，然后创建session安全码，随后判断安装目录的安全性，感觉暂时不必注意</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603195149726.png" alt="image-20240603195149726"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603195149726.png" alt="image-20240603195149726"></p>
 <p>之后判断完当前用户的IP是合法的之后，就进入后台登录的检测了，这里在检测的时候，调用了cheuser函数，具体内容如下</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603200021831.png" alt="image-20240603200021831"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603200021831.png" alt="image-20240603200021831"></p>
 <p>可以看到相当于白名单，用户名和密码不在指定字符内，就不会让你通过的。登录成功的话，会跟及你用户当前的信息进行update更新</p>
 <p>后面的部分就是封装的一些函数，用来获取一些关于当前用户的id，groupid等信息。当然这些信息，都在查询数据库的时候就赋值给指定的变量了</p>
 <h1 id="0x03-漏洞审计">0x03 漏洞审计</h1>
 <h2 id="sql注入1">sql注入1</h2>
 <p>才发现这个版本的审计文章很少。。。由于那些文章分析的漏洞都在后台中，我也就直接来看后台了</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203355791.png" alt="image-20240603203355791"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203355791.png" alt="image-20240603203355791"></p>
 <p>分析了一下，发现这段代码很可疑，前面的部分，发现都经过了特殊字符的转义，还有intval函数的强转，导致无法sql注入，但这里接受了一个get传参，并且没有进行过滤，有可能可以操作</p>
 <p>这段代码先是进行了个编码处理，不过没啥用，随后我们跟进getone函数，看到这里先是判断与数据库是否连接，然后调用checksql函数检查传入的sql语句是否合法，随后的if代码块，进一步过滤其中的不合法字符，同时确保回显的数据只有一条</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203732668.png" alt="image-20240603203732668"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203732668.png" alt="image-20240603203732668"></p>
 <p>跟进checksql函数，如下图，先是获取一些信息，然后就是过滤的部分了，前面的替换为了空（可绕过），后面的干脆就是去掉了某个字符而已，这也是可以绕过的</p>
 <p>比如sleepp，经过过滤后就是sleep</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203858244.png" alt="image-20240603203858244"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603203858244.png" alt="image-20240603203858244"></p>
 <p>这个版本的文章实在是太少，对于这个地方的漏洞，我复现不出来。。。。</p>
 <p>首先我们知道这里的v_name参数是存在sql注入的，然后尝试sqlmap跑，参考文章是可以跑出来的，但我尝试了n次不会搞，同时参考文章说道：</p>
 <pre><code class="hljs scss">在进行过滤的时候都是使用的小写，使用大写可以绕过，但是在<span class="hljs-number">623</span>行对sql语句使用了strtolower处理，不能够使用select子查询，所以此处只能注入出当前数据库</code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603211505092.png" alt="image-20240603211505092"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603211505092.png" alt="image-20240603211505092"></p>
 <p>还有一种情况就是我数据库这里对应的表中是空的，导致sqlmap跑不出来。。。</p>
 <h2 id="sql注入2">sql注入2</h2>
 <p>这里依旧没有复现出来，说到底，sqlmap工具不会用。。。。。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220045721.png" alt="image-20240603220045721"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220045721.png" alt="image-20240603220045721"></p>
 <p>到了上图会发现这个功能的参数e_id是没有经过过滤的，我们可以跟进delcommentcache，这里面顾名思义就是删除评论缓存</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220233610.png" alt="image-20240603220233610"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220233610.png" alt="image-20240603220233610"></p>
 <p>上图的Execute与下面紧跟的ExecuteNoneQuery对sql语句的处理差不多，如下图所示，看到sql语句不是空的话，就进入下面，但这里的sql语句safecheck安全检查默认是false不开启，也说明了没有任何过滤</p>
 <p>然后执行sql查询</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603215615181.png" alt="image-20240603215615181"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603215724402.png" alt="image-20240603215724402"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603215615181.png" alt="image-20240603215615181"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603215724402.png" alt="image-20240603215724402"></p>
 <p>这也说明了调试的重要性，要是纯看的话，会认为这里是开启的。</p>
 <p>这意味着我们可以进行sql注入，但由于sqlmap不会玩，搞不出来。。。。就放一个文章成功的例子吧</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220559603.png" alt="image-20240603220559603"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240603220559603.png" alt="image-20240603220559603"></p>
 <h2 id="sql注入3">sql注入3</h2>
 <p>根据文章所说，在后台目录的admin_video.php中存在sql注入，这里我们审计的时候（感觉seay有点垃圾），发现下图的地方，这三个参数是直接接受的传参，并没有进行过滤，可能存在sql注入，接下来跟踪这些变量，看谁调用了他们</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604194436744.png" alt="image-20240604194436744"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604194436744.png" alt="image-20240604194436744"></p>
 <p>第一个参数，如下图，会经过implode函数的处理，这意味着我们的输入的内容只能是参数，否则会报错，无法利用</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195005701.png" alt="image-20240604195005701"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195005701.png" alt="image-20240604195005701"></p>
 <p>同样的第二个参数也是如此，无法利用</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195151036.png" alt="image-20240604195151036"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195151036.png" alt="image-20240604195151036"></p>
 <p>第三个参数是可以利用的，如下图所示，这里该参数参与了这个insert插入的sql语句，也是没有做出任何过滤。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195447020.png" alt="image-20240604195447020"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195447020.png" alt="image-20240604195447020"></p>
 <p>这里我们继续跟进ExecuteNoneQuery，可以看到，先是做了相关初始化，然后判断sql参数是否为空</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195657721.png" alt="image-20240604195657721"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195657721.png" alt="image-20240604195657721"></p>
 <p>继续跟进SetQuery，这里就是做一个替换，没啥用</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195742211.png" alt="image-20240604195742211"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240604195742211.png" alt="image-20240604195742211"></p>
 <p>继续看下面，会将参数parameters，转化为常规变量，，随后调用CheckSql进行SQL语句的安全检查，我们调试看一下是否开启（这里调试环境出问题了，搞了一天没搞好，就先跳过去，后面去虚拟机搞了）</p>
 <p>当然这里是默认没有进行sql语句的检查的。我这里依旧是跑不出来，sqlmap的语句不会玩。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605123928192.png" alt="image-20240605123928192"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605123928192.png" alt="image-20240605123928192"></p>
 <p>放个截图算了</p>
 <h2 id="sql注入4">sql注入4</h2>
 <p>这个地方的手法，没见过。在后台的<strong>admin_members_groups.php</strong>中</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125223091.png" alt="image-20240605125223091"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125223091.png" alt="image-20240605125223091"></p>
 <p>并且说明一下，如果id经过了intval的处理，就不可能绕过了，本地测试如下</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125717566.png" alt="image-20240605125717566"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125723646.png" alt="image-20240605125723646"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125717566.png" alt="image-20240605125717566"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605125723646.png" alt="image-20240605125723646"></p>
 <p>可以看到这里的输出为2，我们后面的内容也就无了，但是这里的id参数是直接拼接过来的，并没有经过任何函数的处理，我们跟进getone函数</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605130053348.png" alt="image-20240605130053348"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605130053348.png" alt="image-20240605130053348"></p>
 <p>看到这里进行了checksql的检查，不过依照文章所说，这里是能绕过的，这里说是得用RLIKE正则绕过，来替换sleep(5)达到延时注入的效果</p>
 <p>tips：戏剧性的是，我依旧复现不出来。。。。。。麻了，暂时学个思路吧</p>
 <p>由上面能知道，这里没有做出有效的过滤，我们看一下文章如何绕过的，根据路由，我们先写一个初始的payload</p>
 <pre><code class="hljs scss">http://<span class="hljs-number">127.0</span>.<span class="hljs-number">0.1</span>/tutpb3/admin_members_group.php?action=edit&amp;id=<span class="hljs-number">2</span> and <span class="hljs-built_in">if</span>(<span class="hljs-built_in">mid</span>(<span class="hljs-built_in">database</span>(),<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)=<span class="hljs-string">'a'</span>,<span class="hljs-built_in">sleep</span>(<span class="hljs-number">5</span>),<span class="hljs-number">1</span>)	#sleep无效</code></pre>
 <p>正常的话，没有过滤，我们可以通过mid函数截断来进行延时注入，但是下图可以看到，采用了正则来检测，绕不过去，但是他对于关键词却没有过滤完全</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605135115786.png" alt="image-20240605135115786"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605135115786.png" alt="image-20240605135115786"></p>
 <p>以前听过一种思路就是通过执行超长sql语句，让mysql数据库不能快速处理，导致处理时间延长而形成的延时注入，而这里我也遇到了</p>
 <p>先给出文章的payload</p>
 <ul>
@@ -257,7 +322,7 @@
 <pre><code class="hljs scss">http://<span class="hljs-number">192.168</span>.<span class="hljs-number">91.142</span>/kk4x47/admin_members_group.php?action=edit&amp;id=<span class="hljs-number">2%</span><span class="hljs-number">20</span>and%<span class="hljs-number">20</span><span class="hljs-built_in">if</span>(<span class="hljs-built_in">mid</span>(<span class="hljs-built_in">user</span>()%<span class="hljs-number">2</span>c1%<span class="hljs-number">2</span>c1)%<span class="hljs-number">3</span>d%<span class="hljs-number">27s</span>%<span class="hljs-number">27%</span><span class="hljs-number">2</span><span class="hljs-built_in">cconcat</span>(<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>)%<span class="hljs-number">2</span><span class="hljs-built_in">crpad</span>(<span class="hljs-number">1%</span><span class="hljs-number">2</span>c999999%<span class="hljs-number">2</span>c%<span class="hljs-number">27</span>a%<span class="hljs-number">27</span>))%<span class="hljs-number">20</span>rlike%<span class="hljs-number">20%</span><span class="hljs-number">27</span>(a.*)%<span class="hljs-number">2</span><span class="hljs-built_in">b</span>(a.*)%<span class="hljs-number">2</span><span class="hljs-built_in">b</span>(a.*)%<span class="hljs-number">2</span><span class="hljs-built_in">b</span>(a.*)%<span class="hljs-number">2</span><span class="hljs-built_in">b</span>(a.*)%<span class="hljs-number">2</span><span class="hljs-built_in">b</span>(a.*)%<span class="hljs-number">2</span><span class="hljs-built_in">b</span>(a.*)%<span class="hljs-number">2</span>bsuibianxiema%<span class="hljs-number">27%</span><span class="hljs-number">2</span>c1)</code></pre>
 <p>这里改一下，他这里是判断的user，我换成了database()：seacms</p>
 <pre><code class="hljs scss">http://<span class="hljs-number">192.168</span>.<span class="hljs-number">91.142</span>/kk4x47/admin_members_group.php?action=edit&amp;id=<span class="hljs-number">2</span> and <span class="hljs-built_in">if</span>(<span class="hljs-built_in">mid</span>(<span class="hljs-built_in">database</span>(),<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)=<span class="hljs-string">'s'</span>,<span class="hljs-built_in">concat</span>(<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>),<span class="hljs-built_in">rpad</span>(<span class="hljs-number">1</span>,<span class="hljs-number">999999</span>,<span class="hljs-string">'a'</span>)) rlike <span class="hljs-string">'(a.*)+(a.*)+(a.*)+(a.*)+(a.*)+(a.*)+(a.*)+b'</span>,<span class="hljs-number">1</span>)</code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605135003933.png" alt="image-20240605135003933"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240605135003933.png" alt="image-20240605135003933"></p>
 <p>如上图，可以看到rpad函数的多少，决定的mysql处理的时长，我们接下来分析上述payload原理</p>
 <p>通过<code>rpad</code>或<code>repeat</code>构造长字符串，加以计算量大的pattern，通过repeat的参数可以控制延时长短。</p>
 <pre><code class="hljs scss">select <span class="hljs-built_in">rpad</span>('a',<span class="hljs-number">4999999</span>,'a') RLIKE <span class="hljs-built_in">concat</span>(repeat('(a.*)+',<span class="hljs-number">30</span>),'<span class="hljs-selector-tag">b</span>');
@@ -279,11 +344,11 @@ $ : 匹配结尾，如s$匹配以s结尾的字符串。
 <pre><code class="hljs scss">先拼接<span class="hljs-number">30</span>次字符串"(a.*)+"，然后通过concat，将其与字符<span class="hljs-selector-tag">b</span>组合拼接。最终组合为这样的'(a.*)+(a.*)+(a.*)+(a.*)+(a.*)+<span class="hljs-selector-tag">b</span>'类似的正则表达式</code></pre>
 <p>这个表达式会去匹配一个字符a，后面跟任意数量的任意字符，但是最终要以b结尾，因此，如果按照上述sql语句，最终返回结果是false，但是这正是我们要的结果。</p>
 <p>我们可以测试一下，如下图，会发现，匹配成功的话，计算时间远小于匹配失败的计算时间，为了达到演示效果，我们的最末尾字符不可为a。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606172402796.png" alt="image-20240606172402796"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606172402796.png" alt="image-20240606172402796"></p>
 <p>接下来可以通过bp来进行爆破一下数据库名</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606173832330.png" alt="image-20240606173832330"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606173832330.png" alt="image-20240606173832330"></p>
 <p>然后分别是指字典，payload1的话，就简单设置1-9；payload2设置26个英文字母即可，然后开始爆破，最后查看响应长度，如下图所示，按顺序拼接一下，不难发现数据库名称就是seacms。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606174247866.png" alt="image-20240606174247866"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240606174247866.png" alt="image-20240606174247866"></p>
 <h2 id="后台rce1">后台RCE1</h2>
 <p>定位到后台的/admin_ip.php</p>
 <pre><code class="hljs php"><span class="hljs-meta">&lt;?php</span>
@@ -311,30 +376,30 @@ $ : 匹配结尾，如s$匹配以s结尾的字符串。
 
 <span class="hljs-meta">?&gt;</span></code></pre>
 <p>可以看到，这里接受两个传参，但是没有任何过滤便写入文件中，我们可以通过手动闭合和注释来写入木马，这里就先写入phpinfo；</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607202651295.png" alt="image-20240607202651295"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607202651295.png" alt="image-20240607202651295"></p>
 <p>上图发包成功后，我们访问对应的文件，发现成功写入。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607202726433.png" alt="image-20240607202726433"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607202726433.png" alt="image-20240607202726433"></p>
 <h2 id="后台rce2">后台RCE2</h2>
 <p>这里的与上面的漏洞点相同，如下图。可以看到没有进行任何过滤，直接对msg5b进行闭合拼接即可</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204456560.png" alt="image-20240607204456560"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204456560.png" alt="image-20240607204456560"></p>
 <p>如下图，payload为：</p>
 <pre><code class="hljs scss">msg5b=&lt;<span class="hljs-selector-tag">a</span> href='https://baidu.com<span class="hljs-string">'&gt;链接&lt;/a&gt;");phpinfo();//</span></code></pre>
 <p>由于我看之前的都进行了url编码，我这里就跟随了</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204350132.png" alt="image-20240607204350132"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204350132.png" alt="image-20240607204350132"></p>
 <p>访问，发现注入成功。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204420916.png" alt="image-20240607204420916"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607204420916.png" alt="image-20240607204420916"></p>
 <h2 id="后台rce3">后台RCE3</h2>
 <p>依旧同上述思路</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205253774.png" alt="image-20240607205253774"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205253774.png" alt="image-20240607205253774"></p>
 <p>没有进行过滤</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205205872.png" alt="image-20240607205205872"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205235176.png" alt="image-20240607205235176"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205205872.png" alt="image-20240607205205872"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607205235176.png" alt="image-20240607205235176"></p>
 <h2 id="后台rce4">后台RCE4</h2>
 <p>由于上述都是同一个类型的，我就想着直接全局搜索，没想到发现更多的同类型的RCE</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210350599.png" alt="image-20240607210350599"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210350599.png" alt="image-20240607210350599"></p>
 <p>这里能看到还存在众多注入点，由于都是同一类型，不赘述了，再挑一个复现即可</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210230544.png" alt="image-20240607210230544"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210302142.png" alt="image-20240607210302142"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210230544.png" alt="image-20240607210230544"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CSeaCMS%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%5Cimage-20240607210302142.png" alt="image-20240607210302142"></p>
 <h1 id="0x04-参考文章">0x04 参考文章</h1>
 <p><a target="_blank" rel="noopener" href="https://www.freebuf.com/vuls/241106.html">SeaCMS v10.1代码审计实战</a></p>
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/jinyanshenxing/p/15805060.html">CVE-2020-21378 SeaCMS v10.1 后台SQL注入漏洞</a></p>
@@ -343,439 +408,270 @@ $ : 匹配结尾，如s$匹配以s结尾的字符串。
 <p>首先要求具有良好的代码功底，这点我认为我自己就有不足，对于学过的语言，只是懂点皮毛，也就是说，接触过的语言，只是了解一个语法基础，对于进阶的东西，了解的很少，也忘了。对于这一不足，我认为有必要在大学毕业之前弥补，对于常用和热门语言，需要懂得开发知识，同时具备基础开发能力。不然真就是一个连脚本小子都不如的fw了。</p>
 <p>同时，在审计这些CMS的时候，总是在看了一会儿代码的时候，认为没有思路，就直接看了文章，那得到的回报就有所降低，不过懂得了部分代审的思路，这需要平时对于这一类文章的积累总结了。另外代审也是一个需要耐心的过程，我似乎并不能静下心来投入进去，总是急于要成果，这是导致我审计质量低下的一个原因。</p>
 <p>最后，仍然需要持续学习，耐心，seay还是有用的。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">hybcx</div><div class="post-copyright__author_desc">只需热爱, 未来可期！</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://hybcx.xyz/2024/06/01/seacms-dai-ma-shen-ji/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://hybcx.xyz/2024/06/01/seacms-dai-ma-shen-ji/')">SeaCMS代码审计</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://hybcx.xyz/2024/06/01/seacms-dai-ma-shen-ji/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=SeaCMS代码审计&amp;url=http://hybcx.xyz/2024/06/01/seacms-dai-ma-shen-ji/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://hybcx.xyz" target="_blank">hybcx</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>PHP代码审计<span class="tagsPageCount">2</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/06/01/ju-zhen-bei/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">矩阵杯</div></div></a></div><div class="next-post pull-right"><a href="/2024/06/09/thm-enumerating-active-directory/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">THM-Enumerating Active Directory</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2024/05/29/bluecms-dai-ma-shen-ji/" title="BlueCMS代码审计"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-05-29</div><div class="title">BlueCMS代码审计</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">这有关于<b style="color:#fff">产品、设计、开发</b>相关的问题和看法，还有<b style="color:#fff">文章翻译</b>和<b style="color:#fff">分享</b>。</div><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">相信你可以在这里找到对你有用的<b style="color:#fff">知识</b>和<b style="color:#fff">教程</b>。</div></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/about"><h1 class="author-info__name">hybcx</h1><div class="author-info__desc">只需热爱, 未来可期！</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/hybchenxing" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a><a class="social-icon faa-parent animated-hover" href="https://space.bilibili.com/1761635300" target="_blank" title="Email"><i class="anzhiyufont anzhiyu-icon-bilibili"></i></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E5%85%A8%E5%B1%80%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">0x02 全局分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#indexphp"><span class="toc-number">2.1.</span> <span class="toc-text">Index.php</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#commonphp"><span class="toc-number">2.2.</span> <span class="toc-text">Common.php</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0%E9%A1%B5%E9%9D%A2"><span class="toc-number">2.3.</span> <span class="toc-text">后台页面</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E6%BC%8F%E6%B4%9E%E5%AE%A1%E8%AE%A1"><span class="toc-number">3.</span> <span class="toc-text">0x03 漏洞审计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A51"><span class="toc-number">3.1.</span> <span class="toc-text">sql注入1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A52"><span class="toc-number">3.2.</span> <span class="toc-text">sql注入2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A53"><span class="toc-number">3.3.</span> <span class="toc-text">sql注入3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A54"><span class="toc-number">3.4.</span> <span class="toc-text">sql注入4</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0rce1"><span class="toc-number">3.5.</span> <span class="toc-text">后台RCE1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0rce2"><span class="toc-number">3.6.</span> <span class="toc-text">后台RCE2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0rce3"><span class="toc-number">3.7.</span> <span class="toc-text">后台RCE3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0rce4"><span class="toc-number">3.8.</span> <span class="toc-text">后台RCE4</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-number">4.</span> <span class="toc-text">0x04 参考文章</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">0x05 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-yun-xing-shi-gui-bi-jian-ce/" title="THM-运行时规避检测">THM-运行时规避检测</a><time datetime="2024-08-08T14:19:16.000Z" title="发表于 2024-08-08 22:19:16">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC">THM-ByPass_UAC</a><time datetime="2024-08-08T07:36:41.000Z" title="发表于 2024-08-08 15:36:41">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/07/thm-qian-ming-gui-bi/" title="THM-签名规避">THM-签名规避</a><time datetime="2024-08-07T09:11:33.000Z" title="发表于 2024-08-07 17:11:33">2024-08-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/05/windows-ti-quan-zong-jie/" title="Windows提权总结">Windows提权总结</a><time datetime="2024-08-05T02:59:37.000Z" title="发表于 2024-08-05 10:59:37">2024-08-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/02/thm-dai-ma-hun-yao-yuan-li/" title="THM-代码混淆原理">THM-代码混淆原理</a><time datetime="2024-08-02T01:46:10.000Z" title="发表于 2024-08-02 09:46:10">2024-08-02</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2024 By <a class="footer-bar-link" href="/" title="hybcx" target="_blank">hybcx</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">199</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">30</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 0.88rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 0.88rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 0.88rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 0.88rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 0.88rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 0.88rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 0.88rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 0.88rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 0.88rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 0.88rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 0.88rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="search-wrap"><div id="algolia-search-input"></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-info"><div class="algolia-stats"></div><div class="algolia-poweredBy"></div></div></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.12",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
 
-<div class="article-footer fs14">
-    <section id="license">
-      <div class="header"><span>许可协议</span></div>
-      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
-</div>
-    </section>
-    </div>
-</article>
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/06/09/thm-enumerating-active-directory/">THM-Enumerating Active Directory</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/06/01/ju-zhen-bei/">矩阵杯</a></div></section></div>
-
-
-
-
-  <div class="related-wrap md-text" id="comments">
-    <section class='header cmt-title cap theme'>
-      <p>感谢大佬们的不吝赐教！</p>
-
-    </section>
-    <section class='body cmt-body twikoo'>
-      
-
-<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
-    </section>
-  </div>
-
-
-
-<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
-本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
-</div></footer>
-<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-<div class="widgets">
-
-
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E5%89%8D%E8%A8%80"><span class="toc-text">0x01 前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E5%85%A8%E5%B1%80%E5%88%86%E6%9E%90"><span class="toc-text">0x02 全局分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#indexphp"><span class="toc-text">Index.php</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#commonphp"><span class="toc-text">Common.php</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0%E9%A1%B5%E9%9D%A2"><span class="toc-text">后台页面</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E6%BC%8F%E6%B4%9E%E5%AE%A1%E8%AE%A1"><span class="toc-text">0x03 漏洞审计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A51"><span class="toc-text">sql注入1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A52"><span class="toc-text">sql注入2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A53"><span class="toc-text">sql注入3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A54"><span class="toc-text">sql注入4</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0rce1"><span class="toc-text">后台RCE1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0rce2"><span class="toc-text">后台RCE2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0rce3"><span class="toc-text">后台RCE3</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0rce4"><span class="toc-text">后台RCE4</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="toc-text">0x04 参考文章</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E6%80%BB%E7%BB%93"><span class="toc-text">0x05 总结</span></a></li></ol></div><div class="widget-footer">
-
-<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
-</div></aside><div class='float-panel blur'>
-  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-  </button>
-  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
-  </button>
-</div>
-</div><div class="scripts">
-<script type="text/javascript">
-  const ctx = {
-    date_suffix: {
-      just: `刚刚`,
-      min: `分钟前`,
-      hour: `小时前`,
-      day: `天前`,
-    },
-    root : `/`,
-  };
-
-  // required plugins (only load if needs)
-  if (`local_search`) {
-    ctx.search = {};
-    ctx.search.service = `local_search`;
-    if (ctx.search.service == 'local_search') {
-      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
-      ctx.search[ctx.search.service] = service_obj;
-    }
-  }
-  const def = {
-    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
-    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
-  };
-  const deps = {
-    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
-    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
-  }
-  
-
-</script>
-
-<script type="text/javascript">
-  const utils = {
-    // 懒加载 css https://github.com/filamentgroup/loadCSS
-    css: (href, before, media, attributes) => {
-      var doc = window.document;
-      var ss = doc.createElement("link");
-      var ref;
-      if (before) {
-        ref = before;
-      } else {
-        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
-        ref = refs[refs.length - 1];
-      }
-      var sheets = doc.styleSheets;
-      if (attributes) {
-        for (var attributeName in attributes) {
-          if (attributes.hasOwnProperty(attributeName)) {
-            ss.setAttribute(attributeName, attributes[attributeName]);
-          }
-        }
-      }
-      ss.rel = "stylesheet";
-      ss.href = href;
-      ss.media = "only x";
-      function ready(cb) {
-        if (doc.body) {
-          return cb();
-        }
-        setTimeout(function () {
-          ready(cb);
-        });
-      }
-      ready(function () {
-        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
-      });
-      var onloadcssdefined = function (cb) {
-        var resolvedHref = ss.href;
-        var i = sheets.length;
-        while (i--) {
-          if (sheets[i].href === resolvedHref) {
-            return cb();
-          }
-        }
-        setTimeout(function () {
-          onloadcssdefined(cb);
-        });
-      };
-      function loadCB() {
-        if (ss.addEventListener) {
-          ss.removeEventListener("load", loadCB);
-        }
-        ss.media = media || "all";
-      }
-      if (ss.addEventListener) {
-        ss.addEventListener("load", loadCB);
-      }
-      ss.onloadcssdefined = onloadcssdefined;
-      onloadcssdefined(loadCB);
-      return ss;
-    },
-
-    js: (src, opt) => new Promise((resolve, reject) => {
-      var script = document.createElement('script');
-      if (src.startsWith('/')){
-        src = ctx.root + src.substring(1);
-      }
-      script.src = src;
-      if (opt) {
-        for (let key of Object.keys(opt)) {
-          script[key] = opt[key]
-        }
-      } else {
-        // 默认异步，如果需要同步，第二个参数传入 {} 即可
-        script.async = true
-      }
-      script.onerror = reject
-      script.onload = script.onreadystatechange = function() {
-        const loadState = this.readyState
-        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-        script.onload = script.onreadystatechange = null
-        resolve()
-      }
-      document.head.appendChild(script)
-    }),
-
-    jq: (fn) => {
-      if (typeof jQuery === 'undefined') {
-        utils.js(deps.jquery).then(fn)
-      } else {
-        fn()
-      }
-    },
-    
-    onLoading: (el) => {
-      if (el) {
-        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
-      }
-    },
-    onLoadSuccess: (el) => {
-      if (el) {
-        $(el).find('.loading-wrap').remove();
-      }
-    },
-    onLoadFailure: (el) => {
-      if (el) {
-        $(el).find('.loading-wrap svg').remove();
-        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
-        $(el).find('.loading-wrap').addClass('error');
-      }
-    },
-    request: (el, url, callback, onFailure) => {
-      let retryTimes = 3;
-      utils.onLoading(el);
-      function req() {
-        return new Promise((resolve, reject) => {
-          let status = 0; // 0 等待 1 完成 2 超时
-          let timer = setTimeout(() => {
-            if (status === 0) {
-              status = 2;
-              timer = null;
-              reject('请求超时');
-              if (retryTimes == 0) {
-                onFailure();
-              }
-            }
-          }, 5000);
-          fetch(url).then(function(response) {
-            if (status !== 2) {
-              clearTimeout(timer);
-              resolve(response);
-              timer = null;
-              status = 1;
-            }
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('Network response was not ok.');
-          }).then(function(data) {
-            retryTimes = 0;
-            utils.onLoadSuccess(el);
-            callback(data);
-          }).catch(function(error) {
-            if (retryTimes > 0) {
-              retryTimes -= 1;
-              setTimeout(() => {
-                req();
-              }, 5000);
-            } else {
-              utils.onLoadFailure(el);
-              onFailure();
-            }
-          });
-        });
-      }
-      req();
-    },
-  };
-</script>
-
-<script>
-  const sidebar = {
-    leftbar: () => {
-      if (l_body) {
-        l_body.toggleAttribute('leftbar');
-        l_body.removeAttribute('rightbar');
-      }
-    },
-    rightbar: () => {
-      if (l_body) {
-        l_body.toggleAttribute('rightbar');
-        l_body.removeAttribute('leftbar');
-      }
-    },
-    dismiss: () => {
-      if (l_body) {
-        l_body.removeAttribute('leftbar');
-        l_body.removeAttribute('rightbar');
-      }
-    },
-    toggleTOC: () => {
-      document.querySelector('#data-toc').classList.toggle('collapse');
-    }
-  }
-</script>
-
-<!-- required -->
-<script src="/js/main.js?v=1.28.1" async></script>
-
-<!-- optional -->
-
-  <script>
-    function load_twikoo() {
-        if (!document.querySelectorAll("#twikoo_container")[0]) return;
-        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
-            const el = document.getElementById("twikoo_container");
-            var path = el.getAttribute('comment_id');
-            if (!path) {
-                path = decodeURI(window.location.pathname);
-            }
-            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
-                el: '#twikoo_container',
-                path: path,
-            }));
-        });
-    }
-
-    window.addEventListener('DOMContentLoaded', (event) => {
-        load_twikoo();
-    });
-</script>
-
-
-
-<script defer>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
-    for (let id of Object.keys(ctx.services)) {
-      const js = ctx.services[id].js;
-      if (id == 'siteinfo') {
-        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
-        if (ctx.cardlinks?.length > 0) {
-          utils.js(js, { defer: true }).then(function () {
-            setCardLink(ctx.cardlinks);
-          });
-        }
-      } else {
-        const els = document.getElementsByClassName(`ds-${id}`);
-        if (els?.length > 0) {
-          utils.jq(() => {
-            if (id == 'timeline' || 'memos' || 'marked') {
-              utils.js(deps.marked).then(function () {
-                utils.js(js, { defer: true });
-              });
-            } else {
-              utils.js(js, { defer: true });
-            }
-          });
-        }
-      }
-    }
-  });
-</script>
-
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    ctx.search = {
-      path: `/search.json`,
-    }
-    utils.js('/js/search/local-search.js', { defer: true });
-  });
-</script><script>
-  window.FPConfig = {
-    delay: 0,
-    ignoreKeywords: [],
-    maxRPS: 5,
-    hoverDelay: 25
-  };
-</script>
-<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
-<script>
-  // https://www.npmjs.com/package/vanilla-lazyload
-  // Set the options globally
-  // to make LazyLoad self-initialize
-  window.lazyLoadOptions = {
-    elements_selector: ".lazy",
-  };
-  // Listen to the initialization event
-  // and get the instance of LazyLoad
-  window.addEventListener(
-    "LazyLoad::Initialized",
-    function (event) {
-      window.lazyLoadInstance = event.detail.instance;
-    },
-    false
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
   );
-  document.addEventListener('DOMContentLoaded', function () {
-    window.lazyLoadInstance?.update();
-  });
-</script><script>
-  ctx.fancybox = {
-    selector: `.timenode p>img`,
-    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
-    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
-  };
-  var selector = '[data-fancybox]:not(.error)';
-  if (ctx.fancybox.selector) {
-    selector += `, ${ctx.fancybox.selector}`
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 hybcx 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="https://cdn.cbd.int/algoliasearch@4.18.0/dist/algoliasearch-lite.umd.js"></script><script src="https://cdn.cbd.int/instantsearch.js@4.60.0/dist/instantsearch.production.min.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+      appKey: 'iEFJUGMm2FY91n9ZG1gdKBSy',
+      avatar: 'mp',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
   }
-  var needFancybox = document.querySelectorAll(selector).length !== 0;
-  if (!needFancybox) {
-    const els = document.getElementsByClassName('ds-memos');
-    if (els != undefined && els.length > 0) {
-      needFancybox = true;
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
     }
   }
-  if (needFancybox) {
-    utils.css(ctx.fancybox.css);
-    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
-      Fancybox.bind(selector, {
-        hideScrollbar: false,
-        Thumbs: {
-          autoStart: false,
-        },
-        caption: (fancybox, slide) => {
-          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
         }
-      });
-    })
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
   }
-</script>
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    const swiper_api = document.getElementById('swiper-api');
-    if (swiper_api != undefined) {
-      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
-      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
-        const effect = swiper_api.getAttribute('effect') || '';
-        var swiper = new Swiper('.swiper#swiper-api', {
-          slidesPerView: 'auto',
-          spaceBetween: 8,
-          centeredSlides: true,
-          effect: effect,
-          rewind: true,
-          pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-          },
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
-        });
-      })
+
+  const getComment = () => {
+    const serverURL = 'https://7Sc5uZwc.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+        "X-LC-Key": 'iEFJUGMm2FY91n9ZG1gdKBSy',
+        "Content-Type": "application/json"
+      },
     }
-  });
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    window.codeElements = document.querySelectorAll('.code');
-    if (window.codeElements.length > 0) {
-      ctx.copycode = {
-        default_text: `Copy`,
-        success_text: `Copied`,
-        toast: `复制成功`,
-      };
-      utils.js('/js/plugins/copycode.js');
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
     }
-  });
-</script>
+  }
 
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><script src="/js/anzhiyu/right_click_menu.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
 
-<!-- inject -->
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
 
-</div></body></html>
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

